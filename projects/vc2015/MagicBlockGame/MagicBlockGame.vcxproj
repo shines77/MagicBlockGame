@@ -19,7 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockGame.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Move.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlockGame\main.cpp" />

@@ -1,3 +1,4 @@
+#pragma once
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,56 +7,37 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <vector>
 #include <exception>
 #include <stdexcept>
 
-struct Color {
-    enum : char {
-        Empty,
-        Red,
-        Green,
-        Blue,
-        White,
-        Orange,
-        Yellow,
-        Unknown,
-        Maximum = Unknown
-    };
-};
+#include "Color.h"
+#include "Move.h"
+#include "SlidingPuzzle.h"
 
+template <size_t BlocksX, size_t BlocksY, size_t TargetX, size_t TargetY>
 class MagicBlockGame
 {
 public:
-    static const size_t kTargetX = 3;
-    static const size_t kTargetY = 3;
-    static const size_t kBlocksX = 5;
-    static const size_t kBlocksY = 5;
+    static const size_t kTargetX = TargetX;
+    static const size_t kTargetY = TargetY;
+    static const size_t kBlocksX = BlocksX;
+    static const size_t kBlocksY = BlocksY;
 
 private:
-    char target_[kTargetX][kTargetY];
-    char blocks_[kBlocksX][kBlocksY];
+    char target_[kTargetY][kTargetX];
+    char blocks_[kBlocksY][kBlocksX];
+
+    size_t              steps_;
+    std::vector<Move>   moves_;
 
 public:
-    char valToColor(char value) {
-        switch (value) {
-        case ' ':
-        case 'E':
-            return Color::Empty;
-        case 'R':
-            return Color::Red;
-        case 'G':
-            return Color::Green;
-        case 'B':
-            return Color::Blue;
-        case 'W':
-            return Color::White;
-        case 'O':
-            return Color::Orange;
-        case 'Y':
-            return Color::Yellow;
-        default:
-            return Color::Unknown;
-        }
+    size_t getSteps() const {
+        return this->steps_;
+    }
+
+    const std::vector<Move> & getMoves() const {
+        return this->moves_;
     }
 
     int readInput(const char * filename) {
@@ -71,10 +53,10 @@ public:
                     std::fill_n(line, sizeof(line), 0);
                     ifs.getline(line, 256);
                     if (line_no >= 0 && line_no < kTargetY) {
-                        for (size_t i = 0; i < kTargetX; i++) {
-                            char color = valToColor(line[i]);
+                        for (size_t x = 0; x < kTargetX; x++) {
+                            char color = Color::valToColor(line[x]);
                             if (color >= Color::Red && color < Color::Maximum) {
-                                this->target_[line_no][i] = color;
+                                this->target_[line_no][x] = color;
                             }
                             else {
                                 result = -2;
@@ -84,10 +66,10 @@ public:
                     }
                     else if (line_no >= (kTargetY + 1) && line_no < (kTargetY + 1 + kBlocksY)) {
                         size_t blocksY = line_no - (kTargetY + 1);
-                        for (size_t i = 0; i < kBlocksX; i++) {
-                            char color = valToColor(line[i]);
+                        for (size_t x = 0; x < kBlocksX; x++) {
+                            char color = Color::valToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Maximum) {
-                                this->blocks_[blocksY][i] = color;
+                                this->blocks_[blocksY][x] = color;
                             }
                             else {
                                 result = -3;
@@ -113,8 +95,18 @@ public:
         return result;
     }
 
-    int solve() {
+    void translateMoves(const std::vector<Move> & moves) {
         //
-        return 0;
+    }
+
+    bool solve() {
+        //
+        SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
+        slidingPuzzle.setPuzzle<BlocksX, BlocksY>(this->blocks_);
+        bool success = slidingPuzzle.solve();
+        if (success) {
+            translateMoves(slidingPuzzle.getMoves());
+        }
+        return success;
     }
 };

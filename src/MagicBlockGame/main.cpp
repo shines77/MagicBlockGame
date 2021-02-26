@@ -10,11 +10,15 @@
 
 int main(int argc, char * argv[])
 {
-    MagicBlockGame game;
+    MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d\n\n", readStatus);
 
-    int steps = game.solve();
+    bool canSolve = game.solve();
+    if (canSolve) {
+        game.getSteps();
+        game.getMoves();
+    }
 
     ::system("pause");
     return 0;
