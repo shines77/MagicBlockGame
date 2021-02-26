@@ -14,10 +14,13 @@ int main(int argc, char * argv[])
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d\n\n", readStatus);
 
-    bool canSolve = game.solve();
-    if (canSolve) {
+    bool solvable = game.solve();
+    if (solvable) {
         game.getSteps();
         game.getMoves();
+    }
+    else {
+        printf("No answer!\n\n");
     }
 
     ::system("pause");

@@ -6,12 +6,8 @@
 template <size_t CellsX, size_t CellsY>
 class SlidingPuzzle
 {
-public:
-    static const size_t kCellsX = CellsX;
-    static const size_t kCellsY = CellsY;
-
 private:
-    char cells_[kCellsY][kCellsX];
+    char cells_[CellsY][CellsX];
     size_t              steps_;
     std::vector<Move>   moves_;
 
@@ -29,17 +25,17 @@ public:
 
     template <size_t BlocksX, size_t BlocksY>
     void setPuzzle(char blocks[BlocksY][BlocksX]) {
-        ptrdiff_t startX = (BlocksX - kCellsX) / 2;
-        ptrdiff_t startY = (BlocksY - kCellsY) / 2;
-        for (size_t y = 0; y < kCellsY; y++) {
-            for (size_t x = 0; x < kCellsX; x++) {
+        ptrdiff_t startX = (BlocksX - CellsX) / 2;
+        ptrdiff_t startY = (BlocksY - CellsY) / 2;
+        for (size_t y = 0; y < CellsY; y++) {
+            for (size_t x = 0; x < CellsX; x++) {
                 this->cells_[y][x] = blocks[startY + y][startX + x];
             }
         }
     }
 
     bool solve() {
-        //
-        return true;
+        bool solvable = true;
+        return solvable;
     }
 };
