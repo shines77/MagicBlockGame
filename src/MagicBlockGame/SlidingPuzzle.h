@@ -27,13 +27,13 @@ private:
 
     jstd::BitSet<kBitmapBits> visited_;
 
-    std::vector<Position> empty_dirs_[BoardX * BoardY];
+    std::vector<Move> empty_moves_[BoardX * BoardY];
     std::vector<Move> moves_;
 
     void init() {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                std::vector<Position> dirs;
+                std::vector<Move> moves;
                 for (size_t dir = Direction::First; dir < Direction::Last; dir++) {
                     int board_x = (int)x + Dir_Offset[dir].x;
                     if (board_x < 0 || board_x >= (int)BoardX)
@@ -41,9 +41,12 @@ private:
                     int board_y = (int)y + Dir_Offset[dir].y;
                     if (board_y < 0 || board_y >= (int)BoardY)
                         continue;
-                    dirs.push_back(Position(board_x, board_y));
+                    Move move;
+                    move.pos = Position(board_x, board_y);
+                    move.dir = (uint8_t)dir;
+                    moves.push_back(move);
                 }
-                this->empty_dirs_[y * BoardY + x] = dirs;
+                this->empty_moves_[y * BoardY + x] = moves;
             }
         }
     }
@@ -102,6 +105,7 @@ public:
             first.empty = empty;
             first.last_dir = -1;
             first.board = this->board_;
+            this->visited_.set(first.board.value());
 
             this->cur_.push_back(first);
 
@@ -115,23 +119,32 @@ public:
                         break;
                     }
 
-                    this->visited_.set(state.board.value());
-
                     empty = state.empty;
-                    size_t empty_pos = empty.y * BoardY + empty.x;
-                    size_t max_dirs = this->empty_dirs_[empty_pos].size();
-                    for (size_t dir = 0; dir < max_dirs; dir++) {
-                        size_t grid_x = empty.x + Dir_Offset[dir].x;
-                        size_t grid_y = empty.y + Dir_Offset[dir].y;
-                        size_t grid_pos = grid_y * BoardY + grid_x;
+                    int empty_pos = empty.y * BoardY + empty.x;
+                    size_t max_idx = this->empty_moves_[empty_pos].size();
+                    for (size_t idx = 0; idx < max_idx; idx++) {
+                        if (this->empty_moves_[empty_pos][idx].dir == state.last_dir)
+                            continue;
+                        //int grid_x = empty.x + Dir_Offset[dir].x;
+                        int grid_x = this->empty_moves_[empty_pos][idx].pos.x;
+                        assert(grid_x >= 0 && grid_x < (int)BoardX);
+                        //int grid_y = empty.y + Dir_Offset[dir].y;
+                        int grid_y = this->empty_moves_[empty_pos][idx].pos.y;
+                        assert(grid_y >= 0 && grid_y < (int)BoardX);
+                        int grid_pos = grid_y * BoardY + grid_x;
+
                         Board<BoardX, BoardY> board = state.board;
                         std::swap(board.cells[empty_pos], board.cells[grid_pos]);
-                        if (this->visited_.test(board.value()))
+                        size_t board_value = board.value();
+                        if (this->visited_.test(board_value))
                             continue;
+
+                        this->visited_.set(board_value);
+
                         State next_state;
-                        Position next_empty((uint32_t)grid_x, (uint32_t)grid_y);
+                        Position next_empty(grid_x, grid_y);
                         next_state.empty = next_empty;
-                        next_state.last_dir = (uint8_t)dir;
+                        next_state.last_dir = (uint8_t)idx;
                         next_state.board = board;
                         next_state.moves = state.moves;
                         Move next_move;

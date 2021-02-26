@@ -64,7 +64,7 @@ struct Board
         size_t bit_value = 0;
         for (size_t cell = 0; cell < (BoardX * BoardY); cell++) {
             bit_value <<= 3;
-            bit_value |= this->cells[cell];
+            bit_value |= (this->cells[cell] & 0x07);
         }
         return bit_value;
     }

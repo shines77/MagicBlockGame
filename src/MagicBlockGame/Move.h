@@ -27,11 +27,11 @@ static const Offset Dir_Offset[Direction::Last] = {
 };
 
 struct Position {
-    uint8_t x;
-    uint8_t y;
+    int8_t x;
+    int8_t y;
 
     Position() : x(0), y(0) {}
-    Position(unsigned int _x, unsigned int _y) : x(_x), y(_y) {}
+    Position(int _x, int _y) : x(_x), y(_y) {}
 };
 
 struct Move {

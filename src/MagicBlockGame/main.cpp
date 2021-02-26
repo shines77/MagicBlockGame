@@ -18,6 +18,7 @@ int main(int argc, char * argv[])
     if (solvable) {
         game.getSteps();
         game.getMoves();
+        printf("Has answer!\n\n");
     }
     else {
         printf("No answer!\n\n");
