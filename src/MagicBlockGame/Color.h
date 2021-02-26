@@ -1,7 +1,10 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 struct Color {
-    enum : char {
+    enum : uint8_t {
         Empty,
         Red,
         Green,
@@ -13,7 +16,7 @@ struct Color {
         Maximum = Unknown
     };
 
-    static char valToColor(char value) {
+    static uint8_t valToColor(uint8_t value) {
         switch (value) {
         case ' ':
         case 'E':

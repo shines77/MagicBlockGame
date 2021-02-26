@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Board.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\BitSet.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockGame.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Move.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h" />

@@ -13,21 +13,21 @@
 
 #include "Color.h"
 #include "Move.h"
+#include "Board.h"
 #include "SlidingPuzzle.h"
 
-template <size_t BlocksX, size_t BlocksY, size_t TargetX, size_t TargetY>
+template <size_t BoardX, size_t BoardY, size_t TargetX, size_t TargetY>
 class MagicBlockGame
 {
 private:
-    char target_[TargetY][TargetX];
-    char blocks_[BlocksY][BlocksX];
+    Board<BoardX, BoardY> board_;
+    Board<TargetX, TargetY> target_;
 
-    size_t              steps_;
-    std::vector<Move>   moves_;
+    std::vector<Move> moves_;
 
 public:
     size_t getSteps() const {
-        return this->steps_;
+        return this->moves_.size();
     }
 
     const std::vector<Move> & getMoves() const {
@@ -50,7 +50,7 @@ public:
                         for (size_t x = 0; x < TargetX; x++) {
                             char color = Color::valToColor(line[x]);
                             if (color >= Color::Red && color < Color::Maximum) {
-                                this->target_[line_no][x] = color;
+                                this->target_.cells[line_no * TargetY + x] = color;
                             }
                             else {
                                 result = -2;
@@ -58,12 +58,12 @@ public:
                             }
                         }
                     }
-                    else if (line_no >= (TargetY + 1) && line_no < (TargetY + 1 + BlocksY)) {
-                        size_t blocksY = line_no - (TargetY + 1);
-                        for (size_t x = 0; x < BlocksX; x++) {
+                    else if (line_no >= (TargetY + 1) && line_no < (TargetY + 1 + BoardY)) {
+                        size_t boardY = line_no - (TargetY + 1);
+                        for (size_t x = 0; x < BoardX; x++) {
                             char color = Color::valToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Maximum) {
-                                this->blocks_[blocksY][x] = color;
+                                this->board_.cells[boardY * BoardY + x] = color;
                             }
                             else {
                                 result = -3;
@@ -102,7 +102,7 @@ public:
     bool solve() {
         //
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.setPuzzle<BlocksX, BlocksY>(this->blocks_);
+        slidingPuzzle.setPuzzle<BoardX, BoardY>(this->board_, this->target_);
         bool solvable = slidingPuzzle.solve();
         if (solvable) {
             translateMoves(slidingPuzzle.getMoves());
