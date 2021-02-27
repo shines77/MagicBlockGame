@@ -1,5 +1,12 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
+#include <vector>
+#include <algorithm>    // For std::swap(), until C++11
+#include <utility>      // For std::swap(), since C++11
+
 #include "Color.h"
 #include "Move.h"
 #include "Board.h"

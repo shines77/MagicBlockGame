@@ -6,7 +6,7 @@
 namespace PuzzleGame {
 
 struct Color {
-    enum : uint8_t {
+    enum {
         Empty,
         Red,
         Green,

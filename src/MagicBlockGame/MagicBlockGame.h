@@ -2,6 +2,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
@@ -10,6 +13,8 @@
 #include <vector>
 #include <exception>
 #include <stdexcept>
+#include <algorithm>    // For std::swap(), until C++11
+#include <utility>      // For std::swap(), since C++11
 
 #include "Color.h"
 #include "Move.h"

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <cstring>      // For std::memset()
 #include <algorithm>    // For std::fill_n()
 
 #include "Color.h"
