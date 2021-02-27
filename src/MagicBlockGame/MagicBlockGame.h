@@ -85,13 +85,13 @@ public:
                 }
                 else {
                     char err_info[256] = {0};
-                    snprintf(err_info, sizeof(err_info) - 1, "readInput() Error code = %d", result);
+                    snprintf(err_info, sizeof(err_info) - 1, "MagicBlockGame::readInput() Error code = %d", result);
                     throw std::runtime_error(err_info);
                 }
             }
         }
         catch (std::exception & ex) {
-            std::cout << "Exception: " << ex.what() << std::endl;
+            std::cout << "Exception: " << ex.what() << std::endl << std::endl;
         }
 
         return result;
@@ -102,7 +102,6 @@ public:
     }
 
     bool solve() {
-        //
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
         slidingPuzzle.setPuzzle<BoardX, BoardY>(this->board_, this->target_);
         bool solvable = slidingPuzzle.solve();

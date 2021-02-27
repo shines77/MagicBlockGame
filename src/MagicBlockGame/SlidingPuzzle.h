@@ -103,8 +103,6 @@ public:
         }
 
         bool solvable = false;
-
-        size_t min_steps = 0;
         size_t depth = 0;
 
         Position16 empty;
@@ -149,7 +147,6 @@ public:
                         next_state.moves.push_back(next_move);
 
                         if (next_state.board == this->target_) {
-                            min_steps = depth;
                             this->moves_ = next_state.moves;
                             assert((depth + 1) == next_state.moves.size());
                             found = true;
