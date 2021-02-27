@@ -44,6 +44,8 @@ private:
     std::vector<Move> empty_moves_[BoardX * BoardY];
     std::vector<Move> moves_;
 
+    size_t map_used_;
+
     void init() {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
@@ -66,7 +68,7 @@ private:
     }
 
 public:
-    SlidingPuzzle() {
+    SlidingPuzzle() : map_used_(0) {
         this->init();
     }
     ~SlidingPuzzle() {}
@@ -77,6 +79,10 @@ public:
 
     const std::vector<Move> & getMoves() const {
         return this->moves_;
+    }
+
+    size_t getMapUsed() const {
+        return this->map_used_;
     }
 
     template <size_t BlockX, size_t BlockY>
@@ -175,6 +181,7 @@ public:
 
             if (found) {
                 solvable = true;
+                this->map_used_ = visited_.count();
             }
         }
 

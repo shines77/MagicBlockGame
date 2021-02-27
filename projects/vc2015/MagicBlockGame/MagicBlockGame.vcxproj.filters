@@ -31,6 +31,9 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\BitUtils.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlockGame\main.cpp">

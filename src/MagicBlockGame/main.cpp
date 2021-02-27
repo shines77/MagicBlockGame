@@ -18,7 +18,7 @@ int main(int argc, char * argv[])
     jtest::CPU::warmup(1000);
 
     MagicBlockGame<5, 5, 3, 3> game;
-    int readStatus = game.readInput("input_test.txt");
+    int readStatus = game.readInput("input.txt");
     printf("readStatus = %d\n\n", readStatus);
 
     jtest::StopWatch sw;
@@ -31,6 +31,7 @@ int main(int argc, char * argv[])
     if (solvable) {
         printf("Has answer!\n\n");
         printf("MinSteps: %d\n\n", (int)game.getSteps());
+        printf("getMapUsed: %d\n\n", (int)game.getMapUsed());
         printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
         game.getSteps();
         game.getMoves();

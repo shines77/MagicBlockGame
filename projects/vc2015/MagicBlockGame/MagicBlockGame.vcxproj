@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\BitUtils.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Board.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\BitSet.h" />

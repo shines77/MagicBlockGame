@@ -17,8 +17,11 @@
 #include <cstring>          // For std::memset()
 #include <initializer_list>
 #include <type_traits>
-#include <algorithm>        // For std::min()
+#include <algorithm>        // For std::swap(), until C++11, For std::min()
+#include <utility>          // For std::swap(), since C++11
 #include <cassert>
+
+#include "BitUtils.h"
 
 namespace jstd {
 
@@ -49,7 +52,7 @@ public:
     static const unit_type kFullMask = unit_type(-1);
     static const unit_type kTrimMask = (kRestBits != 0) ? (unit_type(size_t(1) << kRestBits) - 1) : kFullMask;
 
-private:
+protected:
     unit_type * array_;
 
     void allocate_array() {
@@ -95,6 +98,12 @@ public:
         if (kRestBits != 0) {
             this->trim();
         }
+    }
+
+    BitSet(this_type && src) noexcept : array_(nullptr) {
+        static_assert((Bits != 0), "PackedBitSet<Bits>: Bits can not be 0 size.");
+        assert (this != &src);
+        std::swap(this->array_, src.array_);
     }
 
     BitSet(unit_type value) noexcept : array_(nullptr) {
@@ -145,6 +154,12 @@ public:
     size_t unit_size() const   { return kUnits;     }
     size_t unit_bits() const   { return kUnitBits;  }
     size_t unit_bytes() const  { return kUnitBytes; }
+
+    void swap(this_type & src) noexcept {
+        if (this != &src) {
+            std::swap(this->array_, src.array_);
+        }
+    }
 
     unit_type array(size_t index) const {
         assert(index < kUnits);
@@ -636,7 +651,7 @@ public:
         size_t total_popcnt = 0;
         for (size_t i = 0; i < kUnits; i++) {
             size_t unit = this->array_[i];
-            unsigned int popcnt = BitUtils::popcnt(unit);
+            unsigned int popcnt = BitUtils::popcnt<Bits>(unit);
             total_popcnt += popcnt;
         }
         return total_popcnt;
@@ -680,7 +695,8 @@ BitSet<Bits> operator & (const BitSet<Bits> & left,
                          const BitSet<Bits> & right) noexcept {
     // left And right
     BitSet<Bits> answer = left;
-    return (answer &= right);
+    answer &= right;
+    return std::move(answer);
 }
 
 template <size_t Bits>
@@ -689,7 +705,8 @@ BitSet<Bits> operator | (const BitSet<Bits> & left,
                          const BitSet<Bits> & right) noexcept {
     // left Or right
     BitSet<Bits> answer = left;
-    return (answer |= right);
+    answer |= right;
+    return std::move(answer);
 }
 
 template <size_t Bits>
@@ -698,7 +715,8 @@ BitSet<Bits> operator ^ (const BitSet<Bits> & left,
                          const BitSet<Bits> & right) noexcept {
     // left Xor right
     BitSet<Bits> answer = left;
-    return (answer ^= right);
+    answer ^= right;
+    return std::move(answer);
 }
 
 } // namespace jstd
