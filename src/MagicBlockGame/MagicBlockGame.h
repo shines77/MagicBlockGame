@@ -16,6 +16,8 @@
 #include "Board.h"
 #include "SlidingPuzzle.h"
 
+namespace PuzzleGame {
+
 template <size_t BoardX, size_t BoardY, size_t TargetX, size_t TargetY>
 class MagicBlockGame
 {
@@ -49,7 +51,7 @@ public:
                     if (line_no >= 0 && line_no < TargetY) {
                         for (size_t x = 0; x < TargetX; x++) {
                             char color = Color::valToColor(line[x]);
-                            if (color >= Color::Red && color < Color::Maximum) {
+                            if (color >= Color::Empty && color < Color::Maximum) {
                                 this->target_.cells[line_no * TargetY + x] = color;
                             }
                             else {
@@ -96,7 +98,7 @@ public:
     }
 
     void translateMoves(const std::vector<Move> & moves) {
-        //
+        this->moves_ = moves;
     }
 
     bool solve() {
@@ -110,3 +112,5 @@ public:
         return solvable;
     }
 };
+
+} // namespace PuzzleGame

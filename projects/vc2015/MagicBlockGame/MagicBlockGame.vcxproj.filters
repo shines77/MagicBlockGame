@@ -25,6 +25,12 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\Board.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\CPUWarmUp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlockGame\main.cpp">

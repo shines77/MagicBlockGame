@@ -7,6 +7,8 @@
 
 #include "Color.h"
 
+namespace PuzzleGame {
+
 template <size_t BoardX, size_t BoardY>
 struct Board
 {
@@ -81,3 +83,5 @@ inline
 bool operator != (const Board<BoardX, BoardY> & lhs, const Board<BoardX, BoardY> & rhs) {
     return lhs.is_not_equal(rhs);
 }
+
+} // namespace PuzzleGame

@@ -5,6 +5,8 @@
 #include "Board.h"
 #include "BitSet.h"
 
+namespace PuzzleGame {
+
 template <size_t BoardX, size_t BoardY>
 class SlidingPuzzle
 {
@@ -12,10 +14,15 @@ public:
     static const size_t kBitmapBits = 1ULL << 27;
 
     struct State {
-        Position empty;
-        uint8_t last_dir, reserve;
+        Position16  empty;
+        uint8_t     last_dir, reserve;
         Board<BoardX, BoardY> board;
         std::vector<Move> moves;
+
+        State() {}
+        State(const Board<BoardX, BoardY> & srcBoard) {
+            this->board = srcBoard;
+        }
     };
 
 private:
@@ -42,7 +49,7 @@ private:
                     if (board_y < 0 || board_y >= (int)BoardY)
                         continue;
                     Move move;
-                    move.pos = Position(board_x, board_y);
+                    move.pos = Position16(board_y * BoardY + board_x);
                     move.dir = (uint8_t)dir;
                     moves.push_back(move);
                 }
@@ -77,13 +84,12 @@ public:
         }
     }
 
-    bool find_empty(Position & empty_pos) const {
+    bool find_empty(Position16 & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 char color = this->board_.cells[y * BoardY + x];
                 if (color == Color::Empty) {
-                    empty_pos.x = (uint8_t)x;
-                    empty_pos.y = (uint8_t)y;
+                    empty_pos.value = (int16_t)(y * BoardY + x);
                     return true;
                 }
             }
@@ -92,13 +98,16 @@ public:
     }
 
     bool solve() {
+        if (this->board_ == this->target_) {
+            return true;
+        }
+
         bool solvable = false;
 
         size_t min_steps = 0;
-        size_t steps = 1;
+        size_t depth = 0;
 
-        // Find empty position
-        Position empty;
+        Position16 empty;
         bool found_empty = find_empty(empty);
         if (found_empty) {
             State first;
@@ -113,42 +122,40 @@ public:
             while (this->cur_.size()) {
                 for (size_t i = 0; i < this->cur_.size(); i++) {
                     const State & state = this->cur_[i];
-                    if (state.board == this->target_) {
-                        min_steps = steps;
-                        found = true;
-                        break;
-                    }
 
-                    empty = state.empty;
-                    int empty_pos = empty.y * BoardY + empty.x;
-                    size_t max_idx = this->empty_moves_[empty_pos].size();
-                    for (size_t idx = 0; idx < max_idx; idx++) {
-                        if (this->empty_moves_[empty_pos][idx].dir == state.last_dir)
+                    int empty_pos = state.empty.value;
+                    const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
+                    size_t total_moves = empty_moves.size();
+                    for (size_t n = 0; n < total_moves; n++) {
+                        if (empty_moves[n].dir == state.last_dir)
                             continue;
-                        //int grid_x = empty.x + Dir_Offset[dir].x;
-                        int grid_x = this->empty_moves_[empty_pos][idx].pos.x;
-                        assert(grid_x >= 0 && grid_x < (int)BoardX);
-                        //int grid_y = empty.y + Dir_Offset[dir].y;
-                        int grid_y = this->empty_moves_[empty_pos][idx].pos.y;
-                        assert(grid_y >= 0 && grid_y < (int)BoardX);
-                        int grid_pos = grid_y * BoardY + grid_x;
 
-                        Board<BoardX, BoardY> board = state.board;
-                        std::swap(board.cells[empty_pos], board.cells[grid_pos]);
-                        size_t board_value = board.value();
+                        State next_state(state.board);
+                        int move_pos = empty_moves[n].pos.value;
+                        std::swap(next_state.board.cells[empty_pos], next_state.board.cells[move_pos]);
+                        size_t board_value = next_state.board.value();
                         if (this->visited_.test(board_value))
                             continue;
 
                         this->visited_.set(board_value);
-
-                        State next_state;
-                        Position next_empty(grid_x, grid_y);
+                        
+                        Position16 next_empty(move_pos);
                         next_state.empty = next_empty;
-                        next_state.last_dir = (uint8_t)idx;
-                        next_state.board = board;
+                        next_state.last_dir = (uint8_t)n;
                         next_state.moves = state.moves;
                         Move next_move;
+                        next_move.pos = state.empty;
+                        next_move.dir = (uint8_t)n;
                         next_state.moves.push_back(next_move);
+
+                        if (next_state.board == this->target_) {
+                            min_steps = depth;
+                            this->moves_ = next_state.moves;
+                            assert((depth + 1) == next_state.moves.size());
+                            found = true;
+                            break;
+                        }
+
                         this->next_.push_back(next_state);
                     }
                 }
@@ -157,7 +164,7 @@ public:
                     break;
                 }
 
-                steps++;
+                depth++;
                 std::swap(this->cur_, this->next_);
                 this->next_.clear();
             }
@@ -170,3 +177,5 @@ public:
         return solvable;
     }
 };
+
+} // namespace PuzzleGame

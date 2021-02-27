@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+namespace PuzzleGame {
+
 struct Color {
     enum : uint8_t {
         Empty,
@@ -38,3 +40,5 @@ struct Color {
         }
     }
 };
+
+} // namespace PuzzleGame
