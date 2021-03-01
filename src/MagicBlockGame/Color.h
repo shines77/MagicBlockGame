@@ -14,8 +14,9 @@ struct Color {
         White,
         Orange,
         Yellow,
-        Unknown,
-        Maximum = Unknown
+        Last,
+        Unknown = Last,
+        Maximum
     };
 
     static uint8_t valToColor(uint8_t value) {

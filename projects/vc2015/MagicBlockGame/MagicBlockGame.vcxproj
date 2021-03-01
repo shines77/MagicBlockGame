@@ -25,7 +25,9 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\BitSet.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\CPUWarmUp.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockGame.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Move.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\SharedData.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h" />
   </ItemGroup>

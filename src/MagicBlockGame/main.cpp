@@ -31,7 +31,7 @@ int main(int argc, char * argv[])
     if (solvable) {
         printf("Has answer!\n\n");
         printf("MinSteps: %d\n\n", (int)game.getSteps());
-        printf("getMapUsed: %d\n\n", (int)game.getMapUsed());
+        printf("Map Used: %d\n\n", (int)game.getMapUsed());
         printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
         game.getSteps();
         game.getMoves();

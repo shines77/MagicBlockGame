@@ -120,17 +120,28 @@ struct Board
     uint128_t value128() const noexcept {
         uint64_t low_value = 0, high_value = 0;
         if (BoardX * BoardY <= 21) {
-            for (size_t cell = 0; cell < (BoardX * BoardY); cell++) {
+            for (ptrdiff_t cell = BoardX * BoardY - 1; cell >= 0; cell--) {
                 low_value <<= 3;
-                low_value |= (this->cells[cell] & 0x07UL);
+                low_value |= uint64_t(this->cells[cell] & 0x07ULL);
             }
         }
         else {
-            // Low: 21 * 3 = 63 bits
-            for (size_t cell = 0; cell < 21; cell++) {
+            // Low: bit 0 ~ 62, 21 * 3 = 63 bits
+            for (ptrdiff_t cell = 20; cell >= 0; cell--) {
                 low_value <<= 3;
-                low_value |= (this->cells[cell] & 0x07UL);
+                low_value |= uint64_t(this->cells[cell] & 0x07ULL);
             }
+            // Low: bit 63
+            low_value |= uint64_t(this->cells[21] & 0x01ULL) << 63;
+
+            // High: bit 2 ~ 63
+            for (ptrdiff_t cell = BoardX * BoardY - 1; cell >= 21; cell--) {
+                high_value <<= 3;
+                high_value |= uint64_t(this->cells[cell] & 0x07ULL);
+            }
+
+            // High: bit 0 ~ 1
+            high_value >>= 1;
         }
         return uint128_t(low_value, high_value);
     }
