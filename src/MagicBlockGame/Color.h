@@ -9,13 +9,14 @@ struct Color {
     enum {
         Empty,
         Red,
+        First = Red,
         Green,
         Blue,
         White,
         Orange,
         Yellow,
-        Last,
-        Unknown = Last,
+        Last = Yellow,
+        Unknown,
         Maximum
     };
 

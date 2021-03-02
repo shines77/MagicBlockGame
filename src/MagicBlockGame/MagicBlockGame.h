@@ -106,7 +106,7 @@ public:
                     if (line_no >= 0 && line_no < TargetY) {
                         for (size_t x = 0; x < TargetX; x++) {
                             char color = Color::valToColor(line[x]);
-                            if (color >= Color::Empty && color < Color::Last) {
+                            if (color >= Color::Empty && color <= Color::Last) {
                                 this->data_.target.cells[line_no * TargetY + x] = color;
                             }
                             else {
@@ -119,7 +119,7 @@ public:
                         size_t boardY = line_no - (TargetY + 1);
                         for (size_t x = 0; x < BoardX; x++) {
                             char color = Color::valToColor(line[x]);
-                            if (color >= Color::Empty && color < Color::Last) {
+                            if (color >= Color::Empty && color <= Color::Last) {
                                 this->data_.board.cells[boardY * BoardY + x] = color;
                             }
                             else {
@@ -181,10 +181,10 @@ public:
         }
     }
 
-    bool find_empty(Position16 & empty_pos) const {
+    bool find_empty(const Board<BoardX, BoardY> & board, Position16 & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                char color = this->data_.board.cells[y * BoardY + x];
+                char color = board.cells[y * BoardY + x];
                 if (color == Color::Empty) {
                     empty_pos.value = (int16_t)(y * BoardY + x);
                     return true;
@@ -226,10 +226,10 @@ public:
         bool solvable = false;
 
         Position16 empty;
-        bool found_empty = find_empty(empty);
+        bool found_empty = find_empty(this->data_.board, empty);
         if (found_empty) {
             Step01Solver solver(&this->data_);
-            solvable = solver.solve_full();
+            solvable = solver.solve_step_123();
         }
 
         return solvable;

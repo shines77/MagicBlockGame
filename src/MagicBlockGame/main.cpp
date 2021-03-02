@@ -40,7 +40,7 @@ int main(int argc, char * argv[])
         printf("No answer!\n\n");
     }
 
-#if defined(NDEBUG) && defined(_MSC_VER)
+#if !defined(NDEBUG) && defined(_MSC_VER)
     ::system("pause");
 #endif
     return 0;
