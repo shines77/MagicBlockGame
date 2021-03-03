@@ -31,6 +31,11 @@ template <size_t BoardX, size_t BoardY,
 class MagicBlockGame
 {
 public:
+    static const size_t kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
+
+    static const ptrdiff_t startX = (BoardX - TargetX) / 2;
+    static const ptrdiff_t startY = (BoardY - TargetY) / 2;
+
     struct Stage {
         Position16  empty;
         uint8_t     last_dir, reserve;
@@ -185,8 +190,8 @@ public:
     bool find_empty(const Board<BoardX, BoardY> & board, Position16 & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                char color = board.cells[y * BoardY + x];
-                if (color == Color::Empty) {
+                uint8_t cell = board.cells[y * BoardY + x];
+                if (cell == Color::Empty) {
                     empty_pos.value = (int16_t)(y * BoardY + x);
                     return true;
                 }
@@ -197,9 +202,6 @@ public:
 
     bool is_satisfy(const Board<BoardX, BoardY> & board,
                     const Board<TargetX, TargetY> & target) const {
-        static const ptrdiff_t startX = (BoardX - TargetX) / 2;
-        static const ptrdiff_t startY = (BoardY - TargetY) / 2;
-
         for (size_t y = 0; y < TargetY; y++) {
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;

@@ -115,8 +115,8 @@ public:
     bool find_empty(const Board<BoardX, BoardY> & board, Position16 & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                char color = board.cells[y * BoardY + x];
-                if (color == Color::Empty) {
+                uint8_t cell = board.cells[y * BoardY + x];
+                if (cell == Color::Empty) {
                     empty_pos.value = (int16_t)(y * BoardY + x);
                     return true;
                 }
@@ -492,7 +492,7 @@ public:
 #if 1
 
     size_t is_satisfy_step_123(const Board<BoardX, BoardY> & board,
-                                 const Board<TargetX, TargetY> & target) {
+                               const Board<TargetX, TargetY> & target) {
         size_t result = 0;
 
         // Top partial
@@ -549,7 +549,7 @@ public:
 #else
 
     size_t is_satisfy_step_123(const Board<BoardX, BoardY> & board,
-                                 const Board<TargetX, TargetY> & target) {
+                               const Board<TargetX, TargetY> & target) {
         size_t result = 0;
 
         // Left-Top Corner
