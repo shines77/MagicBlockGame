@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include <cstring>      // For std::memset()
+#include <type_traits>  // For std::conditional<bool, T1, T2>
 #include <algorithm>    // For std::fill_n()
 
 #include "Color.h"
@@ -64,9 +65,22 @@ bool operator < (const uint128_t & lhs, const uint128_t & rhs) noexcept  {
 }
 
 template <size_t BoardX, size_t BoardY>
-struct Board
+union Board
 {
-    uint8_t cells[BoardX * BoardY];
+    static const size_t Bytes = BoardX * BoardY;
+
+    typedef typename std::conditional<
+                (Bytes <= sizeof(uint32_t)), uint32_t, size_t
+            >::type  unit_type;
+    typedef Board<BoardX, BoardY> this_type;
+
+    static const size_t kUnitBytes = sizeof(unit_type);
+
+    static const size_t kUnits = (Bytes + kUnitBytes - 1) / kUnitBytes;
+    static const size_t kBytes = kUnits * kUnitBytes;
+
+    uint8_t     cells[BoardX * BoardY];
+    unit_type   uints[kUnits];
 
     Board() {
         this->clear();
@@ -78,33 +92,50 @@ struct Board
     ~Board() {}
 
     void clear() {
+#if 0
         std::fill_n(this->cells, sizeof(cells), Color::Empty);
+#else
+        for (size_t n = 0; n < kUnits; n++) {
+            this->uints[n] = 0;
+        }
+#endif
     }
 
     void copy(const Board & other) {
-        for (size_t cell = 0; cell < (BoardX * BoardY); cell++) {
-            this->cells[cell] = other.cells[cell];
+        for (size_t n = 0; n < kUnits; n++) {
+            this->uints[n] = other.uints[n];
         }
     }
 
     void copy(uint8_t cells[BoardX * BoardY]) {
-        for (size_t cell = 0; cell < (BoardX * BoardY); cell++) {
+        size_t cell;
+        for (cell = 0; cell < (BoardX * BoardY); cell++) {
             this->cells[cell] = cells[cell];
+        }
+        for (; cell < kBytes; cell++) {
+            this->cells[cell] = 0;
         }
     }
 
     Board & operator = (const Board & other) {
-        for (size_t cell = 0; cell < (BoardX * BoardY); cell++) {
-            this->cells[cell] = other.cells[cell];
+        for (size_t n = 0; n < kUnits; n++) {
+            this->uints[n] = other.uints[n];
         }
         return *this;
     }
 
     bool is_equal(const Board & other) const noexcept {
+#if 1
+        for (size_t n = 0; n < kUnits; n++) {
+            if (this->uints[n] != other.uints[n])
+                return false;
+        }
+#else
         for (size_t cell = 0; cell < (BoardX * BoardY); cell++) {
             if (this->cells[cell] != other.cells[cell])
                 return false;
         }
+#endif
         return true;
     }
 

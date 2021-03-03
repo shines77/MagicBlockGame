@@ -31,19 +31,20 @@ template <size_t BoardX, size_t BoardY,
 class MagicBlockGame
 {
 public:
-    struct State {
+    struct Stage {
         Position16  empty;
         uint8_t     last_dir, reserve;
         Board<BoardX, BoardY> board;
         std::vector<Move> moves;
 
-        State() {}
-        State(const Board<BoardX, BoardY> & srcBoard) {
+        Stage() {}
+        Stage(const Board<BoardX, BoardY> & srcBoard) {
             this->board = srcBoard;
         }
     };
 
-    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 1> Step01Solver;
+    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 1>   Step01Solver;
+    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 123> Step123Solver;
 
 private:
     SharedData<BoardX, BoardY, TargetX, TargetY> data_;
@@ -164,18 +165,18 @@ public:
 
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                char color = this->data_.board.cells[y * BoardY + x];
-                if (color >= Color::Empty && color < Color::Maximum) {
-                    this->data_.board_colors[color]++;
+                char cell = this->data_.board.cells[y * BoardY + x];
+                if (cell >= Color::Empty && cell < Color::Maximum) {
+                    this->data_.board_colors[cell]++;
                 }
             }
         }
 
         for (size_t y = 0; y < TargetY; y++) {
             for (size_t x = 0; x < TargetX; x++) {
-                char color = this->data_.target.cells[y * BoardY + x];
-                if (color >= Color::Empty && color < Color::Maximum) {
-                    this->data_.board_colors[color]++;
+                char cell = this->data_.target.cells[y * BoardY + x];
+                if (cell >= Color::Empty && cell < Color::Maximum) {
+                    this->data_.target_colors[cell]++;
                 }
             }
         }
@@ -200,8 +201,8 @@ public:
         static const ptrdiff_t startY = (BoardY - TargetY) / 2;
 
         for (size_t y = 0; y < TargetY; y++) {
+            ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
-            ptrdiff_t targetBaseY = y * BoardY;
             for (size_t x = 0; x < TargetX; x++) {
                 uint8_t target = this->data_.target.cells[targetBaseY + x];
                 uint8_t disc = this->data_.board.cells[baseY + (startX + x)];
@@ -228,7 +229,7 @@ public:
         Position16 empty;
         bool found_empty = find_empty(this->data_.board, empty);
         if (found_empty) {
-            Step01Solver solver(&this->data_);
+            Step123Solver solver(&this->data_);
             solvable = solver.solve_step_123();
         }
 
