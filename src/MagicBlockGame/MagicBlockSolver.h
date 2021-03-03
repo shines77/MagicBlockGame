@@ -64,8 +64,6 @@ private:
     std::vector<Stage> next_;
 
     std::set<uint128_t> visited_;
-
-    const std::vector<Move> * empty_moves_;
     std::vector<Move> moves_;
 
     int s123_min_depth_[4];
@@ -389,7 +387,7 @@ public:
 
             this->cur_.push_back(first);
 
-            bool found = false;
+            bool exit = false;
             while (this->cur_.size()) {
                 for (size_t i = 0; i < this->cur_.size(); i++) {
                     const Stage & stage = this->cur_[i];
@@ -423,19 +421,22 @@ public:
                         if (sat_mask > 0) {
                             this->moves_ = next_stage.moves;
                             assert((depth + 1) == next_stage.moves.size());
-                            found = true;
-                            break;
+                            bool reached_end = record_min_openning(depth, sat_mask, next_stage);
+                            if (reached_end) {
+                                exit = true;
+                                break;
+                            }
                         }
 
                         this->next_.push_back(next_stage);
                     }
 
-                    if (found) {
+                    if (exit) {
                         break;
                     }
                 }
 
-                if (found) {
+                if (exit) {
                     break;
                 }
 
@@ -444,14 +445,26 @@ public:
                 printf("cur.size() = %u, next.size() = %u\n", (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
+                if (s123_depth_limit_ != -1 && depth >= s123_depth_limit_) {
+                    exit = true;
+                    break;
+                }
+
                 std::swap(this->cur_, this->next_);
                 this->next_.clear();
             }
 
-            if (found) {
+            if (exit) {
                 solvable = true;
                 this->map_used_ = visited_.size();
                 printf("sat_mask_01 = %u\n\n", (uint32_t)sat_mask);
+
+                for (size_t i = 0; i < 4; i++) {
+                    printf("i = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
+                           (uint32_t)(i + 1), s123_min_depth_[i], s123_max_depth_[i],
+                           (uint32_t)this->s123_stages_[i].size());
+                }
+                printf("\n");
             }
         }
 
@@ -461,8 +474,7 @@ public:
     bool verify_board_is_equal(const Board<BoardX, BoardY> & board,
                                const Board<TargetX, TargetY> & target,
                                size_t firstTargetX, size_t lastTargetX,
-                               size_t firstTargetY, size_t lastTargetY,
-                               size_t type) {
+                               size_t firstTargetY, size_t lastTargetY) {
 #ifdef ENABLE_DEBUG
         Board<BoardX, BoardY> test_board;
         for (size_t y = firstTargetY; y < lastTargetY; y++) {
@@ -498,7 +510,7 @@ public:
         // Top partial
         static const ptrdiff_t TopY = startY;
 
-        if (verify_board_is_equal(board, target, 0, TargetX, 0, 1, 1)) {
+        if (verify_board_is_equal(board, target, 0, TargetX, 0, 1)) {
             count_partial_color_nums(board, 0, BoardX, 0, TopY + 1);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -510,7 +522,7 @@ public:
         // Left partial
         static const ptrdiff_t LeftX = startX;
 
-        if (verify_board_is_equal(board, target, 0, 1, 0, TargetY, 2)) {
+        if (verify_board_is_equal(board, target, 0, 1, 0, TargetY)) {
             count_partial_color_nums(board, 0, LeftX + 1, 0, BoardY);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -522,7 +534,7 @@ public:
         // Right partial
         static const ptrdiff_t RightX = startX + TargetX - 1;
 
-        if (verify_board_is_equal(board, target, TargetX - 1, TargetX, 0, TargetY, 4)) {
+        if (verify_board_is_equal(board, target, TargetX - 1, TargetX, 0, TargetY)) {
             count_partial_color_nums(board, RightX, BoardX, 0, BoardY);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -534,7 +546,7 @@ public:
         // Bottom partial
         static const ptrdiff_t BottomY = startY + TargetY - 1;
 
-        if (verify_board_is_equal(board, target, 0, TargetX, TargetY - 1, TargetY, 8)) {
+        if (verify_board_is_equal(board, target, 0, TargetX, TargetY - 1, TargetY)) {
             count_partial_color_nums(board, 0, BoardX, BottomY, BoardY);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -630,7 +642,7 @@ public:
                 }
                 else {
                     if (s123_depth_limit_ == -1) {
-                        s123_depth_limit_ = std::min(depth + kMaxSlideDepth, 27ULL);
+                        s123_depth_limit_ = std::min(std::max(depth + kMaxSlideDepth, 15ULL), 27ULL);
                     }
                     s123_min_depth_[type] = (int)depth;
                     s123_max_depth_[type] = (int)(depth + kSlideDepth);

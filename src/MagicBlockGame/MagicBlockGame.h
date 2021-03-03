@@ -50,6 +50,7 @@ public:
 
     typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 1>   Step01Solver;
     typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 123> Step123Solver;
+    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 456> Step456Solver;
 
 private:
     SharedData<BoardX, BoardY, TargetX, TargetY> data_;
