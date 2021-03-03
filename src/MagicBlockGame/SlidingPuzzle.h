@@ -87,8 +87,8 @@ public:
 
     template <size_t BlockX, size_t BlockY>
     void setPuzzle(Board<BlockX, BlockY> blocks, Board<BoardX, BoardY> target) {
-        ptrdiff_t startX = (BlockX - BoardX) / 2;
-        ptrdiff_t startY = (BlockY - BoardY) / 2;
+        static const ptrdiff_t startX = (BlockX - BoardX) / 2;
+        static const ptrdiff_t startY = (BlockY - BoardY) / 2;
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 this->board_.cells[y * BoardY + x] = blocks.cells[(startY + y) * BlockY + (startX + x)];

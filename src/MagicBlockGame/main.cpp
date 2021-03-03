@@ -13,10 +13,34 @@
 
 using namespace PuzzleGame;
 
-int main(int argc, char * argv[])
+void test_sliding_puzzle()
 {
-    jtest::CPU::warmup(1000);
+    MagicBlockGame<5, 5, 3, 3> game;
+    int readStatus = game.readInput("input_test.txt");
+    printf("readStatus = %d\n\n", readStatus);
 
+    jtest::StopWatch sw;
+
+    sw.start();
+    bool solvable = game.solve_3x3();
+    sw.stop();
+    double elapsed_time = sw.getElapsedMillisec();
+
+    if (solvable) {
+        printf("Has answer!\n\n");
+        printf("MinSteps: %d\n\n", (int)game.getSteps());
+        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+        printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+        game.getSteps();
+        game.getMoves();
+    }
+    else {
+        printf("No answer!\n\n");
+    }
+}
+
+void test_magic_block_game()
+{
     MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d\n\n", readStatus);
@@ -39,6 +63,14 @@ int main(int argc, char * argv[])
     else {
         printf("No answer!\n\n");
     }
+}
+
+int main(int argc, char * argv[])
+{
+    jtest::CPU::warmup(1000);
+
+    test_sliding_puzzle();
+    test_magic_block_game();
 
 #if !defined(NDEBUG) && defined(_MSC_VER)
     ::system("pause");
