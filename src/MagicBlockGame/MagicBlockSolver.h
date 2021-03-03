@@ -243,7 +243,8 @@ public:
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
                     size_t total_moves = empty_moves.size();
                     for (size_t n = 0; n < total_moves; n++) {
-                        if (empty_moves[n].dir == stage.last_dir)
+                        uint8_t last_dir = empty_moves[n].dir;
+                        if (last_dir == stage.last_dir)
                             continue;
 
                         Stage next_stage(stage.board);
@@ -257,11 +258,11 @@ public:
                         
                         Position16 next_empty(move_pos);
                         next_stage.empty = next_empty;
-                        next_stage.last_dir = (uint8_t)n;
+                        next_stage.last_dir = last_dir;
                         next_stage.moves = stage.moves;
                         Move next_move;
                         next_move.pos = stage.empty;
-                        next_move.dir = (uint8_t)n;
+                        next_move.dir = last_dir;
                         next_stage.moves.push_back(next_move);
 
                         if (is_satisfy_full(next_stage.board, this->data_->target)) {
@@ -396,7 +397,8 @@ public:
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
                     size_t total_moves = empty_moves.size();
                     for (size_t n = 0; n < total_moves; n++) {
-                        if (empty_moves[n].dir == stage.last_dir)
+                        uint8_t last_dir = empty_moves[n].dir;
+                        if (last_dir == stage.last_dir)
                             continue;
 
                         Stage next_stage(stage.board);
@@ -410,11 +412,11 @@ public:
                         
                         Position16 next_empty(move_pos);
                         next_stage.empty = next_empty;
-                        next_stage.last_dir = (uint8_t)n;
+                        next_stage.last_dir = last_dir;
                         next_stage.moves = stage.moves;
                         Move next_move;
                         next_move.pos = stage.empty;
-                        next_move.dir = (uint8_t)n;
+                        next_move.dir = last_dir;
                         next_stage.moves.push_back(next_move);
 
                         sat_mask = is_satisfy_step_01(next_stage.board, this->target_);
@@ -501,8 +503,6 @@ public:
         return true;
     }
 
-#if 1
-
     size_t is_satisfy_step_123(const Board<BoardX, BoardY> & board,
                                const Board<TargetX, TargetY> & target) {
         size_t result = 0;
@@ -558,10 +558,8 @@ public:
         return result;
     }
 
-#else
-
-    size_t is_satisfy_step_123(const Board<BoardX, BoardY> & board,
-                               const Board<TargetX, TargetY> & target) {
+    size_t is_satisfy_step_12(const Board<BoardX, BoardY> & board,
+                              const Board<TargetX, TargetY> & target) {
         size_t result = 0;
 
         // Left-Top Corner
@@ -618,8 +616,6 @@ public:
 
         return result;
     }
-
-#endif
 
     bool record_min_openning(size_t depth, size_t sat_mask, const Stage & stage) {
         static const size_t kSlideDepth = 6;
@@ -687,7 +683,8 @@ public:
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
                     size_t total_moves = empty_moves.size();
                     for (size_t n = 0; n < total_moves; n++) {
-                        if (empty_moves[n].dir == stage.last_dir)
+                        uint8_t last_dir = empty_moves[n].dir;
+                        if (last_dir == stage.last_dir)
                             continue;
 
                         Stage next_stage(stage.board);
@@ -701,11 +698,11 @@ public:
                         
                         Position16 next_empty(move_pos);
                         next_stage.empty = next_empty;
-                        next_stage.last_dir = (uint8_t)n;
+                        next_stage.last_dir = last_dir;
                         next_stage.moves = stage.moves;
                         Move next_move;
                         next_move.pos = stage.empty;
-                        next_move.dir = (uint8_t)n;
+                        next_move.dir = last_dir;
                         next_stage.moves.push_back(next_move);
 
                         sat_mask = is_satisfy_step_123(next_stage.board, this->target_);

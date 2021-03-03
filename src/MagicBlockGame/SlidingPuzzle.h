@@ -138,6 +138,7 @@ public:
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
                     size_t total_moves = empty_moves.size();
                     for (size_t n = 0; n < total_moves; n++) {
+                        uint8_t last_dir = empty_moves[n].dir;
                         if (empty_moves[n].dir == state.last_dir)
                             continue;
 
@@ -152,11 +153,11 @@ public:
                         
                         Position16 next_empty(move_pos);
                         next_state.empty = next_empty;
-                        next_state.last_dir = (uint8_t)n;
+                        next_state.last_dir = last_dir;
                         next_state.moves = state.moves;
                         Move next_move;
                         next_move.pos = state.empty;
-                        next_move.dir = (uint8_t)n;
+                        next_move.dir = last_dir;
                         next_state.moves.push_back(next_move);
 
                         if (next_state.board == this->target_) {
