@@ -711,23 +711,13 @@ public:
                                 bool reached_end = record_min_openning(depth, sat_mask, next_stage);
                                 if (reached_end) {
                                     exit = true;
-                                    break;
                                 }
                             }
                             else {
                                 exit = true;
-                                break;
                             }
                         }               
                     }
-
-                    if (exit) {
-                        break;
-                    }
-                }
-
-                if (exit) {
-                    break;
                 }
 
                 depth++;
@@ -736,13 +726,17 @@ public:
                        (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
+                std::swap(this->cur_, this->next_);
+                this->next_.clear();
+
+                if (exit) {
+                    break;
+                }
+
                 if (this->data_->s123_depth_limit != -1 && depth >= this->data_->s123_depth_limit) {
                     exit = true;
                     break;
                 }
-
-                std::swap(this->cur_, this->next_);
-                this->next_.clear();
             }
 
             if (exit) {

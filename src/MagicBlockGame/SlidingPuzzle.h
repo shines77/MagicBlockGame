@@ -175,13 +175,13 @@ public:
                     }
                 }
 
-                if (found) {
-                    break;
-                }
-
                 depth++;
                 std::swap(this->cur_, this->next_);
                 this->next_.clear();
+
+                if (found) {
+                    break;
+                }
             }
 
             if (found) {

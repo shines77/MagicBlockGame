@@ -222,8 +222,13 @@ public:
         Position16 empty;
         bool found_empty = find_empty(this->data_.board, empty);
         if (found_empty) {
-            Step123Solver solver(&this->data_);
-            solvable = solver.solve();
+            Step123Solver solver_123(&this->data_);
+            solvable = solver_123.solve();
+
+            if (solvable) {
+                //Step456Solver solver_456(&this->data_);
+                //solvable = solver_456.solve();
+            }
         }
 
         return solvable;
