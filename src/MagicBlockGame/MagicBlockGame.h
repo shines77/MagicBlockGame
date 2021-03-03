@@ -36,17 +36,7 @@ public:
     static const ptrdiff_t startX = (BoardX - TargetX) / 2;
     static const ptrdiff_t startY = (BoardY - TargetY) / 2;
 
-    struct Stage {
-        Position16  empty;
-        uint8_t     last_dir, reserve;
-        Board<BoardX, BoardY> board;
-        std::vector<Move> moves;
-
-        Stage() {}
-        Stage(const Board<BoardX, BoardY> & srcBoard) {
-            this->board = srcBoard;
-        }
-    };
+    typedef typename SharedData<BoardX, BoardY, TargetX, TargetY>::stage_type stage_type;
 
     typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 1>   Step01Solver;
     typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 123> Step123Solver;
@@ -233,7 +223,7 @@ public:
         bool found_empty = find_empty(this->data_.board, empty);
         if (found_empty) {
             Step123Solver solver(&this->data_);
-            solvable = solver.solve_step_123();
+            solvable = solver.solve();
         }
 
         return solvable;

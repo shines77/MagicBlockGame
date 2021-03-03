@@ -160,14 +160,18 @@ public:
                         next_move.dir = last_dir;
                         next_state.moves.push_back(next_move);
 
+                        this->next_.push_back(next_state);
+
                         if (next_state.board == this->target_) {
                             this->moves_ = next_state.moves;
                             assert((depth + 1) == next_state.moves.size());
                             found = true;
                             break;
                         }
+                    }
 
-                        this->next_.push_back(next_state);
+                    if (found) {
+                        break;
                     }
                 }
 

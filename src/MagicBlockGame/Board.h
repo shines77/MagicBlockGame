@@ -64,6 +64,16 @@ bool operator < (const uint128_t & lhs, const uint128_t & rhs) noexcept  {
     return (lhs.compare(rhs) == -1);
 }
 
+inline
+bool operator >= (const uint128_t & lhs, const uint128_t & rhs) noexcept  {
+    return (lhs.compare(rhs) == -1);
+}
+
+inline
+bool operator <= (const uint128_t & lhs, const uint128_t & rhs) noexcept  {
+    return (lhs.compare(rhs) == 1);
+}
+
 template <size_t BoardX, size_t BoardY>
 union Board
 {
