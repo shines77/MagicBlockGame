@@ -286,7 +286,7 @@ public:
                 }
 
                 depth++;
-                printf("depth = %u\n", (uint32_t)(depth + 1));
+                printf("depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n", (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
@@ -440,7 +440,7 @@ public:
                 }
 
                 depth++;
-                printf("depth = %u\n", (uint32_t)(depth + 1));
+                printf("depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n", (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
@@ -720,11 +720,11 @@ public:
                 }
 
                 depth++;
-                printf("depth = %u\n", (uint32_t)(depth + 1));
+                printf("depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n", (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
-                if (s123_depth_limit_ != -1 && (depth + 1) >= s123_depth_limit_) {
+                if (s123_depth_limit_ != -1 && depth >= s123_depth_limit_) {
                     exit = true;
                     break;
                 }
