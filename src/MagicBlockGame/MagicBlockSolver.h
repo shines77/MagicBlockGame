@@ -124,14 +124,17 @@ private:
             }
 
             this->data_->s123.depth_limit = -1;
-            this->data_->s456.lock_inited = 0;
+
+            for (size_t i = 0; i < 4; i++) {
+                this->data_->s456.lock_inited[i] = 0;
+            }
         }
         else if (Step == 456) {
             this->target_ = this->data_->target;
-            if (this->data_->s456.lock_inited == 0) {
-                //this->data_->s456.lock_inited = 1;
-
-                switch (this->data_->s456.openning_type) {
+            size_t openning_type = this->data_->s456.openning_type;
+            if (this->data_->s456.lock_inited[openning_type] == 0) {
+                this->data_->s456.lock_inited[openning_type] = 1;
+                switch (openning_type) {
                     case 0:
                         // Top partial
                         count_partial_target_color_nums(this->target_, 0, TargetX, TargetY - 1, TargetY);
@@ -159,7 +162,7 @@ private:
             }
         }
 
-        count_board_color_nums(this->board_);
+        //count_board_color_nums(this->board_);
     }
 
     void assert_color(uint8_t color) const {

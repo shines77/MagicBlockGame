@@ -29,10 +29,19 @@ struct Step456
 {
     size_t openning_type;
     size_t index;
-    int lock_inited;
+    int lock_inited[4];
     int locked[BoardX * BoardY];
 
-    Step456() : openning_type(size_t(-1)), index(size_t(-1)), lock_inited(0) {}
+    Step456() : openning_type(size_t(-1)), index(size_t(-1)) {
+        for (size_t i = 0; i < 4; i++) {
+            this->lock_inited[i] = 0;
+        }
+
+        for (size_t i = 0; i < BoardX * BoardY; i++) {
+            this->locked[i] = 0;
+        }
+    }
+
     ~Step456() {}
 };
 
