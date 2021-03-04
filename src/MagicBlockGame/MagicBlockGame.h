@@ -245,7 +245,7 @@ public:
                         }
                         else {
 #if defined(_MSC_VER)
-                            ::Sleep(500);
+                            //::Sleep(500);
 #endif
                         }
                     }

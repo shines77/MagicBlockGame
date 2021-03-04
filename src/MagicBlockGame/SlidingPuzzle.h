@@ -129,7 +129,7 @@ public:
 
             this->cur_.push_back(first);
 
-            bool found = false;
+            bool exit = false;
             while (this->cur_.size()) {
                 for (size_t i = 0; i < this->cur_.size(); i++) {
                     const State & state = this->cur_[i];
@@ -165,12 +165,13 @@ public:
                         if (next_state.board == this->target_) {
                             this->moves_ = next_state.moves;
                             assert((depth + 1) == next_state.moves.size());
-                            found = true;
+                            solvable = true;
+                            exit = true;
                             break;
                         }
                     }
 
-                    if (found) {
+                    if (exit) {
                         break;
                     }
                 }
@@ -179,13 +180,12 @@ public:
                 std::swap(this->cur_, this->next_);
                 this->next_.clear();
 
-                if (found) {
+                if (exit) {
                     break;
                 }
             }
 
-            if (found) {
-                solvable = true;
+            if (solvable) {
                 this->map_used_ = visited_.count();
             }
         }

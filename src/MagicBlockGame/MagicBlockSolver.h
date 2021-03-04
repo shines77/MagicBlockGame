@@ -127,10 +127,10 @@ private:
             this->data_->s456.lock_inited = 0;
         }
         else if (Step == 456) {
+            this->target_ = this->data_->target;
             if (this->data_->s456.lock_inited == 0) {
-                this->data_->s456.lock_inited = 1;
+                //this->data_->s456.lock_inited = 1;
 
-                this->target_ = this->data_->target;
                 switch (this->data_->s456.openning_type) {
                     case 0:
                         // Top partial
@@ -786,6 +786,7 @@ public:
 
                         sat_mask = is_satisfy(next_stage.board, this->target_);
                         if (sat_mask > 0) {
+                            solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
                                 bool reached_end = record_min_openning(depth, sat_mask, next_stage);
                                 if (reached_end) {
@@ -795,10 +796,15 @@ public:
                             else {
                                 this->moves_ = next_stage.moves;
                                 assert((depth + 1) == next_stage.moves.size());
-                                solvable = true;
                                 exit = true;
+                                break;
                             }
-                        }               
+                        }
+                    }
+                    if (!(Step == 1 || Step == 12 || Step == 123)) {
+                        if (exit) {
+                            break;
+                        }
                     }
                 }
 
@@ -822,37 +828,35 @@ public:
                     }
                 }
                 else if (Step == 456) {
-                    if (depth >= 35) {
+                    if (depth >= 32) {
                         exit = true;
                         break;
                     }
                 }
             }
 
-            if (exit) {
-                this->map_used_ = visited_.size();
-                printf("sat_mask = %u\n\n", (uint32_t)sat_mask);
+            this->map_used_ = visited_.size();
+            printf("sat_mask = %u\n\n", (uint32_t)sat_mask);
 
-                if (Step == 1 || Step == 12 || Step == 123) {
-                    solvable = true;
-                    for (size_t i = 0; i < 4; i++) {
-                        printf("i = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
-                               (uint32_t)(i + 1),
-                               this->data_->s123.min_depth[i],
-                               this->data_->s123.max_depth[i],
-                               (uint32_t)this->data_->s123.stage_list[i].size());
-                    }
-                    printf("\n");
+            if (Step == 1 || Step == 12 || Step == 123) {
+                printf("Solvable: %s\n", (solvable ? "true" : "false"));
+                for (size_t i = 0; i < 4; i++) {
+                    printf("i = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
+                            (uint32_t)(i + 1),
+                            this->data_->s123.min_depth[i],
+                            this->data_->s123.max_depth[i],
+                            (uint32_t)this->data_->s123.stage_list[i].size());
                 }
-                else if (Step == 456) {
-                    printf("Step: 456\n\n");
-                    printf("Solvable: %u\n", (uint32_t)solvable);
-                    printf("OpenningType: %u\n", (uint32_t)this->data_->s456.openning_type);
-                    printf("Index: %u\n", (uint32_t)this->data_->s456.index);
-                    printf("next.size() = %u\n", (uint32_t)this->cur_.size());
-                    printf("moves.size() = %u\n", (uint32_t)this->moves_.size());
-                    printf("\n");
-                }
+                printf("\n");
+            }
+            else if (Step == 456) {
+                printf("Step: 456\n\n");
+                printf("Solvable: %s\n", (solvable ? "true" : "false"));
+                printf("OpenningType = %u\n", (uint32_t)this->data_->s456.openning_type);
+                printf("Index = %u\n", (uint32_t)this->data_->s456.index);
+                printf("next.size() = %u\n", (uint32_t)this->cur_.size());
+                printf("moves.size() = %u\n", (uint32_t)this->moves_.size());
+                printf("\n");
             }
         }
 
