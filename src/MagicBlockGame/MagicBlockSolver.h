@@ -476,8 +476,27 @@ public:
             }
         }
 #endif
-
         for (size_t y = firstTargetY; y < lastTargetY; y++) {
+            ptrdiff_t targetBaseY = y * TargetY;
+            ptrdiff_t baseY = (startY + y) * BoardY;
+            for (size_t x = firstTargetX; x < lastTargetX; x++) {
+                uint8_t target_cell = target.cells[targetBaseY + x];
+                uint8_t cell = board.cells[baseY + (startX + x)];
+                assert_color(target_cell);
+                assert_color(cell);
+                if (cell != target_cell) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    bool reverse_verify_board_is_equal(const Board<BoardX, BoardY> & board,
+                                       const Board<TargetX, TargetY> & target,
+                                       size_t firstTargetX, size_t lastTargetX,
+                                       size_t firstTargetY, size_t lastTargetY) {
+        for (ptrdiff_t y = ptrdiff_t(lastTargetY - 1); y >= ptrdiff_t(firstTargetX); y--) {
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
             for (size_t x = firstTargetX; x < lastTargetX; x++) {
@@ -607,8 +626,8 @@ public:
         return result;
     }
 
-    size_t is_satisfy_step_456(const Board<BoardX, BoardY> & board,
-                               const Board<TargetX, TargetY> & target) {
+    size_t _is_satisfy_step_456(const Board<BoardX, BoardY> & board,
+                                const Board<TargetX, TargetY> & target) {
         size_t result = 0;
 
         if (this->data_->s456.openning_type == 0) {
@@ -617,11 +636,9 @@ public:
 
             if (verify_board_is_equal(board, target, 0, TargetX, 0, 2)) {
                 count_partial_color_nums(board, 0, BoardX, TopY + 2, BoardY);
-                if (Step == 456 || this->partial_colors_[Color::Empty] == 1) {
-                    bool is_valid = check_partial_color_nums();
-                    if (is_valid)
-                        result |= 1;
-                }
+                bool is_valid = check_partial_color_nums();
+                if (is_valid)
+                    result |= 1;
             }
         }
         else if (this->data_->s456.openning_type == 1) {
@@ -630,11 +647,9 @@ public:
 
             if (verify_board_is_equal(board, target, 0, 2, 0, TargetY)) {
                 count_partial_color_nums(board, LeftX + 2, BoardX, 0, BoardY);
-                if (Step == 456 || this->partial_colors_[Color::Empty] == 1) {
-                    bool is_valid = check_partial_color_nums();
-                    if (is_valid)
-                        result |= 2;
-                }
+                bool is_valid = check_partial_color_nums();
+                if (is_valid)
+                    result |= 2;
             }
         }
         else if (this->data_->s456.openning_type == 2) {
@@ -643,11 +658,9 @@ public:
 
             if (verify_board_is_equal(board, target, TargetX - 2, TargetX, 0, TargetY)) {
                 count_partial_color_nums(board, 0, startX + 1, 0, BoardY);
-                if (Step == 456 || this->partial_colors_[Color::Empty] == 1) {
-                    bool is_valid = check_partial_color_nums();
-                    if (is_valid)
-                        result |= 4;
-                }
+                bool is_valid = check_partial_color_nums();
+                if (is_valid)
+                    result |= 4;
             }
         }
         else if (this->data_->s456.openning_type == 3) {
@@ -656,15 +669,24 @@ public:
 
             if (verify_board_is_equal(board, target, 0, TargetX, TargetY - 2, TargetY)) {
                 count_partial_color_nums(board, 0, BoardX, 0, startY + 1);
-                if (Step == 456 || this->partial_colors_[Color::Empty] == 1) {
-                    bool is_valid = check_partial_color_nums();
-                    if (is_valid)
-                        result |= 8;
-                }
+                bool is_valid = check_partial_color_nums();
+                if (is_valid)
+                    result |= 8;
             }
         }
         else {
             assert(false);
+        }
+
+        return result;
+    }
+
+    size_t is_satisfy_step_456(const Board<BoardX, BoardY> & board,
+                               const Board<TargetX, TargetY> & target) {
+        size_t result = 0;
+
+        if (reverse_verify_board_is_equal(board, target, 0, TargetX, 0, TargetY)) {
+            result |= 1;
         }
 
         return result;
@@ -812,10 +834,15 @@ public:
                 }
 
                 depth++;
-                printf("depth = %u\n", (uint32_t)depth);
-                printf("cur.size() = %u, next.size() = %u\n",
-                       (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
-                printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
+                if (Step == 456) {
+                    printf(">> %u\n", (uint32_t)depth);
+                }
+                else {
+                    printf("depth = %u\n", (uint32_t)depth);
+                    printf("cur.size() = %u, next.size() = %u\n",
+                           (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
+                    printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
+                }
 
                 std::swap(this->cur_, this->next_);
                 this->next_.clear();
@@ -831,7 +858,7 @@ public:
                     }
                 }
                 else if (Step == 456) {
-                    if (depth >= 32) {
+                    if (depth > this->data_->s456.depth_limit) {
                         exit = true;
                         break;
                     }
@@ -839,10 +866,10 @@ public:
             }
 
             this->map_used_ = visited_.size();
-            printf("sat_mask = %u\n\n", (uint32_t)sat_mask);
+            printf("\n");
 
             if (Step == 1 || Step == 12 || Step == 123) {
-                printf("Solvable: %s\n", (solvable ? "true" : "false"));
+                printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
                 for (size_t i = 0; i < 4; i++) {
                     printf("i = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                             (uint32_t)(i + 1),
@@ -853,8 +880,7 @@ public:
                 printf("\n");
             }
             else if (Step == 456) {
-                printf("Step: 456\n\n");
-                printf("Solvable: %s\n", (solvable ? "true" : "false"));
+                printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
                 printf("OpenningType = %u\n", (uint32_t)this->data_->s456.openning_type);
                 printf("Index = %u\n", (uint32_t)this->data_->s456.index);
                 printf("next.size() = %u\n", (uint32_t)this->cur_.size());

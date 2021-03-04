@@ -30,13 +30,14 @@ void test_sliding_puzzle()
         printf("Has answer!\n\n");
         printf("MinSteps: %d\n\n", (int)game.getSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
-        printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
         game.getSteps();
         game.getMoves();
     }
     else {
         printf("No answer!\n\n");
     }
+
+    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 
 #if defined(_MSC_VER)
     ::system("pause");
@@ -60,20 +61,21 @@ void test_magic_block_game()
         printf("Has answer!\n\n");
         printf("MinSteps: %d\n\n", (int)game.getSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
-        printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
         game.getSteps();
         game.getMoves();
     }
     else {
         printf("No answer!\n\n");
     }
+
+    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
 int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
 
-    test_sliding_puzzle();
+    //test_sliding_puzzle();
     test_magic_block_game();
 
 #if !defined(NDEBUG) && defined(_MSC_VER)

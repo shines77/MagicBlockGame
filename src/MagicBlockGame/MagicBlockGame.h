@@ -45,10 +45,14 @@ public:
 private:
     SharedData<BoardX, BoardY, TargetX, TargetY> data_;
 
-    std::vector<Move> moves_;
+    size_t min_steps_;
     size_t map_used_;
 
+    std::vector<Move> moves_;
+    std::vector<Move> answer_;
+
     void init() {
+        // Initialize empty_moves[BoardX * BoardY]
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 std::vector<Move> empty_moves;
@@ -70,7 +74,7 @@ private:
     }
 
 public:
-    MagicBlockGame() : map_used_(0) {
+    MagicBlockGame() : min_steps_(size_t(-1)), map_used_(0) {
         this->init();
     }
 
@@ -227,7 +231,7 @@ public:
 
             if (solvable) {
 #if defined(_MSC_VER)
-                ::system("pause");
+                //::system("pause");
 #endif
                 for (size_t i = 0; i < 4; i++) {
                     this->data_.s456.openning_type = i;
@@ -235,21 +239,58 @@ public:
                     size_t totalStage = stage_list.size();
                     for (size_t n = 0; n < totalStage; n++) {
                         this->data_.s456.index = n;
+                        if (this->min_steps_ > stage_list[n].moves.size()) {
+                            this->data_.s456.depth_limit = std::min(35ULL,
+                                this->min_steps_ - stage_list[n].moves.size());
+                        }
+                        else {
+                            continue;
+                        }
                         Step456Solver solver_456(&this->data_);
                         solver_456.setBoard(stage_list[n].board);
                         solvable = solver_456.solve();
                         if (solvable) {
+                            translateMoves(solver_456.getMoves());
+                            size_t total_steps = stage_list[n].moves.size() + this->moves_.size();
+                            printf("Step123 moves: %u, Step456 moves: %u, Total moves: %u\n\n",
+                                   (uint32_t)stage_list[n].moves.size(),
+                                   (uint32_t)this->moves_.size(),
+                                   (uint32_t)total_steps);
+
+                            if (total_steps < this->min_steps_) {
+                                this->map_used_ = solver_456.getMapUsed();
+                                this->min_steps_ = total_steps;
+                                this->answer_ = stage_list[n].moves;
+                                for (auto iter : this->moves_) {
+                                    this->answer_.push_back(iter);
+                                }
+                                printf("Total moves: %u\n\n", (uint32_t)this->answer_.size());
+                            }
 #if defined(_MSC_VER)
-                            ::system("pause");
+                            //::system("pause");
+                            //::Sleep(1000);
 #endif
                         }
                         else {
 #if defined(_MSC_VER)
-                            //::Sleep(500);
+                            //::Sleep(1000);
 #endif
                         }
                     }
                 }
+
+                printf("this->min_steps: %u\n", (uint32_t)this->min_steps_);
+                printf("Total moves: %u\n", (uint32_t)this->answer_.size());
+                printf("\n");
+
+                if (this->min_steps_ != size_t(-1) || this->answer_.size() > 0) {
+                    solvable = true;
+                    this->moves_ = this->answer_;
+                }
+
+#if defined(_MSC_VER)
+                //::system("pause");
+#endif
             }
         }
 
