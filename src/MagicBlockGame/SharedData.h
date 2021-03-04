@@ -12,11 +12,35 @@
 
 namespace PuzzleGame {
 
+template <size_t BoardX, size_t BoardY>
+struct Step123
+{
+    typedef Stage<BoardX, BoardY> stage_type;
+
+    int min_depth[4];
+    int max_depth[4];
+
+    size_t depth_limit;
+    std::vector<stage_type> stage_list[4];
+};
+
+template <size_t BoardX, size_t BoardY>
+struct Step456
+{
+    size_t openning_type;
+    size_t index;
+    int lock_inited;
+    int locked[BoardX * BoardY];
+
+    Step456() : openning_type(size_t(-1)), index(size_t(-1)), lock_inited(0) {}
+    ~Step456() {}
+};
+
 template <size_t BoardX, size_t BoardY,
           size_t TargetX, size_t TargetY>
 struct SharedData
 {
-    typedef Stage<BoardX, BoardY> stage_type;
+    typedef typename Step123<BoardX, BoardY>::stage_type stage_type;
 
     Board<BoardX, BoardY> board;
     Board<TargetX, TargetY> target;
@@ -26,11 +50,11 @@ struct SharedData
 
     std::vector<Move> empty_moves[BoardX * BoardY];
 
-    int s123_min_depth[4];
-    int s123_max_depth[4];
+    Step123<BoardX, BoardY> s123;
+    Step456<BoardX, BoardY> s456;
 
-    size_t s123_depth_limit;
-    std::vector<stage_type> s123_stages[4];
+    SharedData() {}
+    ~SharedData() {}
 };
 
 } // namespace PuzzleGame

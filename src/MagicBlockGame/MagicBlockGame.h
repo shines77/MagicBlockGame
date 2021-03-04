@@ -170,7 +170,7 @@ public:
 
         for (size_t y = 0; y < TargetY; y++) {
             for (size_t x = 0; x < TargetX; x++) {
-                char cell = this->data_.target.cells[y * BoardY + x];
+                char cell = this->data_.target.cells[y * TargetY + x];
                 if (cell >= Color::Empty && cell < Color::Maximum) {
                     this->data_.target_colors[cell]++;
                 }
@@ -226,8 +226,30 @@ public:
             solvable = solver_123.solve();
 
             if (solvable) {
-                //Step456Solver solver_456(&this->data_);
-                //solvable = solver_456.solve();
+#if defined(_MSC_VER)
+                ::system("pause");
+#endif
+                for (size_t i = 0; i < 4; i++) {
+                    this->data_.s456.openning_type = i;
+                    const std::vector<stage_type> & stage_list = this->data_.s123.stage_list[i];
+                    size_t totalStage = stage_list.size();
+                    for (size_t n = 0; n < totalStage; n++) {
+                        this->data_.s456.index = n;
+                        Step456Solver solver_456(&this->data_);
+                        solver_456.setBoard(stage_list[n].board);
+                        solvable = solver_456.solve();
+                        if (solvable) {
+#if defined(_MSC_VER)
+                            ::system("pause");
+#endif
+                        }
+                        else {
+#if defined(_MSC_VER)
+                            ::Sleep(500);
+#endif
+                        }
+                    }
+                }
             }
         }
 

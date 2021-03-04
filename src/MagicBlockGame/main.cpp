@@ -37,6 +37,10 @@ void test_sliding_puzzle()
     else {
         printf("No answer!\n\n");
     }
+
+#if defined(_MSC_VER)
+    ::system("pause");
+#endif
 }
 
 void test_magic_block_game()

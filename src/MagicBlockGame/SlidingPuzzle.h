@@ -85,16 +85,16 @@ public:
         return this->map_used_;
     }
 
-    template <size_t BlockX, size_t BlockY>
-    void setPuzzle(Board<BlockX, BlockY> blocks, Board<BoardX, BoardY> target) {
-        static const ptrdiff_t startX = (BlockX - BoardX) / 2;
-        static const ptrdiff_t startY = (BlockY - BoardY) / 2;
+    template <size_t UBoardX, size_t UBoardY>
+    void setPuzzle(const Board<UBoardX, UBoardY> & board, const Board<BoardX, BoardY> & target) {
+        static const ptrdiff_t startX = (UBoardX - BoardX) / 2;
+        static const ptrdiff_t startY = (UBoardY - BoardY) / 2;
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                this->board_.cells[y * BoardY + x] = blocks.cells[(startY + y) * BlockY + (startX + x)];
-                this->target_.cells[y * BoardY + x] = target.cells[y * BoardY + x];
+                this->board_.cells[y * BoardY + x] = board.cells[(startY + y) * UBoardY + (startX + x)];
             }
         }
+        this->target_ = target;
     }
 
     bool find_empty(Position16 & empty_pos) const {
