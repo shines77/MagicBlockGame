@@ -28,25 +28,29 @@ static const Offset Dir_Offset[Direction::Last] = {
     { -1,  0 }
 };
 
-struct Position {
+#pragma pack(push, 1)
+
+struct Position8 {
     int8_t x;
     int8_t y;
 
-    Position() : x(0), y(0) {}
-    Position(int _x, int _y) : x(_x), y(_y) {}
+    Position8() : x(0), y(0) {}
+    Position8(int _x, int _y) : x(_x), y(_y) {}
 };
 
-struct Position16 {
+struct Position {
     int16_t value;
 
-    Position16() : value(0) {}
-    Position16(int _value) : value(_value) {}
+    Position() : value(0) {}
+    Position(int _value) : value(_value) {}
 };
 
 struct Move {
-    Position16  pos;
+    Position    pos;
     uint8_t     dir;
     uint8_t     reserve;
 };
+
+#pragma pack(pop)
 
 } // namespace PuzzleGame

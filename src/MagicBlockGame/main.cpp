@@ -31,7 +31,7 @@ void test_sliding_puzzle()
         printf("MinSteps: %d\n\n", (int)game.getSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
         game.getSteps();
-        game.getMoves();
+        game.getMovePath();
     }
     else {
         printf("No answer!\n\n");
@@ -62,7 +62,7 @@ void test_magic_block_game()
         printf("MinSteps: %d\n\n", (int)game.getSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
         game.getSteps();
-        game.getMoves();
+        game.getMovePath();
     }
     else {
         printf("No answer!\n\n");
@@ -78,7 +78,7 @@ int main(int argc, char * argv[])
     //test_sliding_puzzle();
     test_magic_block_game();
 
-#if !defined(NDEBUG) && defined(_MSC_VER)
+#if !defined(_NDEBUG) && defined(_MSC_VER)
     ::system("pause");
 #endif
     return 0;

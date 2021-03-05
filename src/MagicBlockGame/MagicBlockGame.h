@@ -38,7 +38,7 @@ public:
 
     typedef typename SharedData<BoardX, BoardY, TargetX, TargetY>::stage_type stage_type;
 
-    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 1>   Step01Solver;
+    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 1>   Step1Solver;
     typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 123> Step123Solver;
     typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 456> Step456Solver;
 
@@ -48,7 +48,7 @@ private:
     size_t min_steps_;
     size_t map_used_;
 
-    std::vector<Move> moves_;
+    std::vector<Move> move_path_;
     std::vector<Move> answer_;
 
     void init() {
@@ -64,7 +64,7 @@ private:
                     if (board_y < 0 || board_y >= (int)BoardY)
                         continue;
                     Move move;
-                    move.pos = Position16(board_y * BoardY + board_x);
+                    move.pos = Position(board_y * BoardY + board_x);
                     move.dir = (uint8_t)dir;
                     empty_moves.push_back(move);
                 }
@@ -81,11 +81,11 @@ public:
     ~MagicBlockGame() {}
 
     size_t getSteps() const {
-        return this->moves_.size();
+        return this->move_path_.size();
     }
 
-    const std::vector<Move> & getMoves() const {
-        return this->moves_;
+    const std::vector<Move> & getMovePath() const {
+        return this->move_path_;
     }
 
     size_t getMapUsed() const {
@@ -182,7 +182,7 @@ public:
         }
     }
 
-    bool find_empty(const Board<BoardX, BoardY> & board, Position16 & empty_pos) const {
+    bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 uint8_t cell = board.cells[y * BoardY + x];
@@ -212,8 +212,8 @@ public:
         return true;
     }
 
-    void translateMoves(const std::vector<Move> & moves) {
-        this->moves_ = moves;
+    void translateMovePath(const std::vector<Move> & move_path) {
+        this->move_path_ = move_path;
     }
 
     bool solve() {
@@ -223,25 +223,22 @@ public:
 
         bool solvable = false;
 
-        Position16 empty;
+        Position empty;
         bool found_empty = find_empty(this->data_.board, empty);
         if (found_empty) {
             Step123Solver solver_123(&this->data_);
             solvable = solver_123.solve();
 
             if (solvable) {
-#if defined(_MSC_VER)
-                //::system("pause");
-#endif
                 for (size_t i = 0; i < 4; i++) {
                     this->data_.s456.openning_type = i;
                     const std::vector<stage_type> & stage_list = this->data_.s123.stage_list[i];
                     size_t totalStage = stage_list.size();
                     for (size_t n = 0; n < totalStage; n++) {
                         this->data_.s456.index = n;
-                        if (this->min_steps_ > stage_list[n].moves.size()) {
+                        if (this->min_steps_ > stage_list[n].move_path.size()) {
                             this->data_.s456.depth_limit = std::min(35ULL,
-                                this->min_steps_ - stage_list[n].moves.size());
+                                this->min_steps_ - stage_list[n].move_path.size());
                         }
                         else {
                             continue;
@@ -250,31 +247,22 @@ public:
                         solver_456.setBoard(stage_list[n].board);
                         solvable = solver_456.solve();
                         if (solvable) {
-                            translateMoves(solver_456.getMoves());
-                            size_t total_steps = stage_list[n].moves.size() + this->moves_.size();
+                            this->move_path_ = solver_456.getMovePath();
+                            size_t total_steps = stage_list[n].move_path.size() + this->move_path_.size();
                             printf("Step123 moves: %u, Step456 moves: %u, Total moves: %u\n\n",
-                                   (uint32_t)stage_list[n].moves.size(),
-                                   (uint32_t)this->moves_.size(),
+                                   (uint32_t)stage_list[n].move_path.size(),
+                                   (uint32_t)this->move_path_.size(),
                                    (uint32_t)total_steps);
 
                             if (total_steps < this->min_steps_) {
                                 this->map_used_ = solver_456.getMapUsed();
                                 this->min_steps_ = total_steps;
-                                this->answer_ = stage_list[n].moves;
-                                for (auto iter : this->moves_) {
+                                this->answer_ = stage_list[n].move_path;
+                                for (auto iter : this->move_path_) {
                                     this->answer_.push_back(iter);
                                 }
                                 printf("Total moves: %u\n\n", (uint32_t)this->answer_.size());
                             }
-#if defined(_MSC_VER)
-                            //::system("pause");
-                            //::Sleep(1000);
-#endif
-                        }
-                        else {
-#if defined(_MSC_VER)
-                            //::Sleep(1000);
-#endif
                         }
                     }
                 }
@@ -285,12 +273,8 @@ public:
 
                 if (this->min_steps_ != size_t(-1) || this->answer_.size() > 0) {
                     solvable = true;
-                    this->moves_ = this->answer_;
+                    this->move_path_ = this->answer_;
                 }
-
-#if defined(_MSC_VER)
-                //::system("pause");
-#endif
             }
         }
 
@@ -302,7 +286,7 @@ public:
         slidingPuzzle.setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target);
         bool solvable = slidingPuzzle.solve();
         if (solvable) {
-            translateMoves(slidingPuzzle.getMoves());
+            translateMovePath(slidingPuzzle.getMovePath());
             this->map_used_ = slidingPuzzle.getMapUsed();
         }
         return solvable;

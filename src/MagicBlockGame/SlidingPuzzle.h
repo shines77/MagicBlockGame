@@ -10,6 +10,7 @@
 #include "Color.h"
 #include "Move.h"
 #include "Board.h"
+#include "Stage.h"
 #include "BitSet.h"
 
 namespace PuzzleGame {
@@ -18,31 +19,21 @@ template <size_t BoardX, size_t BoardY>
 class SlidingPuzzle
 {
 public:
-    static const size_t kBitmapBits = 1ULL << 27;
+    static const size_t kMapBits = 1ULL << (BoardX * BoardY * 3);
 
-    struct State {
-        Position16  empty;
-        uint8_t     last_dir, reserve;
-        Board<BoardX, BoardY> board;
-        std::vector<Move> moves;
-
-        State() {}
-        State(const Board<BoardX, BoardY> & srcBoard) {
-            this->board = srcBoard;
-        }
-    };
+    typedef Stage<BoardX, BoardY> stage_type;
 
 private:
     Board<BoardX, BoardY> board_;
     Board<BoardX, BoardY> target_;
 
-    std::vector<State> cur_;
-    std::vector<State> next_;
+    std::vector<stage_type> cur_;
+    std::vector<stage_type> next_;
 
-    jstd::BitSet<kBitmapBits> visited_;
+    jstd::BitSet<kMapBits> visited_;
 
     std::vector<Move> empty_moves_[BoardX * BoardY];
-    std::vector<Move> moves_;
+    std::vector<Move> move_path_;
 
     size_t map_used_;
 
@@ -58,7 +49,7 @@ private:
                     if (board_y < 0 || board_y >= (int)BoardY)
                         continue;
                     Move move;
-                    move.pos = Position16(board_y * BoardY + board_x);
+                    move.pos = Position(board_y * BoardY + board_x);
                     move.dir = (uint8_t)dir;
                     moves.push_back(move);
                 }
@@ -74,11 +65,11 @@ public:
     ~SlidingPuzzle() {}
 
     size_t getSteps() const {
-        return this->moves_.size();
+        return this->move_path_.size();
     }
 
-    const std::vector<Move> & getMoves() const {
-        return this->moves_;
+    const std::vector<Move> & getMovePath() const {
+        return this->move_path_;
     }
 
     size_t getMapUsed() const {
@@ -97,7 +88,7 @@ public:
         this->target_ = target;
     }
 
-    bool find_empty(Position16 & empty_pos) const {
+    bool find_empty(Position & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 char color = this->board_.cells[y * BoardY + x];
@@ -118,53 +109,53 @@ public:
         bool solvable = false;
         size_t depth = 0;
 
-        Position16 empty;
+        Position empty;
         bool found_empty = find_empty(empty);
         if (found_empty) {
-            State first;
-            first.empty = empty;
-            first.last_dir = -1;
-            first.board = this->board_;
-            this->visited_.set(first.board.value());
+            stage_type start;
+            start.empty = empty;
+            start.last_dir = -1;
+            start.board = this->board_;
+            this->visited_.set(start.board.value());
 
-            this->cur_.push_back(first);
+            this->cur_.push_back(start);
 
             bool exit = false;
             while (this->cur_.size()) {
                 for (size_t i = 0; i < this->cur_.size(); i++) {
-                    const State & state = this->cur_[i];
+                    const stage_type & stage = this->cur_[i];
 
-                    int empty_pos = state.empty.value;
+                    int empty_pos = stage.empty.value;
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
                     size_t total_moves = empty_moves.size();
                     for (size_t n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = empty_moves[n].dir;
-                        if (cur_dir == state.last_dir)
+                        if (cur_dir == stage.last_dir)
                             continue;
 
-                        State next_state(state.board);
+                        stage_type next_stage(stage.board);
                         int move_pos = empty_moves[n].pos.value;
-                        std::swap(next_state.board.cells[empty_pos], next_state.board.cells[move_pos]);
-                        size_t board_value = next_state.board.value();
+                        std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
+                        size_t board_value = next_stage.board.value();
                         if (this->visited_.test(board_value))
                             continue;
 
                         this->visited_.set(board_value);
                         
-                        Position16 next_empty(move_pos);
-                        next_state.empty = next_empty;
-                        next_state.last_dir = cur_dir;
-                        next_state.moves = state.moves;
+                        Position next_empty(move_pos);
+                        next_stage.empty = next_empty;
+                        next_stage.last_dir = cur_dir;
+                        next_stage.move_path = stage.move_path;
                         Move next_move;
-                        next_move.pos = state.empty;
+                        next_move.pos = stage.empty;
                         next_move.dir = cur_dir;
-                        next_state.moves.push_back(next_move);
+                        next_stage.move_path.push_back(next_move);
 
-                        this->next_.push_back(next_state);
+                        this->next_.push_back(next_stage);
 
-                        if (next_state.board == this->target_) {
-                            this->moves_ = next_state.moves;
-                            assert((depth + 1) == next_state.moves.size());
+                        if (next_stage.board == this->target_) {
+                            this->move_path_ = next_stage.move_path;
+                            assert((depth + 1) == next_stage.moves.size());
                             solvable = true;
                             exit = true;
                             break;

@@ -55,7 +55,7 @@ private:
     std::vector<stage_type> next_;
 
     std::set<uint128_t> visited_;
-    std::vector<Move> moves_;
+    std::vector<Move> move_path_;
 
     size_t map_used_;
 
@@ -161,8 +161,6 @@ private:
                 }
             }
         }
-
-        //count_board_color_nums(this->board_);
     }
 
     void assert_color(uint8_t color) const {
@@ -178,11 +176,11 @@ public:
     ~MagicBlockSolver() {}
 
     size_t getSteps() const {
-        return this->moves_.size();
+        return this->move_path_.size();
     }
 
-    const std::vector<Move> & getMoves() const {
-        return this->moves_;
+    const std::vector<Move> & getMovePath() const {
+        return this->move_path_;
     }
 
     size_t getMapUsed() const {
@@ -193,7 +191,7 @@ public:
         this->board_ = board;
     }
 
-    bool find_empty(const Board<BoardX, BoardY> & board, Position16 & empty_pos) const {
+    bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 uint8_t cell = board.cells[y * BoardY + x];
@@ -288,7 +286,7 @@ public:
     }
 
     void translateMoves(const std::vector<Move> & moves) {
-        this->moves_ = moves;
+        this->move_path_ = moves;
     }
 
     bool is_satisfy_full(const Board<BoardX, BoardY> & board,
@@ -318,7 +316,7 @@ public:
         bool solvable = false;
         size_t depth = 0;
 
-        Position16 empty;
+        Position empty;
         bool found_empty = find_empty(this->board_, empty);
         if (found_empty) {
             stage_type start;
@@ -351,7 +349,7 @@ public:
 
                         this->visited_.insert(board_value);
                         
-                        Position16 next_empty(move_pos);
+                        Position next_empty(move_pos);
                         next_stage.empty = next_empty;
                         next_stage.last_dir = cur_dir;
                         next_stage.moves = stage.moves;
@@ -363,7 +361,7 @@ public:
                         this->next_.push_back(next_stage);
 
                         if (is_satisfy_full(next_stage.board, this->data_->target)) {
-                            this->moves_ = next_stage.moves;
+                            this->move_path_ = next_stage.moves;
                             assert((depth + 1) == next_stage.moves.size());
                             found = true;
                             break;
@@ -377,7 +375,9 @@ public:
 
                 depth++;
                 printf("depth = %u\n", (uint32_t)depth);
-                printf("cur.size() = %u, next.size() = %u\n", (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
+                printf("cur.size() = %u, next.size() = %u\n",
+                       (uint32_t)(this->cur_.size()),
+                       (uint32_t)(this->next_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
                 std::swap(this->cur_, this->next_);
@@ -761,7 +761,7 @@ public:
         bool solvable = false;
         size_t depth = 0;
 
-        Position16 empty;
+        Position empty;
         bool found_empty = find_empty(this->board_, empty);
         if (found_empty) {
             stage_type start;
@@ -801,11 +801,11 @@ public:
 
                         next_stage.empty.value = (int16_t)move_pos;
                         next_stage.last_dir = cur_dir;
-                        next_stage.moves = stage.moves;
+                        next_stage.move_path = stage.move_path;
                         Move next_move;
                         next_move.pos = stage.empty;
                         next_move.dir = cur_dir;
-                        next_stage.moves.push_back(next_move);
+                        next_stage.move_path.push_back(next_move);
 
                         this->next_.push_back(next_stage);
 
@@ -813,14 +813,14 @@ public:
                         if (sat_mask > 0) {
                             solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
-                                bool reached_end = record_min_openning(depth, sat_mask, next_stage);
-                                if (reached_end) {
+                                bool all_reached = record_min_openning(depth, sat_mask, next_stage);
+                                if (all_reached) {
                                     exit = true;
                                 }
                             }
                             else {
-                                this->moves_ = next_stage.moves;
-                                assert((depth + 1) == next_stage.moves.size());
+                                this->move_path_ = next_stage.move_path;
+                                assert((depth + 1) == next_stage.move_path.size());
                                 exit = true;
                                 break;
                             }
@@ -884,7 +884,7 @@ public:
                 printf("OpenningType = %u\n", (uint32_t)this->data_->s456.openning_type);
                 printf("Index = %u\n", (uint32_t)this->data_->s456.index);
                 printf("next.size() = %u\n", (uint32_t)this->cur_.size());
-                printf("moves.size() = %u\n", (uint32_t)this->moves_.size());
+                printf("moves.size() = %u\n", (uint32_t)this->move_path_.size());
                 printf("\n");
             }
         }
