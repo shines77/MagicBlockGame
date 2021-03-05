@@ -17,6 +17,7 @@
 #include <algorithm>    // For std::swap(), until C++11. std::min()
 #include <utility>      // For std::swap(), since C++11
 
+#include "UInt128.h"
 #include "Color.h"
 #include "Move.h"
 #include "Board.h"
@@ -36,6 +37,8 @@ class MagicBlockSolver
 public:
     static const size_t kMinSearchDepth = 15;
     static const size_t kMaxSearchDepth = 27;
+
+    static const size_t kSearchDepthLimit = 30;
 
 #ifndef NDEBUG
     static const size_t kSlideDepth = 1;
