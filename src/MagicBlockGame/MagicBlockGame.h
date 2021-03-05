@@ -237,8 +237,8 @@ public:
                     for (size_t n = 0; n < totalStage; n++) {
                         this->data_.s456.index = n;
                         if (this->min_steps_ > stage_list[n].move_path.size()) {
-                            this->data_.s456.depth_limit = std::min(35ULL,
-                                this->min_steps_ - stage_list[n].move_path.size());
+                            this->data_.s456.depth_limit = std::min(size_t(35),
+                                size_t(this->min_steps_ - stage_list[n].move_path.size()));
                         }
                         else {
                             continue;
@@ -283,7 +283,7 @@ public:
 
     bool solve_3x3() {
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target);
+        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target);
         bool solvable = slidingPuzzle.solve();
         if (solvable) {
             translateMovePath(slidingPuzzle.getMovePath());

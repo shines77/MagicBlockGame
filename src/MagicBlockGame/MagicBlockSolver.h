@@ -624,7 +624,7 @@ public:
                 this->data_->s123.stage_list[type].push_back(stage);
                 if (this->data_->s123.min_depth[type] != -1) {
                     assert(this->data_->s123.max_depth[type] != -1);
-                    if (depth >= this->data_->s123.max_depth[type]) {
+                    if ((int)depth >= this->data_->s123.max_depth[type]) {
                         reached_mask |= mask;
                     }
                 }
