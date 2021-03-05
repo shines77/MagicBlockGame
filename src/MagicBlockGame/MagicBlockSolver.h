@@ -34,6 +34,17 @@ template <size_t BoardX, size_t BoardY,
 class MagicBlockSolver
 {
 public:
+    static const size_t kMinSearchDepth = 15;
+    static const size_t kMaxSearchDepth = 27;
+
+#ifndef NDEBUG
+    static const size_t kSlideDepth = 1;
+    static const size_t kMaxSlideDepth = 2;
+#else
+    static const size_t kSlideDepth = 6;
+    static const size_t kMaxSlideDepth = 10;
+#endif
+
     static const size_t kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
 
     static const ptrdiff_t startX = (BoardX - TargetX) / 2;
@@ -48,9 +59,6 @@ private:
     Board<TargetX, TargetY> target_;
 
     int partial_colors_[Color::Maximum];
-
-    std::vector<stage_type> cur_;
-    std::vector<stage_type> next_;
 
     std::set<uint128_t> visited_;
     std::vector<Position> move_path_;
@@ -357,10 +365,11 @@ public:
         return result;
     }
 
-    bool verify_board_is_equal(const Board<BoardX, BoardY> & board,
-                               const Board<TargetX, TargetY> & target,
-                               size_t firstTargetX, size_t lastTargetX,
-                               size_t firstTargetY, size_t lastTargetY) {
+    // Check order: up to down
+    bool check_board_is_equal(const Board<BoardX, BoardY> & board,
+                              const Board<TargetX, TargetY> & target,
+                              size_t firstTargetX, size_t lastTargetX,
+                              size_t firstTargetY, size_t lastTargetY) {
 #ifdef ENABLE_DEBUG
         Board<BoardX, BoardY> test_board;
         for (size_t y = firstTargetY; y < lastTargetY; y++) {
@@ -386,10 +395,11 @@ public:
         return true;
     }
 
-    bool reverse_verify_board_is_equal(const Board<BoardX, BoardY> & board,
-                                       const Board<TargetX, TargetY> & target,
-                                       size_t firstTargetX, size_t lastTargetX,
-                                       size_t firstTargetY, size_t lastTargetY) {
+    // Check order: down to up
+    bool reverse_check_board_is_equal(const Board<BoardX, BoardY> & board,
+                                      const Board<TargetX, TargetY> & target,
+                                      size_t firstTargetX, size_t lastTargetX,
+                                      size_t firstTargetY, size_t lastTargetY) {
         for (ptrdiff_t y = ptrdiff_t(lastTargetY - 1); y >= ptrdiff_t(firstTargetX); y--) {
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
@@ -414,7 +424,7 @@ public:
         static const ptrdiff_t LeftTopX = startX;
         static const ptrdiff_t LeftTopY = startY;
 
-        if (verify_board_is_equal(board, target, 0, 2, 0, 1)) {
+        if (check_board_is_equal(board, target, 0, 2, 0, 1)) {
             count_reverse_partial_color_nums(board, 0, LeftTopX + 2, 0, LeftTopY + 1);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -427,7 +437,7 @@ public:
         static const ptrdiff_t RightTopX = startX + TargetX - 1;
         static const ptrdiff_t RightTopY = startY;
 
-        if (verify_board_is_equal(board, target, TargetX - 2, TargetX, 0, 1)) {
+        if (check_board_is_equal(board, target, TargetX - 2, TargetX, 0, 1)) {
             count_reverse_partial_color_nums(board, RightTopX - 1, BoardX, 0, RightTopY + 1);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -440,7 +450,7 @@ public:
         static const ptrdiff_t LeftBottomX = startX;
         static const ptrdiff_t LeftBottomY = startY + TargetY - 1;
 
-        if (verify_board_is_equal(board, target, 0, 2, TargetY - 1, TargetY)) {
+        if (check_board_is_equal(board, target, 0, 2, TargetY - 1, TargetY)) {
             count_reverse_partial_color_nums(board, 0, LeftBottomX + 2, LeftBottomY, BoardY);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -453,7 +463,7 @@ public:
         static const ptrdiff_t RightBottomX = startX + TargetX - 1;
         static const ptrdiff_t RightBottomY = startY + TargetY - 1;
 
-        if (verify_board_is_equal(board, target, TargetX - 2, TargetX, TargetY - 1, TargetY)) {
+        if (check_board_is_equal(board, target, TargetX - 2, TargetX, TargetY - 1, TargetY)) {
             count_reverse_partial_color_nums(board, RightBottomX - 1, BoardX, RightBottomY, BoardY);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -472,7 +482,7 @@ public:
         // Top partial
         static const ptrdiff_t TopY = startY;
 
-        if (verify_board_is_equal(board, target, 0, TargetX, 0, 1)) {
+        if (check_board_is_equal(board, target, 0, TargetX, 0, 1)) {
             count_reverse_partial_color_nums(board, 0, BoardX, 0, TopY + 1);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -484,7 +494,7 @@ public:
         // Left partial
         static const ptrdiff_t LeftX = startX;
 
-        if (verify_board_is_equal(board, target, 0, 1, 0, TargetY)) {
+        if (check_board_is_equal(board, target, 0, 1, 0, TargetY)) {
             count_reverse_partial_color_nums(board, 0, LeftX + 1, 0, BoardY);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -496,7 +506,7 @@ public:
         // Right partial
         static const ptrdiff_t RightX = startX + TargetX - 1;
 
-        if (verify_board_is_equal(board, target, TargetX - 1, TargetX, 0, TargetY)) {
+        if (check_board_is_equal(board, target, TargetX - 1, TargetX, 0, TargetY)) {
             count_reverse_partial_color_nums(board, RightX, BoardX, 0, BoardY);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -508,7 +518,7 @@ public:
         // Bottom partial
         static const ptrdiff_t BottomY = startY + TargetY - 1;
 
-        if (verify_board_is_equal(board, target, 0, TargetX, TargetY - 1, TargetY)) {
+        if (check_board_is_equal(board, target, 0, TargetX, TargetY - 1, TargetY)) {
             count_reverse_partial_color_nums(board, 0, BoardX, BottomY, BoardY);
             if (this->partial_colors_[Color::Empty] == 0) {
                 bool is_valid = check_partial_color_nums();
@@ -520,15 +530,15 @@ public:
         return result;
     }
 
-    size_t _is_satisfy_step_456(const Board<BoardX, BoardY> & board,
-                                const Board<TargetX, TargetY> & target) {
+    size_t is_satisfy_step_456(const Board<BoardX, BoardY> & board,
+                               const Board<TargetX, TargetY> & target) {
         size_t result = 0;
 
         if (this->data_->s456.openning_type == 0) {
             // Top partial
             static const ptrdiff_t TopY = startY;
 
-            if (verify_board_is_equal(board, target, 0, TargetX, 0, 2)) {
+            if (check_board_is_equal(board, target, 0, TargetX, 0, 2)) {
                 count_partial_color_nums(board, 0, BoardX, TopY + 2, BoardY);
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
@@ -539,7 +549,7 @@ public:
             // Left partial
             static const ptrdiff_t LeftX = startX;
 
-            if (verify_board_is_equal(board, target, 0, 2, 0, TargetY)) {
+            if (check_board_is_equal(board, target, 0, 2, 0, TargetY)) {
                 count_partial_color_nums(board, LeftX + 2, BoardX, 0, BoardY);
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
@@ -550,7 +560,7 @@ public:
             // Right partial
             static const ptrdiff_t RightX = startX + TargetX - 1;
 
-            if (verify_board_is_equal(board, target, TargetX - 2, TargetX, 0, TargetY)) {
+            if (check_board_is_equal(board, target, TargetX - 2, TargetX, 0, TargetY)) {
                 count_partial_color_nums(board, 0, startX + 1, 0, BoardY);
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
@@ -561,7 +571,7 @@ public:
             // Bottom partial
             static const ptrdiff_t BottomY = startY + TargetY - 1;
 
-            if (verify_board_is_equal(board, target, 0, TargetX, TargetY - 2, TargetY)) {
+            if (check_board_is_equal(board, target, 0, TargetX, TargetY - 2, TargetY)) {
                 count_partial_color_nums(board, 0, BoardX, 0, startY + 1);
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
@@ -575,11 +585,12 @@ public:
         return result;
     }
 
-    size_t is_satisfy_step_456(const Board<BoardX, BoardY> & board,
-                               const Board<TargetX, TargetY> & target) {
+    size_t is_satisfy_step_456_789(const Board<BoardX, BoardY> & board,
+                                   const Board<TargetX, TargetY> & target) {
         size_t result = 0;
 
-        if (reverse_verify_board_is_equal(board, target, 0, TargetX, 0, TargetY)) {
+        // Check order: down to up
+        if (reverse_check_board_is_equal(board, target, 0, TargetX, 0, TargetY)) {
             result |= 1;
         }
 
@@ -598,7 +609,7 @@ public:
             return is_satisfy_step_123(board, target);
         }
         else if (Step == 456) {
-            return is_satisfy_step_456(board, target);
+            return is_satisfy_step_456_789(board, target);
         }
         else {
             return (size_t)is_satisfy_full(board, target);
@@ -608,13 +619,6 @@ public:
     }
 
     bool record_min_openning(size_t depth, size_t sat_mask, const stage_type & stage) {
-#ifndef NDEBUG
-        static const size_t kSlideDepth = 1;
-        static const size_t kMaxSlideDepth = 2;
-#else
-        static const size_t kSlideDepth = 6;
-        static const size_t kMaxSlideDepth = 10;
-#endif
         size_t reached_mask = 0;
         size_t mask = 1;
         size_t type = 0;
@@ -631,7 +635,7 @@ public:
                 else {
                     if (this->data_->s123.depth_limit == size_t(-1)) {
                         this->data_->s123.depth_limit = std::min(
-                            std::max(depth + kMaxSlideDepth, size_t(15)), size_t(27));
+                            std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
                     }
                     this->data_->s123.min_depth[type] = (int)depth;
                     this->data_->s123.max_depth[type] = (int)(depth + kSlideDepth);
@@ -664,12 +668,15 @@ public:
             start.board = this->data_->board;
             this->visited_.insert(start.board.value128());
 
-            this->cur_.push_back(start);
+            std::vector<stage_type> cur_stages;
+            std::vector<stage_type> next_stages;
+
+            cur_stages.push_back(start);
 
             bool exit = false;
-            while (this->cur_.size()) {
-                for (size_t i = 0; i < this->cur_.size(); i++) {
-                    const stage_type & stage = this->cur_[i];
+            while (cur_stages.size()) {    
+                for (size_t i = 0; i < cur_stages.size(); i++) {
+                    const stage_type & stage = cur_stages[i];
 
                     int empty_pos = stage.empty.value;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
@@ -694,9 +701,9 @@ public:
                         Position next_move(stage.empty);
                         next_stage.move_path.push_back(next_move);
 
-                        this->next_.push_back(next_stage);
+                        next_stages.push_back(next_stage);
 
-                        if (is_satisfy_full(next_stage.board, this->data_->target)) {
+                        if (is_satisfy_full(next_stage.board, this->target_)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
@@ -713,12 +720,12 @@ public:
                 depth++;
                 printf("depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n",
-                       (uint32_t)(this->cur_.size()),
-                       (uint32_t)(this->next_.size()));
+                       (uint32_t)(cur_stages.size()),
+                       (uint32_t)(next_stages.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
-                std::swap(this->cur_, this->next_);
-                this->next_.clear();
+                std::swap(cur_stages, next_stages);
+                next_stages.clear();
 
                 if (exit) {
                     break;
@@ -751,12 +758,15 @@ public:
             start.board = this->board_;
             this->visited_.insert(start.board.value128());
 
-            this->cur_.push_back(start);
+            std::vector<stage_type> cur_stages;
+            std::vector<stage_type> next_stages;
+
+            cur_stages.push_back(start);
 
             bool exit = false;
-            while (this->cur_.size()) {
-                for (size_t i = 0; i < this->cur_.size(); i++) {
-                    const stage_type & stage = this->cur_[i];
+            while (cur_stages.size()) {
+                for (size_t i = 0; i < cur_stages.size(); i++) {
+                    const stage_type & stage = cur_stages[i];
 
                     int empty_pos = stage.empty.value;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
@@ -768,7 +778,7 @@ public:
 
                         int16_t move_pos = empty_moves[n].pos.value;
                         if (Step == 456) {
-                            if (this->data_->s456.locked[move_pos] > 0)
+                            if (this->data_->s456.locked[move_pos] != 0)
                                 continue;
                         }
 
@@ -786,7 +796,7 @@ public:
                         Position next_move(stage.empty);
                         next_stage.move_path.push_back(next_move);
 
-                        this->next_.push_back(next_stage);
+                        next_stages.push_back(next_stage);
 
                         sat_mask = is_satisfy(next_stage.board, this->target_);
                         if (sat_mask > 0) {
@@ -814,17 +824,17 @@ public:
 
                 depth++;
                 if (Step == 456) {
-                    printf(">> %u\n", (uint32_t)depth);
+                    //printf(">> %u\n", (uint32_t)depth);
                 }
                 else {
                     printf("depth = %u\n", (uint32_t)depth);
                     printf("cur.size() = %u, next.size() = %u\n",
-                           (uint32_t)(this->cur_.size()), (uint32_t)(this->next_.size()));
+                           (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
                     printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
                 }
 
-                std::swap(this->cur_, this->next_);
-                this->next_.clear();
+                std::swap(cur_stages, next_stages);
+                next_stages.clear();
 
                 if (exit) {
                     break;
@@ -862,8 +872,8 @@ public:
             else if (Step == 456) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
                 printf("OpenningType = %u\n", (uint32_t)this->data_->s456.openning_type);
-                printf("Index = %u\n", (uint32_t)this->data_->s456.index);
-                printf("next.size() = %u\n", (uint32_t)this->cur_.size());
+                printf("Index = %u\n", (uint32_t)(this->data_->s456.index + 1));
+                printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                 printf("moves.size() = %u\n", (uint32_t)this->move_path_.size());
                 printf("\n");
             }

@@ -27,9 +27,6 @@ private:
     Board<BoardX, BoardY> board_;
     Board<BoardX, BoardY> target_;
 
-    std::vector<stage_type> cur_;
-    std::vector<stage_type> next_;
-
     jstd::BitSet<kMapBits> visited_;
 
     std::vector<Move> empty_moves_[BoardX * BoardY];
@@ -118,12 +115,15 @@ public:
             start.board = this->board_;
             this->visited_.set(start.board.value());
 
-            this->cur_.push_back(start);
+            std::vector<stage_type> cur_stages;
+            std::vector<stage_type> next_stages;
+
+            cur_stages.push_back(start);
 
             bool exit = false;
-            while (this->cur_.size()) {
-                for (size_t i = 0; i < this->cur_.size(); i++) {
-                    const stage_type & stage = this->cur_[i];
+            while (cur_stages.size()) {
+                for (size_t i = 0; i < cur_stages.size(); i++) {
+                    const stage_type & stage = cur_stages[i];
 
                     int empty_pos = stage.empty.value;
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
@@ -133,8 +133,8 @@ public:
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        stage_type next_stage(stage.board);
                         int16_t move_pos = empty_moves[n].pos.value;
+                        stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_t board_value = next_stage.board.value();
                         if (this->visited_.test(board_value))
@@ -148,7 +148,7 @@ public:
                         Position next_move(stage.empty);
                         next_stage.move_path.push_back(next_move);
 
-                        this->next_.push_back(next_stage);
+                        next_stages.push_back(next_stage);
 
                         if (next_stage.board == this->target_) {
                             this->move_path_ = next_stage.move_path;
@@ -165,8 +165,8 @@ public:
                 }
 
                 depth++;
-                std::swap(this->cur_, this->next_);
-                this->next_.clear();
+                std::swap(cur_stages, next_stages);
+                next_stages.clear();
 
                 if (exit) {
                     break;
