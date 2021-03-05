@@ -28,10 +28,8 @@ void test_sliding_puzzle()
 
     if (solvable) {
         printf("Has answer!\n\n");
-        printf("MinSteps: %d\n\n", (int)game.getSteps());
+        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
-        game.getSteps();
-        game.getMovePath();
     }
     else {
         printf("No answer!\n\n");
@@ -59,10 +57,8 @@ void test_magic_block_game()
 
     if (solvable) {
         printf("Has answer!\n\n");
-        printf("MinSteps: %d\n\n", (int)game.getSteps());
+        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
-        game.getSteps();
-        game.getMovePath();
     }
     else {
         printf("No answer!\n\n");

@@ -190,7 +190,7 @@ public:
 
     ~MagicBlockSolver() {}
 
-    size_t getSteps() const {
+    size_t getMinSteps() const {
         return this->move_path_.size();
     }
 
@@ -779,7 +779,7 @@ public:
                 for (size_t i = 0; i < cur_stages.size(); i++) {
                     const stage_type & stage = cur_stages[i];
 
-                    int empty_pos = stage.empty.value;
+                    int16_t empty_pos = stage.empty.value;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
                     size_t total_moves = empty_moves.size();
                     for (size_t n = 0; n < total_moves; n++) {

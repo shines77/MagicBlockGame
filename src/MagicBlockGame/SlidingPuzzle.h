@@ -46,7 +46,7 @@ private:
                     if (board_y < 0 || board_y >= (int)BoardY)
                         continue;
                     Move move;
-                    move.pos = Position(board_y * BoardY + board_x);
+                    move.pos = Position(board_y * (int)BoardY + board_x);
                     move.dir = (uint8_t)dir;
                     moves.push_back(move);
                 }
@@ -61,7 +61,7 @@ public:
     }
     ~SlidingPuzzle() {}
 
-    size_t getSteps() const {
+    size_t getMinSteps() const {
         return this->move_path_.size();
     }
 
