@@ -47,9 +47,7 @@ private:
     Board<BoardX, BoardY> board_;
     Board<TargetX, TargetY> target_;
 
-    int board_colors_[Color::Maximum];
     int partial_colors_[Color::Maximum];
-    int target_colors_[Color::Maximum];
 
     std::vector<stage_type> cur_;
     std::vector<stage_type> next_;
@@ -59,6 +57,10 @@ private:
 
     size_t map_used_;
 
+    void assert_color(uint8_t color) const {
+        assert(color >= Color::Empty && color < Color::Last);
+    }
+
     void count_target_color_nums(const Board<TargetX, TargetY> & target) {
         for (size_t clr = Color::Empty; clr < Color::Maximum; clr++) {
             this->data_->target_colors[clr] = 0;
@@ -66,7 +68,7 @@ private:
 
         for (size_t y = 0; y < TargetY; y++) {
             for (size_t x = 0; x < TargetX; x++) {
-                char cell = target.cells[y * TargetY + x];
+                uint8_t cell = target.cells[y * TargetY + x];
                 assert_color(cell);
                 if (cell >= Color::Empty && cell < Color::Maximum) {
                     this->data_->target_colors[cell]++;
@@ -84,7 +86,7 @@ private:
 
         for (size_t y = firstTargetY; y < lastTargetY; y++) {
             for (size_t x = firstTargetX; x < lastTargetX; x++) {
-                char cell = target.cells[y * TargetY + x];
+                uint8_t cell = target.cells[y * TargetY + x];
                 assert_color(cell);
                 if (cell >= Color::Empty && cell < Color::Maximum) {
                     this->data_->target_colors[cell]++;
@@ -163,10 +165,6 @@ private:
         }
     }
 
-    void assert_color(uint8_t color) const {
-        assert(color >= Color::Empty && color < Color::Last);
-    }
-
 public:
     MagicBlockSolver(SharedData<BoardX, BoardY, TargetX, TargetY> * data)
         : data_(data), map_used_(0) {
@@ -202,21 +200,6 @@ public:
             }
         }
         return false;
-    }
-
-    void count_board_color_nums(const Board<BoardX, BoardY> & board) {
-        for (size_t clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->board_colors_[clr] = 0;
-        }
-
-        for (size_t y = 0; y < BoardY; y++) {
-            for (size_t x = 0; x < BoardX; x++) {
-                char cell = board.cells[y * BoardY + x];
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->board_colors_[cell]++;
-                }
-            }
-        }
     }
 
     void count_reverse_partial_color_nums(const Board<BoardX, BoardY> & board,
@@ -646,8 +629,9 @@ public:
                     }
                 }
                 else {
-                    if (this->data_->s123.depth_limit == -1) {
-                        this->data_->s123.depth_limit = std::min(std::max(depth + kMaxSlideDepth, 15ULL), 27ULL);
+                    if (this->data_->s123.depth_limit == size_t(-1)) {
+                        this->data_->s123.depth_limit = std::min(
+                            std::max(depth + kMaxSlideDepth, size_t(15)), size_t(27));
                     }
                     this->data_->s123.min_depth[type] = (int)depth;
                     this->data_->s123.max_depth[type] = (int)(depth + kSlideDepth);
@@ -847,7 +831,8 @@ public:
                 }
 
                 if (Step == 1 || Step == 12 || Step == 123) {
-                    if (this->data_->s123.depth_limit != -1 && depth >= this->data_->s123.depth_limit) {
+                    if (this->data_->s123.depth_limit != size_t(-1) &&
+                        depth >= this->data_->s123.depth_limit) {
                         exit = true;
                         break;
                     }

@@ -94,7 +94,7 @@ public:
 
     int readInput(const char * filename) {
         int result = -1;
-        int line_no = 0;
+        size_t line_no = 0;
         std::ifstream ifs;
         try {
             ifs.open(filename, std::ios::in);
@@ -106,7 +106,7 @@ public:
                     ifs.getline(line, 256);
                     if (line_no >= 0 && line_no < TargetY) {
                         for (size_t x = 0; x < TargetX; x++) {
-                            char color = Color::valToColor(line[x]);
+                            uint8_t color = Color::valToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
                                 this->data_.target.cells[line_no * TargetY + x] = color;
                             }
@@ -119,7 +119,7 @@ public:
                     else if (line_no >= (TargetY + 1) && line_no < (TargetY + 1 + BoardY)) {
                         size_t boardY = line_no - (TargetY + 1);
                         for (size_t x = 0; x < BoardX; x++) {
-                            char color = Color::valToColor(line[x]);
+                            uint8_t color = Color::valToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
                                 this->data_.board.cells[boardY * BoardY + x] = color;
                             }
@@ -165,7 +165,7 @@ public:
 
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                char cell = this->data_.board.cells[y * BoardY + x];
+                uint8_t cell = this->data_.board.cells[y * BoardY + x];
                 if (cell >= Color::Empty && cell < Color::Maximum) {
                     this->data_.board_colors[cell]++;
                 }
@@ -174,7 +174,7 @@ public:
 
         for (size_t y = 0; y < TargetY; y++) {
             for (size_t x = 0; x < TargetX; x++) {
-                char cell = this->data_.target.cells[y * TargetY + x];
+                uint8_t cell = this->data_.target.cells[y * TargetY + x];
                 if (cell >= Color::Empty && cell < Color::Maximum) {
                     this->data_.target_colors[cell]++;
                 }
@@ -201,9 +201,9 @@ public:
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
             for (size_t x = 0; x < TargetX; x++) {
-                uint8_t target = this->data_.target.cells[targetBaseY + x];
-                uint8_t disc = this->data_.board.cells[baseY + (startX + x)];
-                if (disc != target) {
+                uint8_t target_cell = this->data_.target.cells[targetBaseY + x];
+                uint8_t cell = this->data_.board.cells[baseY + (startX + x)];
+                if (cell != target_cell) {
                     return false;
                 }
             }
