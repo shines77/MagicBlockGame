@@ -271,6 +271,7 @@ public:
                         MoveInfo move_info;
                         move_info.from_pos = from_pos;
                         move_info.move_to_pos = move_to_pos;
+                        move_info.color = board.cells[from_pos];
                         move_info.dir = last_dir;
                         this->answer_.push_back(move_info);
 
@@ -309,6 +310,7 @@ public:
                                 MoveInfo move_info;
                                 move_info.from_pos = from_pos;
                                 move_info.move_to_pos = move_to_pos;
+                                move_info.color = board.cells[move_to_pos];
                                 move_info.dir = cur_dir;
                                 this->answer_.push_back(move_info);
                                 foundLastStep = true;
@@ -346,9 +348,11 @@ public:
         for (auto iter : answer) {
             size_t from_pos    = iter.from_pos.value;
             size_t move_to_pos = iter.move_to_pos.value;
+            size_t color       = iter.color;
             size_t dir         = iter.dir;
-            printf("    [%2u]: from: (%u, %u), to: (%u, %u), dir: %-5s (%u)\n",
+            printf("    [%2u]: %s - from: (%u, %u), to: (%u, %u), dir: %-5s (%u)\n",
                    (uint32_t)(index + 1),
+                   Color::toShortString(color),
                    (uint32_t)(from_pos % BoardY), (uint32_t)(from_pos / BoardY),
                    (uint32_t)(move_to_pos % BoardY), (uint32_t)(move_to_pos / BoardY),
                    Direction::toString(dir),

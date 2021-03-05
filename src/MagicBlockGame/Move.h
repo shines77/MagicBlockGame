@@ -60,8 +60,8 @@ struct Move {
 struct MoveInfo {
     Position    from_pos;
     Position    move_to_pos;
+    uint8_t     color;
     uint8_t     dir;
-    uint8_t     reserve;
 };
 
 struct Offset {
