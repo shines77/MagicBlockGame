@@ -867,7 +867,7 @@ public:
             }
 
             this->map_used_ = visited_.size();
-            printf("\n");
+            //printf("\n");
 
             if (Step == 1 || Step == 12 || Step == 123) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
@@ -885,7 +885,9 @@ public:
                 printf("OpenningType = %u\n", (uint32_t)this->data_->s456.openning_type);
                 printf("Index = %u\n", (uint32_t)(this->data_->s456.index + 1));
                 printf("next.size() = %u\n", (uint32_t)cur_stages.size());
-                printf("moves.size() = %u\n", (uint32_t)this->move_path_.size());
+                if (solvable) {
+                    printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                }
                 printf("\n");
             }
         }
