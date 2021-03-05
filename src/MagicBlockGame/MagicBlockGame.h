@@ -352,7 +352,7 @@ public:
             size_t move_to_pos = iter.move_to_pos.value;
             size_t color       = iter.color;
             size_t dir         = iter.dir;
-            printf("    [%2u]: from: (%u, %u), to: (%u, %u), [%s] -> dir: %-5s (%u)\n",
+            printf("    [%2u]: from: (%u, %u) -> to: (%u, %u), [%s], dir: %-5s (%u)\n",
                    (uint32_t)(index + 1),
                    (uint32_t)(from_pos % BoardY), (uint32_t)(from_pos / BoardY),
                    (uint32_t)(move_to_pos % BoardY), (uint32_t)(move_to_pos / BoardY),
