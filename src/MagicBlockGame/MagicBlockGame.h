@@ -298,11 +298,13 @@ public:
                         const std::vector<Move> & empty_moves = this->data_.empty_moves[move_to_pos];
                         size_t total_moves = empty_moves.size();
                         for (size_t n = 0; n < total_moves; n++) {
-                            uint8_t cur_dir = empty_moves[n].dir;
+                            uint8_t dir = empty_moves[n].dir;
+                            from_pos = empty_moves[n].pos.value;
+                            uint8_t cur_dir = Direction::template getDir<BoardX, BoardY>(from_pos, move_to_pos);
+                            assert(dir != cur_dir);
                             if (cur_dir == last_dir)
                                 continue;
 
-                            from_pos = empty_moves[n].pos.value;
                             std::swap(board.cells[from_pos], board.cells[move_to_pos]);
 
                             if (check_board_is_equal(board, this->data_.target,
@@ -350,11 +352,11 @@ public:
             size_t move_to_pos = iter.move_to_pos.value;
             size_t color       = iter.color;
             size_t dir         = iter.dir;
-            printf("    [%2u]: %s - from: (%u, %u), to: (%u, %u), dir: %-5s (%u)\n",
+            printf("    [%2u]: from: (%u, %u), to: (%u, %u), [%s] -> dir: %-5s (%u)\n",
                    (uint32_t)(index + 1),
-                   Color::toShortString(color),
                    (uint32_t)(from_pos % BoardY), (uint32_t)(from_pos / BoardY),
                    (uint32_t)(move_to_pos % BoardY), (uint32_t)(move_to_pos / BoardY),
+                   Color::toShortString(color),
                    Direction::toString(dir),
                    (uint32_t)dir);
             index++;
