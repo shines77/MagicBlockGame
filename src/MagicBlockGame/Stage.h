@@ -17,7 +17,7 @@ struct Stage {
     Position    empty;
     uint8_t     last_dir, reserve;
     Board<BoardX, BoardY> board;
-    std::vector<Move> move_path;
+    std::vector<Position> move_path;
 
     Stage() {}
     Stage(const Board<BoardX, BoardY> & srcBoard) {

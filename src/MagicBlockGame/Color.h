@@ -8,15 +8,15 @@ namespace PuzzleGame {
 struct Color {
     enum {
         Empty,
-        Red,
-        First = Red,
+        First,
+        Red = First,
         Green,
         Blue,
         White,
         Orange,
         Yellow,
-        Last = Yellow,
-        Unknown,
+        Last,
+        Unknown = Last,
         Maximum
     };
 

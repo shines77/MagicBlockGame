@@ -33,7 +33,7 @@ private:
     jstd::BitSet<kMapBits> visited_;
 
     std::vector<Move> empty_moves_[BoardX * BoardY];
-    std::vector<Move> move_path_;
+    std::vector<Position> move_path_;
 
     size_t map_used_;
 
@@ -68,7 +68,7 @@ public:
         return this->move_path_.size();
     }
 
-    const std::vector<Move> & getMovePath() const {
+    const std::vector<Position> & getMovePath() const {
         return this->move_path_;
     }
 
@@ -134,7 +134,7 @@ public:
                             continue;
 
                         stage_type next_stage(stage.board);
-                        int move_pos = empty_moves[n].pos.value;
+                        int16_t move_pos = empty_moves[n].pos.value;
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_t board_value = next_stage.board.value();
                         if (this->visited_.test(board_value))
@@ -142,20 +142,17 @@ public:
 
                         this->visited_.set(board_value);
                         
-                        Position next_empty(move_pos);
-                        next_stage.empty = next_empty;
+                        next_stage.empty.value = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.move_path = stage.move_path;
-                        Move next_move;
-                        next_move.pos = stage.empty;
-                        next_move.dir = cur_dir;
+                        Position next_move(stage.empty);
                         next_stage.move_path.push_back(next_move);
 
                         this->next_.push_back(next_stage);
 
                         if (next_stage.board == this->target_) {
                             this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.moves.size());
+                            assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
                             exit = true;
                             break;

@@ -8,10 +8,10 @@ namespace PuzzleGame {
 struct Direction {
     enum {
         First,
-        Up = First,
-        Right,
-        Down,
+        Down = First,
         Left,
+        Up,
+        Right,
         Last
     };
 };
@@ -23,9 +23,9 @@ struct Offset {
     
 static const Offset Dir_Offset[Direction::Last] = {
     {  0,  1 },
-    {  1,  0 },
+    { -1,  0 },
     {  0, -1 },
-    { -1,  0 }
+    {  1,  0 }
 };
 
 #pragma pack(push, 1)
@@ -36,6 +36,10 @@ struct Position8 {
 
     Position8() : x(0), y(0) {}
     Position8(int _x, int _y) : x(_x), y(_y) {}
+    Position8(const Position8 & src) {
+        this->x = src.x;
+        this->y = src.y;
+    }
 };
 
 struct Position {
@@ -43,6 +47,9 @@ struct Position {
 
     Position() : value(0) {}
     Position(int _value) : value(_value) {}
+    Position(const Position & src) {
+        this->value = src.value;
+    }
 };
 
 struct Move {

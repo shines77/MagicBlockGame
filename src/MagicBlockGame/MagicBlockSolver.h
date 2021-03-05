@@ -55,7 +55,7 @@ private:
     std::vector<stage_type> next_;
 
     std::set<uint128_t> visited_;
-    std::vector<Move> move_path_;
+    std::vector<Position> move_path_;
 
     size_t map_used_;
 
@@ -164,7 +164,7 @@ private:
     }
 
     void assert_color(uint8_t color) const {
-        assert(color >= Color::Empty && color <= Color::Last);
+        assert(color >= Color::Empty && color < Color::Last);
     }
 
 public:
@@ -179,7 +179,7 @@ public:
         return this->move_path_.size();
     }
 
-    const std::vector<Move> & getMovePath() const {
+    const std::vector<Position> & getMovePath() const {
         return this->move_path_;
     }
 
@@ -232,7 +232,7 @@ public:
         }
 #endif
         this->partial_colors_[Color::Empty] = 0;
-        for (size_t clr = Color::First; clr <= Color::Last; clr++) {
+        for (size_t clr = Color::First; clr < Color::Last; clr++) {
             this->partial_colors_[clr] = kSingelColorNums;
         }
 
@@ -241,7 +241,7 @@ public:
             for (size_t x = firstX; x < lastX; x++) {
                 uint8_t cell = board.cells[baseY + x];
                 assert_color(cell);
-                if (cell >= Color::Empty && cell <= Color::Last) {
+                if (cell >= Color::Empty && cell < Color::Last) {
                     this->partial_colors_[cell]--;
                 }
             }
@@ -251,7 +251,7 @@ public:
     void count_partial_color_nums(const Board<BoardX, BoardY> & board,
                                   size_t firstX, size_t lastX,
                                   size_t firstY, size_t lastY) {
-        for (size_t clr = Color::Empty; clr <= Color::Last; clr++) {
+        for (size_t clr = Color::Empty; clr < Color::Last; clr++) {
             this->partial_colors_[clr] = 0;
         }
 
@@ -260,7 +260,7 @@ public:
             for (size_t x = firstX; x < lastX; x++) {
                 uint8_t cell = board.cells[baseY + x];
                 assert_color(cell);
-                if (cell >= Color::Empty && cell <= Color::Last) {
+                if (cell >= Color::Empty && cell < Color::Last) {
                     this->partial_colors_[cell]++;
                 }
             }
@@ -269,14 +269,14 @@ public:
 
     bool check_partial_color_nums() const {
         if (Step == 456) {
-            for (size_t clr = Color::Empty; clr <= Color::Last; clr++) {
+            for (size_t clr = Color::Empty; clr < Color::Last; clr++) {
                 if (this->partial_colors_[clr] < this->data_->target_colors[clr]) {
                     return false;
                 }
             }
         }
         else {
-            for (size_t clr = Color::First; clr <= Color::Last; clr++) {
+            for (size_t clr = Color::First; clr < Color::Last; clr++) {
                 if (this->partial_colors_[clr] < this->data_->target_colors[clr]) {
                     return false;
                 }
@@ -306,95 +306,6 @@ public:
         }
 
         return true;
-    }
-
-    bool solve_full() {
-        if (is_satisfy_full(this->board_, this->target_)) {
-            return true;
-        }
-
-        bool solvable = false;
-        size_t depth = 0;
-
-        Position empty;
-        bool found_empty = find_empty(this->board_, empty);
-        if (found_empty) {
-            stage_type start;
-            start.empty = empty;
-            start.last_dir = -1;
-            start.board = this->data_->board;
-            this->visited_.insert(start.board.value128());
-
-            this->cur_.push_back(start);
-
-            bool found = false;
-            while (this->cur_.size()) {
-                for (size_t i = 0; i < this->cur_.size(); i++) {
-                    const stage_type & stage = this->cur_[i];
-
-                    int empty_pos = stage.empty.value;
-                    const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_t total_moves = empty_moves.size();
-                    for (size_t n = 0; n < total_moves; n++) {
-                        uint8_t cur_dir = empty_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
-                            continue;
-
-                        stage_type next_stage(stage.board);
-                        int move_pos = empty_moves[n].pos.value;
-                        std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        uint128_t board_value = next_stage.board.value128();
-                        if (this->visited_.count(board_value) > 0)
-                            continue;
-
-                        this->visited_.insert(board_value);
-                        
-                        Position next_empty(move_pos);
-                        next_stage.empty = next_empty;
-                        next_stage.last_dir = cur_dir;
-                        next_stage.moves = stage.moves;
-                        Move next_move;
-                        next_move.pos = stage.empty;
-                        next_move.dir = cur_dir;
-                        next_stage.moves.push_back(next_move);
-
-                        this->next_.push_back(next_stage);
-
-                        if (is_satisfy_full(next_stage.board, this->data_->target)) {
-                            this->move_path_ = next_stage.moves;
-                            assert((depth + 1) == next_stage.moves.size());
-                            found = true;
-                            break;
-                        }  
-                    }
-
-                    if (found) {
-                        break;
-                    }
-                }
-
-                depth++;
-                printf("depth = %u\n", (uint32_t)depth);
-                printf("cur.size() = %u, next.size() = %u\n",
-                       (uint32_t)(this->cur_.size()),
-                       (uint32_t)(this->next_.size()));
-                printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
-
-                std::swap(this->cur_, this->next_);
-                this->next_.clear();
-
-                if (found) {
-                    break;
-                }
-            }
-
-            if (found) {
-                solvable = true;
-                this->map_used_ = visited_.size();
-            }
-        }
-
-        return solvable;
     }
 
     size_t is_satisfy_step_1(const Board<BoardX, BoardY> & board,
@@ -692,6 +603,27 @@ public:
         return result;
     }
 
+    size_t is_satisfy(const Board<BoardX, BoardY> & board,
+                      const Board<TargetX, TargetY> & target) {
+        if (Step == 1) {
+            return is_satisfy_step_1(board, target);
+        }
+        if (Step == 12) {
+            return is_satisfy_step_12(board, target);
+        }
+        else if (Step == 123) {
+            return is_satisfy_step_123(board, target);
+        }
+        else if (Step == 456) {
+            return is_satisfy_step_456(board, target);
+        }
+        else {
+            return (size_t)is_satisfy_full(board, target);
+        }
+
+        return 0;
+    }
+
     bool record_min_openning(size_t depth, size_t sat_mask, const stage_type & stage) {
 #ifndef NDEBUG
         static const size_t kSlideDepth = 1;
@@ -731,25 +663,90 @@ public:
         return ((reached_mask & 0x0F) == 0x0F);
     }
 
-    size_t is_satisfy(const Board<BoardX, BoardY> & board,
-                      const Board<TargetX, TargetY> & target) {
-        if (Step == 1) {
-            return is_satisfy_step_1(board, target);
-        }
-        if (Step == 12) {
-            return is_satisfy_step_12(board, target);
-        }
-        else if (Step == 123) {
-            return is_satisfy_step_123(board, target);
-        }
-        else if (Step == 456) {
-            return is_satisfy_step_456(board, target);
-        }
-        else {
-            return (size_t)is_satisfy_full(board, target);
+    bool solve_full() {
+        if (is_satisfy_full(this->board_, this->target_)) {
+            return true;
         }
 
-        return 0;
+        bool solvable = false;
+        size_t depth = 0;
+
+        Position empty;
+        bool found_empty = find_empty(this->board_, empty);
+        if (found_empty) {
+            stage_type start;
+            start.empty = empty;
+            start.last_dir = -1;
+            start.board = this->data_->board;
+            this->visited_.insert(start.board.value128());
+
+            this->cur_.push_back(start);
+
+            bool exit = false;
+            while (this->cur_.size()) {
+                for (size_t i = 0; i < this->cur_.size(); i++) {
+                    const stage_type & stage = this->cur_[i];
+
+                    int empty_pos = stage.empty.value;
+                    const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
+                    size_t total_moves = empty_moves.size();
+                    for (size_t n = 0; n < total_moves; n++) {
+                        uint8_t cur_dir = empty_moves[n].dir;
+                        if (cur_dir == stage.last_dir)
+                            continue;
+
+                        stage_type next_stage(stage.board);
+                        int16_t move_pos = empty_moves[n].pos.value;
+                        std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
+                        uint128_t board_value = next_stage.board.value128();
+                        if (this->visited_.count(board_value) > 0)
+                            continue;
+
+                        this->visited_.insert(board_value);
+
+                        next_stage.empty = move_pos;
+                        next_stage.last_dir = cur_dir;
+                        next_stage.move_path = stage.move_path;
+                        Position next_move(stage.empty);
+                        next_stage.move_path.push_back(next_move);
+
+                        this->next_.push_back(next_stage);
+
+                        if (is_satisfy_full(next_stage.board, this->data_->target)) {
+                            this->move_path_ = next_stage.move_path;
+                            assert((depth + 1) == next_stage.move_path.size());
+                            solvable = true;
+                            exit = true;
+                            break;
+                        }  
+                    }
+
+                    if (exit) {
+                        break;
+                    }
+                }
+
+                depth++;
+                printf("depth = %u\n", (uint32_t)depth);
+                printf("cur.size() = %u, next.size() = %u\n",
+                       (uint32_t)(this->cur_.size()),
+                       (uint32_t)(this->next_.size()));
+                printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
+
+                std::swap(this->cur_, this->next_);
+                this->next_.clear();
+
+                if (exit) {
+                    break;
+                }
+            }
+
+            if (solvable) {
+                this->map_used_ = visited_.size();
+            }
+        }
+
+        return solvable;
     }
 
     bool solve() {
@@ -785,7 +782,7 @@ public:
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        int move_pos = empty_moves[n].pos.value;
+                        int16_t move_pos = empty_moves[n].pos.value;
                         if (Step == 456) {
                             if (this->data_->s456.locked[move_pos] > 0)
                                 continue;
@@ -799,12 +796,10 @@ public:
 
                         this->visited_.insert(board_value);
 
-                        next_stage.empty.value = (int16_t)move_pos;
+                        next_stage.empty.value = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.move_path = stage.move_path;
-                        Move next_move;
-                        next_move.pos = stage.empty;
-                        next_move.dir = cur_dir;
+                        Position next_move(stage.empty);
                         next_stage.move_path.push_back(next_move);
 
                         this->next_.push_back(next_stage);

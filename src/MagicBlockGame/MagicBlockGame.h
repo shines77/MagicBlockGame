@@ -48,8 +48,8 @@ private:
     size_t min_steps_;
     size_t map_used_;
 
-    std::vector<Move> move_path_;
-    std::vector<Move> answer_;
+    std::vector<Position> move_path_;
+    std::vector<Position> answer_;
 
     void init() {
         // Initialize empty_moves[BoardX * BoardY]
@@ -84,7 +84,7 @@ public:
         return this->move_path_.size();
     }
 
-    const std::vector<Move> & getMovePath() const {
+    const std::vector<Position> & getMovePath() const {
         return this->move_path_;
     }
 
@@ -107,7 +107,7 @@ public:
                     if (line_no >= 0 && line_no < TargetY) {
                         for (size_t x = 0; x < TargetX; x++) {
                             char color = Color::valToColor(line[x]);
-                            if (color >= Color::Empty && color <= Color::Last) {
+                            if (color >= Color::Empty && color < Color::Last) {
                                 this->data_.target.cells[line_no * TargetY + x] = color;
                             }
                             else {
@@ -120,7 +120,7 @@ public:
                         size_t boardY = line_no - (TargetY + 1);
                         for (size_t x = 0; x < BoardX; x++) {
                             char color = Color::valToColor(line[x]);
-                            if (color >= Color::Empty && color <= Color::Last) {
+                            if (color >= Color::Empty && color < Color::Last) {
                                 this->data_.board.cells[boardY * BoardY + x] = color;
                             }
                             else {
@@ -212,7 +212,7 @@ public:
         return true;
     }
 
-    void translateMovePath(const std::vector<Move> & move_path) {
+    void translateMovePath(const std::vector<Position> & move_path) {
         this->move_path_ = move_path;
     }
 
