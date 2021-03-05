@@ -20,8 +20,12 @@ struct Step123
     int min_depth[4];
     int max_depth[4];
 
+    size_t has_solution;
     size_t depth_limit;
     std::vector<stage_type> stage_list[4];
+
+    Step123() : has_solution(0), depth_limit(size_t(-1)) {}
+    ~Step123() {}
 };
 
 template <size_t BoardX, size_t BoardY>

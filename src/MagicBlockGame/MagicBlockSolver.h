@@ -38,7 +38,7 @@ public:
     static const size_t kMinSearchDepth = 15;
     static const size_t kMaxSearchDepth = 27;
 
-    static const size_t kSearchDepthLimit = 30;
+    static const size_t kDefaultSearchDepthLimit = 30;
 
 #ifndef NDEBUG
     static const size_t kSlideDepth = 1;
@@ -131,13 +131,15 @@ private:
 
             count_target_color_nums(this->target_);
 
+            this->data_->s123.has_solution = 0;
+            this->data_->s123.depth_limit = kDefaultSearchDepthLimit;
+
             for (size_t i = 0; i < 4; i++) {
                 this->data_->s123.min_depth[i] = -1;
                 this->data_->s123.max_depth[i] = -1;
             }
 
-            this->data_->s123.depth_limit = -1;
-
+            // Reset lock_inited[]
             for (size_t i = 0; i < 4; i++) {
                 this->data_->s456.lock_inited[i] = 0;
             }
@@ -636,7 +638,9 @@ public:
                     }
                 }
                 else {
-                    if (this->data_->s123.depth_limit == size_t(-1)) {
+                    if (this->data_->s123.has_solution == 0) {
+                        this->data_->s123.has_solution = 1;
+                        // Update the depth limit
                         this->data_->s123.depth_limit = std::min(
                             std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
                     }
