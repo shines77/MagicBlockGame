@@ -255,7 +255,7 @@ public:
         Board<BoardX, BoardY> board(this->data_.board);
         size_t index = 0;
         int16_t from_pos, move_to_pos;
-        uint8_t last_dir;
+        uint8_t last_dir = uint8_t(-1);
         if (move_path.size() > 0) {
             index++;
             move_to_pos = move_path[0].value;
@@ -289,33 +289,40 @@ public:
                     index++;
                 }
 
-                bool foundLastStep = false;
-                move_to_cell = board.cells[move_to_pos];
-                assert_color(move_to_cell);
-                if (move_to_cell == Color::Empty) {
-                    const std::vector<Move> & empty_moves = this->data_.empty_moves[move_to_pos];
-                    size_t total_moves = empty_moves.size();
-                    for (size_t n = 0; n < total_moves; n++) {
-                        uint8_t cur_dir = empty_moves[n].dir;
-                        if (cur_dir == last_dir)
-                            continue;
+                if (success) {
+                    bool foundLastStep = false;
+                    move_to_cell = board.cells[move_to_pos];
+                    assert_color(move_to_cell);
+                    if (move_to_cell == Color::Empty) {
+                        const std::vector<Move> & empty_moves = this->data_.empty_moves[move_to_pos];
+                        size_t total_moves = empty_moves.size();
+                        for (size_t n = 0; n < total_moves; n++) {
+                            uint8_t cur_dir = empty_moves[n].dir;
+                            if (cur_dir == last_dir)
+                                continue;
 
-                        from_pos = empty_moves[n].pos.value;
-                        std::swap(board.cells[from_pos], board.cells[move_to_pos]);
-
-                        if (check_board_is_equal(board, this->data_.target,
-                                                 0, TargetX, 0, TargetY)) {
-                            MoveInfo move_info;
-                            move_info.from_pos = from_pos;
-                            move_info.move_to_pos = move_to_pos;
-                            move_info.dir = cur_dir;
-                            this->answer_.push_back(move_info);
-                            foundLastStep = true;
-                            break;
-                        }
-                        else {
+                            from_pos = empty_moves[n].pos.value;
                             std::swap(board.cells[from_pos], board.cells[move_to_pos]);
+
+                            if (check_board_is_equal(board, this->data_.target,
+                                                     0, TargetX, 0, TargetY)) {
+                                MoveInfo move_info;
+                                move_info.from_pos = from_pos;
+                                move_info.move_to_pos = move_to_pos;
+                                move_info.dir = cur_dir;
+                                this->answer_.push_back(move_info);
+                                foundLastStep = true;
+                                break;
+                            }
+                            else {
+                                std::swap(board.cells[from_pos], board.cells[move_to_pos]);
+                            }
                         }
+                    }
+
+                    if (!foundLastStep) {
+                        printf("translateMovePath():\n\n"
+                               "The last step move is wrong.\n\n");
                     }
                 }
             }
