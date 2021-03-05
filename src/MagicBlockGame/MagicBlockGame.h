@@ -409,7 +409,7 @@ public:
                     }
                 }
 
-                printf("this->min_steps: %u\n", (uint32_t)this->min_steps_);
+                printf("min_steps: %u\n", (uint32_t)this->min_steps_);
                 printf("Total moves: %u\n", (uint32_t)this->best_move_path_.size());
                 printf("\n");
 
