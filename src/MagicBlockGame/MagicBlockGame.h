@@ -97,7 +97,7 @@ public:
         return this->best_move_path_;
     }
 
-    const std::vector<Move> & getAnswer() const {
+    const std::vector<MoveInfo> & getAnswer() const {
         return this->answer_;
     }
 
@@ -335,7 +335,7 @@ public:
 
     void displayAnswer(const std::vector<MoveInfo> & answer) {
         size_t index = 0;
-        printf("Answer[%u] = {\n", (uint32_t)answer.size());
+        printf("Answer_Move_Path[%u] = {\n", (uint32_t)answer.size());
         for (auto iter : answer) {
             size_t from_pos    = iter.from_pos.value;
             size_t move_to_pos = iter.move_to_pos.value;
