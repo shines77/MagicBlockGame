@@ -35,19 +35,23 @@ template <size_t BoardX, size_t BoardY,
 class MagicBlockSolver
 {
 public:
+#ifdef NDEBUG
     static const size_t kMinSearchDepth = 15;
     static const size_t kMaxSearchDepth = 27;
 
     static const size_t kDefaultSearchDepthLimit = 30;
 
-#ifndef NDEBUG
-    static const size_t kSlideDepth = 1;
-    static const size_t kMaxSlideDepth = 2;
-#else
     static const size_t kSlideDepth = 6;
     static const size_t kMaxSlideDepth = 10;
-#endif
+#else
+    static const size_t kMinSearchDepth = 15;
+    static const size_t kMaxSearchDepth = 21;
 
+    static const size_t kDefaultSearchDepthLimit = 22;
+
+    static const size_t kSlideDepth = 1;
+    static const size_t kMaxSlideDepth = 2;
+#endif
     static const size_t kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
 
     static const ptrdiff_t startX = (BoardX - TargetX) / 2;
