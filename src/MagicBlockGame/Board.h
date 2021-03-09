@@ -50,8 +50,10 @@ union Board
     }
 
     void copy(const Board & other) {
-        for (size_t n = 0; n < kUnits; n++) {
-            this->uints[n] = other.uints[n];
+        if (this != &other) {
+            for (size_t n = 0; n < kUnits; n++) {
+                this->uints[n] = other.uints[n];
+            }
         }
     }
 
@@ -66,8 +68,10 @@ union Board
     }
 
     Board & operator = (const Board & other) {
-        for (size_t n = 0; n < kUnits; n++) {
-            this->uints[n] = other.uints[n];
+        if (this != &other) {
+            for (size_t n = 0; n < kUnits; n++) {
+                this->uints[n] = other.uints[n];
+            }
         }
         return *this;
     }

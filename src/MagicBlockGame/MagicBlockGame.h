@@ -119,7 +119,7 @@ public:
                     ifs.getline(line, 256);
                     if (line_no >= 0 && line_no < TargetY) {
                         for (size_t x = 0; x < TargetX; x++) {
-                            uint8_t color = Color::valToColor(line[x]);
+                            uint8_t color = Color::strToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
                                 this->data_.target.cells[line_no * TargetY + x] = color;
                             }
@@ -132,7 +132,7 @@ public:
                     else if (line_no >= (TargetY + 1) && line_no < (TargetY + 1 + BoardY)) {
                         size_t boardY = line_no - (TargetY + 1);
                         for (size_t x = 0; x < BoardX; x++) {
-                            uint8_t color = Color::valToColor(line[x]);
+                            uint8_t color = Color::strToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
                                 this->data_.board.cells[boardY * BoardY + x] = color;
                             }
