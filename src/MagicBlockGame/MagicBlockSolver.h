@@ -67,7 +67,6 @@ private:
 
     int partial_colors_[Color::Maximum];
 
-    std::set<uint128_t> visited_;
     std::vector<Position> move_path_;
 
     size_t map_used_;
@@ -673,11 +672,13 @@ public:
         Position empty;
         bool found_empty = find_empty(this->board_, empty);
         if (found_empty) {
+            std::set<uint128_t> visited;
+
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
             start.board = this->data_->board;
-            this->visited_.insert(start.board.value128());
+            visited.insert(start.board.value128());
 
             std::vector<stage_type> cur_stages;
             std::vector<stage_type> next_stages;
@@ -701,10 +702,10 @@ public:
                         int16_t move_pos = empty_moves[n].pos.value;
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         uint128_t board_value = next_stage.board.value128();
-                        if (this->visited_.count(board_value) > 0)
+                        if (visited.count(board_value) > 0)
                             continue;
 
-                        this->visited_.insert(board_value);
+                        visited.insert(board_value);
 
                         next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -733,7 +734,7 @@ public:
                 printf("cur.size() = %u, next.size() = %u\n",
                        (uint32_t)(cur_stages.size()),
                        (uint32_t)(next_stages.size()));
-                printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
+                printf("visited.size() = %u\n\n", (uint32_t)(visited.size()));
 
                 std::swap(cur_stages, next_stages);
                 next_stages.clear();
@@ -744,7 +745,7 @@ public:
             }
 
             if (solvable) {
-                this->map_used_ = visited_.size();
+                this->map_used_ = visited.size();
             }
         }
 
@@ -763,11 +764,13 @@ public:
         Position empty;
         bool found_empty = find_empty(this->board_, empty);
         if (found_empty) {
+            std::set<uint128_t> visited;
+
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
             start.board = this->board_;
-            this->visited_.insert(start.board.value128());
+            visited.insert(start.board.value128());
 
             std::vector<stage_type> cur_stages;
             std::vector<stage_type> next_stages;
@@ -796,10 +799,10 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         uint128_t board_value = next_stage.board.value128();
-                        if (this->visited_.count(board_value) > 0)
+                        if (visited.count(board_value) > 0)
                             continue;
 
-                        this->visited_.insert(board_value);
+                        visited.insert(board_value);
 
                         next_stage.empty.value = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -841,7 +844,7 @@ public:
                     printf("depth = %u\n", (uint32_t)depth);
                     printf("cur.size() = %u, next.size() = %u\n",
                            (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
-                    printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
+                    printf("visited.size() = %u\n\n", (uint32_t)(visited.size()));
                 }
 
                 std::swap(cur_stages, next_stages);
@@ -866,7 +869,7 @@ public:
                 }
             }
 
-            this->map_used_ = visited_.size();
+            this->map_used_ = visited.size();
 
             if (Step == 1 || Step == 12 || Step == 123) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));

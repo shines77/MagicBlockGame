@@ -431,12 +431,23 @@ public:
         return solvable;
     }
 
-    bool solve_3x3() {
+    bool solve_sliding_puzzle() {
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
         slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target);
         bool solvable = slidingPuzzle.solve();
         if (solvable) {
-            translateMovePath(slidingPuzzle.getMovePath());
+            this->best_move_path_ = slidingPuzzle.getMovePath();
+            this->map_used_ = slidingPuzzle.getMapUsed();
+        }
+        return solvable;
+    }
+
+    bool queue_solve_sliding_puzzle() {
+        SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
+        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target);
+        bool solvable = slidingPuzzle.queue_solve();
+        if (solvable) {
+            this->best_move_path_ = slidingPuzzle.getMovePath();
             this->map_used_ = slidingPuzzle.getMapUsed();
         }
         return solvable;
