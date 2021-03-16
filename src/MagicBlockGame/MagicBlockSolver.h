@@ -11,6 +11,7 @@
 #include <fstream>
 #include <cstring>
 #include <vector>
+#include <queue>
 #include <set>
 #include <exception>
 #include <stdexcept>
@@ -849,6 +850,154 @@ public:
 
                 std::swap(cur_stages, next_stages);
                 next_stages.clear();
+
+                if (exit) {
+                    break;
+                }
+
+                if (Step == 1 || Step == 12 || Step == 123) {
+                    if (this->data_->s123.depth_limit != size_t(-1) &&
+                        depth >= this->data_->s123.depth_limit) {
+                        exit = true;
+                        break;
+                    }
+                }
+                else if (Step == 456) {
+                    if (depth > this->data_->s456.depth_limit) {
+                        exit = true;
+                        break;
+                    }
+                }
+            }
+
+            this->map_used_ = visited.size();
+
+            if (Step == 1 || Step == 12 || Step == 123) {
+                printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
+                for (size_t i = 0; i < 4; i++) {
+                    printf("i = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
+                            (uint32_t)(i + 1),
+                            this->data_->s123.min_depth[i],
+                            this->data_->s123.max_depth[i],
+                            (uint32_t)this->data_->s123.stage_list[i].size());
+                }
+                printf("\n");
+            }
+            else if (Step == 456) {
+                //printf("\n");
+                printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
+                printf("OpenningType = %u\n", (uint32_t)this->data_->s456.openning_type);
+                printf("Index = %u\n", (uint32_t)(this->data_->s456.index + 1));
+                printf("next.size() = %u\n", (uint32_t)cur_stages.size());
+                if (solvable) {
+                    printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                }
+                printf("\n");
+            }
+        }
+
+        return solvable;
+    }
+
+    bool queue_solve() {
+        size_t sat_mask = is_satisfy(this->board_, this->target_);
+        if (sat_mask > 0) {
+            return true;
+        }
+
+        bool solvable = false;
+        size_t depth = 0;
+
+        Position empty;
+        bool found_empty = find_empty(this->board_, empty);
+        if (found_empty) {
+            std::set<uint128_t> visited;
+
+            stage_type start;
+            start.empty = empty;
+            start.last_dir = -1;
+            start.board = this->board_;
+            visited.insert(start.board.value128());
+
+            std::queue<stage_type> cur_stages;
+            std::queue<stage_type> next_stages;
+
+            cur_stages.push(start);
+
+            bool exit = false;
+            while (!cur_stages.empty()) {
+                do {
+                    const stage_type & stage = cur_stages.front();
+
+                    int16_t empty_pos = stage.empty.value;
+                    const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
+                    size_t total_moves = empty_moves.size();
+                    for (size_t n = 0; n < total_moves; n++) {
+                        uint8_t cur_dir = empty_moves[n].dir;
+                        if (cur_dir == stage.last_dir)
+                            continue;
+
+                        int16_t move_pos = empty_moves[n].pos.value;
+                        if (Step == 456) {
+                            if (this->data_->s456.locked[move_pos] != 0)
+                                continue;
+                        }
+
+                        stage_type next_stage(stage.board);
+                        std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
+                        uint128_t board_value = next_stage.board.value128();
+                        if (visited.count(board_value) > 0)
+                            continue;
+
+                        visited.insert(board_value);
+
+                        next_stage.empty.value = move_pos;
+                        next_stage.last_dir = cur_dir;
+                        next_stage.move_path = stage.move_path;
+                        Position next_move(stage.empty);
+                        next_stage.move_path.push_back(next_move);
+
+                        next_stages.push(next_stage);
+
+                        sat_mask = is_satisfy(next_stage.board, this->target_);
+                        if (sat_mask > 0) {
+                            solvable = true;
+                            if (Step == 1 || Step == 12 || Step == 123) {
+                                bool all_reached = record_min_openning(depth, sat_mask, next_stage);
+                                if (all_reached) {
+                                    exit = true;
+                                }
+                            }
+                            else {
+                                this->move_path_ = next_stage.move_path;
+                                assert((depth + 1) == next_stage.move_path.size());
+                                exit = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    cur_stages.pop();
+
+                    if (!(Step == 1 || Step == 12 || Step == 123)) {
+                        if (exit) {
+                            break;
+                        }
+                    }
+                } while (!cur_stages.empty());
+
+                depth++;
+                if (Step == 456) {
+                    //printf(">> %u\n", (uint32_t)depth);
+                }
+                else {
+                    printf("depth = %u\n", (uint32_t)depth);
+                    printf("cur.size() = %u, next.size() = %u\n",
+                           (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
+                    printf("visited.size() = %u\n\n", (uint32_t)(visited.size()));
+                }
+
+                std::swap(cur_stages, next_stages);
 
                 if (exit) {
                     break;
