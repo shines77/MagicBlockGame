@@ -121,7 +121,7 @@ public:
                         for (size_t x = 0; x < TargetX; x++) {
                             uint8_t color = Color::strToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
-                                this->data_.target.cells[line_no * TargetY + x] = color;
+                                this->data_.target[0].cells[line_no * TargetY + x] = color;
                             }
                             else {
                                 result = -2;
@@ -187,7 +187,7 @@ public:
 
         for (size_t y = 0; y < TargetY; y++) {
             for (size_t x = 0; x < TargetX; x++) {
-                uint8_t cell = this->data_.target.cells[y * TargetY + x];
+                uint8_t cell = this->data_.target[0].cells[y * TargetY + x];
                 if (cell >= Color::Empty && cell < Color::Maximum) {
                     this->data_.target_colors[cell]++;
                 }
@@ -214,8 +214,8 @@ public:
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
             for (size_t x = 0; x < TargetX; x++) {
-                uint8_t target_cell = this->data_.target.cells[targetBaseY + x];
-                uint8_t cell = this->data_.board.cells[baseY + (startX + x)];
+                uint8_t target_cell = target.cells[targetBaseY + x];
+                uint8_t cell = board.cells[baseY + (startX + x)];
                 if (cell != target_cell) {
                     return false;
                 }
@@ -223,6 +223,18 @@ public:
         }
 
         return true;
+    }
+
+    size_t is_satisfy(const Board<BoardX, BoardY> & board,
+                      const Board<TargetX, TargetY> target[4],
+                      size_t target_len) const {
+        for (size_t index = 0; index < target_len; index++) {
+            if (is_satisfy(board, target[index])) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
     }
 
     // Check order: up to down
@@ -244,6 +256,22 @@ public:
             }
         }
         return true;
+    }
+
+    // Check order: up to down
+    size_t check_board_is_equal(const Board<BoardX, BoardY> & board,
+                                const Board<TargetX, TargetY> target[4],
+                                size_t target_len,
+                                size_t firstTargetX, size_t lastTargetX,
+                                size_t firstTargetY, size_t lastTargetY) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (check_board_is_equal(board, target[index],
+                firstTargetX, lastTargetX, firstTargetY, lastTargetY)) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
     }
 
     bool translateMovePath(const std::vector<Position> & move_path) {
@@ -307,7 +335,7 @@ public:
 
                             std::swap(board.cells[from_pos], board.cells[move_to_pos]);
 
-                            if (check_board_is_equal(board, this->data_.target,
+                            if (check_board_is_equal(board, this->data_.target, this->data_.target_len,
                                                      0, TargetX, 0, TargetY)) {
                                 MoveInfo move_info;
                                 move_info.from_pos = from_pos;
@@ -369,7 +397,7 @@ public:
     }
 
     bool solve() {
-        if (is_satisfy(this->data_.board, this->data_.target)) {
+        if (is_satisfy(this->data_.board, this->data_.target, this->data_.target_len) != size_t(-1)) {
             return true;
         }
 
@@ -437,7 +465,7 @@ public:
 
     bool solve_sliding_puzzle() {
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target);
+        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target, this->data_.target_len);
         bool solvable = slidingPuzzle.solve();
         if (solvable) {
             this->best_move_path_ = slidingPuzzle.getMovePath();
@@ -448,7 +476,7 @@ public:
 
     bool queue_solve_sliding_puzzle() {
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target);
+        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target, this->data_.target_len);
         bool solvable = slidingPuzzle.queue_solve();
         if (solvable) {
             this->best_move_path_ = slidingPuzzle.getMovePath();

@@ -57,7 +57,9 @@ struct SharedData
     typedef typename Step123<BoardX, BoardY>::stage_type stage_type;
 
     Board<BoardX, BoardY> board;
-    Board<TargetX, TargetY> target;
+    Board<TargetX, TargetY> target[4];
+
+    size_t target_len;
 
     int board_colors[Color::Maximum];
     int target_colors[Color::Maximum];
@@ -67,7 +69,7 @@ struct SharedData
     Step123<BoardX, BoardY> s123;
     Step456<BoardX, BoardY> s456;
 
-    SharedData() {}
+    SharedData() : target_len(0) {}
     ~SharedData() {}
 };
 

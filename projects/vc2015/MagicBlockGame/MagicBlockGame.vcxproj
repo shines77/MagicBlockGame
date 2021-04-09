@@ -31,6 +31,8 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Stage.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\MagicBlockGame.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\MagicBlockSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\UInt128.h" />
   </ItemGroup>
   <ItemGroup>

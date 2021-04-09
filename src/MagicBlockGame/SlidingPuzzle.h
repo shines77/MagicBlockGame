@@ -26,7 +26,8 @@ public:
 
 private:
     Board<BoardX, BoardY> board_;
-    Board<BoardX, BoardY> target_;
+    Board<BoardX, BoardY> target_[4];
+    size_t target_len_;
 
     std::vector<Move> empty_moves_[BoardX * BoardY];
     std::vector<Position> move_path_;
@@ -55,7 +56,7 @@ private:
     }
 
 public:
-    SlidingPuzzle() : map_used_(0) {
+    SlidingPuzzle() : target_len_(0), map_used_(0) {
         this->init();
     }
     ~SlidingPuzzle() {}
@@ -73,7 +74,9 @@ public:
     }
 
     template <size_t UBoardX, size_t UBoardY>
-    void setPuzzle(const Board<UBoardX, UBoardY> & board, const Board<BoardX, BoardY> & target) {
+    void setPuzzle(const Board<UBoardX, UBoardY> & board,
+                   const Board<BoardX, BoardY> target[4],
+                   size_t target_len) {
         static const ptrdiff_t startX = (UBoardX - BoardX) / 2;
         static const ptrdiff_t startY = (UBoardY - BoardY) / 2;
         for (size_t y = 0; y < BoardY; y++) {
@@ -81,7 +84,10 @@ public:
                 this->board_.cells[y * BoardY + x] = board.cells[(startY + y) * UBoardY + (startX + x)];
             }
         }
-        this->target_ = target;
+        for (size_t i = 0; i < 4; i++) {
+            this->target_[i] = target[i];
+        }
+        this->target_len_ = target_len;
     }
 
     bool find_empty(Position & empty_pos) const {
@@ -97,8 +103,25 @@ public:
         return false;
     }
 
+    bool is_satisfy(const Board<BoardX, BoardY> & board,
+                    const Board<BoardX, BoardY> & target) const {
+        return (board == target);
+    }
+
+    size_t is_satisfy(const Board<BoardX, BoardY> & board,
+                      const Board<BoardX, BoardY> target[4],
+                      size_t target_len) const {
+        for (size_t index = 0; index < target_len; index++) {
+            if (board == target[index]) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
+    }
+
     bool solve() {
-        if (this->board_ == this->target_) {
+        if (is_satisfy(this->board_, this->target_, this->target_len_)) {
             return true;
         }
 
@@ -151,7 +174,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        if (next_stage.board == this->target_) {
+                        if (is_satisfy(next_stage.board, this->target_, this->target_len_)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
@@ -183,7 +206,7 @@ public:
     }
 
     bool queue_solve() {
-        if (this->board_ == this->target_) {
+        if (is_satisfy(this->board_, this->target_, this->target_len_)) {
             return true;
         }
 
@@ -236,7 +259,7 @@ public:
 
                         next_stages.push(next_stage);
 
-                        if (next_stage.board == this->target_) {
+                        if (is_satisfy(next_stage.board, this->target_, this->target_len_)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;

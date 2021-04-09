@@ -64,7 +64,9 @@ private:
     SharedData<BoardX, BoardY, TargetX, TargetY> * data_;
 
     Board<BoardX, BoardY> board_;
-    Board<TargetX, TargetY> target_;
+    Board<TargetX, TargetY> target_[4];
+
+    size_t target_len_;
 
     int partial_colors_[Color::Maximum];
 
@@ -131,9 +133,12 @@ private:
     void init() {
         if (Step == 1 || Step == 12 || Step == 123) {
             this->board_ = this->data_->board;
-            this->target_ = this->data_->target;
+            for (size_t i = 0; i < 4; i++) {
+                this->target_[i] = this->data_->target[i];
+            }
+            this->target_len_ = this->data_->target_len;
 
-            count_target_color_nums(this->target_);
+            count_target_color_nums(this->target_[0]);
 
             this->data_->s123.has_solution = 0;
             this->data_->s123.depth_limit = kDefaultSearchDepthLimit;
@@ -149,29 +154,33 @@ private:
             }
         }
         else if (Step == 456) {
-            this->target_ = this->data_->target;
+            for (size_t i = 0; i < 4; i++) {
+                this->target_[i] = this->data_->target[i];
+            }
+            this->target_len_ = this->data_->target_len;
+
             size_t openning_type = this->data_->s456.openning_type;
             if (this->data_->s456.lock_inited[openning_type] == 0) {
                 this->data_->s456.lock_inited[openning_type] = 1;
                 switch (openning_type) {
                     case 0:
                         // Top partial
-                        count_partial_target_color_nums(this->target_, 0, TargetX, TargetY - 1, TargetY);
+                        count_partial_target_color_nums(this->target_[0], 0, TargetX, TargetY - 1, TargetY);
                         locked_partial_board(this->data_->s456.locked, 0, BoardX, 0, startY + 1);
                         break;
                     case 1:
                         // Left partial
-                        count_partial_target_color_nums(this->target_, TargetX - 1, TargetX, 0, TargetY);
+                        count_partial_target_color_nums(this->target_[0], TargetX - 1, TargetX, 0, TargetY);
                         locked_partial_board(this->data_->s456.locked, 0, startX + 1, 0, BoardY);
                         break;
                     case 2:
                         // Right partial
-                        count_partial_target_color_nums(this->target_, 0, 1, 0, TargetY);
+                        count_partial_target_color_nums(this->target_[0], 0, 1, 0, TargetY);
                         locked_partial_board(this->data_->s456.locked, startX + TargetX - 1, BoardX, 0, BoardY);
                         break;
                     case 3:
                         // Bottom partial
-                        count_partial_target_color_nums(this->target_, 0, TargetX, 0, 1);
+                        count_partial_target_color_nums(this->target_[0], 0, TargetX, 0, 1);
                         locked_partial_board(this->data_->s456.locked, 0, BoardX, startY + TargetY - 1, BoardY);
                         break;
                     default:
@@ -184,7 +193,7 @@ private:
 
 public:
     MagicBlockSolver(SharedData<BoardX, BoardY, TargetX, TargetY> * data)
-        : data_(data), map_used_(0) {
+        : data_(data), target_len_(0), map_used_(0) {
         this->init();
     }
 
@@ -308,6 +317,18 @@ public:
         return true;
     }
 
+    size_t is_satisfy_full(const Board<BoardX, BoardY> & board,
+                           const Board<TargetX, TargetY> target[4],
+                           size_t target_len) const {
+        for (size_t index = 0; index < target_len; index++) {
+            if (is_satisfy_full(board, target[index])) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
+    }
+
     size_t is_satisfy_step_1(const Board<BoardX, BoardY> & board,
                              const Board<TargetX, TargetY> & target) {
         static const ptrdiff_t startX = (BoardX - TargetX) / 2;
@@ -374,6 +395,18 @@ public:
         return result;
     }
 
+    size_t is_satisfy_step_1(const Board<BoardX, BoardY> & board,
+                             const Board<TargetX, TargetY> target[4],
+                             size_t target_len) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (is_satisfy_step_1(board, target[index]) != 0) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
+    }
+
     // Check order: up to down
     bool check_board_is_equal(const Board<BoardX, BoardY> & board,
                               const Board<TargetX, TargetY> & target,
@@ -404,6 +437,22 @@ public:
         return true;
     }
 
+    // Check order: up to down
+    size_t check_board_is_equal(const Board<BoardX, BoardY> & board,
+                                const Board<TargetX, TargetY> target[4],
+                                size_t target_len,
+                                size_t firstTargetX, size_t lastTargetX,
+                                size_t firstTargetY, size_t lastTargetY) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (check_board_is_equal(board, target[index],
+                firstTargetX, lastTargetX, firstTargetY, lastTargetY)) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
+    }
+
     // Check order: down to up
     bool reverse_check_board_is_equal(const Board<BoardX, BoardY> & board,
                                       const Board<TargetX, TargetY> & target,
@@ -423,6 +472,22 @@ public:
             }
         }
         return true;
+    }
+
+    // Check order: down to up
+    size_t reverse_check_board_is_equal(const Board<BoardX, BoardY> & board,
+                                        const Board<TargetX, TargetY> & target,
+                                        size_t target_len,
+                                        size_t firstTargetX, size_t lastTargetX,
+                                        size_t firstTargetY, size_t lastTargetY) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (reverse_check_board_is_equal(board, target[index],
+                firstTargetX, lastTargetX, firstTargetY, lastTargetY)) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
     }
 
     size_t is_satisfy_step_12(const Board<BoardX, BoardY> & board,
@@ -484,6 +549,18 @@ public:
         return result;
     }
 
+    size_t is_satisfy_step_12(const Board<BoardX, BoardY> & board,
+                              const Board<TargetX, TargetY> target[4],
+                              size_t target_len) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (is_satisfy_step_12(board, target[index]) != 0) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
+    }
+
     size_t is_satisfy_step_123(const Board<BoardX, BoardY> & board,
                                const Board<TargetX, TargetY> & target) {
         size_t result = 0;
@@ -537,6 +614,18 @@ public:
         }
 
         return result;
+    }
+
+    size_t is_satisfy_step_123(const Board<BoardX, BoardY> & board,
+                               const Board<TargetX, TargetY> target[4],
+                               size_t target_len) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (is_satisfy_step_123(board, target[index]) != 0) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
     }
 
     size_t is_satisfy_step_456(const Board<BoardX, BoardY> & board,
@@ -594,6 +683,18 @@ public:
         return result;
     }
 
+    size_t is_satisfy_step_456(const Board<BoardX, BoardY> & board,
+                               const Board<TargetX, TargetY> target[4],
+                               size_t target_len) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (is_satisfy_step_456(board, target[index]) != 0) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
+    }
+
     size_t is_satisfy_step_456_789(const Board<BoardX, BoardY> & board,
                                    const Board<TargetX, TargetY> & target) {
         size_t result = 0;
@@ -604,6 +705,18 @@ public:
         }
 
         return result;
+    }
+
+    size_t is_satisfy_step_456_789(const Board<BoardX, BoardY> & board,
+                                   const Board<TargetX, TargetY> target[4],
+                                   size_t target_len) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (is_satisfy_step_456_789(board, target[index]) != 0) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
     }
 
     size_t is_satisfy(const Board<BoardX, BoardY> & board,
@@ -625,6 +738,40 @@ public:
         }
 
         return 0;
+    }
+
+    size_t is_satisfy(const Board<BoardX, BoardY> & board,
+                      const Board<TargetX, TargetY> target[4],
+                      size_t target_len) {
+        if (Step == 1) {
+            return is_satisfy_step_1(board, target, target_len);
+        }
+        if (Step == 12) {
+            return is_satisfy_step_12(board, target, target_len);
+        }
+        else if (Step == 123) {
+            return is_satisfy_step_123(board, target, target_len);
+        }
+        else if (Step == 456) {
+            return is_satisfy_step_456_789(board, target, target_len);
+        }
+        else {
+            return (size_t)is_satisfy_full(board, target, target_len);
+        }
+
+        return 0;
+    }
+
+    size_t is_satisfy_(const Board<BoardX, BoardY> & board,
+                       const Board<TargetX, TargetY> target[4],
+                       size_t target_len) {
+        for (size_t index = 0; index < target_len; index++) {
+            if (is_satisfy(board, target[index]) != 0) {
+                return index;
+            }
+        }
+
+        return size_t(-1);
     }
 
     bool record_min_openning(size_t depth, size_t sat_mask, const stage_type & stage) {
@@ -663,7 +810,7 @@ public:
     }
 
     bool solve_full() {
-        if (is_satisfy_full(this->board_, this->target_)) {
+        if (is_satisfy_full(this->board_, this->target_, this->target_len_)) {
             return true;
         }
 
@@ -716,7 +863,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        if (is_satisfy_full(next_stage.board, this->target_)) {
+                        if (is_satisfy_full(next_stage.board, this->target_, this->target_len_)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
@@ -754,7 +901,7 @@ public:
     }
 
     bool solve() {
-        size_t sat_mask = is_satisfy(this->board_, this->target_);
+        size_t sat_mask = is_satisfy(this->board_, this->target_, this->target_len_);
         if (sat_mask > 0) {
             return true;
         }
@@ -813,7 +960,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        sat_mask = is_satisfy(next_stage.board, this->target_);
+                        sat_mask = is_satisfy(next_stage.board, this->target_, this->target_len_);
                         if (sat_mask > 0) {
                             solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
@@ -900,7 +1047,7 @@ public:
     }
 
     bool queue_solve() {
-        size_t sat_mask = is_satisfy(this->board_, this->target_);
+        size_t sat_mask = is_satisfy(this->board_, this->target_, this->target_len_);
         if (sat_mask > 0) {
             return true;
         }
@@ -959,7 +1106,7 @@ public:
 
                         next_stages.push(next_stage);
 
-                        sat_mask = is_satisfy(next_stage.board, this->target_);
+                        sat_mask = is_satisfy(next_stage.board, this->target_, this->target_len_);
                         if (sat_mask > 0) {
                             solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
