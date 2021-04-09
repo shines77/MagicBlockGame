@@ -76,6 +76,7 @@ private:
                 this->data_.empty_moves[y * BoardY + x] = empty_moves;
             }
         }
+        this->data_.target_len = 1;
     }
 
 public:
@@ -119,7 +120,7 @@ public:
                     ifs.getline(line, 256);
                     if (line_no >= 0 && line_no < TargetY) {
                         for (size_t x = 0; x < TargetX; x++) {
-                            uint8_t color = Color::strToColor(line[x]);
+                            uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
                                 this->data_.target[0].cells[line_no * TargetY + x] = color;
                             }
@@ -132,7 +133,7 @@ public:
                     else if (line_no >= (TargetY + 1) && line_no < (TargetY + 1 + BoardY)) {
                         size_t boardY = line_no - (TargetY + 1);
                         for (size_t x = 0; x < BoardX; x++) {
-                            uint8_t color = Color::strToColor(line[x]);
+                            uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
                                 this->data_.board.cells[boardY * BoardY + x] = color;
                             }

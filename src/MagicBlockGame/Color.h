@@ -20,7 +20,7 @@ struct Color {
         Maximum
     };
 
-    static uint8_t strToColor(uint8_t value) {
+    static uint8_t charToColor(uint8_t value) {
         switch (value) {
         case ' ':
         case 'E':
