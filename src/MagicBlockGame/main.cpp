@@ -13,10 +13,10 @@
 
 using namespace PuzzleGame;
 
-void test_sliding_puzzle()
+void solve_sliding_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("test_sliding_puzzle()\n\n");
+    printf("solve_sliding_puzzle()\n\n");
 
     MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input_test.txt");
@@ -30,21 +30,21 @@ void test_sliding_puzzle()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
-        printf("Has answer!\n\n");
+        printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)game.getMinSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
     }
     else {
-        printf("No answer!\n\n");
+        printf("Not found a answer!\n\n");
     }
 
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-void test_sliding_puzzle_queue()
+void solve_sliding_puzzle_queue()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("test_sliding_puzzle_queue()\n\n");
+    printf("solve_sliding_puzzle_queue()\n\n");
 
     MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input_test.txt");
@@ -58,19 +58,22 @@ void test_sliding_puzzle_queue()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
-        printf("Has answer!\n\n");
+        printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)game.getMinSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
     }
     else {
-        printf("No answer!\n\n");
+        printf("Not found a answer!\n\n");
     }
 
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-void test_magic_block_game()
+void solve_magic_block_game()
 {
+    printf("-------------------------------------------------------\n\n");
+    printf("solve_magic_block_game()\n\n");
+
     MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d\n\n", readStatus);
@@ -83,12 +86,12 @@ void test_magic_block_game()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
-        printf("Has answer!\n\n");
+        printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)game.getMinSteps());
         printf("Map Used: %d\n\n", (int)game.getMapUsed());
     }
     else {
-        printf("No answer!\n\n");
+        printf("Not found a answer!\n\n");
     }
 
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
@@ -98,10 +101,10 @@ int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
 
-    //test_sliding_puzzle();
-    //test_sliding_puzzle_queue();
+    //solve_sliding_puzzle();
+    //solve_sliding_puzzle_queue();
 
-    test_magic_block_game();
+    solve_magic_block_game();
 
 #if !defined(_NDEBUG) && defined(_MSC_VER)
     ::system("pause");

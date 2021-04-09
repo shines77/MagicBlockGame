@@ -113,7 +113,7 @@ public:
             ifs.open(filename, std::ios::in);
             if (ifs.good()) {
                 result = 0;
-                do { 
+                do {
                     char line[256];
                     std::fill_n(line, sizeof(line), 0);
                     ifs.getline(line, 256);
