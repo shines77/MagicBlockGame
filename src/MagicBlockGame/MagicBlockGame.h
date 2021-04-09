@@ -344,6 +344,10 @@ public:
         return success;
     }
 
+    const char posToChr(size_t pos) {
+        return (char)('A' + (uint8_t)(pos % 256));
+    }
+
     void displayAnswer(const std::vector<MoveInfo> & answer) {
         size_t index = 0;
         printf("Answer_Move_Path[%u] = {\n", (uint32_t)answer.size());
@@ -352,11 +356,11 @@ public:
             size_t move_to_pos = iter.move_to_pos.value;
             size_t color       = iter.color;
             size_t dir         = iter.dir;
-            printf("    [%2u]: from: (%u, %u) --> to: (%u, %u), [%s], dir: %-5s (%u)\n",
+            printf("    [%2u]: [%s], %c%u --> %c%u, dir: %-5s (%u)\n",
                    (uint32_t)(index + 1),
-                   (uint32_t)(from_pos % BoardY), (uint32_t)(from_pos / BoardY),
-                   (uint32_t)(move_to_pos % BoardY), (uint32_t)(move_to_pos / BoardY),
                    Color::toShortString(color),
+                   (uint32_t)posToChr(from_pos / BoardY), (uint32_t)(from_pos % BoardY) + 1,
+                   (uint32_t)posToChr(move_to_pos / BoardY), (uint32_t)(move_to_pos % BoardY) + 1,
                    Direction::toString(dir),
                    (uint32_t)dir);
             index++;
