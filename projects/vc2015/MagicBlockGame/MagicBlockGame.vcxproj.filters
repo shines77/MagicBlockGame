@@ -55,6 +55,9 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\MagicBlockSolver.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\ErrorCode.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlockGame\main.cpp">

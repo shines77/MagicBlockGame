@@ -8,6 +8,7 @@
 
 #include "MagicBlockGame.h"
 
+#include "ErrorCode.h"
 #include "CPUWarmUp.h"
 #include "StopWatch.h"
 
@@ -76,7 +77,7 @@ void solve_magic_block_game()
 
     MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input.txt");
-    printf("readStatus = %d\n\n", readStatus);
+    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
 
     jtest::StopWatch sw;
 

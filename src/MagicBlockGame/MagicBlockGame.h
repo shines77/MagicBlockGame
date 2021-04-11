@@ -21,6 +21,7 @@
 #include "Move.h"
 #include "Board.h"
 #include "SharedData.h"
+#include "ErrorCode.h"
 #include "MagicBlockSolver.h"
 #include "SlidingPuzzle.h"
 
@@ -107,13 +108,13 @@ public:
     }
 
     int readInput(const char * filename) {
-        int result = -1;
+        int err_code = ErrorCode::Success;
         size_t line_no = 0;
         std::ifstream ifs;
         try {
             ifs.open(filename, std::ios::in);
             if (ifs.good()) {
-                result = 0;
+                err_code = 0;
                 do {
                     char line[256];
                     std::fill_n(line, sizeof(line), 0);
@@ -125,7 +126,7 @@ public:
                                 this->data_.target[0].cells[line_no * TargetY + x] = color;
                             }
                             else {
-                                result = -2;
+                                err_code = ErrorCode::UnknownTargetColor;
                                 break;
                             }
                         }
@@ -138,37 +139,40 @@ public:
                                 this->data_.board.cells[boardY * BoardY + x] = color;
                             }
                             else {
-                                result = -3;
+                                err_code = ErrorCode::UnknownBoardColor;
                                 break;
                             }
                         }
                     }
-                    if (result < 0)
+                    if (ErrorCode::isFailure(err_code))
                         break;
                     line_no++;
                 } while (!ifs.eof());
 
                 ifs.close();
 
-                if (result == 0) {
-                    result = 1;
-                }
-                else {
+                if (ErrorCode::isFailure(err_code)) {
                     char err_info[256] = {0};
-                    snprintf(err_info, sizeof(err_info) - 1, "MagicBlockGame::readInput() Error code = %d", result);
+                    snprintf(err_info, sizeof(err_info) - 1,
+                             "MagicBlockGame::readInput() Error code: %d, reason: %s",
+                             err_code, ErrorCode::toString(err_code));
                     throw std::runtime_error(err_info);
                 }
             }
         }
         catch (std::exception & ex) {
+            if (ErrorCode::isSuccess(err_code)) {
+                err_code = ErrorCode::StdException;
+            }
             std::cout << "Exception: " << ex.what() << std::endl << std::endl;
         }
 
-        if (result == 1) {
+        if (ErrorCode::isSuccess(err_code)) {
             count_color_nums();
+            rotate_target_board();
         }
 
-        return result;
+        return err_code;
     }
 
     void count_color_nums() {
@@ -194,6 +198,39 @@ public:
                 }
             }
         }
+    }
+
+    void rotate_target_board() {
+        this->data_.target[0].rotate_90_degrees_cw(this->data_.target[1]);
+        this->data_.target[0].rotate_180_degrees_cw(this->data_.target[2]);
+        this->data_.target[0].rotate_270_degrees_cw(this->data_.target[3]);
+
+        bool is_duplicated[4];
+        for (size_t i = 0; i < 4; i++) {
+            is_duplicated[i] = false;
+        }
+
+        for (size_t i = 1; i < 4; i++) {
+            for (size_t j = 0; j < i; j++) {
+                if (this->data_.target[j] == this->data_.target[i]) {
+                    is_duplicated[i] = true;
+                    break;
+                }
+            }
+        }
+
+        size_t target_len = 4;
+        for (size_t i = 1; i < 4; i++) {
+            if (is_duplicated[i]) {
+                for (size_t j = i + 1; j < 4; j++) {
+                    this->data_.target[j - 1] = this->data_.target[j];
+                }
+                target_len--;
+            }
+        }
+        assert(target_len > 0);
+
+        this->data_.target_len = target_len;
     }
 
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {

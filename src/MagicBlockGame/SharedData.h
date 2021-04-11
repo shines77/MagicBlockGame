@@ -59,10 +59,10 @@ struct SharedData
     Board<BoardX, BoardY> board;
     Board<TargetX, TargetY> target[4];
 
-    size_t target_len;
-
     int board_colors[Color::Maximum];
     int target_colors[Color::Maximum];
+
+    size_t target_len;
 
     std::vector<Move> empty_moves[BoardX * BoardY];
 

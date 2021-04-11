@@ -762,9 +762,9 @@ public:
         return 0;
     }
 
-    size_t is_satisfy_(const Board<BoardX, BoardY> & board,
-                       const Board<TargetX, TargetY> target[4],
-                       size_t target_len) {
+    size_t is_satisfy_all(const Board<BoardX, BoardY> & board,
+                          const Board<TargetX, TargetY> target[4],
+                          size_t target_len) {
         for (size_t index = 0; index < target_len; index++) {
             if (is_satisfy(board, target[index]) != 0) {
                 return index;
@@ -902,7 +902,7 @@ public:
 
     bool solve() {
         size_t sat_mask = is_satisfy(this->board_, this->target_, this->target_len_);
-        if (sat_mask > 0) {
+        if (sat_mask > 0 && sat_mask != size_t(-1)) {
             return true;
         }
 
@@ -961,7 +961,7 @@ public:
                         next_stages.push_back(next_stage);
 
                         sat_mask = is_satisfy(next_stage.board, this->target_, this->target_len_);
-                        if (sat_mask > 0) {
+                        if (sat_mask > 0 && sat_mask != size_t(-1)) {
                             solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
                                 bool all_reached = record_min_openning(depth, sat_mask, next_stage);
@@ -1048,7 +1048,7 @@ public:
 
     bool queue_solve() {
         size_t sat_mask = is_satisfy(this->board_, this->target_, this->target_len_);
-        if (sat_mask > 0) {
+        if (sat_mask > 0 && sat_mask != size_t(-1)) {
             return true;
         }
 
@@ -1107,7 +1107,7 @@ public:
                         next_stages.push(next_stage);
 
                         sat_mask = is_satisfy(next_stage.board, this->target_, this->target_len_);
-                        if (sat_mask > 0) {
+                        if (sat_mask > 0 && sat_mask != size_t(-1)) {
                             solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
                                 bool all_reached = record_min_openning(depth, sat_mask, next_stage);

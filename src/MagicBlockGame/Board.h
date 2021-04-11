@@ -128,6 +128,45 @@ union Board
         }
         return uint128_t(low_value, high_value);
     }
+
+    // clockwise rotate 90 degrees
+    void rotate_90_degrees_cw(Board<BoardX, BoardY> & dest) {
+        for (size_t y = 0; y < BoardY; y++) {
+            for (size_t x = 0; x < BoardX; x++) {
+                size_t src_pos = y * BoardY + x;
+                size_t dest_x = (BoardY - 1) - y;
+                size_t dest_y = x;
+                size_t dest_pos = dest_y * BoardY + dest_x;
+                dest.cells[dest_pos] = this->cells[src_pos];
+            }
+        }
+    }
+
+    // clockwise rotate 180 degrees
+    void rotate_180_degrees_cw(Board<BoardX, BoardY> & dest) {
+        for (size_t y = 0; y < BoardY; y++) {
+            for (size_t x = 0; x < BoardX; x++) {
+                size_t src_pos = y * BoardY + x;
+                size_t dest_x = (BoardX - 1) - x;
+                size_t dest_y = (BoardY - 1) - y;
+                size_t dest_pos = dest_y * BoardY + dest_x;
+                dest.cells[dest_pos] = this->cells[src_pos];
+            }
+        }
+    }
+
+    // clockwise rotate 270 degrees
+    void rotate_270_degrees_cw(Board<BoardX, BoardY> & dest) {
+        for (size_t y = 0; y < BoardY; y++) {
+            for (size_t x = 0; x < BoardX; x++) {
+                size_t src_pos = y * BoardY + x;
+                size_t dest_x = y;
+                size_t dest_y = (BoardX - 1) - x;
+                size_t dest_pos = dest_y * BoardY + dest_x;
+                dest.cells[dest_pos] = this->cells[src_pos];
+            }
+        }
+    }
 };
 
 template <size_t BoardX, size_t BoardY>
