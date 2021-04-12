@@ -126,7 +126,7 @@ public:
                                 this->data_.target[0].cells[line_no * TargetY + x] = color;
                             }
                             else {
-                                err_code = ErrorCode::UnknownTargetColor;
+                                err_code = ErrorCode::UnknownTargetBoardColor;
                                 break;
                             }
                         }
@@ -139,7 +139,7 @@ public:
                                 this->data_.board.cells[boardY * BoardY + x] = color;
                             }
                             else {
-                                err_code = ErrorCode::UnknownBoardColor;
+                                err_code = ErrorCode::UnknownPlayerBoardColor;
                                 break;
                             }
                         }
@@ -169,6 +169,26 @@ public:
 
         if (ErrorCode::isSuccess(err_code)) {
             count_color_nums();
+
+            int result = check_board_colors();
+            if (ErrorCode::isFailure(result)) {
+                if (result >= ErrorCode::TargetBoardColorOverflowFirst &&
+                    result <= ErrorCode::TargetBoardColorOverflowLast) {
+                    err_code = ErrorCode::TargetBoardColorOverflow;
+                }
+                else if (result >= ErrorCode::PlayerBoardColorOverflowFirst &&
+                         result <= ErrorCode::PlayerBoardColorOverflowLast) {
+                    err_code = ErrorCode::PlayerBoardColorOverflow;
+                }
+
+                if (ErrorCode::isFailure(err_code)) {
+                    char err_info[256] = {0};
+                    snprintf(err_info, sizeof(err_info) - 1,
+                             "MagicBlockGame::readInput() Error code: %d, reason: %s",
+                             err_code, ErrorCode::toString(err_code));
+                }
+            }
+
             rotate_target_board();
         }
 
@@ -198,6 +218,36 @@ public:
                 }
             }
         }
+    }
+
+    int check_player_board_colors() {
+        int err_code = ErrorCode::Success;
+        for (size_t clr = 0; clr < Color::Maximum; clr++) {
+            if (this->data_.board_colors[clr] > kSingelColorNums) {
+                err_code = ErrorCode::PlayerBoardColorOverflowFirst + (int)clr;
+                return err_code;
+            }
+        }
+        return err_code;
+    }
+
+    int check_target_board_colors() {
+        int err_code = ErrorCode::Success;
+        for (size_t clr = 0; clr < Color::Maximum; clr++) {
+            if (this->data_.target_colors[clr] > kSingelColorNums) {
+                err_code = ErrorCode::TargetBoardColorOverflowFirst + (int)clr;
+                return err_code;
+            }
+        }
+        return err_code;
+    }
+
+    int check_board_colors() {
+        int err_code = check_player_board_colors();
+        if (ErrorCode::isSuccess(err_code)) {
+            err_code = check_target_board_colors();
+        }
+        return err_code;
     }
 
     void rotate_target_board() {

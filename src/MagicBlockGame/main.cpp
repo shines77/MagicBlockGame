@@ -21,7 +21,10 @@ void solve_sliding_puzzle()
 
     MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input_test.txt");
-    printf("readStatus = %d\n\n", readStatus);
+    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+    if (ErrorCode::isFailure(readStatus)) {
+        return;
+    }
 
     jtest::StopWatch sw;
 
@@ -49,7 +52,10 @@ void solve_sliding_puzzle_queue()
 
     MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input_test.txt");
-    printf("readStatus = %d\n\n", readStatus);
+    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+    if (ErrorCode::isFailure(readStatus)) {
+        return;
+    }
 
     jtest::StopWatch sw;
 
@@ -78,6 +84,9 @@ void solve_magic_block_game()
     MagicBlockGame<5, 5, 3, 3> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+    if (ErrorCode::isFailure(readStatus)) {
+        return;
+    }
 
     jtest::StopWatch sw;
 
@@ -102,10 +111,10 @@ int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
 
-    //solve_sliding_puzzle();
-    //solve_sliding_puzzle_queue();
+    solve_sliding_puzzle();
+    solve_sliding_puzzle_queue();
 
-    solve_magic_block_game();
+    //solve_magic_block_game();
 
 #if !defined(_NDEBUG) && defined(_MSC_VER)
     ::system("pause");

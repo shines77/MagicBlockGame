@@ -121,7 +121,7 @@ public:
     }
 
     bool solve() {
-        if (is_satisfy(this->board_, this->target_, this->target_len_)) {
+        if (is_satisfy(this->board_, this->target_, this->target_len_) != size_t(-1)) {
             return true;
         }
 
@@ -174,7 +174,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        if (is_satisfy(next_stage.board, this->target_, this->target_len_)) {
+                        if (is_satisfy(next_stage.board, this->target_, this->target_len_) != size_t(-1)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
@@ -206,7 +206,7 @@ public:
     }
 
     bool queue_solve() {
-        if (is_satisfy(this->board_, this->target_, this->target_len_)) {
+        if (is_satisfy(this->board_, this->target_, this->target_len_) != size_t(-1)) {
             return true;
         }
 
@@ -259,7 +259,7 @@ public:
 
                         next_stages.push(next_stage);
 
-                        if (is_satisfy(next_stage.board, this->target_, this->target_len_)) {
+                        if (is_satisfy(next_stage.board, this->target_, this->target_len_) != size_t(-1)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
