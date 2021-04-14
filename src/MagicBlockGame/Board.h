@@ -130,7 +130,7 @@ union Board
     }
 
     // clockwise rotate 90 degrees
-    void rotate_90_degrees_cw(Board<BoardX, BoardY> & dest) {
+    void rotate_90_cw(Board<BoardX, BoardY> & dest) {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 size_t src_pos = y * BoardY + x;
@@ -143,7 +143,7 @@ union Board
     }
 
     // clockwise rotate 180 degrees
-    void rotate_180_degrees_cw(Board<BoardX, BoardY> & dest) {
+    void rotate_180_cw(Board<BoardX, BoardY> & dest) {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 size_t src_pos = y * BoardY + x;
@@ -156,7 +156,7 @@ union Board
     }
 
     // clockwise rotate 270 degrees
-    void rotate_270_degrees_cw(Board<BoardX, BoardY> & dest) {
+    void rotate_270_cw(Board<BoardX, BoardY> & dest) {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
                 size_t src_pos = y * BoardY + x;

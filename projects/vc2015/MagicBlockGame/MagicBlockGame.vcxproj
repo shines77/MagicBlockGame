@@ -23,6 +23,7 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\Board.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\BitSet.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Constant.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\CPUWarmUp.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\ErrorCode.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockGame.h" />

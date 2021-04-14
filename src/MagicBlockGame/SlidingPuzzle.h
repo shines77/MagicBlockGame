@@ -2,12 +2,14 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <assert.h>
 
 #include <vector>
 #include <queue>
 #include <algorithm>    // For std::swap(), until C++11
 #include <utility>      // For std::swap(), since C++11
 
+#include "Constant.h"
 #include "Color.h"
 #include "Move.h"
 #include "Board.h"
@@ -25,8 +27,8 @@ public:
     typedef Stage<BoardX, BoardY> stage_type;
 
 private:
-    Board<BoardX, BoardY> player_;
-    Board<BoardX, BoardY> target_[4];
+    Board<BoardX, BoardY> player_board_;
+    Board<BoardX, BoardY> target_board_[4];
     size_t target_len_;
 
     std::vector<Move> empty_moves_[BoardX * BoardY];
@@ -74,18 +76,18 @@ public:
     }
 
     template <size_t UBoardX, size_t UBoardY>
-    void setPuzzle(const Board<UBoardX, UBoardY> & board,
+    void setPuzzle(const Board<UBoardX, UBoardY> & player,
                    const Board<BoardX, BoardY> target[4],
                    size_t target_len) {
         static const ptrdiff_t startX = (UBoardX - BoardX) / 2;
         static const ptrdiff_t startY = (UBoardY - BoardY) / 2;
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                this->player_.cells[y * BoardY + x] = board.cells[(startY + y) * UBoardY + (startX + x)];
+                this->player_board_.cells[y * BoardY + x] = player.cells[(startY + y) * UBoardY + (startX + x)];
             }
         }
         for (size_t i = 0; i < 4; i++) {
-            this->target_[i] = target[i];
+            this->target_board_[i] = target[i];
         }
         this->target_len_ = target_len;
     }
@@ -93,7 +95,7 @@ public:
     bool find_empty(Position & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                char color = this->player_.cells[y * BoardY + x];
+                char color = this->player_board_.cells[y * BoardY + x];
                 if (color == Color::Empty) {
                     empty_pos.value = (int16_t)(y * BoardY + x);
                     return true;
@@ -103,16 +105,16 @@ public:
         return false;
     }
 
-    bool is_satisfy(const Board<BoardX, BoardY> & board,
+    bool is_satisfy(const Board<BoardX, BoardY> & player,
                     const Board<BoardX, BoardY> & target) const {
-        return (board == target);
+        return (player == target);
     }
 
-    size_t is_satisfy(const Board<BoardX, BoardY> & board,
+    size_t is_satisfy(const Board<BoardX, BoardY> & player,
                       const Board<BoardX, BoardY> target[4],
                       size_t target_len) const {
         for (size_t index = 0; index < target_len; index++) {
-            if (board == target[index]) {
+            if (player == target[index]) {
                 return index;
             }
         }
@@ -121,7 +123,7 @@ public:
     }
 
     bool solve() {
-        if (is_satisfy(this->player_, this->target_, this->target_len_) != size_t(-1)) {
+        if (is_satisfy(this->player_board_, this->target_board_, this->target_len_) != size_t(-1)) {
             return true;
         }
 
@@ -136,7 +138,7 @@ public:
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
-            start.board = this->player_;
+            start.board = this->player_board_;
             visited.set(start.board.value());
 
             std::vector<stage_type> cur_stages;
@@ -174,7 +176,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        if (is_satisfy(next_stage.board, this->target_, this->target_len_) != size_t(-1)) {
+                        if (is_satisfy(next_stage.board, this->target_board_, this->target_len_) != size_t(-1)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
@@ -206,7 +208,7 @@ public:
     }
 
     bool queue_solve() {
-        if (is_satisfy(this->player_, this->target_, this->target_len_) != size_t(-1)) {
+        if (is_satisfy(this->player_board_, this->target_board_, this->target_len_) != size_t(-1)) {
             return true;
         }
 
@@ -221,7 +223,7 @@ public:
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
-            start.board = this->player_;
+            start.board = this->player_board_;
             visited.set(start.board.value());           
 
             std::queue<stage_type> cur_stages;
@@ -259,7 +261,7 @@ public:
 
                         next_stages.push(next_stage);
 
-                        if (is_satisfy(next_stage.board, this->target_, this->target_len_) != size_t(-1)) {
+                        if (is_satisfy(next_stage.board, this->target_board_, this->target_len_) != size_t(-1)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;

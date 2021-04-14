@@ -19,7 +19,7 @@ void solve_sliding_puzzle()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle()\n\n");
 
-    MagicBlockGame<5, 5, 3, 3> game;
+    MagicBlockGame<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input_test.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -50,7 +50,7 @@ void solve_sliding_puzzle_queue()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle_queue()\n\n");
 
-    MagicBlockGame<5, 5, 3, 3> game;
+    MagicBlockGame<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input_test.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -81,7 +81,7 @@ void solve_magic_block_game()
     printf("-------------------------------------------------------\n\n");
     printf("solve_magic_block_game()\n\n");
 
-    MagicBlockGame<5, 5, 3, 3> game;
+    MagicBlockGame<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {

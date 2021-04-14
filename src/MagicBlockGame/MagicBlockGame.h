@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <assert.h>
 
 #include <cstdlib>
 #include <cstdio>
@@ -17,6 +18,7 @@
 #include <algorithm>    // For std::swap(), until C++11
 #include <utility>      // For std::swap(), since C++11
 
+#include "Constant.h"
 #include "Color.h"
 #include "Move.h"
 #include "Board.h"
@@ -28,7 +30,8 @@
 namespace PuzzleGame {
 
 template <size_t BoardX, size_t BoardY,
-          size_t TargetX, size_t TargetY>
+          size_t TargetX, size_t TargetY,
+          bool AllowRotate = true>
 class MagicBlockGame
 {
 public:
@@ -39,9 +42,9 @@ public:
 
     typedef typename SharedData<BoardX, BoardY, TargetX, TargetY>::stage_type stage_type;
 
-    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 1>   Step1Solver;
-    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 123> Step123Solver;
-    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, 456> Step456Solver;
+    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, 1>   Step1Solver;
+    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, 123> Step123Solver;
+    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, false, 456>       Step456Solver;
 
 private:
     SharedData<BoardX, BoardY, TargetX, TargetY> data_;
@@ -77,7 +80,11 @@ private:
                 this->data_.empty_moves[y * BoardY + x] = empty_moves;
             }
         }
-        this->data_.target_len = 1;
+
+        if (AllowRotate)
+            this->data_.target_len = MaxRotateType;
+        else
+            this->data_.target_len = 1;
     }
 
 public:
@@ -123,7 +130,7 @@ public:
                         for (size_t x = 0; x < TargetX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
-                                this->data_.target[0].cells[line_no * TargetY + x] = color;
+                                this->data_.target_board[0].cells[line_no * TargetY + x] = color;
                             }
                             else {
                                 err_code = ErrorCode::UnknownTargetBoardColor;
@@ -136,7 +143,7 @@ public:
                         for (size_t x = 0; x < BoardX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
-                                this->data_.player.cells[boardY * BoardY + x] = color;
+                                this->data_.player_board.cells[boardY * BoardY + x] = color;
                             }
                             else {
                                 err_code = ErrorCode::UnknownPlayerBoardColor;
@@ -203,7 +210,7 @@ public:
 
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                uint8_t cell = this->data_.player.cells[y * BoardY + x];
+                uint8_t cell = this->data_.player_board.cells[y * BoardY + x];
                 if (cell >= Color::Empty && cell < Color::Maximum) {
                     this->data_.player_colors[cell]++;
                 }
@@ -212,7 +219,7 @@ public:
 
         for (size_t y = 0; y < TargetY; y++) {
             for (size_t x = 0; x < TargetX; x++) {
-                uint8_t cell = this->data_.target[0].cells[y * TargetY + x];
+                uint8_t cell = this->data_.target_board[0].cells[y * TargetY + x];
                 if (cell >= Color::Empty && cell < Color::Maximum) {
                     this->data_.target_colors[cell]++;
                 }
@@ -251,9 +258,9 @@ public:
     }
 
     void rotate_target_board() {
-        this->data_.target[0].rotate_90_degrees_cw(this->data_.target[1]);
-        this->data_.target[0].rotate_180_degrees_cw(this->data_.target[2]);
-        this->data_.target[0].rotate_270_degrees_cw(this->data_.target[3]);
+        this->data_.target_board[0].rotate_90_cw(this->data_.target_board[1]);
+        this->data_.target_board[0].rotate_180_cw(this->data_.target_board[2]);
+        this->data_.target_board[0].rotate_270_cw(this->data_.target_board[3]);
 
         bool is_duplicated[4];
         for (size_t i = 0; i < 4; i++) {
@@ -262,7 +269,7 @@ public:
 
         for (size_t i = 1; i < 4; i++) {
             for (size_t j = 0; j < i; j++) {
-                if (this->data_.target[j] == this->data_.target[i]) {
+                if (this->data_.target_board[j] == this->data_.target_board[i]) {
                     is_duplicated[i] = true;
                     break;
                 }
@@ -273,7 +280,7 @@ public:
         for (size_t i = 1; i < 4; i++) {
             if (is_duplicated[i]) {
                 for (size_t j = i + 1; j < 4; j++) {
-                    this->data_.target[j - 1] = this->data_.target[j];
+                    this->data_.target_board[j - 1] = this->data_.target_board[j];
                 }
                 target_len--;
             }
@@ -296,14 +303,14 @@ public:
         return false;
     }
 
-    bool is_satisfy(const Board<BoardX, BoardY> & board,
+    bool is_satisfy(const Board<BoardX, BoardY> & player,
                     const Board<TargetX, TargetY> & target) const {
         for (size_t y = 0; y < TargetY; y++) {
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
             for (size_t x = 0; x < TargetX; x++) {
                 uint8_t target_cell = target.cells[targetBaseY + x];
-                uint8_t cell = board.cells[baseY + (startX + x)];
+                uint8_t cell = player.cells[baseY + (startX + x)];
                 if (cell != target_cell) {
                     return false;
                 }
@@ -313,16 +320,17 @@ public:
         return true;
     }
 
-    size_t is_satisfy(const Board<BoardX, BoardY> & board,
+    size_t is_satisfy(const Board<BoardX, BoardY> & player,
                       const Board<TargetX, TargetY> target[4],
                       size_t target_len) const {
         for (size_t index = 0; index < target_len; index++) {
-            if (is_satisfy(board, target[index])) {
-                return index;
+            if (is_satisfy(player, target[index])) {
+                size_u result(1, index);
+                return result.value;
             }
         }
 
-        return size_t(-1);
+        return 0;
     }
 
     // Check order: up to down
@@ -355,11 +363,12 @@ public:
         for (size_t index = 0; index < target_len; index++) {
             if (check_board_is_equal(board, target[index],
                 firstTargetX, lastTargetX, firstTargetY, lastTargetY)) {
-                return index;
+                size_u result(1, index);
+                return result.value;
             }
         }
 
-        return size_t(-1);
+        return 0;
     }
 
     bool translateMovePath(const std::vector<Position> & move_path) {
@@ -368,7 +377,7 @@ public:
         //printf("translateMovePath() begin ...\n\n");
         this->answer_.clear();
 
-        Board<BoardX, BoardY> board(this->data_.player);
+        Board<BoardX, BoardY> board(this->data_.player_board);
         size_t index = 0;
         int16_t from_pos, move_to_pos;
         uint8_t last_dir = uint8_t(-1);
@@ -423,7 +432,7 @@ public:
 
                             std::swap(board.cells[from_pos], board.cells[move_to_pos]);
 
-                            if (check_board_is_equal(board, this->data_.target, this->data_.target_len,
+                            if (check_board_is_equal(board, this->data_.target_board, this->data_.target_len,
                                                      0, TargetX, 0, TargetY)) {
                                 MoveInfo move_info;
                                 move_info.from_pos = from_pos;
@@ -485,51 +494,57 @@ public:
     }
 
     bool solve() {
-        if (is_satisfy(this->data_.player, this->data_.target, this->data_.target_len) != size_t(-1)) {
+        if (is_satisfy(this->data_.player_board, this->data_.target_board, this->data_.target_len) != 0) {
             return true;
         }
 
         bool solvable = false;
+        size_t out_rotate_type = 0;
 
         Position empty;
-        bool found_empty = find_empty(this->data_.player, empty);
+        bool found_empty = find_empty(this->data_.player_board, empty);
         if (found_empty) {
             Step123Solver solver_123(&this->data_);
-            solvable = solver_123.solve();
+            solvable = solver_123.solve(out_rotate_type);
 
             if (solvable) {
-                for (size_t i = 0; i < 4; i++) {
-                    this->data_.s456.openning_type = i;
-                    const std::vector<stage_type> & stage_list = this->data_.s123.stage_list[i];
-                    size_t totalStage = stage_list.size();
-                    for (size_t n = 0; n < totalStage; n++) {
-                        this->data_.s456.index = n;
-                        if (this->min_steps_ > stage_list[n].move_path.size()) {
-                            this->data_.s456.depth_limit = std::min(size_t(35),
-                                size_t(this->min_steps_ - stage_list[n].move_path.size()));
-                        }
-                        else {
-                            continue;
-                        }
-                        Step456Solver solver_456(&this->data_);
-                        solver_456.setBoard(stage_list[n].board);
-                        solvable = solver_456.solve();
-                        if (solvable) {
-                            this->move_path_ = solver_456.getMovePath();
-                            size_t total_steps = stage_list[n].move_path.size() + this->move_path_.size();
-                            printf("Step123 moves: %u, Step456 moves: %u, Total moves: %u\n\n",
-                                   (uint32_t)stage_list[n].move_path.size(),
-                                   (uint32_t)this->move_path_.size(),
-                                   (uint32_t)total_steps);
+                for (size_t rotate_type = 0; rotate_type < MaxRotateType; rotate_type++) {
+                    for (size_t phrase1_type = 0; phrase1_type < MaxPhrase1Type; phrase1_type++) {
+                        this->data_.s456.phrase1_type = phrase1_type;
+                        const std::vector<stage_type> & stage_list = this->data_.s123.stage_list[rotate_type][phrase1_type];
+                        size_t totalStage = stage_list.size();
+                        for (size_t n = 0; n < totalStage; n++) {
+                            this->data_.s456.index = n;
+                            if (this->min_steps_ > stage_list[n].move_path.size()) {
+                                this->data_.s456.depth_limit = std::min(size_t(35),
+                                    size_t(this->min_steps_ - stage_list[n].move_path.size()));
+                            }
+                            else {
+                                continue;
+                            }
 
-                            if (total_steps < this->min_steps_) {
-                                this->map_used_ = solver_456.getMapUsed();
-                                this->min_steps_ = total_steps;
-                                this->best_move_path_ = stage_list[n].move_path;
-                                for (auto iter : this->move_path_) {
-                                    this->best_move_path_.push_back(iter);
+                            Step456Solver solver_456(&this->data_);
+                            solver_456.setPlayerBoard(stage_list[n].board);
+                            solver_456.setRotateType(stage_list[n].rotate_type);
+
+                            solvable = solver_456.solve(out_rotate_type);
+                            if (solvable) {
+                                this->move_path_ = solver_456.getMovePath();
+                                size_t total_steps = stage_list[n].move_path.size() + this->move_path_.size();
+                                printf("Step123 moves: %u, Step456 moves: %u, Total moves: %u\n\n",
+                                       (uint32_t)stage_list[n].move_path.size(),
+                                       (uint32_t)this->move_path_.size(),
+                                       (uint32_t)total_steps);
+
+                                if (total_steps < this->min_steps_) {
+                                    this->map_used_ = solver_456.getMapUsed();
+                                    this->min_steps_ = total_steps;
+                                    this->best_move_path_ = stage_list[n].move_path;
+                                    for (auto iter : this->move_path_) {
+                                        this->best_move_path_.push_back(iter);
+                                    }
+                                    printf("Total moves: %u\n\n", (uint32_t)this->best_move_path_.size());
                                 }
-                                printf("Total moves: %u\n\n", (uint32_t)this->best_move_path_.size());
                             }
                         }
                     }
@@ -553,7 +568,9 @@ public:
 
     bool solve_sliding_puzzle() {
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player, this->data_.target, this->data_.target_len);
+        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player_board,
+                                                         this->data_.target_board,
+                                                         this->data_.target_len);
         bool solvable = slidingPuzzle.solve();
         if (solvable) {
             this->best_move_path_ = slidingPuzzle.getMovePath();
@@ -564,7 +581,9 @@ public:
 
     bool queue_solve_sliding_puzzle() {
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player, this->data_.target, this->data_.target_len);
+        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player_board,
+                                                         this->data_.target_board,
+                                                         this->data_.target_len);
         bool solvable = slidingPuzzle.queue_solve();
         if (solvable) {
             this->best_move_path_ = slidingPuzzle.getMovePath();
