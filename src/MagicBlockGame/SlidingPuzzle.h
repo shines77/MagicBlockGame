@@ -25,7 +25,7 @@ public:
     typedef Stage<BoardX, BoardY> stage_type;
 
 private:
-    Board<BoardX, BoardY> board_;
+    Board<BoardX, BoardY> player_;
     Board<BoardX, BoardY> target_[4];
     size_t target_len_;
 
@@ -81,7 +81,7 @@ public:
         static const ptrdiff_t startY = (UBoardY - BoardY) / 2;
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                this->board_.cells[y * BoardY + x] = board.cells[(startY + y) * UBoardY + (startX + x)];
+                this->player_.cells[y * BoardY + x] = board.cells[(startY + y) * UBoardY + (startX + x)];
             }
         }
         for (size_t i = 0; i < 4; i++) {
@@ -93,7 +93,7 @@ public:
     bool find_empty(Position & empty_pos) const {
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                char color = this->board_.cells[y * BoardY + x];
+                char color = this->player_.cells[y * BoardY + x];
                 if (color == Color::Empty) {
                     empty_pos.value = (int16_t)(y * BoardY + x);
                     return true;
@@ -121,7 +121,7 @@ public:
     }
 
     bool solve() {
-        if (is_satisfy(this->board_, this->target_, this->target_len_) != size_t(-1)) {
+        if (is_satisfy(this->player_, this->target_, this->target_len_) != size_t(-1)) {
             return true;
         }
 
@@ -136,7 +136,7 @@ public:
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
-            start.board = this->board_;
+            start.board = this->player_;
             visited.set(start.board.value());
 
             std::vector<stage_type> cur_stages;
@@ -206,7 +206,7 @@ public:
     }
 
     bool queue_solve() {
-        if (is_satisfy(this->board_, this->target_, this->target_len_) != size_t(-1)) {
+        if (is_satisfy(this->player_, this->target_, this->target_len_) != size_t(-1)) {
             return true;
         }
 
@@ -221,7 +221,7 @@ public:
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
-            start.board = this->board_;
+            start.board = this->player_;
             visited.set(start.board.value());           
 
             std::queue<stage_type> cur_stages;

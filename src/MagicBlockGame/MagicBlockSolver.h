@@ -63,7 +63,7 @@ public:
 private:
     SharedData<BoardX, BoardY, TargetX, TargetY> * data_;
 
-    Board<BoardX, BoardY> board_;
+    Board<BoardX, BoardY> player_;
     Board<TargetX, TargetY> target_[4];
 
     size_t target_len_;
@@ -132,7 +132,7 @@ private:
 
     void init() {
         if (Step == 1 || Step == 12 || Step == 123) {
-            this->board_ = this->data_->board;
+            this->player_ = this->data_->player;
             for (size_t i = 0; i < 4; i++) {
                 this->target_[i] = this->data_->target[i];
             }
@@ -212,7 +212,7 @@ public:
     }
 
     void setBoard(const Board<BoardX, BoardY> & board) {
-        this->board_ = board;
+        this->player_ = board;
     }
 
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
@@ -810,7 +810,7 @@ public:
     }
 
     bool solve_full() {
-        if (is_satisfy_full(this->board_, this->target_, this->target_len_)) {
+        if (is_satisfy_full(this->player_, this->target_, this->target_len_)) {
             return true;
         }
 
@@ -818,14 +818,14 @@ public:
         size_t depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(this->board_, empty);
+        bool found_empty = find_empty(this->player_, empty);
         if (found_empty) {
             std::set<uint128_t> visited;
 
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
-            start.board = this->data_->board;
+            start.board = this->data_->player;
             visited.insert(start.board.value128());
 
             std::vector<stage_type> cur_stages;
@@ -901,7 +901,7 @@ public:
     }
 
     bool solve() {
-        size_t sat_mask = is_satisfy(this->board_, this->target_, this->target_len_);
+        size_t sat_mask = is_satisfy(this->player_, this->target_, this->target_len_);
         if (sat_mask > 0 && sat_mask != size_t(-1)) {
             return true;
         }
@@ -910,14 +910,14 @@ public:
         size_t depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(this->board_, empty);
+        bool found_empty = find_empty(this->player_, empty);
         if (found_empty) {
             std::set<uint128_t> visited;
 
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
-            start.board = this->board_;
+            start.board = this->player_;
             visited.insert(start.board.value128());
 
             std::vector<stage_type> cur_stages;
@@ -1047,7 +1047,7 @@ public:
     }
 
     bool queue_solve() {
-        size_t sat_mask = is_satisfy(this->board_, this->target_, this->target_len_);
+        size_t sat_mask = is_satisfy(this->player_, this->target_, this->target_len_);
         if (sat_mask > 0 && sat_mask != size_t(-1)) {
             return true;
         }
@@ -1056,14 +1056,14 @@ public:
         size_t depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(this->board_, empty);
+        bool found_empty = find_empty(this->player_, empty);
         if (found_empty) {
             std::set<uint128_t> visited;
 
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
-            start.board = this->board_;
+            start.board = this->player_;
             visited.insert(start.board.value128());
 
             std::queue<stage_type> cur_stages;

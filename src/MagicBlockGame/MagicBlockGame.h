@@ -136,7 +136,7 @@ public:
                         for (size_t x = 0; x < BoardX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::Empty && color < Color::Last) {
-                                this->data_.board.cells[boardY * BoardY + x] = color;
+                                this->data_.player.cells[boardY * BoardY + x] = color;
                             }
                             else {
                                 err_code = ErrorCode::UnknownPlayerBoardColor;
@@ -197,15 +197,15 @@ public:
 
     void count_color_nums() {
         for (size_t clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->data_.board_colors[clr] = 0;
+            this->data_.player_colors[clr] = 0;
             this->data_.target_colors[clr] = 0;
         }
 
         for (size_t y = 0; y < BoardY; y++) {
             for (size_t x = 0; x < BoardX; x++) {
-                uint8_t cell = this->data_.board.cells[y * BoardY + x];
+                uint8_t cell = this->data_.player.cells[y * BoardY + x];
                 if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->data_.board_colors[cell]++;
+                    this->data_.player_colors[cell]++;
                 }
             }
         }
@@ -223,7 +223,7 @@ public:
     int check_player_board_colors() {
         int err_code = ErrorCode::Success;
         for (size_t clr = 0; clr < Color::Maximum; clr++) {
-            if (this->data_.board_colors[clr] > kSingelColorNums) {
+            if (this->data_.player_colors[clr] > kSingelColorNums) {
                 err_code = ErrorCode::PlayerBoardColorOverflowFirst + (int)clr;
                 return err_code;
             }
@@ -368,7 +368,7 @@ public:
         //printf("translateMovePath() begin ...\n\n");
         this->answer_.clear();
 
-        Board<BoardX, BoardY> board(this->data_.board);
+        Board<BoardX, BoardY> board(this->data_.player);
         size_t index = 0;
         int16_t from_pos, move_to_pos;
         uint8_t last_dir = uint8_t(-1);
@@ -485,14 +485,14 @@ public:
     }
 
     bool solve() {
-        if (is_satisfy(this->data_.board, this->data_.target, this->data_.target_len) != size_t(-1)) {
+        if (is_satisfy(this->data_.player, this->data_.target, this->data_.target_len) != size_t(-1)) {
             return true;
         }
 
         bool solvable = false;
 
         Position empty;
-        bool found_empty = find_empty(this->data_.board, empty);
+        bool found_empty = find_empty(this->data_.player, empty);
         if (found_empty) {
             Step123Solver solver_123(&this->data_);
             solvable = solver_123.solve();
@@ -553,7 +553,7 @@ public:
 
     bool solve_sliding_puzzle() {
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target, this->data_.target_len);
+        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player, this->data_.target, this->data_.target_len);
         bool solvable = slidingPuzzle.solve();
         if (solvable) {
             this->best_move_path_ = slidingPuzzle.getMovePath();
@@ -564,7 +564,7 @@ public:
 
     bool queue_solve_sliding_puzzle() {
         SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.board, this->data_.target, this->data_.target_len);
+        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player, this->data_.target, this->data_.target_len);
         bool solvable = slidingPuzzle.queue_solve();
         if (solvable) {
             this->best_move_path_ = slidingPuzzle.getMovePath();

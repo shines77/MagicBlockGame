@@ -114,7 +114,7 @@ int main(int argc, char * argv[])
     solve_sliding_puzzle();
     solve_sliding_puzzle_queue();
 
-    //solve_magic_block_game();
+    solve_magic_block_game();
 
 #if !defined(_NDEBUG) && defined(_MSC_VER)
     ::system("pause");

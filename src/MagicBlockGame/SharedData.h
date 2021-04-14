@@ -56,13 +56,13 @@ struct SharedData
 {
     typedef typename Step123<BoardX, BoardY>::stage_type stage_type;
 
-    Board<BoardX, BoardY> board;
+    Board<BoardX, BoardY> player;
     Board<TargetX, TargetY> target[4];
 
-    int board_colors[Color::Maximum];
-    int target_colors[Color::Maximum];
-
     size_t target_len;
+
+    int player_colors[Color::Maximum];
+    int target_colors[Color::Maximum];    
 
     std::vector<Move> empty_moves[BoardX * BoardY];
 
