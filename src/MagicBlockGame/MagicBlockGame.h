@@ -508,6 +508,9 @@ public:
             solvable = solver_123.solve(out_rotate_type);
 
             if (solvable) {
+#if !defined(_NDEBUG) && defined(_MSC_VER)
+                ::system("pause");
+#endif
                 for (size_t rotate_type = 0; rotate_type < MaxRotateType; rotate_type++) {
                     for (size_t phrase1_type = 0; phrase1_type < MaxPhrase1Type; phrase1_type++) {
                         this->data_.s456.phrase1_type = phrase1_type;
