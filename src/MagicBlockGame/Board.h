@@ -8,7 +8,7 @@
 #include <algorithm>    // For std::fill_n()
 
 #include "Color.h"
-#include "UInt128.h"
+#include "Value128.h"
 
 namespace PuzzleGame {
 
@@ -100,7 +100,7 @@ union Board
         return value64;
     }
 
-    uint128_t value128() const noexcept {
+    Value128 value128() const noexcept {
         uint64_t low_value = 0, high_value = 0;
         if (BoardX * BoardY <= 21) {
             for (ptrdiff_t cell = BoardX * BoardY - 1; cell >= 0; cell--) {
@@ -126,7 +126,7 @@ union Board
             // High: bit 0 ~ 1
             high_value >>= 1;
         }
-        return uint128_t(low_value, high_value);
+        return Value128(low_value, high_value);
     }
 
     // clockwise rotate 90 degrees

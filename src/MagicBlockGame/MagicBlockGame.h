@@ -26,6 +26,7 @@
 #include "ErrorCode.h"
 #include "MagicBlockSolver.h"
 #include "SlidingPuzzle.h"
+#include "StopWatch.h"
 
 namespace PuzzleGame {
 
@@ -504,10 +505,98 @@ public:
         Position empty;
         bool found_empty = find_empty(this->data_.player_board, empty);
         if (found_empty) {
+            jtest::StopWatch sw;
+
             Step123Solver solver_123(&this->data_);
+            sw.start();
             solvable = solver_123.solve(out_rotate_type);
+            sw.stop();
 
             if (solvable) {
+                double elapsed_time = sw.getElapsedMillisec();
+                printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+#if !defined(_NDEBUG) && defined(_MSC_VER)
+                ::system("pause");
+#endif
+                for (size_t rotate_type = 0; rotate_type < MaxRotateType; rotate_type++) {
+                    for (size_t phrase1_type = 0; phrase1_type < MaxPhrase1Type; phrase1_type++) {
+                        this->data_.s456.phrase1_type = phrase1_type;
+                        const std::vector<stage_type> & stage_list = this->data_.s123.stage_list[rotate_type][phrase1_type];
+                        size_t totalStage = stage_list.size();
+                        for (size_t n = 0; n < totalStage; n++) {
+                            this->data_.s456.index = n;
+                            if (this->min_steps_ > stage_list[n].move_path.size()) {
+                                this->data_.s456.depth_limit = std::min(size_t(35),
+                                    size_t(this->min_steps_ - stage_list[n].move_path.size()));
+                            }
+                            else {
+                                continue;
+                            }
+
+                            Step456Solver solver_456(&this->data_);
+                            solver_456.setPlayerBoard(stage_list[n].board);
+                            solver_456.setRotateType(stage_list[n].rotate_type);
+
+                            solvable = solver_456.solve(out_rotate_type);
+                            if (solvable) {
+                                this->move_path_ = solver_456.getMovePath();
+                                size_t total_steps = stage_list[n].move_path.size() + this->move_path_.size();
+                                printf("Step123 moves: %u, Step456 moves: %u, Total moves: %u\n\n",
+                                       (uint32_t)stage_list[n].move_path.size(),
+                                       (uint32_t)this->move_path_.size(),
+                                       (uint32_t)total_steps);
+
+                                if (total_steps < this->min_steps_) {
+                                    this->map_used_ = solver_456.getMapUsed();
+                                    this->min_steps_ = total_steps;
+                                    this->best_move_path_ = stage_list[n].move_path;
+                                    for (auto iter : this->move_path_) {
+                                        this->best_move_path_.push_back(iter);
+                                    }
+                                    printf("Total moves: %u\n\n", (uint32_t)this->best_move_path_.size());
+                                }
+                            }
+                        }
+                    }
+                }
+
+                printf("min_steps: %u\n", (uint32_t)this->min_steps_);
+                printf("Total moves: %u\n", (uint32_t)this->best_move_path_.size());
+                printf("\n");
+
+                if (this->min_steps_ != size_t(-1) || this->best_move_path_.size() > 0) {
+                    solvable = true;
+                    if (translateMovePath(this->best_move_path_)) {
+                        displayAnswer(this->answer_);
+                    }
+                }
+            }
+        }
+
+        return solvable;
+    }
+
+    bool bitmap_solve() {
+        if (is_satisfy(this->data_.player_board, this->data_.target_board, this->data_.target_len) != 0) {
+            return true;
+        }
+
+        bool solvable = false;
+        size_t out_rotate_type = 0;
+
+        Position empty;
+        bool found_empty = find_empty(this->data_.player_board, empty);
+        if (found_empty) {
+            jtest::StopWatch sw;
+
+            Step123Solver solver_123(&this->data_);
+            sw.start();
+            solvable = solver_123.bitmap_solve(out_rotate_type);
+            sw.stop();
+
+            if (solvable) {
+                double elapsed_time = sw.getElapsedMillisec();
+                printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 #if !defined(_NDEBUG) && defined(_MSC_VER)
                 ::system("pause");
 #endif

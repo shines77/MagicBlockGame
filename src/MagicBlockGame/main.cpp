@@ -107,6 +107,37 @@ void solve_magic_block_game()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
+void solve_magic_block_game_bitmap()
+{
+    printf("-------------------------------------------------------\n\n");
+    printf("solve_magic_block_game_bitmap()\n\n");
+
+    MagicBlockGame<5, 5, 3, 3, true> game;
+    int readStatus = game.readInput("input.txt");
+    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+    if (ErrorCode::isFailure(readStatus)) {
+        return;
+    }
+
+    jtest::StopWatch sw;
+
+    sw.start();
+    bool solvable = game.bitmap_solve();
+    sw.stop();
+    double elapsed_time = sw.getElapsedMillisec();
+
+    if (solvable) {
+        printf("Found a answer!\n\n");
+        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
+        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+    }
+    else {
+        printf("Not found a answer!\n\n");
+    }
+
+    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+}
+
 int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
@@ -115,6 +146,7 @@ int main(int argc, char * argv[])
     solve_sliding_puzzle_queue();
 
     solve_magic_block_game();
+    solve_magic_block_game_bitmap();
 
 #if !defined(_NDEBUG) && defined(_MSC_VER)
     ::system("pause");
