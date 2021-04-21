@@ -1279,7 +1279,7 @@ public:
         Position empty;
         bool found_empty = find_empty(this->player_board_, empty);
         if (found_empty) {
-            SparseTrieBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY> visited;
+            SparseTrieBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> visited;
 
             stage_type start;
             start.empty = empty;
@@ -1426,7 +1426,7 @@ public:
                 printf("\n");
             }
 
-            SparseTrieBitsetPool<3>::getInstance().shutdown();
+            SparseTrieBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2>::shutdown();
         }
 
         return solvable;

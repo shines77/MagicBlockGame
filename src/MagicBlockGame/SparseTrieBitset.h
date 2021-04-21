@@ -11,6 +11,7 @@
 #include <cstring>
 #include <memory>
 #include <vector>
+#include <map>
 #include <bitset>
 #include <exception>
 #include <stdexcept>
@@ -25,7 +26,7 @@ static const std::size_t s_SparseTrieBitset_board_y_index[] = {
 
 #pragma pack(push, 1)
 
-template <std::size_t Bits>
+template <std::size_t Bits, std::size_t PoolId = 0>
 class SparseTrieBitsetPool {
 public:
     typedef std::size_t     size_type;
@@ -34,6 +35,8 @@ public:
     static const size_type kBitMask = (size_type(1) << Bits) - 1;
 
     static const size_type kMaxArraySize = 16384;
+
+    static const size_type kChunkAlignment = 4096;
 
     static const size_type kChunkSize = 65536;
     static const size_type kChunkLowBits = 16;
@@ -128,7 +131,7 @@ public:
 
     class Node {
     public:
-        typedef std::size_t     size_type;
+        typedef std::size_t size_type;
 
     private:
         uint16_t    type_;
@@ -174,7 +177,7 @@ public:
 
     class Chunk {
     public:
-        typedef std::size_t     size_type;
+        typedef std::size_t size_type;
 
         static const size_type kUintBytes = sizeof(size_type);
 
@@ -183,7 +186,11 @@ public:
         size_type   size_;
 
         void init() {
-            void * new_chunk = std::malloc(kChunkSize * kUintBytes);
+#if defined(_MSC_VER)
+            void * new_chunk = ::_aligned_malloc(kChunkSize * kUintBytes, kChunkAlignment);
+#else
+            void * new_chunk = ::memalign(kChunkAlignment, kChunkSize * kUintBytes);
+#endif
             if (new_chunk != nullptr) {
                 this->chunk_ = new_chunk;
             }
@@ -211,7 +218,11 @@ public:
 
         void destroy() {
             if (this->chunk_ != nullptr) {
-                std::free(this->chunk_);
+#if defined(_MSC_VER)
+                ::_aligned_free(this->chunk_);
+#else
+                ::free(this->chunk_);
+#endif
                 this->chunk_ = nullptr;
             }
             this->size_ = 0;
@@ -249,15 +260,32 @@ public:
         this->init();
     }
 
+    SparseTrieBitsetPool(const SparseTrieBitsetPool & src) = delete;
+
+    SparseTrieBitsetPool(SparseTrieBitsetPool && src) : size_(0) {
+        this->internal_swap(std::forward<SparseTrieBitsetPool>(src));
+    }
+
     virtual ~SparseTrieBitsetPool() {
-        this->destroy();
+        this->destroy_pool();
+    }
+
+    void internal_swap(SparseTrieBitsetPool & other) {
+        std::swap(this->chunk_list_, other.chunk_list_);
+        std::swap(this->size_, other.size_);
+    }
+
+    void swap(SparseTrieBitsetPool & other) {
+        if (&other != this) {
+            this->internal_swap(other);
+        }
     }
 
     size_type size() const {
         return this->size_;
     }
 
-    void destroy() {
+    void destroy_pool() {
         size_type list_size = this->chunk_list_.size();
         for (size_type i = 0; i < list_size; i++) {
             chunk_type * chunk = this->chunk_list_[i];
@@ -271,18 +299,72 @@ public:
     }
 
     static SparseTrieBitsetPool & getInstance() {
-        static SparseTrieBitsetPool pool;
-        return pool;
+        static std::map<size_type, SparseTrieBitsetPool> pool_map;
+        if (pool_map.count(PoolId) == 0) {
+            pool_map.insert(std::make_pair(PoolId, SparseTrieBitsetPool()));
+        }
+        return pool_map[PoolId];
+    }
+
+    PoolHandle find_ptr(void * ptr) const {
+        return 0;
+    }
+
+    PoolHandle mem_alloc(size_type size) {
+        //
+        return 0;
+    }
+
+    void mem_free(PoolHandle handle, size_type size) {
+        //
+    }
+
+    void * malloc_ptr(size_type size) {
+        PoolHandle handle = this->mem_alloc(size);
+        return handle.ptr<void>();
+    }
+
+    void free_ptr(void * ptr, size_type size) {
+        PoolHandle handle = this->find_ptr(ptr);
+        return this->mem_free(handle, size);
     }
 
     template <typename T>
-    T * allocate() {
-        return new T;
+    PoolHandle allocate() {
+        return (T *)this->mem_alloc(sizeof(T));
     }
 
     template <typename T>
-    T * allocate_array(size_type size) {
-        return nullptr;
+    PoolHandle allocate(size_type size) {
+        return (T *)this->mem_alloc(sizeof(T) * size);
+    }
+
+    void destroy(PoolHandle handle) {
+        this->mem_free(handle, sizeof(T));
+    }
+
+    void destroy(PoolHandle handle, size_type size) {
+        this->mem_free(handle, sizeof(T) * size);
+    }
+
+    template <typename T>
+    T * allocate_ptr() {
+        return (T *)this->malloc_ptr(sizeof(T));
+    }
+
+    template <typename T>
+    T * allocate_ptr(size_type size) {
+        return (T *)this->malloc_ptr(sizeof(T) * size);
+    }
+
+    template <typename T>
+    void destroy_ptr(T * p) {
+        this->free_ptr((void *)p, sizeof(T));
+    }
+
+    template <typename T>
+    void destroy_ptr(T * p, size_type size) {
+        this->free_ptr((void *)p, sizeof(T) * size);
     }
 
     template <typename T>
@@ -298,18 +380,18 @@ public:
     }
 
     static void shutdown() {
-        auto pool = SparseTrieBitsetPool::getInstance();
-        pool.destroy();
+        auto & pool = SparseTrieBitsetPool::getInstance();
+        pool.destroy_pool();
     }
 };
 
 #pragma pack(pop)
 
-template <typename Board, std::size_t Bits, std::size_t Length, std::size_t ChunkSize = 65536>
+template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
 class SparseTrieBitset {
 public:
     typedef Board                                       board_type;
-    typedef SparseTrieBitsetPool<Bits>                  pool_type;
+    typedef SparseTrieBitsetPool<Bits, PoolId>          pool_type;
     typedef typename pool_type::chunk_type              chunk_type;
     typedef typename pool_type::node_type               node_type;
 
@@ -351,15 +433,20 @@ public:
             this->y_index_[BoardY - 1] = top;
         }
 
-        auto pool = pool_type::getInstance();
-        this->root_ = pool.allocate<node_type>();
+        auto & pool = pool_type::getInstance();
+        this->root_ = pool.allocate_ptr<node_type>();
     }
 
     void destroy() {
         if (this->pool_ != nullptr) {
-            this->pool_->destroy();
+            this->pool_->destroy_pool();
             this->pool_ = nullptr;
         }
+    }
+
+    static void shutdown() {
+        auto & pool = pool_type::getInstance();
+        pool.destroy_pool();
     }
 
     bool contains(const board_type & board) const {

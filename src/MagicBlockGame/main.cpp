@@ -142,7 +142,7 @@ void solve_magic_block_game_bitmap()
 
 void SparseTrieBitset_test()
 {
-    SparseTrieBitset<Board<5, 5>, 3, 25> visited;
+    SparseTrieBitset<Board<5, 5>, 3, 25, 1> visited;
     Board<5, 5> board;
     board.cells[0] = Color::Blue;
     board.cells[1] = Color::Red;
@@ -157,7 +157,7 @@ void SparseTrieBitset_test()
     board.cells[9] = Color::Unknown;
     visited.append(board);
 
-    SparseTrieBitsetPool<3>::getInstance().shutdown();
+    SparseTrieBitset<Board<5, 5>, 3, 25, 1>::shutdown();
 }
 
 int main(int argc, char * argv[])
