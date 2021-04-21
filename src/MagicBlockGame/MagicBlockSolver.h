@@ -26,7 +26,7 @@
 #include "Board.h"
 #include "Stage.h"
 #include "SharedData.h"
-#include "SparseTrieBitmap.h"
+#include "SparseTrieBitset.h"
 
 //#define ENABLE_DEBUG
 
@@ -1279,14 +1279,14 @@ public:
         Position empty;
         bool found_empty = find_empty(this->player_board_, empty);
         if (found_empty) {
-            SparseTrieBitmap<8, BoardX * BoardY> visited;
+            SparseTrieBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY> visited;
 
             stage_type start;
             start.empty = empty;
             start.last_dir = -1;
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited.append(start.board.value128());
+            visited.append(start.board);
 
             std::vector<stage_type> cur_stages;
             std::vector<stage_type> next_stages;
@@ -1314,11 +1314,10 @@ public:
 
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        Value128 board_value = next_stage.board.value128();
-                        if (visited.contains(board_value))
+                        if (visited.contains(next_stage.board))
                             continue;
 
-                        visited.append(board_value);
+                        visited.append(next_stage.board);
 
                         next_stage.empty.value = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -1426,6 +1425,8 @@ public:
                 }
                 printf("\n");
             }
+
+            SparseTrieBitsetPool<3>::getInstance().shutdown();
         }
 
         return solvable;

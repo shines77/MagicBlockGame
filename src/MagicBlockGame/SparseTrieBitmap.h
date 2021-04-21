@@ -15,17 +15,17 @@ namespace PuzzleGame {
 
 #pragma pack(push, 1)
 
-template <typename Key, std::size_t Bits, std::size_t ChunkSize = 65536>
+template <typename Board, std::size_t Bits, std::size_t ChunkSize = 65536>
 class SparseTrieBitmapPool {
 public:
     typedef std::size_t     size_type;
-    typedef Key             key_type;
+    typedef Board           board_type;
 
     // Node
     class Node {
     public:
         typedef std::size_t         size_type;
-        typedef Key                 key_type;
+        typedef Board               board_type;
         typedef Node                node_type;
 
         static const size_type kBitMask = (size_type(2) << Bits) - 1;
@@ -44,7 +44,7 @@ public:
     class Chunk {
     public:
         typedef std::size_t         size_type;
-        typedef Key                 key_type;
+        typedef Board               board_type;
         typedef Chunk               chunk_type;
 
         static const size_type kChunkSize = ChunkSize;
@@ -84,14 +84,18 @@ public:
 
 #pragma pack(pop)
 
-template <std::size_t Bits, std::size_t Length, std::size_t ChunkSize = 65536>
+template <typename Board, std::size_t Bits, std::size_t Length, std::size_t ChunkSize = 65536>
 class SparseTrieBitmap {
 public:
-    typedef std::size_t                                     size_type;
-    typedef Value128                                        key_type;
-    typedef SparseTrieBitmapPool<key_type, Bits, ChunkSize> pool_type;
-    typedef typename pool_type::chunk_type                  chunk_type;
-    typedef typename pool_type::node_type                   node_type;
+    typedef std::size_t                                         size_type;
+    typedef Board                                               board_type;
+    typedef SparseTrieBitmapPool<board_type, Bits, ChunkSize>   pool_type;
+    typedef typename pool_type::chunk_type                      chunk_type;
+    typedef typename pool_type::node_type                       node_type;
+
+    static const size_type BoardX = board_type::Y;
+    static const size_type BoardY = board_type::X;
+    static const size_type BoardSize = board_type::BoardSize;
 
 private:
     pool_type *     pool_;
@@ -117,20 +121,16 @@ public:
         }
     }
 
-    uint16_t getValue(size_type pos) {
-        //
-    }
-
-    bool contains(const key_type & key) const {
+    bool contains(const board_type & board) const {
         //
         return true;
     }
 
-    void append(const key_type & key) {
+    void append(const board_type & board) {
         //
     }
 
-    void remove(const key_type & key) {
+    void remove(const board_type & board) {
         //
     }
 };

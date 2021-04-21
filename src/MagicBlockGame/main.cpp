@@ -12,6 +12,8 @@
 #include "CPUWarmUp.h"
 #include "StopWatch.h"
 
+#include "SparseTrieBitset.h"
+
 using namespace PuzzleGame;
 
 void solve_sliding_puzzle()
@@ -138,9 +140,31 @@ void solve_magic_block_game_bitmap()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
+void SparseTrieBitset_test()
+{
+    SparseTrieBitset<Board<5, 5>, 3, 25> visited;
+    Board<5, 5> board;
+    board.cells[0] = Color::Blue;
+    board.cells[1] = Color::Red;
+    board.cells[2] = Color::Green;
+    board.cells[3] = Color::Orange;
+    board.cells[4] = Color::White;
+
+    board.cells[5] = Color::Yellow;
+    board.cells[6] = Color::Empty;
+    board.cells[7] = Color::Red;
+    board.cells[8] = Color::Blue;
+    board.cells[9] = Color::Unknown;
+    visited.append(board);
+
+    SparseTrieBitsetPool<3>::getInstance().shutdown();
+}
+
 int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
+
+    SparseTrieBitset_test();
 
     solve_sliding_puzzle();
     solve_sliding_puzzle_queue();
