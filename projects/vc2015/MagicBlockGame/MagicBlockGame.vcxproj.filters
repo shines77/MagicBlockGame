@@ -8,6 +8,9 @@
     <Filter Include="src\TwoEndpoint">
       <UniqueIdentifier>{f784530f-e609-4bfa-86d6-80299d83187a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\support">
+      <UniqueIdentifier>{3d15b143-52f8-437c-9486-08ddeb33bdf2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockGame.h">
@@ -66,6 +69,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\SparseTrieBitset.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseTrieBitsetPool.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h">
+      <Filter>src\support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\support\RT_PowerOf2.h">
+      <Filter>src\support</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
