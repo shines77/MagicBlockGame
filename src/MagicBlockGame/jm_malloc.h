@@ -149,20 +149,32 @@ public:
     };
 
     //
+    // TinyObject
+    //
     // Class0: 4,
     // Class1: (interval = 8,   count = 8 ) 8, 16, 24, 32, 40, 48, 56, 64,
     // Class2: (interval = 16,  count = 12) 80, 96, 112, 128, ..., 248, 256,
     // Class3: (interval = 32,  count = 24) 288, 320, 352, 384, ..., 992, 1024,
     // Class4: (interval = 64,  count = 48) 1088, 1152, ..., 4032, 4096,
     //
+    // SamllObject
+    //
     // Class5: (interval = 128, count = 96)  4224, 4352, ..., 16252, 16384,
-    // Class5: (interval = 256, count = 192) 16640, 16896, ..., 65280, 65536,
+    //
+    // MidimumObject
+    //
+    // Class6: (interval = 256, count = 192) 16640, 16896, ..., 65280, 65536,
     //
     class SizeClass {
     public:
         static const size_type kTinyObjectSizeLimit = 4096;
         static const size_type kSamllObjectSizeLimit = 16384;
         static const size_type kMidimumObjectSizeLimit = 65536;
+
+        // count = (16384 - 4096) / 128 = 96
+        static const size_type kSamllObjectSizeCount = (kSamllObjectSizeLimit - kTinyObjectSizeLimit) / 128;
+        // count = (kChunkTotalBytes - 16384 + 255) / 256 = 960
+        static const size_type kMidimumObjectSizeCount = (kChunkTotalBytes - kSamllObjectSizeLimit) / 256;
 
     private:
         std::uint16_t sizeList_[128];
@@ -212,24 +224,29 @@ public:
         }
 
         ~SizeClass() {
-            //
+        }
+
+        size_type getMaxIndex() const {
+            return this->maxTinyIndex_ + kSamllObjectSizeCount + kMidimumObjectSizeCount;
         }
 
         size_type sizeToIndex(size_type alloc_size) const {
-            static const size_type kSamllObjectSizeCount = (kSamllObjectSizeLimit - kTinyObjectSizeLimit) / 128;
-
             size_type index;
             if (alloc_size < kTinyObjectSizeLimit) {
+                // TinyObject
+                // [0, 4096)
                 index = this->sizeToIndex_[alloc_size];
             }
             else if (alloc_size <= kSamllObjectSizeLimit) {
-                // [4096, 16384)
+                // SamllObject
+                // [4096, 16384), interval = 128 bytes
                 // count = (16384 - 4096) / 128 = 96
                 index = this->maxTinyIndex_ + (alloc_size - kTinyObjectSizeLimit + 127) / 128ULL;
             }
             else if (alloc_size <= kChunkTotalBytes) {
-                // [16384, kChunkTotalBytes]
-                // (kChunkTotalBytes - 16384 + 255) / 256 = 960
+                // MidimumObject
+                // [16384, kChunkTotalBytes], interval = 256 bytes
+                // count = (kChunkTotalBytes - 16384 + 255) / 256 = 960
                 // Maximum index value = this->maxTinyIndex_(92) + 96 + 960 = 1148
                 index = this->maxTinyIndex_ + kSamllObjectSizeCount + (alloc_size - kSamllObjectSizeLimit + 255) / 256ULL;
             }
@@ -237,6 +254,29 @@ public:
                 index = size_type(-1);
             }
             return index;
+        }
+
+        size_type indexToSize(size_type index) const {
+            size_type alloc_size;
+            if (index <= this->maxTinyIndex_) {
+                // TinyObject
+                // [0, 4096)
+                alloc_size = this->sizeList_[index];
+            }
+            else if (index <= (this->maxTinyIndex_ + kSamllObjectSizeCount)) {
+                // SamllObject
+                // [4096, 16384), interval = 128 bytes
+                alloc_size = kTinyObjectSizeLimit + (index - this->maxTinyIndex_) * 128;
+            }
+            else if (index <= (this->maxTinyIndex_ + kSamllObjectSizeCount + kMidimumObjectSizeCount)) {
+                // MidimumObject
+                // [16384, kChunkTotalBytes], interval = 256 bytes
+                alloc_size = kSamllObjectSizeLimit + (index - (this->maxTinyIndex_ + kSamllObjectSizeCount)) * 256;
+            }
+            else {
+                alloc_size = size_type(-1);
+            }
+            return alloc_size;
         }
     };
 

@@ -165,12 +165,24 @@ void SparseTrieBitset_test()
 void jm_mallc_test()
 {
     ThreadMalloc<0>::SizeClass sizeClass;
-    std::size_t index;
-    index = sizeClass.sizeToIndex(121);
-    index = sizeClass.sizeToIndex(239);
-    index = sizeClass.sizeToIndex(922);
-    index = sizeClass.sizeToIndex(1233);
-    index = sizeClass.sizeToIndex(12233);
+
+    std::size_t index, index1, index2;
+    index = sizeClass.sizeToIndex(0);
+    assert(index == 0);
+
+    index  = sizeClass.sizeToIndex(4095);
+    index1 = sizeClass.sizeToIndex(4096);
+    index2 = sizeClass.sizeToIndex(4097);
+    assert(index == 92);
+    assert(index1 == 92);
+    assert(index2 == (index1 + 1));
+
+    index  = sizeClass.sizeToIndex(16383);
+    index1 = sizeClass.sizeToIndex(16384);
+    index2 = sizeClass.sizeToIndex(16385);
+    assert(index == (92 + 96));
+    assert(index1 == (92 + 96));
+    assert(index2 == (index1 + 1));
 }
 
 int main(int argc, char * argv[])
