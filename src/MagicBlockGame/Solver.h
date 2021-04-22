@@ -1426,7 +1426,7 @@ public:
                 printf("\n");
             }
 
-            SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2>::shutdown();
+            visited.shutdown();
         }
 
         return solvable;

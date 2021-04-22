@@ -38,6 +38,7 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\RT_PowerOf2.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\jm_malloc.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Value128.h" />
   </ItemGroup>
   <ItemGroup>

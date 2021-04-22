@@ -16,6 +16,8 @@
 #include <exception>
 #include <stdexcept>
 
+#include "jm_malloc.h"
+
 #include "Value128.h"
 #include "support/CT_PowerOf2.h"
 
@@ -33,19 +35,25 @@ public:
 
     static const size_type kMaxArraySize = 16384;
 
-    static const size_type kChunkAlignment = 4096;
     static const size_type kChunkPageSize = 4096;
+    static const size_type kChunkAlignment = 4096;
 
-    // The chunk size is set to 128 KB for faster memory allocation.
-    static const size_type kDefaultChunkBytes = 128 * 1024;
+    // The maximum chunk unit size is 65536.
+    static const size_type kDefaultChunkUnitSize = 65536;
     static const size_type kDefaultChunkUintBytes = 4;
 
-    static const size_type kChunkTotalBytes = jstd::compile_time::round_up_pow2<kDefaultChunkBytes>::value;
     static const size_type kChunkUintBytes = jstd::compile_time::round_up_pow2<kDefaultChunkUintBytes>::value;
+    static const size_type kRoundChunkUnitSize = jstd::compile_time::round_up_pow2<kDefaultChunkUnitSize>::value;
+    static const size_type kChunkUnitSize = (kRoundChunkUnitSize <= 65536) ? kRoundChunkUnitSize : 65536; 
 
-    static const size_type kChunkUnitSize = kChunkTotalBytes / kChunkUintBytes;
-    static const size_type kChunkLowBits = jstd::compile_time::CountTrailingZeroBits<kChunkUnitSize>::value;
+    static const size_type kChunkLowShift = jstd::compile_time::CountTrailingZeroBits<kChunkUnitSize>::value;
     static const size_type kChunkLowMask = kChunkUnitSize - 1;
+
+    //
+    // The chunk size is set to 128 KB for faster memory allocation.
+    // Default value is 64KB * 4 = 256KB.
+    //
+    static const size_type kChunkTotalBytes = kChunkUnitSize * kChunkUintBytes;
 
     struct NodeType {
         enum type {
@@ -437,7 +445,7 @@ public:
 
     template <typename T>
     T * realPtr(std::uint32_t index) const {
-        std::uint16_t chunk_id = (index >> (std::uint32_t)kChunkLowBits);
+        std::uint16_t chunk_id = (index >> (std::uint32_t)kChunkLowShift);
         if (chunk_id < this->chunk_list_.size()) {
             chunk_type * chunk = this->chunk_list_[chunk_id];
             std::uint16_t offset = (index & (std::uint32_t)kChunkLowMask);

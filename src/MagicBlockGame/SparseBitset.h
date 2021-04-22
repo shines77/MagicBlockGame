@@ -78,7 +78,7 @@ public:
         }
     }
 
-    static void shutdown() {
+    void shutdown() {
         auto & pool = pool_type::getInstance();
         pool.destroy_pool();
     }

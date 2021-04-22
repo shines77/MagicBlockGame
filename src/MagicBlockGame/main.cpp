@@ -13,8 +13,10 @@
 #include "StopWatch.h"
 
 #include "SparseBitset.h"
+#include "jm_malloc.h"
 
 using namespace MagicBlock;
+using namespace jm_malloc;
 
 void solve_sliding_puzzle()
 {
@@ -157,20 +159,32 @@ void SparseTrieBitset_test()
     board.cells[9] = Color::Unknown;
     visited.append(board);
 
-    MagicBlock::SparseBitset<Board<5, 5>, 3, 25, 1>::shutdown();
+    visited.shutdown();
+}
+
+void jm_mallc_test()
+{
+    ThreadMalloc<0>::SizeClass sizeClass;
+    std::size_t index;
+    index = sizeClass.sizeToIndex(121);
+    index = sizeClass.sizeToIndex(239);
+    index = sizeClass.sizeToIndex(922);
+    index = sizeClass.sizeToIndex(1233);
+    index = sizeClass.sizeToIndex(12233);
 }
 
 int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
 
-    SparseTrieBitset_test();
+    jm_mallc_test();
+    //SparseTrieBitset_test();
 
     solve_sliding_puzzle();
     solve_sliding_puzzle_queue();
 
     solve_magic_block_game();
-    solve_magic_block_game_bitmap();
+    //solve_magic_block_game_bitmap();
 
 #if !defined(_NDEBUG) && defined(_MSC_VER)
     ::system("pause");
