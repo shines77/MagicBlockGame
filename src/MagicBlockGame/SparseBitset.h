@@ -16,21 +16,21 @@
 #include <exception>
 #include <stdexcept>
 
-#include "SparseTrieBitsetPool.h"
+#include "SparseBitsetPool.h"
 #include "Value128.h"
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
-class SparseTrieBitset {
+class SparseBitset {
 public:
-    typedef Board                                       board_type;
-    typedef SparseTrieBitsetPool<Bits, PoolId>          pool_type;
-    typedef typename pool_type::chunk_type              chunk_type;
-    typedef typename pool_type::node_type               node_type;
+    typedef Board                               board_type;
+    typedef SparseBitsetPool<Bits, PoolId>      pool_type;
+    typedef typename pool_type::chunk_type      chunk_type;
+    typedef typename pool_type::node_type       node_type;
 
-    typedef typename pool_type::size_type               size_type;
-    typedef typename pool_type::ssize_type              ssize_type;
+    typedef typename pool_type::size_type       size_type;
+    typedef typename pool_type::ssize_type      ssize_type;
 
     static const size_type BoardX = board_type::Y;
     static const size_type BoardY = board_type::X;
@@ -45,11 +45,11 @@ private:
     size_type       y_index_[BoardY];
 
 public:
-    SparseTrieBitset() : pool_(nullptr), size_(0), root_(nullptr) {
+    SparseBitset() : pool_(nullptr), size_(0), root_(nullptr) {
         this->init();
     }
 
-    virtual ~SparseTrieBitset() {
+    virtual ~SparseBitset() {
         this->destroy();
     }
 

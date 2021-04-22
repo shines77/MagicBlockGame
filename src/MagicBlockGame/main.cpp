@@ -6,22 +6,22 @@
 #include <iostream>
 #include <cstring>
 
-#include "MagicBlockGame.h"
+#include "Game.h"
 
 #include "ErrorCode.h"
 #include "CPUWarmUp.h"
 #include "StopWatch.h"
 
-#include "SparseTrieBitset.h"
+#include "SparseBitset.h"
 
-using namespace PuzzleGame;
+using namespace MagicBlock;
 
 void solve_sliding_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle()\n\n");
 
-    MagicBlockGame<5, 5, 3, 3, true> game;
+    MagicBlock::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input_test.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -52,7 +52,7 @@ void solve_sliding_puzzle_queue()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle_queue()\n\n");
 
-    MagicBlockGame<5, 5, 3, 3, true> game;
+    MagicBlock::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input_test.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -83,7 +83,7 @@ void solve_magic_block_game()
     printf("-------------------------------------------------------\n\n");
     printf("solve_magic_block_game()\n\n");
 
-    MagicBlockGame<5, 5, 3, 3, true> game;
+    MagicBlock::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -114,7 +114,7 @@ void solve_magic_block_game_bitmap()
     printf("-------------------------------------------------------\n\n");
     printf("solve_magic_block_game_bitmap()\n\n");
 
-    MagicBlockGame<5, 5, 3, 3, true> game;
+    MagicBlock::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -142,7 +142,7 @@ void solve_magic_block_game_bitmap()
 
 void SparseTrieBitset_test()
 {
-    SparseTrieBitset<Board<5, 5>, 3, 25, 1> visited;
+    MagicBlock::SparseBitset<Board<5, 5>, 3, 25, 1> visited;
     Board<5, 5> board;
     board.cells[0] = Color::Blue;
     board.cells[1] = Color::Red;
@@ -157,7 +157,7 @@ void SparseTrieBitset_test()
     board.cells[9] = Color::Unknown;
     visited.append(board);
 
-    SparseTrieBitset<Board<5, 5>, 3, 25, 1>::shutdown();
+    MagicBlock::SparseBitset<Board<5, 5>, 3, 25, 1>::shutdown();
 }
 
 int main(int argc, char * argv[])

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 struct Color {
     enum {

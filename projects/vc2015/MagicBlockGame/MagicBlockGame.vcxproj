@@ -26,20 +26,18 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\Constant.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\CPUWarmUp.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\ErrorCode.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockGame.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockSolver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Game.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Solver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Move.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SharedData.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SparseTrieBitmap.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseTrieBitset.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseTrieBitsetPool.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitset.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitsetPool.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Stage.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\RT_PowerOf2.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\MagicBlockGame.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\MagicBlockSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Value128.h" />
   </ItemGroup>
   <ItemGroup>

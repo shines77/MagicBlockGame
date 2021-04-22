@@ -16,7 +16,7 @@
 #include "Stage.h"
 #include "BitSet.h"
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 template <size_t BoardX, size_t BoardY>
 class SlidingPuzzle

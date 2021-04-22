@@ -12,7 +12,7 @@
 #include "Color.h"
 #include "Value128.h"
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 template <std::size_t BoardX, std::size_t BoardY>
 union Board

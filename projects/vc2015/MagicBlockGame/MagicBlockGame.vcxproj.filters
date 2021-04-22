@@ -13,9 +13,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockGame.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -40,20 +37,11 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\BitUtils.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\MagicBlockSolver.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\SharedData.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\Stage.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\MagicBlockGame.h">
-      <Filter>src\TwoEndpoint</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\MagicBlockSolver.h">
-      <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\ErrorCode.h">
       <Filter>src</Filter>
@@ -67,17 +55,23 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\Value128.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseTrieBitset.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseTrieBitsetPool.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h">
       <Filter>src\support</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\RT_PowerOf2.h">
       <Filter>src\support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitset.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitsetPool.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Game.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Solver.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

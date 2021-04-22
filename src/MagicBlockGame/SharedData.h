@@ -11,7 +11,7 @@
 #include "Board.h"
 #include "Stage.h"
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 template <size_t BoardX, size_t BoardY>
 struct Step123

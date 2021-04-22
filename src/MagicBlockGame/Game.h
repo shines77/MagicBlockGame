@@ -24,16 +24,16 @@
 #include "Board.h"
 #include "SharedData.h"
 #include "ErrorCode.h"
-#include "MagicBlockSolver.h"
+#include "Solver.h"
 #include "SlidingPuzzle.h"
 #include "StopWatch.h"
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 template <size_t BoardX, size_t BoardY,
           size_t TargetX, size_t TargetY,
           bool AllowRotate = true>
-class MagicBlockGame
+class Game
 {
 public:
     static const size_t kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
@@ -43,9 +43,9 @@ public:
 
     typedef typename SharedData<BoardX, BoardY, TargetX, TargetY>::stage_type stage_type;
 
-    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, 1>   Step1Solver;
-    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, 123> Step123Solver;
-    typedef MagicBlockSolver<BoardX, BoardY, TargetX, TargetY, false, 456>       Step456Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, 1>    Step1Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, 123>  Step123Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, false, 456>        Step456Solver;
 
 private:
     SharedData<BoardX, BoardY, TargetX, TargetY> data_;
@@ -89,11 +89,11 @@ private:
     }
 
 public:
-    MagicBlockGame() : min_steps_(size_t(-1)), map_used_(0) {
+    Game() : min_steps_(size_t(-1)), map_used_(0) {
         this->init();
     }
 
-    ~MagicBlockGame() {}
+    ~Game() {}
 
     size_t getMinSteps() const {
         return this->best_move_path_.size();

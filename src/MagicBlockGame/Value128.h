@@ -5,7 +5,7 @@
 
 #include <type_traits>
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 union size_u {
     typedef typename std::conditional<

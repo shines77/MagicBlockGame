@@ -2,7 +2,7 @@
 
 #include "Color.h"
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 struct ErrorCode {
     enum ErrorType {

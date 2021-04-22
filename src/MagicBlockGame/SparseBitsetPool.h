@@ -19,12 +19,12 @@
 #include "Value128.h"
 #include "support/CT_PowerOf2.h"
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 #pragma pack(push, 1)
 
 template <std::size_t Bits, std::size_t PoolId = 0>
-class SparseTrieBitsetPool {
+class SparseBitsetPool {
 public:
     typedef std::size_t     size_type;
     typedef std::ptrdiff_t  ssize_type;
@@ -72,7 +72,7 @@ public:
 
         template <typename T>
         T * ptr() const {
-            SparseTrieBitsetPool & pool = SparseTrieBitsetPool::getInstance();
+            SparseBitsetPool & pool = SparseBitsetPool::getInstance();
             return pool.realPtr<T>(this->value_);
         }
     };
@@ -190,7 +190,7 @@ public:
         }
 
         Node * hasChild(std::uint16_t value) const {
-            SparseTrieBitsetPool & pool = SparseTrieBitsetPool::getInstance();
+            SparseBitsetPool & pool = SparseBitsetPool::getInstance();
             if (this->type_ == NodeType::ArrayContainer) {
                 ArrayContainer * container = pool.realPtr<ArrayContainer>(this->container_);
                 return container->hasChild(value);
@@ -209,7 +209,7 @@ public:
         }
 
         bool hasLeafChild(std::uint16_t value) const {
-            SparseTrieBitsetPool & pool = SparseTrieBitsetPool::getInstance();
+            SparseBitsetPool & pool = SparseBitsetPool::getInstance();
             if (this->type_ == NodeType::LeafArrayContainer) {
                 LeafArrayContainer * container = pool.realPtr<LeafArrayContainer>(this->container_);
                 return container->hasLeafChild(value);
@@ -324,26 +324,26 @@ private:
     }
 
 public:
-    SparseTrieBitsetPool() : size_(0) {
+    SparseBitsetPool() : size_(0) {
         this->init();
     }
 
-    SparseTrieBitsetPool(const SparseTrieBitsetPool & src) = delete;
+    SparseBitsetPool(const SparseBitsetPool & src) = delete;
 
-    SparseTrieBitsetPool(SparseTrieBitsetPool && src) : size_(0) {
-        this->internal_swap(std::forward<SparseTrieBitsetPool>(src));
+    SparseBitsetPool(SparseBitsetPool && src) : size_(0) {
+        this->internal_swap(std::forward<SparseBitsetPool>(src));
     }
 
-    virtual ~SparseTrieBitsetPool() {
+    virtual ~SparseBitsetPool() {
         this->destroy_pool();
     }
 
-    void internal_swap(SparseTrieBitsetPool & other) {
+    void internal_swap(SparseBitsetPool & other) {
         std::swap(this->chunk_list_, other.chunk_list_);
         std::swap(this->size_, other.size_);
     }
 
-    void swap(SparseTrieBitsetPool & other) {
+    void swap(SparseBitsetPool & other) {
         if (&other != this) {
             this->internal_swap(other);
         }
@@ -366,10 +366,10 @@ public:
         this->size_ = 0;
     }
 
-    static SparseTrieBitsetPool & getInstance() {
-        static std::map<size_type, SparseTrieBitsetPool> pool_map;
+    static SparseBitsetPool & getInstance() {
+        static std::map<size_type, SparseBitsetPool> pool_map;
         if (pool_map.count(PoolId) == 0) {
-            pool_map.insert(std::make_pair(PoolId, SparseTrieBitsetPool()));
+            pool_map.insert(std::make_pair(PoolId, SparseBitsetPool()));
         }
         return pool_map[PoolId];
     }
@@ -448,7 +448,7 @@ public:
     }
 
     static void shutdown() {
-        auto & pool = SparseTrieBitsetPool::getInstance();
+        auto & pool = SparseBitsetPool::getInstance();
         pool.destroy_pool();
     }
 };

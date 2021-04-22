@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 #pragma pack(push, 1)
 

@@ -26,16 +26,16 @@
 #include "Board.h"
 #include "Stage.h"
 #include "SharedData.h"
-#include "SparseTrieBitset.h"
+#include "SparseBitset.h"
 
 //#define ENABLE_DEBUG
 
-namespace PuzzleGame {
+namespace MagicBlock {
 
 template <size_t BoardX, size_t BoardY,
           size_t TargetX, size_t TargetY,
           bool AllowRotate, size_t Step>
-class MagicBlockSolver
+class Solver
 {
 public:
 #ifdef NDEBUG
@@ -195,12 +195,12 @@ private:
     }
 
 public:
-    MagicBlockSolver(SharedData<BoardX, BoardY, TargetX, TargetY> * data)
+    Solver(SharedData<BoardX, BoardY, TargetX, TargetY> * data)
         : data_(data), target_len_(0), rotate_type_(0), map_used_(0) {
         this->init();
     }
 
-    ~MagicBlockSolver() {}
+    ~Solver() {}
 
     size_t getMinSteps() const {
         return this->move_path_.size();
@@ -1279,7 +1279,7 @@ public:
         Position empty;
         bool found_empty = find_empty(this->player_board_, empty);
         if (found_empty) {
-            SparseTrieBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> visited;
+            SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> visited;
 
             stage_type start;
             start.empty = empty;
@@ -1426,7 +1426,7 @@ public:
                 printf("\n");
             }
 
-            SparseTrieBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2>::shutdown();
+            SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2>::shutdown();
         }
 
         return solvable;
