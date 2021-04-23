@@ -1,4 +1,8 @@
 
+#if defined(_MSC_VER)
+#include <vld.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdlib>
@@ -157,6 +161,26 @@ void SparseTrieBitset_test()
     board.cells[7] = Color::Red;
     board.cells[8] = Color::Blue;
     board.cells[9] = Color::Unknown;
+
+    board.cells[10] = Color::Red;
+    board.cells[11] = Color::Yellow;
+    board.cells[12] = Color::Orange;
+    board.cells[13] = Color::Blue;
+    board.cells[14] = Color::White;
+
+    board.cells[15] = Color::Green;
+    board.cells[16] = Color::Yellow;
+    board.cells[17] = Color::Red;
+    board.cells[18] = Color::Blue;
+    board.cells[19] = Color::Orange;
+
+    board.cells[20] = Color::Red;
+    board.cells[21] = Color::Yellow;
+    board.cells[22] = Color::Orange;
+    board.cells[23] = Color::Blue;
+    board.cells[24] = Color::White;
+
+    visited.append(board);
     visited.append(board);
 
     visited.shutdown();
@@ -204,13 +228,20 @@ int main(int argc, char * argv[])
     jtest::CPU::warmup(1000);
 
     jm_mallc_test();
-    //SparseTrieBitset_test();
+    SparseTrieBitset_test();
 
     solve_sliding_puzzle();
     solve_sliding_puzzle_queue();
 
+#ifdef NDEBUG
     solve_magic_block_game();
-    //solve_magic_block_game_bitmap();
+
+#if !defined(_NDEBUG) && defined(_MSC_VER)
+    ::system("pause");
+#endif
+#endif // !NDEBUG
+
+    solve_magic_block_game_bitmap();
 
 #if !defined(_NDEBUG) && defined(_MSC_VER)
     ::system("pause");
