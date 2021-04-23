@@ -26,7 +26,6 @@ class SparseBitset {
 public:
     typedef Board                               board_type;
     typedef SparseBitsetPool<Bits, PoolId>      pool_type;
-    typedef typename pool_type::chunk_type      chunk_type;
     typedef typename pool_type::node_type       node_type;
 
     typedef typename pool_type::size_type       size_type;
@@ -67,20 +66,20 @@ public:
             this->y_index_[BoardY - 1] = top;
         }
 
-        auto & pool = pool_type::getInstance();
-        this->root_ = pool.allocate_ptr<node_type>();
+        this->pool_ = new pool_type;
+        assert(this->pool_ != nullptr);
+        this->root_ = this->pool_->allocate_ptr<node_type>();
     }
 
     void destroy() {
         if (this->pool_ != nullptr) {
-            this->pool_->destroy_pool();
+            this->pool_->destroy();
             this->pool_ = nullptr;
         }
     }
 
     void shutdown() {
-        auto & pool = pool_type::getInstance();
-        pool.destroy_pool();
+        this->destroy();
     }
 
     size_type getLayerValue(const board_type & board, size_type yi) {

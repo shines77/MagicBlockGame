@@ -20,6 +20,8 @@
 #include "Bitset.h"
 #include "support/CT_PowerOf2.h"
 
+#define JM_MALLOC_USE_STATISTIC_INFO    1
+
 namespace jm_malloc {
 
 #pragma pack(push, 1)
@@ -79,6 +81,8 @@ public:
             return this->ptr<void>();
         }
     };
+
+    typedef PtrHandle Handle;
 
     //
     // TinyObject
@@ -212,6 +216,18 @@ public:
         }
     }; // SizeClass
 
+    struct StaticData {
+        bool inited;
+        SizeClass sizeClass;
+
+        StaticData() : inited(false) {}
+        ~StaticData() {}
+
+        void init() {
+            this->inited = true;
+        }
+    };
+
     struct Span;
 
     struct Chunk {
@@ -306,11 +322,11 @@ public:
             this->init();
         }
 
-        Span(const Span & src) : ptr_(nullptr), span_(nullptr), size_(0) {
+        Span(const Span & src) : ptr(nullptr), start(0), length(0) {
             this->internal_copy(src);
         }
 
-        Span(Span && src) : ptr_(nullptr), span_(nullptr), size_(0) {
+        Span(Span && src) : ptr(nullptr), start(0), length(0) {
             this->internal_swap(std::forward<Span>(src));
         }
 
@@ -364,7 +380,11 @@ public:
         std::list<Span>                 span_list_;
         std::vector<Chunk>              chunk_list_;
         ThreadCache                     cache_;
-
+#if JM_MALLOC_USE_STATISTIC_INFO
+        size_type                       alloc_size_;
+        size_type                       inuse_chunk_size_;
+        size_type                       alloc_chunk_size_;
+#endif
         jstd::BitSet<kChunkHighCount>   chunk_used_;
 
         void init() {
@@ -375,10 +395,26 @@ public:
             std::swap(this->span_list_, other.span_list_);
             std::swap(this->chunk_list_, other.chunk_list_);
             std::swap(this->cache_, other.cache_);
+#if JM_MALLOC_USE_STATISTIC_INFO
+            std::swap(this->alloc_size_, other.alloc_size_);
+            std::swap(this->inuse_chunk_size_, other.inuse_chunk_size_);
+            std::swap(this->alloc_chunk_size_, other.alloc_chunk_size_);
+#endif
             std::swap(this->chunk_used_, other.chunk_used_);
         }
 
     public:
+#if JM_MALLOC_USE_STATISTIC_INFO
+        ChunkHeap() : alloc_size_(0), inuse_chunk_size_(0), alloc_chunk_size_(0) {
+            this->init();
+        }
+
+        ChunkHeap(const ChunkHeap & src) = delete;
+
+        ChunkHeap(ChunkHeap && src) : alloc_size_(0), inuse_chunk_size_(0), alloc_chunk_size_(0) {
+            this->internal_swap(std::forward<ChunkHeap>(src));
+        }
+#else
         ChunkHeap() {
             this->init();
         }
@@ -388,6 +424,7 @@ public:
         ChunkHeap(ChunkHeap && src) {
             this->internal_swap(std::forward<ChunkHeap>(src));
         }
+#endif // JM_MALLOC_USE_STATISTIC_INFO
 
         ~ChunkHeap() {
             this->destory();
@@ -397,6 +434,19 @@ public:
             return this->chunk_list_.size();
         }
 
+#if JM_MALLOC_USE_STATISTIC_INFO
+        size_type alloc_size() const {
+            return this->alloc_size_;
+        }
+
+        size_type actual_inuse_size() const {
+            return (this->inuse_chunk_size_ * kChunkTotalBytes);
+        }
+
+        size_type actual_alloc_size() const {
+            return (this->alloc_chunk_size_ * kChunkTotalBytes);
+        }
+#endif
         void swap(ChunkHeap & other) {
             if (&other != this) {
                 this->internal_swap(other);
@@ -469,10 +519,9 @@ public:
         U * realPtr(std::uint32_t handle) const {
             size_type chunk_id = (handle >> (std::uint32_t)kChunkLowShift);
             if (chunk_id < this->chunk_list_.size()) {
-                chunk_type * chunk = this->chunk_list_[chunk_id];
-                assert(chunk != nullptr);
+                const Chunk & chunk = this->chunk_list_[chunk_id];
                 size_type offset = (handle & (std::uint32_t)kChunkLowMask);
-                return chunk->valueOf<U>(offset);
+                return chunk.valueOf<U>(offset);
             }
             return nullptr;
         }
@@ -488,7 +537,7 @@ private:
     size_type   alloc_size_;
 
     void init() {
-        //
+        this->Static().init();
     }
 
 public:
@@ -521,28 +570,41 @@ public:
         return this->chunk_heap_.chunk_size();
     }
 
+#if JM_MALLOC_USE_STATISTIC_INFO
     size_type alloc_size() const {
-        return this->alloc_size_;
+        return this->chunk_heap_.alloc_size();
     }
 
-    size_type actual_size() const {
-        return (this->size() * kChunkTotalBytes);
+    size_type actual_inuse_size() const {
+        return this->chunk_heap_.actual_inuse_size();
     }
+
+    size_type actual_alloc_size() const {
+        return this->chunk_heap_.actual_alloc_size()
+    }
+#endif
 
     void destroyHeap() {
         this->chunk_heap_.destory();
         this->alloc_size_ = 0;
     }
 
+    static StaticData & Static() {
+        static StaticData static_data;
+        return static_data;
+    }
+
     static malloc_type & getInstance() {
-        static std::map<size_type, malloc_type> malloc_pool;
-        if (malloc_pool.count(PoolId) > 0) {
-            return malloc_pool[PoolId];
-        }
-        else {
-            malloc_pool.insert(std::make_pair(PoolId, malloc_type()));
-            return malloc_pool[PoolId];
-        }
+        static malloc_type malloc;
+        return malloc;
+    }
+
+    PtrHandle jm_malloc(size_type size) {
+        return 0;
+    }
+
+    void jm_free(PtrHandle handle, size_type size) {
+        //
     }
 
     template <typename U>
