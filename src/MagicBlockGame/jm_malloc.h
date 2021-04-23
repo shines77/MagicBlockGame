@@ -11,11 +11,13 @@
 #include <cstring>
 #include <memory>
 #include <vector>
+#include <list>
 #include <map>
 #include <bitset>
 #include <exception>
 #include <stdexcept>
 
+#include "Bitset.h"
 #include "support/CT_PowerOf2.h"
 
 namespace jm_malloc {
@@ -38,11 +40,16 @@ public:
     static const size_type kDefaultChunkUintBytes = 4;
 
     static const size_type kChunkUintBytes = jstd::compile_time::round_up_pow2<kDefaultChunkUintBytes>::value;
-    static const size_type kRoundChunkUnitSize = jstd::compile_time::round_up_pow2<kDefaultChunkUnitSize>::value;
-    static const size_type kChunkUnitSize = (kRoundChunkUnitSize <= 65536) ? kRoundChunkUnitSize : 65536; 
+    static const size_type kRoundedChunkUnitSize = jstd::compile_time::round_up_pow2<kDefaultChunkUnitSize>::value;
+    static const size_type kChunkUnitSize = (kRoundedChunkUnitSize <= 65536) ? kRoundedChunkUnitSize : 65536; 
 
     static const size_type kChunkLowShift = jstd::compile_time::CountTrailingZeroBits<kChunkUnitSize>::value;
     static const size_type kChunkLowMask = kChunkUnitSize - 1;
+
+    static const size_type kChunkHighCount = (size_type(1) << 32) / kChunkUnitSize;
+    static const size_type kChunkHighBits = sizeof(std::uint32_t) * 8 - kChunkLowShift;
+    static const size_type kChunkHighMask = kChunkHighCount - 1;
+    static const size_type kChunkHighMaskFull = (((size_type(1) << 32) - 1) >> kChunkLowShift) << kChunkLowShift;
 
     //
     // The chunk size is set to 128 KB for faster memory allocation.
@@ -71,81 +78,6 @@ public:
         void * void_ptr() const {
             return this->ptr<void>();
         }
-    };
-
-    class Chunk {
-    public:
-        typedef std::size_t size_type;
-
-    protected:
-        void *      chunk_;
-        size_type   size_;
-
-        void init() {
-#if defined(_MSC_VER)
-            void * new_chunk = ::_aligned_malloc(kChunkUnitSize * kChunkUintBytes, kChunkAlignment);
-#else
-            // Note: Use posix_memalign() in BSD.
-            void * new_chunk = ::memalign(kChunkAlignment, kChunkSize * kUintBytes);
-#endif
-            if (new_chunk != nullptr) {
-                this->chunk_ = new_chunk;
-            }
-            else {
-                throw std::bad_alloc();
-            }
-            this->size_ = kChunkUnitSize;
-        }
-
-    public:
-        Chunk(void * chunk = nullptr) : chunk_(chunk), size_(0) {
-            this->init();
-        }
-
-        Chunk(const Chunk & src) = delete;
-
-        Chunk(Chunk && src) : chunk_(nullptr), size_(0) {
-            std::swap(this->chunk_, src.chunk_);
-            std::swap(this->size_, src.size_);
-        }
-
-        virtual ~Chunk() {
-            this->destroy();
-        }
-
-        void destroy() {
-            if (this->chunk_ != nullptr) {
-#if defined(_MSC_VER)
-                ::_aligned_free(this->chunk_);
-#else
-                ::free(this->chunk_);
-#endif
-                this->chunk_ = nullptr;
-            }
-            this->size_ = 0;
-        }
-
-        void swap(Chunk & other) {
-            if (&other != this) {
-                std::swap(this->chunk_, other.chunk_);
-                std::swap(this->size_, other.size_);
-            }
-        }
-
-        template <typename U>
-        U * valueOf(std::uint16_t offset) const {
-            assert(this->chunk_ != nullptr);
-            return reinterpret_cast<U *>(&reinterpret_cast<size_type *>(this->chunk_)[offset]);
-        }
-
-        template <typename U>
-        U * valueOf(size_type offset) const {
-            return this->valueOf<U>(static_cast<std::uint16_t>(offset));
-        }
-    }; // Chunk
-
-    struct SizeInfo {
-        std::uint16_t index;
     };
 
     //
@@ -278,7 +210,145 @@ public:
             }
             return alloc_size;
         }
-    };
+    }; // SizeClass
+
+    struct Span;
+
+    struct Chunk {
+        void *      ptr;       // Constructed memory ptr
+        Span *      span;      // Span
+        size_type   size;      // Unit size
+
+        Chunk() : ptr(nullptr), span(nullptr), size(0) {
+            this->init();
+        }
+        Chunk(void * ptr, Span * span, size_type size) : ptr(ptr), span(span), size(size) {
+            this->init();
+        }
+
+        Chunk(const Chunk & src) : ptr(nullptr), span(nullptr), size(0) {
+            this->internal_copy(src);
+        }
+
+        Chunk(Chunk && src) : ptr(nullptr), span(nullptr), size(0) {
+            this->internal_swap(std::forward<Chunk>(src));
+        }
+
+        Chunk & operator = (const Chunk & rhs) {
+            this->copy(rhs);
+            return *this;
+        }
+
+        virtual ~Chunk() {
+            this->destroy();
+        }
+
+        void init() {
+            //
+        }
+
+        void destroy() {
+            //
+        }
+
+        void internal_copy(const Chunk & src) {
+            this->ptr = src.ptr;
+            this->span = src.span;
+            this->size = src.size;
+        }
+
+        void internal_swap(const Chunk & src) {
+            std::swap(this->ptr, src.ptr);
+            std::swap(this->span, src.span);
+            std::swap(this->size, src.size);
+        }
+
+        void set(void * ptr, Span * span, size_type size) {
+            this->ptr = ptr;
+            this->span = span;
+            this->size = size;
+        }
+
+        void copy(const Chunk & src) {
+            if (&src != this) {
+                this->internal_copy(src);
+            }
+        }
+
+        void swap(Chunk & other) {
+            if (&other != this) {
+                this->internal_swap(other);
+            }
+        }
+
+        template <typename U>
+        U * valueOf(std::uint16_t offset) const {
+            assert(this->ptr != nullptr);
+            return reinterpret_cast<U *>(&reinterpret_cast<size_type *>(this->ptr)[offset]);
+        }
+
+        template <typename U>
+        U * valueOf(size_type offset) const {
+            return this->valueOf<U>(static_cast<std::uint16_t>(offset));
+        }
+    }; // Chunk
+
+    struct Span {
+        void *      ptr;       // Allocated memory ptr
+        size_type   start;     // The starting chunk index
+        size_type   length;    // The length of span crossing
+
+        Span() : ptr(nullptr), start(0), length(0) {
+            this->init();
+        }
+        Span(void * ptr, size_type start, size_type length) :
+            ptr(ptr), start(start), length(length) {
+            this->init();
+        }
+
+        Span(const Span & src) : ptr_(nullptr), span_(nullptr), size_(0) {
+            this->internal_copy(src);
+        }
+
+        Span(Span && src) : ptr_(nullptr), span_(nullptr), size_(0) {
+            this->internal_swap(std::forward<Span>(src));
+        }
+
+        Span & operator = (const Span & rhs) {
+            this->copy(rhs);
+            return *this;
+        }
+
+        virtual ~Span() {
+            this->destory();
+        }
+
+        void init() {
+            //
+        }
+
+        void destory() {
+            //
+        }
+
+        void internal_copy(const Chunk & src) {
+            this->ptr = src.ptr;
+            this->start = src.start;
+            this->length = src.length;
+        }
+
+        void internal_swap(const Chunk & src) {
+            std::swap(this->ptr, src.ptr);
+            std::swap(this->start, src.start);
+            std::swap(this->length, src.length);
+        }
+
+        void set(void * ptr, size_type start, size_type length) {
+            this->ptr = ptr;
+            this->start = start;
+            this->length = length;
+        }
+    }; // Span
 
     class ThreadCache {
     private:
@@ -287,18 +357,138 @@ public:
     public:
         ThreadCache() {}
         ~ThreadCache() {}
-    };
+    }; // ThreadCache
 
-    typedef Chunk   chunk_type;
+    class ChunkHeap {
+    private:
+        std::list<Span>                 span_list_;
+        std::vector<Chunk>              chunk_list_;
+        ThreadCache                     cache_;
+
+        jstd::BitSet<kChunkHighCount>   chunk_used_;
+
+        void init() {
+            this->chunk_used_.unit_size();
+        }
+
+        void internal_swap(ChunkHeap & other) {
+            std::swap(this->span_list_, other.span_list_);
+            std::swap(this->chunk_list_, other.chunk_list_);
+            std::swap(this->cache_, other.cache_);
+            std::swap(this->chunk_used_, other.chunk_used_);
+        }
+
+    public:
+        ChunkHeap() {
+            this->init();
+        }
+
+        ChunkHeap(const ChunkHeap & src) = delete;
+
+        ChunkHeap(ChunkHeap && src) {
+            this->internal_swap(std::forward<ChunkHeap>(src));
+        }
+
+        ~ChunkHeap() {
+            this->destory();
+        }
+
+        size_type chunk_size() const {
+            return this->chunk_list_.size();
+        }
+
+        void swap(ChunkHeap & other) {
+            if (&other != this) {
+                this->internal_swap(other);
+            }
+        }
+
+        void destory() {
+            auto iter = this->span_list_.begin();
+            while (iter != this->span_list_.end()) {
+                Span & span = *iter;
+                this->destroySpan(&span);
+                iter++;
+            }
+            this->span_list_.clear();
+        }
+
+        Span * findFreeSpan(size_type num_chunks) {
+            return nullptr;
+        }
+
+        bool createNewSpan(Span & span, size_type num_chunks) {
+            size_type first_free_chunk = 0;
+            if (first_free_chunk != size_type(-1)) {
+#if defined(_MSC_VER)
+                void * new_ptr = ::_aligned_malloc(kChunkTotalBytes * num_chunks, kChunkAlignment);
+#else
+                // Note: Use posix_memalign() in BSD.
+                void * new_ptr = ::memalign(kChunkAlignment, kChunkTotalBytes * num_chunks);
+#endif
+                if (new_ptr != nullptr) {
+                    span.set(new_ptr, first_free_chunk, num_chunks);
+                    return true;
+                }
+                else {
+                    throw std::bad_alloc();
+                }
+            }
+            return false;
+        }
+
+        bool allocateSpan(Span & span, size_type num_chunks) {
+            Span * freeSpan = findFreeSpan(num_chunks);
+            if (freeSpan == nullptr) {
+                return this->createNewSpan(span, num_chunks);
+            }
+            else {
+                span = freeSpan;
+                return true;
+            }
+        }
+
+        void destroySpan(Span * span) {
+            assert(span != nullptr);
+            if (span->ptr != nullptr) {
+#if defined(_MSC_VER)
+                ::_aligned_free(span->ptr);
+#else
+                ::free(span->ptr);
+#endif
+                span->ptr = nullptr;
+            }
+        }
+
+        void releaseSpan(Span * span) {
+            assert(span != nullptr);
+            this->destroySpan(span);
+        }
+
+        template <typename U>
+        U * realPtr(std::uint32_t handle) const {
+            size_type chunk_id = (handle >> (std::uint32_t)kChunkLowShift);
+            if (chunk_id < this->chunk_list_.size()) {
+                chunk_type * chunk = this->chunk_list_[chunk_id];
+                assert(chunk != nullptr);
+                size_type offset = (handle & (std::uint32_t)kChunkLowMask);
+                return chunk->valueOf<U>(offset);
+            }
+            return nullptr;
+        }
+
+        template <typename U>
+        U * realPtr(PtrHandle handle) const {
+            return this->realPtr<U>(handle.value());
+        }
+    }; // ChunkHeap
 
 private:
-    std::vector<chunk_type *>   chunk_list_;
-    size_type                   alloc_size_;
+    ChunkHeap   chunk_heap_;
+    size_type   alloc_size_;
 
     void init() {
-        chunk_type * new_chunk = new chunk_type;
-        this->chunk_list_.push_back(new_chunk);
-        this->alloc_size_ = 1;
+        //
     }
 
 public:
@@ -308,16 +498,16 @@ public:
 
     ThreadMalloc(const malloc_type & src) = delete;
 
-    ThreadMalloc(malloc_type && src) : size_(0) {
+    ThreadMalloc(malloc_type && src) : alloc_size_(0) {
         this->internal_swap(std::forward<malloc_type>(src));
     }
 
     virtual ~ThreadMalloc() {
-        this->destroyPool();
+        this->destroyHeap();
     }
 
     void internal_swap(malloc_type & other) {
-        std::swap(this->chunk_list_, other.chunk_list_);
+        this->chunk_heap_.swap(other.chunk_heap_);
         std::swap(this->alloc_size_, other.alloc_size_);
     }
 
@@ -328,7 +518,7 @@ public:
     }
 
     size_type size() const {
-        return this->chunk_list_.size();
+        return this->chunk_heap_.chunk_size();
     }
 
     size_type alloc_size() const {
@@ -339,47 +529,35 @@ public:
         return (this->size() * kChunkTotalBytes);
     }
 
-    void destroyPool() {
-        size_type list_size = this->chunk_list_.size();
-        for (size_type i = 0; i < list_size; i++) {
-            chunk_type * chunk = this->chunk_list_[i];
-            if (chunk != nullptr) {
-                delete this->chunk_list_[i];
-                this->chunk_list_[i] = nullptr;
-            }
-        }
-        this->chunk_list_.clear();
+    void destroyHeap() {
+        this->chunk_heap_.destory();
         this->alloc_size_ = 0;
     }
 
     static malloc_type & getInstance() {
         static std::map<size_type, malloc_type> malloc_pool;
-        if (malloc_pool.count(PoolId) == 0) {
-            malloc_pool.insert(std::make_pair(PoolId, this_type()));
+        if (malloc_pool.count(PoolId) > 0) {
+            return malloc_pool[PoolId];
         }
-        return malloc_pool[PoolId];
+        else {
+            malloc_pool.insert(std::make_pair(PoolId, malloc_type()));
+            return malloc_pool[PoolId];
+        }
     }
 
     template <typename U>
     U * realPtr(std::uint32_t handle) const {
-        size_type chunk_id = (handle >> (std::uint32_t)kChunkLowShift);
-        if (chunk_id < this->chunk_list_.size()) {
-            chunk_type * chunk = this->chunk_list_[chunk_id];
-            assert(chunk != nullptr);
-            size_type offset = (handle & (std::uint32_t)kChunkLowMask);
-            return chunk->valueOf<U>(offset);
-        }
-        return nullptr;
+        return this->chunk_heap_.realPtr<U>(handle);
     }
 
     template <typename U>
     U * realPtr(PtrHandle handle) const {
-        return this->realPtr<U>(handle.value());
+        return this->chunk_heap_.realPtr<U>(handle.value());
     }
 
     static void shutdown() {
         auto & malloc = malloc_type::getInstance();
-        malloc.destroyPool();
+        malloc.destroyHeap();
     }
 };
 

@@ -162,7 +162,7 @@ void SparseTrieBitset_test()
     visited.shutdown();
 }
 
-void jm_mallc_test()
+void jm_mallc_SizeClass_test()
 {
     ThreadMalloc<0>::SizeClass sizeClass;
 
@@ -183,6 +183,20 @@ void jm_mallc_test()
     assert(index == (92 + 96));
     assert(index1 == (92 + 96));
     assert(index2 == (index1 + 1));
+}
+
+void jm_mallc_ThreadMalloc_test()
+{
+    ThreadMalloc<0> threadMalloc;
+    threadMalloc.getInstance();
+
+    threadMalloc.shutdown();
+}
+
+void jm_mallc_test()
+{
+    jm_mallc_SizeClass_test();
+    jm_mallc_ThreadMalloc_test();
 }
 
 int main(int argc, char * argv[])
