@@ -32,16 +32,20 @@ public:
     typedef std::size_t     size_type;
     typedef std::ptrdiff_t  ssize_type;
 
+    typedef ThreadMalloc<PoolId> this_type;
     typedef ThreadMalloc<PoolId> malloc_type;
 
     static const size_type kChunkPageSize = 4096;
     static const size_type kChunkAlignment = 4096;
 
-    // The maximum chunk unit size is 65536.
-    static const size_type kDefaultChunkUnitSize = 65536;
-    static const size_type kDefaultChunkUintBytes = 4;
+    // You can choose std::uint32_t or std::uint64_t, default is std::uint32_t.
+    typedef std::uint32_t  ChunkUnitType;
 
-    static const size_type kChunkUintBytes = jstd::compile_time::round_up_pow2<kDefaultChunkUintBytes>::value;
+    // The maximum chunk unit size is 65536. 
+    // Range: [2, 65536], must be the power of 2.
+    static const size_type kDefaultChunkUnitSize = 65536;
+    static const size_type kChunkUintBytes = sizeof(ChunkUnitType);
+
     static const size_type kRoundedChunkUnitSize = jstd::compile_time::round_up_pow2<kDefaultChunkUnitSize>::value;
     static const size_type kChunkUnitSize = (kRoundedChunkUnitSize <= 65536) ? kRoundedChunkUnitSize : 65536; 
 
@@ -59,15 +63,15 @@ public:
     //
     static const size_type kChunkTotalBytes = kChunkUnitSize * kChunkUintBytes;
 
-    class PtrHandle {
+    class Handle {
     protected:
         std::uint32_t value_;
 
     public:
-        PtrHandle() : value_(0) {}
-        PtrHandle(std::uint32_t value) : value_(value) {}
-        PtrHandle(const PtrHandle & src) : value_(src.value_) {}
-        ~PtrHandle() = default;
+        Handle() : value_(0) {}
+        Handle(std::uint32_t value) : value_(value) {}
+        Handle(const Handle & src) : value_(src.value_) {}
+        ~Handle() = default;
 
         std::uint32_t value() const { return this->value_; }
 
@@ -82,7 +86,123 @@ public:
         }
     };
 
-    typedef PtrHandle Handle;
+    // free_list<T>
+    template <typename T>
+    class free_list {
+    public:
+        typedef T                               node_type;
+        typedef typename this_type::size_type   size_type;
+
+    protected:
+        node_type * head_;
+        size_type   size_;
+
+    public:
+        free_list(node_type * head = nullptr) : head_(head), size_(0) {}
+        ~free_list() {
+#ifndef NDEBUG
+            clear();
+#endif
+        }
+
+        node_type * begin() const { return this->head_; }
+        node_type * end() const   { return nullptr; }
+
+        node_type * head() const { return this->head_; }
+        size_type   size() const { return this->size_; }
+
+        bool is_valid() const { return (this->head_ != nullptr); }
+        bool is_empty() const { return (this->size_ == 0); }
+
+        void set_head(node_type * head) {
+            this->head_ = head;
+        }
+        void set_size(size_type size) {
+            this->size_ = size;
+        }
+
+        void set_list(node_type * head, size_type size) {
+            this->head_ = head;
+            this->size_ = size;
+        }
+
+        void clear() {
+            this->head_ = nullptr;
+            this->size_ = 0;
+        }
+
+        void reset(node_type * head) {
+            this->head_ = head;
+            this->size_ = 0;
+        }
+
+        void increase() {
+            ++(this->size_);
+        }
+
+        void decrease() {
+            assert(this->size_ > 0);
+            --(this->size_);
+        }
+
+        void inflate(size_type size) {
+            this->size_ += size;
+        }
+
+        void deflate(size_type size) {
+            assert(this->size_ >= size);
+            this->size_ -= size;
+        }
+
+        void push_front(node_type * node) {
+            assert(node != nullptr);
+            node->next = this->head_;
+            this->head_ = node;
+            this->increase();
+        }
+
+        node_type * pop_front() {
+            assert(this->head_ != nullptr);
+            node_type * node = this->head_;
+            this->head_ = node->next;
+            this->decrease();
+            return node;
+        }
+
+        node_type * front() {
+            return this->head();
+        }
+
+        node_type * back() {
+            node_type * prev = nullptr;
+            node_type * node = this->head_;
+            while (node != nullptr) {
+                prev = node;
+                node = node->next;
+            }
+            return prev;
+        }
+
+        void erase(node_type * where, node_type * node) {
+            if (where != nullptr)
+                where->next = node->next;
+            else
+                this->head_ = node->next;
+            this->decrease();
+        }
+
+        void swap(free_list & other) {
+            if (&other != this) {
+                std::swap(this->head_, other.head_);
+                std::swap(this->size_, other.size_);
+            }
+        }
+    };
+
+    template <typename T>
+    inline void swap(free_list<T> & lhs, free_list<T> & rhs) {
+        lhs.swap(rhs);
+    }
 
     //
     // TinyObject
@@ -216,18 +336,6 @@ public:
         }
     }; // SizeClass
 
-    struct StaticData {
-        bool inited;
-        SizeClass sizeClass;
-
-        StaticData() : inited(false) {}
-        ~StaticData() {}
-
-        void init() {
-            this->inited = true;
-        }
-    };
-
     struct Span;
 
     struct Chunk {
@@ -300,7 +408,7 @@ public:
         template <typename U>
         U * valueOf(std::uint16_t offset) const {
             assert(this->ptr != nullptr);
-            return reinterpret_cast<U *>(&reinterpret_cast<size_type *>(this->ptr)[offset]);
+            return reinterpret_cast<U *>(&reinterpret_cast<ChunkUnitType *>(this->ptr)[offset]);
         }
 
         template <typename U>
@@ -382,6 +490,7 @@ public:
         ThreadCache                     cache_;
 #if JM_MALLOC_USE_STATISTIC_INFO
         size_type                       alloc_size_;
+        size_type                       object_cnt_;
         size_type                       inuse_chunk_size_;
         size_type                       alloc_chunk_size_;
 #endif
@@ -397,6 +506,7 @@ public:
             std::swap(this->cache_, other.cache_);
 #if JM_MALLOC_USE_STATISTIC_INFO
             std::swap(this->alloc_size_, other.alloc_size_);
+            std::swap(this->object_cnt_, other.object_cnt_);
             std::swap(this->inuse_chunk_size_, other.inuse_chunk_size_);
             std::swap(this->alloc_chunk_size_, other.alloc_chunk_size_);
 #endif
@@ -405,13 +515,14 @@ public:
 
     public:
 #if JM_MALLOC_USE_STATISTIC_INFO
-        ChunkHeap() : alloc_size_(0), inuse_chunk_size_(0), alloc_chunk_size_(0) {
+        ChunkHeap() : alloc_size_(0), object_cnt_(0), inuse_chunk_size_(0), alloc_chunk_size_(0) {
             this->init();
         }
 
         ChunkHeap(const ChunkHeap & src) = delete;
 
-        ChunkHeap(ChunkHeap && src) : alloc_size_(0), inuse_chunk_size_(0), alloc_chunk_size_(0) {
+        ChunkHeap(ChunkHeap && src) :
+            alloc_size_(0), object_cnt_(0), inuse_chunk_size_(0), alloc_chunk_size_(0) {
             this->internal_swap(std::forward<ChunkHeap>(src));
         }
 #else
@@ -437,6 +548,10 @@ public:
 #if JM_MALLOC_USE_STATISTIC_INFO
         size_type alloc_size() const {
             return this->alloc_size_;
+        }
+
+        size_type object_count() const {
+            return this->object_cnt_;
         }
 
         size_type actual_inuse_size() const {
@@ -527,10 +642,22 @@ public:
         }
 
         template <typename U>
-        U * realPtr(PtrHandle handle) const {
+        U * realPtr(Handle handle) const {
             return this->realPtr<U>(handle.value());
         }
     }; // ChunkHeap
+
+    struct StaticData {
+        bool inited;
+        SizeClass sizeClass;
+
+        StaticData() : inited(false) {}
+        ~StaticData() {}
+
+        void init() {
+            this->inited = true;
+        }
+    }; // StaticData
 
 private:
     ChunkHeap   chunk_heap_;
@@ -566,13 +693,17 @@ public:
         }
     }
 
-    size_type size() const {
+    size_type chunk_size() const {
         return this->chunk_heap_.chunk_size();
     }
 
 #if JM_MALLOC_USE_STATISTIC_INFO
     size_type alloc_size() const {
         return this->chunk_heap_.alloc_size();
+    }
+
+    size_type object_count() const {
+        return this->chunk_heap_.object_count();
     }
 
     size_type actual_inuse_size() const {
@@ -599,11 +730,11 @@ public:
         return malloc;
     }
 
-    PtrHandle jm_malloc(size_type size) {
+    Handle jm_malloc(size_type size) {
         return 0;
     }
 
-    void jm_free(PtrHandle handle, size_type size) {
+    void jm_free(Handle handle, size_type size) {
         //
     }
 
@@ -613,7 +744,7 @@ public:
     }
 
     template <typename U>
-    U * realPtr(PtrHandle handle) const {
+    U * realPtr(Handle handle) const {
         return this->chunk_heap_.realPtr<U>(handle.value());
     }
 
