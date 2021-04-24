@@ -1427,6 +1427,7 @@ public:
             }
 
             visited.shutdown();
+            visited.display_trie_info();
         }
 
         return solvable;

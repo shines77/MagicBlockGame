@@ -233,6 +233,7 @@ int main(int argc, char * argv[])
     solve_sliding_puzzle();
     solve_sliding_puzzle_queue();
 
+#if 0
 #ifdef NDEBUG
     solve_magic_block_game();
 
@@ -240,6 +241,7 @@ int main(int argc, char * argv[])
     ::system("pause");
 #endif
 #endif // !NDEBUG
+#endif
 
     solve_magic_block_game_bitmap();
 

@@ -38,10 +38,17 @@ public:
 
     static const size_type kBitMask = utils_type::kBitMask;
 
+    struct LayerInfo {
+        size_type maxLayerSize;
+        size_type childCount;
+        size_type totalLayerSize;
+    };
+
 private:
     utils_type      utils_;
     size_type       size_;
     node_type *     root_;
+    LayerInfo       layer_info_[BoardY];
     size_type       y_index_[BoardY];
 
 public:
@@ -58,6 +65,17 @@ public:
     }
 
     void init() {
+#if 1
+        size_type top = BoardY / 2 - 1, bottom = BoardY / 2;
+        if ((BoardY % 2) != 0) {
+            this->y_index_[0] = bottom;
+            bottom++;
+        }
+        for (size_type yi = 0; yi < (BoardY / 2); yi++) {
+            this->y_index_[yi * 2 + 2] = top--;
+            this->y_index_[yi * 2 + 1] = bottom++;
+        }
+#else
         size_type top = 0, bottom = BoardY - 1;
         for (size_type yi = 0; yi < (BoardY / 2); yi++) {
             this->y_index_[yi * 2 + 0] = top++;
@@ -66,8 +84,15 @@ public:
         if ((BoardY % 2) != 0) {
             this->y_index_[BoardY - 1] = top;
         }
+#endif
 
         this->root_ = this->utils_.createNewNode();
+
+        for (size_type i = 0; i < BoardY; i++) {
+            this->layer_info_[i].maxLayerSize = 0;
+            this->layer_info_[i].childCount = 0;
+            this->layer_info_[i].totalLayerSize = 0;
+        }
     }
 
     void destroy() {
@@ -81,12 +106,18 @@ public:
 
     void destroy_trie_impl(node_type * node, size_type depth) {
         assert(node != nullptr);
+        size_type layer_size = node->size();
+        if (layer_size > this->layer_info_[depth].maxLayerSize) {
+            this->layer_info_[depth].maxLayerSize = layer_size;
+        }
+        this->layer_info_[depth].childCount++;
+        this->layer_info_[depth].totalLayerSize += layer_size;
+
         if (node->type() == utils_type::NodeType::LeafArrayContainer ||
             node->type() == utils_type::NodeType::LeafBitmapContainer) {
             return;
         }
 
-        size_type layer_size = node->size();
         Container * container = node->container();
         assert(container != nullptr);
         assert(layer_size == container->size());
@@ -102,20 +133,24 @@ public:
 
     void destroy_trie() {
         node_type * node = this->root_;
-        if (node == nullptr ||
-            node->type() == utils_type::NodeType::LeafArrayContainer ||
-            node->type() == utils_type::NodeType::LeafBitmapContainer) {
+        if (node == nullptr) {
             return;
         }
 
         size_type layer_size = node->size();
+        if (layer_size > this->layer_info_[0].maxLayerSize) {
+            this->layer_info_[0].maxLayerSize = layer_size;
+        }
+        this->layer_info_[0].childCount++;
+        this->layer_info_[0].totalLayerSize += layer_size;
+
         Container * container = node->container();
         assert(container != nullptr);
         assert(layer_size == container->size());
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             node_type * child = container->valueOf(i);
             if (child != nullptr) {
-                destroy_trie_impl(child, 0);
+                destroy_trie_impl(child, 1);
                 child->destroy();
                 delete child;
             }
@@ -124,6 +159,18 @@ public:
         this->root_->destroy();
         delete this->root_;
         this->root_ = nullptr;
+    }
+
+    void display_trie_info() {
+        printf("SparseBitset<T> trie info:\n\n");
+        for (size_type i = 0; i < BoardY; i++) {
+            printf("[%u]: maxLayerSize = %8u, childCount = %8u, averageSize = %0.2f\n\n",
+                   uint32_t(i + 1),
+                   uint32_t(this->layer_info_[i].maxLayerSize),
+                   uint32_t(this->layer_info_[i].childCount),
+                   (double)this->layer_info_[i].totalLayerSize / this->layer_info_[i].childCount);
+        }
+        printf("\n");
     }
 
     size_type getLayerValue(const board_type & board, size_type yi) const {
