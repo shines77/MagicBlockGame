@@ -60,6 +60,8 @@ public:
         };
     };
 
+    class Container;
+
     class ValueArray {
     private:
         std::vector<std::uint16_t> array_;
@@ -102,8 +104,6 @@ public:
             this->array_.push_back(value);
         }
     };
-
-    class Container;
 
     class NodeArray {
     private:
@@ -154,10 +154,14 @@ public:
         void init() {
             assert(this->size_ == 0);
             this->reserve(kDefaultArrayCapacity);
+            //this-capacity_ = kDefaultArrayCapacity;
         }
 
     public:
         Container() : type_(NodeType::ArrayContainer), size_(0), capacity_(0), reserve_(0) {
+            this->init();
+        }
+        Container(uint16_t type) : type_(type), size_(0), capacity_(0), reserve_(0) {
             this->init();
         }
 
@@ -280,13 +284,14 @@ public:
         }
     };
 
-    class ArrayContainer : public Container {
+    class ArrayContainer final : public Container {
     private:
         ValueArray  valueArray_;
         NodeArray   nodeArray_;
 
     public:
-        ArrayContainer() = default;
+        ArrayContainer() : Container(NodeType::ArrayContainer) {}
+        ArrayContainer(const ArrayContainer & src) = delete;
         virtual ~ArrayContainer() = default;
 
         void destroy() final {
@@ -305,12 +310,12 @@ public:
             pos++;
         }
 
-        void reserve(size_type capacity) {
+        void reserve(size_type capacity) final {
             this->valueArray_.reserve(capacity);
             this->nodeArray_.reserve(capacity);
         }
 
-        void resize(size_type newSize) {
+        void resize(size_type newSize) final {
             this->valueArray_.resize(newSize);
             this->nodeArray_.resize(newSize);
         }
@@ -344,7 +349,7 @@ public:
             return container;
         }
 
-        Container * appendLeaf(std::uint16_t value) {
+        Container * appendLeaf(std::uint16_t value) final {
             Container * container = Container::createNewContainer(NodeType::LeafArrayContainer);
             this->append(value, container);
             this->size_++;
@@ -356,12 +361,13 @@ public:
         }
     };
 
-    class LeafArrayContainer : public Container {
+    class LeafArrayContainer final : public Container {
     private:
         ValueArray  valueArray_;
 
     public:
-        LeafArrayContainer() = default;
+        LeafArrayContainer() : Container(NodeType::LeafArrayContainer) {}
+        LeafArrayContainer(const LeafArrayContainer & src) = delete;
         virtual ~LeafArrayContainer() = default;
 
         void destroy() final {
@@ -380,11 +386,11 @@ public:
             pos++;
         }
 
-        void reserve(size_type capacity) {
+        void reserve(size_type capacity) final {
             this->valueArray_.reserve(capacity);
         }
 
-        void resize(size_type newSize) {
+        void resize(size_type newSize) final {
             this->valueArray_.resize(newSize);
         }
 
@@ -409,7 +415,7 @@ public:
             return nullptr;
         }
 
-        Container * appendLeaf(std::uint16_t value) {
+        Container * appendLeaf(std::uint16_t value) final {
             this->append(value, nullptr);
             this->size_++;
             return nullptr;
@@ -420,10 +426,11 @@ public:
         }
     };
 
-    class BitmapContainer : public Container {
+    class BitmapContainer final : public Container {
     public:
-        BitmapContainer() {}
-        virtual ~BitmapContainer() {}
+        BitmapContainer() : Container(NodeType::BitmapContainer) {}
+        BitmapContainer(const BitmapContainer & src) = delete;
+        virtual ~BitmapContainer() = default;
 
         void destroy() final {
             // TODO:
@@ -441,11 +448,11 @@ public:
             pos++;
         }
 
-        void reserve(size_type capacity) {
+        void reserve(size_type capacity) final {
             // TODO:
         }
 
-        void resize(size_type newSize) {
+        void resize(size_type newSize) final {
             // TODO:
         }
 
@@ -469,7 +476,7 @@ public:
             return container;
         }
 
-        Container * appendLeaf(std::uint16_t value) {
+        Container * appendLeaf(std::uint16_t value) final {
             Container * container = Container::createNewContainer(NodeType::LeafArrayContainer);
             this->append(value, container);
             this->size_++;
@@ -482,10 +489,11 @@ public:
         }
     };
 
-    class LeafBitmapContainer : public Container {
+    class LeafBitmapContainer final : public Container {
     public:
-        LeafBitmapContainer() {}
-        virtual ~LeafBitmapContainer() {}
+        LeafBitmapContainer() : Container(NodeType::LeafBitmapContainer) {}
+        LeafBitmapContainer(const LeafBitmapContainer & src) = delete;
+        virtual ~LeafBitmapContainer() = default;
 
         void destroy() final {
             // TODO:
@@ -501,6 +509,14 @@ public:
 
         void next(size_type & pos) const final {
             pos++;
+        }
+
+        void reserve(size_type capacity) final {
+            // TODO:
+        }
+
+        void resize(size_type newSize) final {
+            // TODO:
         }
 
         Container * hasChild(std::uint16_t value) const final {
@@ -522,7 +538,7 @@ public:
             return nullptr;
         }
 
-        Container * appendLeaf(std::uint16_t value) {
+        Container * appendLeaf(std::uint16_t value) final {
             this->append(value, nullptr);
             this->size_++;
             return nullptr;
