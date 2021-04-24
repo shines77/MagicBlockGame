@@ -135,4 +135,4 @@ public:
     }
 };
 
-} // namespace PuzzleGame
+} // namespace MagicBlock

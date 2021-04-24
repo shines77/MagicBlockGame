@@ -89,4 +89,4 @@ struct Color {
     }
 };
 
-} // namespace PuzzleGame
+} // namespace MagicBlock

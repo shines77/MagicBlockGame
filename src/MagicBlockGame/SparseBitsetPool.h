@@ -330,4 +330,4 @@ public:
 
 #pragma pack(pop)
 
-} // namespace PuzzleGame
+} // namespace MagicBlock

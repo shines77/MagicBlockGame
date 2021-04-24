@@ -66,4 +66,4 @@ struct ErrorCode {
     }
 };
 
-} // namespace PuzzleGame
+} // namespace MagicBlock

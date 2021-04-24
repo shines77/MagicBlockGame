@@ -89,4 +89,4 @@ bool operator <= (const Value128 & lhs, const Value128 & rhs) noexcept  {
     return (lhs.compare(rhs) == 1);
 }
 
-} // namespace PuzzleGame
+} // namespace MagicBlock

@@ -89,4 +89,4 @@ struct SharedData
     ~SharedData() {}
 };
 
-} // namespace PuzzleGame
+} // namespace MagicBlock

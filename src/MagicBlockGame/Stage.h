@@ -28,4 +28,4 @@ struct Stage {
 
 #pragma pack(pop)
 
-} // namespace PuzzleGame
+} // namespace MagicBlock

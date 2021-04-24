@@ -188,4 +188,4 @@ bool operator != (const Board<BoardX, BoardY> & lhs, const Board<BoardX, BoardY>
     return !(lhs.is_equal(rhs));
 }
 
-} // namespace PuzzleGame
+} // namespace MagicBlock
