@@ -205,7 +205,8 @@ public:
             // Not implemented!
         }
 
-        static Container * createNewContainer(size_type type = NodeType::ArrayContainer) {
+        template <size_type type = NodeType::ArrayContainer>
+        static Container * createNewContainer() {
             Container * container;
             if (type == NodeType::ArrayContainer) {
                 ArrayContainer * newContainer = new ArrayContainer;
@@ -343,14 +344,14 @@ public:
         }
 
         Container * append(std::uint16_t value) final {
-            Container * container = Container::createNewContainer(NodeType::ArrayContainer);
+            Container * container = Container::createNewContainer<NodeType::ArrayContainer>();
             this->append(value, container);
             this->size_++;
             return container;
         }
 
         Container * appendLeaf(std::uint16_t value) final {
-            Container * container = Container::createNewContainer(NodeType::LeafArrayContainer);
+            Container * container = Container::createNewContainer<NodeType::LeafArrayContainer>();
             this->append(value, container);
             this->size_++;
             return container;
@@ -470,14 +471,14 @@ public:
         }
 
         Container * append(std::uint16_t value) final {
-            Container * container = Container::createNewContainer(NodeType::ArrayContainer);
+            Container * container = Container::createNewContainer<NodeType::ArrayContainer>();
             this->append(value, container);
             this->size_++;
             return container;
         }
 
         Container * appendLeaf(std::uint16_t value) final {
-            Container * container = Container::createNewContainer(NodeType::LeafArrayContainer);
+            Container * container = Container::createNewContainer<NodeType::LeafArrayContainer>();
             this->append(value, container);
             this->size_++;
             return container;
@@ -579,7 +580,7 @@ private:
             this->y_index_[yi * 2 + 2] = bottom++;
         }
 #endif
-        this->root_ = Container::createNewContainer();
+        this->root_ = Container::createNewContainer<NodeType::ArrayContainer>();
 
         for (size_type i = 0; i < BoardY; i++) {
             this->layer_info_[i].maxLayerSize = 0;
