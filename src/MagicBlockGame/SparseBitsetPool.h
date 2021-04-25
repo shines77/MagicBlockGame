@@ -19,7 +19,6 @@
 #include "jm_malloc.h"
 
 #include "Value128.h"
-#include "jm_malloc.h"
 #include "support/CT_PowerOf2.h"
 
 using namespace jm_malloc;
@@ -72,14 +71,14 @@ public:
         }
     };
 
-    class ValueArray {
+    class IndexArray {
     public:
         int indexOf(std::uint16_t value) const {
             return 0;
         }
     };
 
-    class NodeArray {
+    class ValueArray {
     public:
         Handle getChildNode(int index) const {
             return 0;
@@ -88,8 +87,8 @@ public:
 
     class ArrayContainer : public Container {
     private:
+        Handle  indexArray_;
         Handle  valueArray_;
-        Handle  nodeArray_;
         std::uint16_t size_;
 
     public:
@@ -97,11 +96,11 @@ public:
         virtual ~ArrayContainer() {}
 
         Node * hasChild(std::uint16_t value) const final {
-            ValueArray * pValueArray = this->valueArray_.ptr<ValueArray>();
-            int index = pValueArray->indexOf(value);
+            IndexArray * pIndexArray = this->indexArray_.ptr<IndexArray>();
+            int index = pIndexArray->indexOf(value);
             if (index >= 0) {
-                NodeArray * pNodeArray = this->nodeArray_.ptr<NodeArray>();
-                Handle childNode = pNodeArray->getChildNode(index);
+                ValueArray * pValueArray = this->valueArray_.ptr<ValueArray>();
+                Handle childNode = pValueArray->getChildNode(index);
                 Node * pChildNode = childNode.ptr<Node>();
                 return pChildNode;
             }
@@ -111,8 +110,8 @@ public:
 
     class LeafArrayContainer : public LeafContainer {
     private:
+        Handle  indexArray_;
         Handle  valueArray_;
-        Handle  nodeArray_;
         std::uint16_t size_;
 
     public:
@@ -120,8 +119,8 @@ public:
         virtual ~LeafArrayContainer() {}
 
         bool hasLeafChild(std::uint16_t value) const final {
-            ValueArray * pValueArray = this->valueArray_.ptr<ValueArray>();
-            int index = pValueArray->indexOf(value);
+            IndexArray * pIndexArray = this->indexArray_.ptr<IndexArray>();
+            int index = pIndexArray->indexOf(value);
             return (index >= 0);
         }
     };

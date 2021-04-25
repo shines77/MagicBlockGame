@@ -76,9 +76,6 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\jm_malloc.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitsetUtils.h">
-      <Filter>src</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlockGame\main.cpp">
