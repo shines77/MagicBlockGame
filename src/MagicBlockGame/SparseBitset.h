@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <memory.h>
 #include <malloc.h>
+#include <assert.h>
 
 #include <cstdint>
 #include <cstddef>
@@ -21,6 +22,137 @@
 #define SPARSEBITSET_DISPLAY_TRIE_INFO  0
 
 namespace MagicBlock {
+
+namespace SortUtils {
+    static void merge_sort(std::uint16_t * indexs, std::uint16_t * new_indexs,
+                           std::size_t first, std::size_t last) {
+        assert(indexs != nullptr);
+        assert(new_indexs != nullptr);
+        std::size_t left = first;
+        std::size_t mid = (first + last) / 2;
+        std::size_t right = mid;
+        std::size_t cur = first;
+        while (left < mid && right < last) {
+            if (indexs[left] <= indexs[right])
+                new_indexs[cur++] = indexs[left++];
+            else
+                new_indexs[cur++] = indexs[right++];
+        }
+
+        while (left < mid) {
+            new_indexs[cur++] = indexs[left++];
+        }
+
+        while (right < last) {
+            new_indexs[cur++] = indexs[right++];
+        }
+    }
+
+    static void merge_sort(std::uint16_t * indexs, std::uintptr_t ** values,
+                           std::uint16_t * new_indexs, std::uintptr_t ** new_values,
+                           std::size_t first, std::size_t last) {
+        assert(indexs != nullptr);
+        assert(new_indexs != nullptr);
+        assert(values != nullptr);
+        assert(new_values != nullptr);
+        std::size_t left = first;
+        std::size_t mid = (first + last) / 2;
+        std::size_t right = mid;
+        std::size_t cur = first;
+        while (left < mid && right < last) {
+            if (indexs[left] <= indexs[right]) {
+                new_indexs[cur] = indexs[left];
+                new_values[cur] = values[left];
+                cur++;
+                left++;
+            }
+            else {
+                new_indexs[cur] = indexs[right];
+                new_values[cur] = values[right];
+                cur++;
+                right++;
+            }
+        }
+
+        while (left < mid) {
+            new_indexs[cur] = indexs[left];
+            new_values[cur] = values[left];
+            cur++;
+            left++;
+        }
+
+        while (right < last) {
+            new_indexs[cur] = indexs[right];
+            new_values[cur] = values[right];
+            cur++;
+            right++;
+        }
+    }
+
+    static void quick_sort(std::uint16_t * indexs, std::size_t first, std::size_t last) {
+        assert(indexs != nullptr);
+        if (first < last) {
+            std::size_t left = first;
+            std::size_t right = last;
+            std::size_t middle = (left + right) / 2;
+            std::uint16_t pivot = indexs[middle];
+            while (left < right) {
+                while (left < right && indexs[left] < pivot) {
+                    left++;
+                }
+                if (left < right) {
+                    indexs[right--] = indexs[left];
+                }
+                while (left < right && indexs[right] > pivot) {
+                    right--;
+                }
+                if (left < right) {
+                    indexs[left++] = indexs[right];
+                }
+            }
+            indexs[middle] = pivot;
+
+            quick_sort(indexs, first, middle - 1);
+            quick_sort(indexs, middle + 1, last);
+        }
+    }
+
+    static void quick_sort(std::uint16_t * indexs, std::uintptr_t ** values,
+                           std::size_t first, std::size_t last) {
+        assert(indexs != nullptr);
+        assert(values != nullptr);
+        if (first < last) {
+            std::size_t left = first;
+            std::size_t right = last;
+            std::size_t middle = (left + right) / 2;
+            std::uint16_t pivot = indexs[middle];
+            std::uintptr_t * pivot_value = values[middle];
+            while (left < right) {
+                while (left < right && indexs[left] < pivot) {
+                    left++;
+                }
+                if (left < right) {
+                    indexs[right] = indexs[left];
+                    values[right] = values[left];
+                    right--;
+                }
+                while (left < right && indexs[right] > pivot) {
+                    right--;
+                }
+                if (left < right) {
+                    indexs[left] = indexs[right];
+                    values[left] = values[right];
+                    left++;
+                }
+            }
+            indexs[middle] = pivot;
+            values[middle] = pivot_value;
+
+            quick_sort(indexs, values, first, middle - 1);
+            quick_sort(indexs, values, middle + 1, last);
+        }
+    }
+} // namespace SortUtils
 
 template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
 class SparseBitset {
@@ -201,8 +333,8 @@ public:
             assert(index >= 0 && index < (int)capacity);
             assert(capacity <= std::uint16_t(kMaxArraySize));
             std::uint16_t * indexEnd = (std::uint16_t *)ptr + capacity;
-            Container ** container = (Container **)indexEnd + index;
-            return *container;
+            Container ** value = (Container **)indexEnd + index;
+            return *value;
         }
 
         void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t capacity, Container * container) {
@@ -257,6 +389,10 @@ public:
 
         size_type capacity() const {
             return this->capacity_;
+        }
+
+        size_type sorted() const {
+            return this->sorted_;
         }
 
         virtual void destroy() {
@@ -399,15 +535,34 @@ public:
             assert(newCapacity > this->capacity());
             assert(this->ptr_ != nullptr);
             if (true) {
-                uintptr_t * new_ptr = (uintptr_t *)std::malloc(newSize);
+                std::uintptr_t * new_ptr = (std::uintptr_t *)std::malloc(newSize);
                 if (new_ptr != nullptr) {
                     //assert(this->ptr_ != nullptr);
-                    std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
                     std::uint16_t * indexEnd = (std::uint16_t *)this->ptr_ + this->capacity();
                     std::uint16_t * newIndexEnd = (std::uint16_t *)new_ptr + newCapacity;
-                    Container * valueFirst = (Container *)indexEnd;
-                    Container * newValueFirst = (Container *)newIndexEnd;
-                    std::memcpy(newValueFirst, valueFirst, sizeof(Container *) * this->capacity());
+                    Container ** valueFirst = (Container **)indexEnd;
+                    Container ** newValueFirst = (Container **)newIndexEnd;
+                    if (this->capacity() < 64) {
+                        std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+                        std::memcpy(newValueFirst, valueFirst, sizeof(Container *) * this->capacity());
+                    }
+                    else {
+                        if (this->sorted() != 0) {
+                            // Quick sort (second half)
+                            SortUtils::quick_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
+                                                  this->capacity() / 2, this->capacity() - 1);
+                            // (Half) Merge sort
+                            SortUtils::merge_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
+                                                  (std::uint16_t *)new_ptr, (std::uintptr_t **)newValueFirst,
+                                                  0, this->capacity());
+                        }
+                        else {
+                            // Quick sort
+                            SortUtils::quick_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
+                                                  0, this->capacity() - 1);
+                        }
+                        this->sorted_ = this->capacity_;
+                    }
                     std::free(this->ptr_);
                     this->ptr_ = new_ptr;
                     this->capacity_ = std::uint16_t(newCapacity);
@@ -510,7 +665,24 @@ public:
                 uintptr_t * new_ptr = (uintptr_t *)std::malloc(newSize);
                 if (new_ptr != nullptr) {
                     //assert(this->ptr_ != nullptr);
-                    std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+                    if (this->capacity() < 64) {
+                        std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+                    }
+                    else {
+                        if (this->sorted() != 0) {
+                            // Quick sort (second half)
+                            SortUtils::quick_sort((std::uint16_t *)this->ptr_,
+                                                  this->capacity() / 2, this->capacity() - 1);
+                            // (Half) Merge sort
+                            SortUtils::merge_sort((std::uint16_t *)this->ptr_, (std::uint16_t *)new_ptr,
+                                                  0, this->capacity());
+                        }
+                        else {
+                            // Quick sort
+                            SortUtils::quick_sort((std::uint16_t *)this->ptr_, 0, this->capacity());
+                        }
+                        this->sorted_ = this->capacity_;
+                    }
                     std::free(this->ptr_);
                     this->ptr_ = new_ptr;
                     this->capacity_ = std::uint16_t(newCapacity);
@@ -942,6 +1114,10 @@ public:
                 }
             }
             container->appendLeaf(layer_value);
+        }
+
+        if (insert_new) {
+            this->size_++;
         }
 
         return insert_new;

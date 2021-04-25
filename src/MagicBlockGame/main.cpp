@@ -233,7 +233,7 @@ int main(int argc, char * argv[])
     solve_sliding_puzzle();
     solve_sliding_puzzle_queue();
 
-#if 1
+#if 0
 #ifdef NDEBUG
     solve_magic_block_game();
 
