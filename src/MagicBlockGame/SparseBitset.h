@@ -160,11 +160,11 @@ public:
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
             int index = 0;
-            std::uint16_t * valueFirst = (std::uint16_t *)ptr;
-            std::uint16_t * valueLast  = (std::uint16_t *)ptr + size;
-            for (std::uint16_t * values = valueFirst; values < valueLast; values++) {
-                assert(*values != kInvalidIndex);
-                if (*values != value)
+            std::uint16_t * indexFirst = (std::uint16_t *)ptr;
+            std::uint16_t * indexLast  = (std::uint16_t *)ptr + size;
+            for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
+                assert(*indexs != kInvalidIndex);
+                if (*indexs != value)
                     index++;
                 else
                     return index;                    
@@ -200,8 +200,8 @@ public:
             assert(index != kInvalidIndex32);
             assert(index >= 0 && index < (int)capacity);
             assert(capacity <= std::uint16_t(kMaxArraySize));
-            std::uint16_t * valueEnd = (std::uint16_t *)ptr + capacity;
-            Container ** container = (Container **)valueEnd + index;
+            std::uint16_t * indexEnd = (std::uint16_t *)ptr + capacity;
+            Container ** container = (Container **)indexEnd + index;
             return *container;
         }
 
@@ -210,10 +210,10 @@ public:
             assert(size <= std::uint16_t(kArraySizeThreshold));
             assert(size <= std::uint16_t(kMaxArraySize));
             assert(size <= capacity);
-            std::uint16_t * valueEnd = (std::uint16_t *)ptr + capacity;
-            Container ** target = (Container **)valueEnd + size;
-            assert(target != nullptr);
-            *target = container;
+            std::uint16_t * indexEnd = (std::uint16_t *)ptr + capacity;
+            Container ** value = (Container **)indexEnd + size;
+            assert(value != nullptr);
+            *value = container;
         }
     };
 
@@ -225,7 +225,7 @@ public:
         std::uint16_t    type_;
         std::uint16_t    size_;      // Cardinality
         std::uint16_t    capacity_;
-        std::uint16_t    reserve_;
+        std::uint16_t    sorted_;
         std::uintptr_t * ptr_;
 
         void init() {
@@ -234,10 +234,10 @@ public:
         }
 
     public:
-        Container() : type_(NodeType::ArrayContainer), size_(0), capacity_(0), reserve_(0), ptr_(nullptr) {
+        Container() : type_(NodeType::ArrayContainer), size_(0), capacity_(0), sorted_(0), ptr_(nullptr) {
             this->init();
         }
-        Container(std::uint16_t type) : type_(type), size_(0), capacity_(0), reserve_(0), ptr_(nullptr) {
+        Container(std::uint16_t type) : type_(type), size_(0), capacity_(0), sorted_(0), ptr_(nullptr) {
             this->init();
         }
 
