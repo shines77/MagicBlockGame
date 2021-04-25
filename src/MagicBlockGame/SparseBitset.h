@@ -62,13 +62,13 @@ public:
 
     class Container;
 
-    class ValueVector {
+    class IndexVector {
     private:
         std::vector<std::uint16_t> array_;
 
     public:
-        ValueVector() = default;
-        ~ValueVector() = default;
+        IndexVector() = default;
+        ~IndexVector() = default;
 
         size_type size() const {
             return this->array_.size();
@@ -105,13 +105,13 @@ public:
         }
     };
 
-    class NodeVector {
+    class ValueVector {
     private:
         std::vector<Container *> array_;
 
     public:
-        NodeVector() = default;
-        ~NodeVector() = default;
+        ValueVector() = default;
+        ~ValueVector() = default;
 
         size_type size() const {
             return this->array_.size();
@@ -141,10 +141,10 @@ public:
         }
     };
 
-    class ValueArray {
+    class IndexArray {
     public:
-        ValueArray() = default;
-        ~ValueArray() = default;
+        IndexArray() = default;
+        ~IndexArray() = default;
 
         size_type size() const {
             return 0;
@@ -181,10 +181,10 @@ public:
         }
     };
 
-    class NodeArray {
+    class ValueArray {
     public:
-        NodeArray() = default;
-        ~NodeArray() = default;
+        ValueArray() = default;
+        ~ValueArray() = default;
 
         size_type size() const {
             return 0;
@@ -392,8 +392,8 @@ public:
 
     class ArrayContainer final : public Container {
     private:
+        IndexArray  indexArray_;
         ValueArray  valueArray_;
-        NodeArray   nodeArray_;
 
         void reallocate(size_type newSize, size_type newCapacity) {
             assert(newCapacity > this->capacity());
@@ -457,9 +457,9 @@ public:
         }
 
         Container * hasChild(std::uint16_t value) const final {
-            int index = this->valueArray_.indexOf(this->ptr_, this->size_, value);
+            int index = this->indexArray_.indexOf(this->ptr_, this->size_, value);
             if (index >= 0) {
-                Container * child = this->nodeArray_.valueOf(this->ptr_, this->capacity_, index);
+                Container * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
                 return child;
             }
             return nullptr;
@@ -476,8 +476,8 @@ public:
             if (this->size() >= this->capacity()) {
                 this->resize(this->capacity() * 2);
             }
-            this->valueArray_.append(this->ptr_, this->size_, value);
-            this->nodeArray_.append(this->ptr_, this->size_, this->capacity_, container);
+            this->indexArray_.append(this->ptr_, this->size_, value);
+            this->valueArray_.append(this->ptr_, this->size_, this->capacity_, container);
         }
 
         Container * append(std::uint16_t value) final {
@@ -495,13 +495,13 @@ public:
         }
 
         Container * valueOf(int index) const final {
-            return this->nodeArray_.valueOf(this->ptr_, this->capacity_, index);
+            return this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
         }
     };
 
     class LeafArrayContainer final : public Container {
     private:
-        ValueArray  valueArray_;
+        IndexArray  indexArray_;
 
         void reallocate(size_type newSize, size_type newCapacity) {
             assert(newCapacity > this->capacity());
@@ -540,7 +540,7 @@ public:
         }
 
         size_type end() const final {
-            return this->valueArray_.size();
+            return this->size();
         }
 
         void next(size_type & pos) const final {
@@ -564,7 +564,7 @@ public:
         }
 
         bool hasLeafChild(std::uint16_t value) const final {
-            int index = valueArray_.indexOf(this->ptr_, this->size_, value);
+            int index = indexArray_.indexOf(this->ptr_, this->size_, value);
             return (index >= 0);
         }
 
@@ -574,7 +574,7 @@ public:
             if (this->size() >= this->capacity()) {
                 this->resize(this->capacity() * 2);
             }
-            this->valueArray_.append(this->ptr_, this->size_, value);
+            this->indexArray_.append(this->ptr_, this->size_, value);
         }
 
         Container * append(std::uint16_t value) final {
