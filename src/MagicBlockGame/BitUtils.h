@@ -12,8 +12,8 @@
 namespace jstd {
 
 struct BitUtils {
-    template <size_t Bits>
-    static unsigned int popcnt(size_t n) noexcept {
+    template <uint64_t Bits>
+    static unsigned int popcnt(uint64_t n) noexcept {
 		const char * const _BitsPerByte =
 			"\0\1\1\2\1\2\2\3\1\2\2\3\2\3\3\4"
 			"\1\2\2\3\2\3\3\4\2\3\3\4\3\4\4\5"

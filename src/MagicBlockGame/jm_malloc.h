@@ -52,10 +52,10 @@ public:
     static const size_type kChunkLowShift = jstd::compile_time::CountTrailingZeroBits<kChunkUnitSize>::value;
     static const size_type kChunkLowMask = kChunkUnitSize - 1;
 
-    static const size_type kChunkHighCount = (size_type(1) << 32) / kChunkUnitSize;
+    static const size_type kChunkHighCount = size_type((std::uint64_t(1) << 32) / kChunkUnitSize);
     static const size_type kChunkHighBits = sizeof(std::uint32_t) * 8 - kChunkLowShift;
     static const size_type kChunkHighMask = kChunkHighCount - 1;
-    static const size_type kChunkHighMaskFull = (((size_type(1) << 32) - 1) >> kChunkLowShift) << kChunkLowShift;
+    static const size_type kChunkHighMaskFull = size_type(((std::uint64_t(1) << 32) - 1) >> kChunkLowShift) << kChunkLowShift;
 
     //
     // The chunk size is set to 128 KB for faster memory allocation.

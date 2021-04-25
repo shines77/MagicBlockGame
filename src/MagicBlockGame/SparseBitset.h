@@ -526,7 +526,10 @@ public:
             this->init();
         }
         LeafArrayContainer(const LeafArrayContainer & src) = delete;
-        virtual ~LeafArrayContainer() = default;
+
+        virtual ~LeafArrayContainer() {
+            this->destroy();
+        }
 
         void destroy() final {
             // TODO:
@@ -597,7 +600,10 @@ public:
             this->init();
         }
         BitmapContainer(const BitmapContainer & src) = delete;
-        virtual ~BitmapContainer() = default;
+
+        virtual ~BitmapContainer() {
+            this->destroy();
+        }
 
         void destroy() final {
             // TODO:
@@ -662,7 +668,10 @@ public:
             this->init();
         }
         LeafBitmapContainer(const LeafBitmapContainer & src) = delete;
-        virtual ~LeafBitmapContainer() = default;
+
+        virtual ~LeafBitmapContainer() {
+            this->destroy();
+        }
 
         void destroy() final {
             // TODO:
