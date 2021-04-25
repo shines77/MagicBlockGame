@@ -403,11 +403,11 @@ public:
                 if (new_ptr != nullptr) {
                     //assert(this->ptr_ != nullptr);
                     std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
-                    std::uint16_t * valueEnd = (std::uint16_t *)this->ptr_ + this->capacity();
-                    std::uint16_t * newValueEnd = (std::uint16_t *)new_ptr + newCapacity;
-                    Container * nodeFirst = (Container *)valueEnd;
-                    Container * newNodeFirst = (Container *)newValueEnd;
-                    std::memcpy(newNodeFirst, nodeFirst, sizeof(Container *) * this->capacity());
+                    std::uint16_t * indexEnd = (std::uint16_t *)this->ptr_ + this->capacity();
+                    std::uint16_t * newIndexEnd = (std::uint16_t *)new_ptr + newCapacity;
+                    Container * valueFirst = (Container *)indexEnd;
+                    Container * newValueFirst = (Container *)newIndexEnd;
+                    std::memcpy(newValueFirst, valueFirst, sizeof(Container *) * this->capacity());
                     std::free(this->ptr_);
                     this->ptr_ = new_ptr;
                     this->capacity_ = std::uint16_t(newCapacity);
@@ -812,8 +812,7 @@ public:
                 }
 #else
                 destroy_trie_impl(child, depth + 1);
-#endif                
-                //child->destroy();
+#endif
                 delete child;
             }
         }
@@ -837,12 +836,10 @@ public:
             Container * child = container->valueOf(i);
             if (child != nullptr) {
                 destroy_trie_impl(child, 1);
-                //child->destroy();
                 delete child;
             }
         }
 
-        //this->root_->destroy();
         delete this->root_;
         this->root_ = nullptr;
     }
