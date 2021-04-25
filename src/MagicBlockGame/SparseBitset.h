@@ -62,13 +62,13 @@ public:
 
     class Container;
 
-    class ValueArray {
+    class ValueVector {
     private:
         std::vector<std::uint16_t> array_;
 
     public:
-        ValueArray() = default;
-        ~ValueArray() = default;
+        ValueVector() = default;
+        ~ValueVector() = default;
 
         size_type size() const {
             return this->array_.size();
@@ -105,13 +105,13 @@ public:
         }
     };
 
-    class NodeArray {
+    class NodeVector {
     private:
         std::vector<Container *> array_;
 
     public:
-        NodeArray() = default;
-        ~NodeArray() = default;
+        NodeVector() = default;
+        ~NodeVector() = default;
 
         size_type size() const {
             return this->array_.size();
@@ -141,33 +141,111 @@ public:
         }
     };
 
+    class ValueArray {
+    public:
+        ValueArray() = default;
+        ~ValueArray() = default;
+
+        size_type size() const {
+            return 0;
+        }
+
+        void reserve(size_type capacity) {
+        }
+
+        void resize(size_type newSize) {
+        }
+
+        int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) const {
+            assert(size <= kArraySizeThreshold);
+            assert(size <= kMaxArraySize);
+            int index = 0;
+            std::uint16_t * valueFirst = (std::uint16_t *)ptr;
+            std::uint16_t * valueLast  = (std::uint16_t *)ptr + size;
+            for (std::uint16_t * values = valueFirst; values < valueLast; values++) {
+                assert(*values != kInvalidIndex);
+                if (*values != value)
+                    index++;
+                else
+                    return index;                    
+            }
+            return kInvalidIndex32;
+        }
+
+        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) {
+            assert(size <= kArraySizeThreshold);
+            assert(size <= kMaxArraySize);
+            std::uint16_t * target = (std::uint16_t *)ptr + size;
+            assert(target != nullptr);
+            *target = value;
+        }
+    };
+
+    class NodeArray {
+    public:
+        NodeArray() = default;
+        ~NodeArray() = default;
+
+        size_type size() const {
+            return 0;
+        }
+
+        void reserve(size_type capacity) {
+        }
+
+        void resize(size_type newSize) {
+        }
+
+        Container * valueOf(std::uintptr_t * ptr, std::uint16_t capacity, int index) const {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)capacity);
+            assert(capacity <= std::uint16_t(kMaxArraySize));
+            std::uint16_t * valueEnd = (std::uint16_t *)ptr + capacity;
+            Container ** container = (Container **)valueEnd + index;
+            return *container;
+        }
+
+        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t capacity, Container * container) {
+            assert(container != nullptr);
+            assert(size <= std::uint16_t(kArraySizeThreshold));
+            assert(size <= std::uint16_t(kMaxArraySize));
+            assert(size <= capacity);
+            std::uint16_t * valueEnd = (std::uint16_t *)ptr + capacity;
+            Container ** target = (Container **)valueEnd + size;
+            assert(target != nullptr);
+            *target = container;
+        }
+    };
+
     class Container {
     public:
         typedef std::size_t size_type;
 
     protected:
-        uint16_t    type_;
-        uint16_t    size_;      // Cardinality
-        uint16_t    capacity_;
-        uint16_t    reserve_;
+        std::uint16_t    type_;
+        std::uint16_t    size_;      // Cardinality
+        std::uint16_t    capacity_;
+        std::uint16_t    reserve_;
+        std::uintptr_t * ptr_;
 
         void init() {
             assert(this->size_ == 0);
             this->reserve(kDefaultArrayCapacity);
-            //this-capacity_ = kDefaultArrayCapacity;
         }
 
     public:
-        Container() : type_(NodeType::ArrayContainer), size_(0), capacity_(0), reserve_(0) {
+        Container() : type_(NodeType::ArrayContainer), size_(0), capacity_(0), reserve_(0), ptr_(nullptr) {
             this->init();
         }
-        Container(uint16_t type) : type_(type), size_(0), capacity_(0), reserve_(0) {
+        Container(std::uint16_t type) : type_(type), size_(0), capacity_(0), reserve_(0), ptr_(nullptr) {
             this->init();
         }
 
         Container(const Container & src) = delete;
 
-        virtual ~Container() = default;
+        virtual ~Container() {
+            this->destroy();
+        }
 
         size_type type() const {
             return this->type_;
@@ -182,7 +260,10 @@ public:
         }
 
         virtual void destroy() {
-            // Not implemented!
+            if (this->ptr_ != nullptr) {
+                std::free(this->ptr_);
+                this->ptr_ = nullptr;
+            }
         }
 
         virtual size_type begin() const {
@@ -203,6 +284,30 @@ public:
 
         virtual void resize(size_type newSize) {
             // Not implemented!
+        }
+
+        void allocate(size_type size, size_type capacity) {
+            assert(this->ptr_ == nullptr);
+            assert(capacity != this->capacity());
+            this->ptr_ = (uintptr_t *)std::malloc(size);
+            this->capacity_ = std::uint16_t(capacity);
+        }
+
+        void reallocate_orgi(size_type newSize, size_type newCapacity) {
+            if (newCapacity > this->capacity()) {
+                if (this->ptr_ != nullptr) {
+                    uintptr_t * new_ptr = (uintptr_t *)std::malloc(newSize);
+                    if (new_ptr != nullptr) {
+                        std::memcpy(new_ptr, this->ptr_, this->capacity());
+                        std::free(this->ptr_);
+                        this->ptr_ = new_ptr;
+                        this->capacity_ = std::uint16_t(newCapacity);
+                    }
+                }
+                else {
+                    this->allocate(newSize, newCapacity);
+                }
+            }
         }
 
         template <size_type type = NodeType::ArrayContainer>
@@ -290,10 +395,38 @@ public:
         ValueArray  valueArray_;
         NodeArray   nodeArray_;
 
+        void reallocate(size_type newSize, size_type newCapacity) {
+            assert(newCapacity > this->capacity());
+            assert(this->ptr_ != nullptr);
+            if (true) {
+                uintptr_t * new_ptr = (uintptr_t *)std::malloc(newSize);
+                if (new_ptr != nullptr) {
+                    //assert(this->ptr_ != nullptr);
+                    std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+                    std::uint16_t * valueEnd = (std::uint16_t *)this->ptr_ + this->capacity();
+                    std::uint16_t * newValueEnd = (std::uint16_t *)new_ptr + newCapacity;
+                    Container * nodeFirst = (Container *)valueEnd;
+                    Container * newNodeFirst = (Container *)newValueEnd;
+                    std::memcpy(newNodeFirst, nodeFirst, sizeof(Container *) * this->capacity());
+                    std::free(this->ptr_);
+                    this->ptr_ = new_ptr;
+                    this->capacity_ = std::uint16_t(newCapacity);
+                }
+            }
+            else {
+                this->allocate(newSize, newCapacity);
+            }
+        }
+
     public:
-        ArrayContainer() : Container(NodeType::ArrayContainer) {}
+        ArrayContainer() : Container(NodeType::ArrayContainer) {
+            this->init();
+        }
         ArrayContainer(const ArrayContainer & src) = delete;
-        virtual ~ArrayContainer() = default;
+
+        virtual ~ArrayContainer() {
+            this->destroy();
+        }
 
         void destroy() final {
             // TODO:
@@ -304,7 +437,7 @@ public:
         }
 
         size_type end() const final {
-            return this->valueArray_.size();
+            return this->size();
         }
 
         void next(size_type & pos) const final {
@@ -312,19 +445,21 @@ public:
         }
 
         void reserve(size_type capacity) final {
-            this->valueArray_.reserve(capacity);
-            this->nodeArray_.reserve(capacity);
+            assert(capacity > this->capacity());
+            size_type allocSize = (sizeof(std::uint16_t) + sizeof(Container *)) * capacity;
+            this->allocate(allocSize, capacity);
         }
 
-        void resize(size_type newSize) final {
-            this->valueArray_.resize(newSize);
-            this->nodeArray_.resize(newSize);
+        void resize(size_type newCapacity) final {
+            assert (newCapacity > this->capacity());
+            size_type allocSize = (sizeof(std::uint16_t) + sizeof(Container *)) * newCapacity;
+            this->reallocate(allocSize, newCapacity);
         }
 
         Container * hasChild(std::uint16_t value) const final {
-            int index = this->valueArray_.indexOf(value);
+            int index = this->valueArray_.indexOf(this->ptr_, this->size_, value);
             if (index >= 0) {
-                Container * child = this->nodeArray_.valueOf(index);
+                Container * child = this->nodeArray_.valueOf(this->ptr_, this->capacity_, index);
                 return child;
             }
             return nullptr;
@@ -336,11 +471,13 @@ public:
 
         void append(std::uint16_t value, Container * container) final {
             assert(container != nullptr);
-            assert(this->valueArray_.size() <= kArraySizeThreshold);
-            assert(this->valueArray_.size() <= kMaxArraySize);
-            assert(this->valueArray_.size() == this->nodeArray_.size());
-            this->valueArray_.append(value);
-            this->nodeArray_.append(container);
+            assert(this->size() <= kArraySizeThreshold);
+            assert(this->size() <= kMaxArraySize);
+            if (this->size() >= this->capacity()) {
+                this->resize(this->capacity() * 2);
+            }
+            this->valueArray_.append(this->ptr_, this->size_, value);
+            this->nodeArray_.append(this->ptr_, this->size_, this->capacity_, container);
         }
 
         Container * append(std::uint16_t value) final {
@@ -358,7 +495,7 @@ public:
         }
 
         Container * valueOf(int index) const final {
-            return this->nodeArray_.valueOf(index);
+            return this->nodeArray_.valueOf(this->ptr_, this->capacity_, index);
         }
     };
 
@@ -366,8 +503,28 @@ public:
     private:
         ValueArray  valueArray_;
 
+        void reallocate(size_type newSize, size_type newCapacity) {
+            assert(newCapacity > this->capacity());
+            assert(this->ptr_ != nullptr);
+            if (true) {
+                uintptr_t * new_ptr = (uintptr_t *)std::malloc(newSize);
+                if (new_ptr != nullptr) {
+                    //assert(this->ptr_ != nullptr);
+                    std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+                    std::free(this->ptr_);
+                    this->ptr_ = new_ptr;
+                    this->capacity_ = std::uint16_t(newCapacity);
+                }
+            }
+            else {
+                this->allocate(newSize, newCapacity);
+            }
+        }
+
     public:
-        LeafArrayContainer() : Container(NodeType::LeafArrayContainer) {}
+        LeafArrayContainer() : Container(NodeType::LeafArrayContainer) {
+            this->init();
+        }
         LeafArrayContainer(const LeafArrayContainer & src) = delete;
         virtual ~LeafArrayContainer() = default;
 
@@ -388,11 +545,15 @@ public:
         }
 
         void reserve(size_type capacity) final {
-            this->valueArray_.reserve(capacity);
+            assert(capacity > this->capacity());
+            size_type allocSize = sizeof(std::uint16_t) * capacity;
+            this->allocate(allocSize, capacity);
         }
 
-        void resize(size_type newSize) final {
-            this->valueArray_.resize(newSize);
+        void resize(size_type newCapacity) final {
+            assert (newCapacity > this->capacity());
+            size_type allocSize = sizeof(std::uint16_t) * newCapacity;
+            this->reallocate(allocSize, newCapacity);
         }
 
         Container * hasChild(std::uint16_t value) const final {
@@ -400,14 +561,17 @@ public:
         }
 
         bool hasLeafChild(std::uint16_t value) const final {
-            int index = valueArray_.indexOf(value);
+            int index = valueArray_.indexOf(this->ptr_, this->size_, value);
             return (index >= 0);
         }
 
         void append(std::uint16_t value, Container * container) final {
-            assert(this->valueArray_.size() <= kArraySizeThreshold);
-            assert(this->valueArray_.size() <= kMaxArraySize);
-            this->valueArray_.append(value);
+            assert(this->size() <= kArraySizeThreshold);
+            assert(this->size() <= kMaxArraySize);
+            if (this->size() >= this->capacity()) {
+                this->resize(this->capacity() * 2);
+            }
+            this->valueArray_.append(this->ptr_, this->size_, value);
         }
 
         Container * append(std::uint16_t value) final {
@@ -429,7 +593,9 @@ public:
 
     class BitmapContainer final : public Container {
     public:
-        BitmapContainer() : Container(NodeType::BitmapContainer) {}
+        BitmapContainer() : Container(NodeType::BitmapContainer) {
+            this->init();
+        }
         BitmapContainer(const BitmapContainer & src) = delete;
         virtual ~BitmapContainer() = default;
 
@@ -492,7 +658,9 @@ public:
 
     class LeafBitmapContainer final : public Container {
     public:
-        LeafBitmapContainer() : Container(NodeType::LeafBitmapContainer) {}
+        LeafBitmapContainer() : Container(NodeType::LeafBitmapContainer) {
+            this->init();
+        }
         LeafBitmapContainer(const LeafBitmapContainer & src) = delete;
         virtual ~LeafBitmapContainer() = default;
 
@@ -633,8 +801,10 @@ public:
                     child->type() != NodeType::LeafBitmapContainer) {
                     destroy_trie_impl(child, depth + 1);
                 }
+#else
+                destroy_trie_impl(child, depth + 1);
 #endif                
-                child->destroy();
+                //child->destroy();
                 delete child;
             }
         }
@@ -658,12 +828,12 @@ public:
             Container * child = container->valueOf(i);
             if (child != nullptr) {
                 destroy_trie_impl(child, 1);
-                child->destroy();
+                //child->destroy();
                 delete child;
             }
         }
 
-        this->root_->destroy();
+        //this->root_->destroy();
         delete this->root_;
         this->root_ = nullptr;
     }

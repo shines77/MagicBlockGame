@@ -178,7 +178,7 @@ union Board
 
 template <std::size_t BoardX, std::size_t BoardY>
 inline
-bool operator == (const Board<BoardX, BoardY> & lhs, const Board<BoardX, BoardY> & rhs) noexcept  {
+bool operator == (const Board<BoardX, BoardY> & lhs, const Board<BoardX, BoardY> & rhs) noexcept {
     return lhs.is_equal(rhs);
 }
 
