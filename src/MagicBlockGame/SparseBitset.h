@@ -95,6 +95,11 @@ namespace SortUtils {
     }
 
 #if 1
+    //
+    // See: https://www.cnblogs.com/skywang12345/p/3596746.html
+    // See: https://blog.csdn.net/zuiaituantuan/article/details/5978009 (recommend)
+    //
+
     // Prerequisite: all elements are unique
     static void quick_sort(std::uint16_t * indexs, std::ptrdiff_t first, std::ptrdiff_t last) {
         assert(indexs != nullptr);
@@ -159,6 +164,11 @@ namespace SortUtils {
         }
     }
 #else
+    //
+    // See: https://baijiahao.baidu.com/s?id=1667443239764190065
+    // See: https://blog.csdn.net/zuiaituantuan/article/details/5978009 (recommend)
+    //
+
     // Prerequisite: all elements are unique
     static void quick_sort(std::uint16_t * indexs, std::ptrdiff_t first, std::ptrdiff_t last) {
         assert(indexs != nullptr);
@@ -166,26 +176,26 @@ namespace SortUtils {
             std::ptrdiff_t left = first;
             std::ptrdiff_t right = last;
             std::size_t middle = (left + right) / 2;
-            std::swap(indexs[middle], indexs[right]);
-            std::uint16_t pivot = indexs[right];
+            std::swap(indexs[left], indexs[middle]);
+            std::uint16_t pivot = indexs[left];
             while (left < right) {
-                while (left < right && indexs[left] < pivot) {
-                    left++;
-                }
-                if (left < right) {
-                    indexs[right--] = indexs[left];
-                }
                 while (left < right && indexs[right] > pivot) {
                     right--;
                 }
                 if (left < right) {
                     indexs[left++] = indexs[right];
                 }
+                while (left < right && indexs[left] < pivot) {
+                    left++;
+                }
+                if (left < right) {
+                    indexs[right--] = indexs[left];
+                }
             }
             indexs[left] = pivot;
 
-            quick_sort(indexs, first, middle - 1);
-            quick_sort(indexs, middle + 1, last);
+            quick_sort(indexs, first, left - 1);
+            quick_sort(indexs, left + 1, last);
         }
     }
 
@@ -198,19 +208,11 @@ namespace SortUtils {
             std::ptrdiff_t left = first;
             std::ptrdiff_t right = last;
             std::ptrdiff_t middle = (left + right) / 2;
-            std::swap(indexs[middle], indexs[right]);
-            std::swap(values[middle], values[right]);
-            std::uint16_t pivot = indexs[right];
-            std::uintptr_t * pivot_value = values[right];
+            std::swap(indexs[left], indexs[middle]);
+            std::swap(values[left], values[middle]);
+            std::uint16_t pivot = indexs[left];
+            std::uintptr_t * pivot_value = values[left];
             while (left < right) {
-                while (left < right && indexs[left] < pivot) {
-                    left++;
-                }
-                if (left < right) {
-                    indexs[right] = indexs[left];
-                    values[right] = values[left];
-                    right--;
-                }
                 while (left < right && indexs[right] > pivot) {
                     right--;
                 }
@@ -219,15 +221,65 @@ namespace SortUtils {
                     values[left] = values[right];
                     left++;
                 }
+                while (left < right && indexs[left] < pivot) {
+                    left++;
+                }
+                if (left < right) {
+                    indexs[right] = indexs[left];
+                    values[right] = values[left];
+                    right--;
+                }
             }
             indexs[left] = pivot;
             values[left] = pivot_value;
 
-            quick_sort(indexs, values, first, middle - 1);
-            quick_sort(indexs, values, middle + 1, last);
+            quick_sort(indexs, values, first, left - 1);
+            quick_sort(indexs, values, left + 1, last);
         }
     }
 #endif
+
+    static int binary_search(std::uint16_t * ptr, std::size_t first,
+                             std::size_t last, std::uint16_t value) {
+        std::size_t low = first;
+        std::size_t high = last;
+        while (std::ptrdiff_t(high - low) >= 8) {
+            std::size_t mid = (low + high) / 2;
+            std::uint16_t middle = ptr[mid];
+            if (value < middle) {
+                std::uint16_t minimum = ptr[low];
+                if (value > minimum)
+                    high = mid;
+                else if (value < minimum)
+                    return -1;
+                else
+                    return (int)low;
+            }
+            else if (value > middle) {
+                std::uint16_t maximum = ptr[high - 1];
+                if (value < maximum)
+                    low = mid;
+                else if (value > maximum)
+                    return -1;
+                else
+                    return (int)(high - 1);
+            }
+            else {
+                return (int)mid;
+            }
+        }
+
+        std::uint16_t * indexFirst = (std::uint16_t *)ptr + low;
+        std::uint16_t * indexLast  = (std::uint16_t *)ptr + high;
+        for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
+            assert(*indexs != std::uint16_t(-1));
+            if (*indexs != value)
+                continue;
+            else
+                return int(indexs - (std::uint16_t *)ptr);
+        }
+        return -1;
+    }
 } // namespace SortUtils
 
 template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
@@ -251,7 +303,7 @@ public:
     static const std::uint16_t  kInvalidIndex = std::uint16_t(-1);
     static const int            kInvalidIndex32 = -1;
 
-    static const size_type      kArraySizeSortThersold = 16384;
+    static const size_type      kArraySizeSortThersold = 64;
 
 #pragma pack(push, 1)
 
@@ -369,15 +421,35 @@ public:
         int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) const {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
-            int index = 0;
             std::uint16_t * indexFirst = (std::uint16_t *)ptr;
             std::uint16_t * indexLast  = (std::uint16_t *)ptr + size;
             for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
                 assert(*indexs != kInvalidIndex);
                 if (*indexs != value)
-                    index++;
+                    continue;
                 else
-                    return index;                    
+                    return int(indexs - indexFirst);
+            }
+            return kInvalidIndex32;
+        }
+
+        int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t sorted, std::uint16_t value) const {
+            assert(size <= kArraySizeThreshold);
+            assert(size <= kMaxArraySize);
+            if (sorted > 0) {
+                int index = SortUtils::binary_search((std::uint16_t *)ptr, 0, sorted, value);
+                if (index != kInvalidIndex32)
+                    return index;
+            }
+
+            std::uint16_t * indexFirst = (std::uint16_t *)ptr + sorted;
+            std::uint16_t * indexLast  = (std::uint16_t *)ptr + size;
+            for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
+                assert(*indexs != kInvalidIndex);
+                if (*indexs != value)
+                    continue;
+                else
+                    return int(indexs - (std::uint16_t *)ptr);
             }
             return kInvalidIndex32;
         }
@@ -529,32 +601,6 @@ public:
             }
         }
 
-        template <size_type type = NodeType::ArrayContainer>
-        static Container * createNewContainer() {
-            Container * container;
-            if (type == NodeType::ArrayContainer) {
-                ArrayContainer * newContainer = new ArrayContainer;
-                container = static_cast<Container *>(newContainer);
-            }
-            else if (type == NodeType::LeafArrayContainer) {
-                LeafArrayContainer * newContainer = new LeafArrayContainer;
-                container = static_cast<Container *>(newContainer);
-            }
-            else if (type == NodeType::BitmapContainer) {
-                BitmapContainer * newContainer = new BitmapContainer;
-                container = static_cast<Container *>(newContainer);
-            }
-            else if (type == NodeType::LeafBitmapContainer) {
-                LeafBitmapContainer * newContainer = new LeafBitmapContainer;
-                container = static_cast<Container *>(newContainer);
-            }
-            else {
-                container = nullptr;
-                throw std::exception("createContainer(): Unknown container type");
-            }
-            return container;
-        }
-
         bool isExists(size_type value) const {
             Container * child;
             return this->hasChild(value, child);
@@ -616,6 +662,32 @@ public:
 
         Container * valueOf(size_type index) const {
             return this->valueOf(static_cast<int>(index));
+        }
+
+        template <size_type type = NodeType::ArrayContainer>
+        static Container * createNewContainer() {
+            Container * container;
+            if (type == NodeType::ArrayContainer) {
+                ArrayContainer * newContainer = new ArrayContainer;
+                container = static_cast<Container *>(newContainer);
+            }
+            else if (type == NodeType::LeafArrayContainer) {
+                LeafArrayContainer * newContainer = new LeafArrayContainer;
+                container = static_cast<Container *>(newContainer);
+            }
+            else if (type == NodeType::BitmapContainer) {
+                BitmapContainer * newContainer = new BitmapContainer;
+                container = static_cast<Container *>(newContainer);
+            }
+            else if (type == NodeType::LeafBitmapContainer) {
+                LeafBitmapContainer * newContainer = new LeafBitmapContainer;
+                container = static_cast<Container *>(newContainer);
+            }
+            else {
+                container = nullptr;
+                throw std::exception("createNewContainer(): Unknown container type");
+            }
+            return container;
         }
     };
 
@@ -709,7 +781,7 @@ public:
         }
 
         Container * hasChild(std::uint16_t value) const final {
-            int index = this->indexArray_.indexOf(this->ptr_, this->size_, value);
+            int index = this->indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, value);
             if (index != kInvalidIndex32) {
                 Container * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
                 return child;
@@ -718,7 +790,7 @@ public:
         }
 
         bool hasChild(std::uint16_t value, Container *& container) const final {
-            int index = this->indexArray_.indexOf(this->ptr_, this->size_, value);
+            int index = this->indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, value);
             if (index != kInvalidIndex32) {
                 Container * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
                 assert(child != nullptr);
@@ -852,7 +924,7 @@ public:
         }
 
         bool hasLeaf(std::uint16_t value) const final {
-            int index = indexArray_.indexOf(this->ptr_, this->size_, value);
+            int index = indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, value);
             return (index != kInvalidIndex32);
         }
 
