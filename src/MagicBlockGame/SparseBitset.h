@@ -1177,9 +1177,19 @@ public:
             size_type layer_value = getLayerValue(board, layer);
             assert(container->type() == NodeType::ArrayContainer ||
                    container->type() == NodeType::BitmapContainer);
-            Container * child = container->hasChild(layer_value);
-            if (child != nullptr) {
-                container = child;
+            Container * child;
+            bool is_exists = container->hasChild(layer_value, child);
+            if (is_exists) {
+                if (child != nullptr) {
+                    assert(child->type() == NodeType::ArrayContainer ||
+                           child->type() == NodeType::BitmapContainer ||
+                           child->type() == NodeType::LeafArrayContainer ||
+                           child->type() == NodeType::LeafBitmapContainer);
+                    container = child;
+                }
+                else {
+                    assert(container->isLeaf());
+                }
                 continue;
             }
             else {
@@ -1211,9 +1221,13 @@ public:
             if (!insert_new) {
                 assert(container->type() == NodeType::ArrayContainer ||
                        container->type() == NodeType::BitmapContainer);
-                Container * child = container->hasChild(layer_value);
-                if (child != nullptr) {
-                    container = child;
+                Container * child;
+                bool is_exists = container->hasChild(layer_value, child);
+                if (is_exists) {
+                    if (child != nullptr)
+                        container = child;
+                    else
+                        assert(container->isLeaf());
                     continue;
                 }
                 else {
