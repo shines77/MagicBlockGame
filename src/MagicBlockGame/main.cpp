@@ -207,6 +207,10 @@ void jm_mallc_SizeClass_test()
     assert(index == (92 + 96));
     assert(index1 == (92 + 96));
     assert(index2 == (index1 + 1));
+
+    (void)index;
+    (void)index1;
+    (void)index2;
 }
 
 void jm_mallc_ThreadMalloc_test()

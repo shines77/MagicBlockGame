@@ -248,7 +248,8 @@ public:
         size_type maxTinyIndex_;
 
         void initTinyObjectSizes() {
-            for (size_type i = 0; i < sizeof(this->sizeList_); i++) {
+            size_type kSizeListLen = sizeof(this->sizeList_) / sizeof(this->sizeList_[0]);
+            for (size_type i = 0; i < kSizeListLen; i++) {
                 this->sizeList_[i] = 0;
             }
 
