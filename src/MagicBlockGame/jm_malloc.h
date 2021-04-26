@@ -17,7 +17,7 @@
 #include <exception>
 #include <stdexcept>
 
-#include "Bitset.h"
+#include "BitSet.h"
 #include "support/CT_PowerOf2.h"
 
 #define JM_MALLOC_USE_STATISTIC_INFO    1
