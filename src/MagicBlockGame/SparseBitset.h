@@ -246,6 +246,34 @@ namespace SortUtils {
                              std::size_t last, std::uint16_t value) {
         std::size_t low = first;
         std::size_t high = last;
+
+        {
+            assert(low < high);
+            std::size_t mid = (low + high) / 2;
+            std::uint16_t middle = ptr[mid];
+            if (value < middle) {
+                std::uint16_t minimum = ptr[low];
+                if (value > minimum)
+                    high = mid;
+                else if (value < minimum)
+                    return -1;
+                else
+                    return (int)low;
+            }
+            else if (value > middle) {
+                std::uint16_t maximum = ptr[high - 1];
+                if (value < maximum)
+                    low = mid + 1;
+                else if (value > maximum)
+                    return -1;
+                else
+                    return (int)(high - 1);
+            }
+            else {
+                return (int)mid;
+            }
+        }
+
         //while (std::ptrdiff_t(high - low) >= 8) {
         while (low < high) {
             std::size_t mid = (low + high) / 2;
