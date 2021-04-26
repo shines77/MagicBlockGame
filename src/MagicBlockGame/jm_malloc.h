@@ -390,10 +390,10 @@ public:
             this->size = src.size;
         }
 
-        void internal_swap(const Chunk & src) {
-            std::swap(this->ptr, src.ptr);
-            std::swap(this->span, src.span);
-            std::swap(this->size, src.size);
+        void internal_swap(Chunk & other) {
+            std::swap(this->ptr, other.ptr);
+            std::swap(this->span, other.span);
+            std::swap(this->size, other.size);
         }
 
         void set(void * ptr, Span * span, size_type size) {
