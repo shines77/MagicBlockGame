@@ -648,7 +648,7 @@ public:
 
         virtual bool hasChild(std::uint16_t value, Container *& container) const {
             // Not implemented!
-            return nullptr;
+            return false;
         }
 
         bool hasChild(std::size_t value, Container *& container) const {
@@ -657,7 +657,7 @@ public:
 
         virtual bool hasLeaf(std::uint16_t value) const {
             // Not implemented!
-            return nullptr;
+            return false;
         }
 
         bool hasLeaf(std::size_t value) const {
@@ -693,32 +693,6 @@ public:
 
         Container * valueOf(size_type index) const {
             return this->valueOf(static_cast<int>(index));
-        }
-
-        template <size_type type = NodeType::ArrayContainer>
-        static Container * createNewContainer() {
-            Container * container;
-            if (type == NodeType::ArrayContainer) {
-                ArrayContainer * newContainer = new ArrayContainer;
-                container = static_cast<Container *>(newContainer);
-            }
-            else if (type == NodeType::LeafArrayContainer) {
-                LeafArrayContainer * newContainer = new LeafArrayContainer;
-                container = static_cast<Container *>(newContainer);
-            }
-            else if (type == NodeType::BitmapContainer) {
-                BitmapContainer * newContainer = new BitmapContainer;
-                container = static_cast<Container *>(newContainer);
-            }
-            else if (type == NodeType::LeafBitmapContainer) {
-                LeafBitmapContainer * newContainer = new LeafBitmapContainer;
-                container = static_cast<Container *>(newContainer);
-            }
-            else {
-                container = nullptr;
-                throw std::exception("createNewContainer(): Unknown container type");
-            }
-            return container;
         }
     };
 
@@ -847,14 +821,14 @@ public:
         }
 
         Container * append(std::uint16_t value) final {
-            Container * container = Container::createNewContainer<NodeType::ArrayContainer>();
+            Container * container = new ArrayContainer();
             this->append(value, container);
             this->size_++;
             return container;
         }
 
         Container * appendLeaf(std::uint16_t value) final {
-            Container * container = Container::createNewContainer<NodeType::LeafArrayContainer>();
+            Container * container = new LeafArrayContainer();
             this->append(value, container);
             this->size_++;
             return container;
@@ -1039,14 +1013,14 @@ public:
         }
 
         Container * append(std::uint16_t value) final {
-            Container * container = Container::createNewContainer<NodeType::ArrayContainer>();
+            Container * container = new ArrayContainer();
             this->append(value, container);
             this->size_++;
             return container;
         }
 
         Container * appendLeaf(std::uint16_t value) final {
-            Container * container = Container::createNewContainer<NodeType::LeafArrayContainer>();
+            Container * container = new LeafArrayContainer();
             this->append(value, container);
             this->size_++;
             return container;
@@ -1130,6 +1104,34 @@ public:
         }
     };
 
+    struct Factory {
+        template <size_type type = NodeType::ArrayContainer>
+        static Container * Container::CreateNewContainer() {
+            Container * container;
+            if (type == NodeType::ArrayContainer) {
+                ArrayContainer * newContainer = new ArrayContainer;
+                container = static_cast<Container *>(newContainer);
+            }
+            else if (type == NodeType::LeafArrayContainer) {
+                LeafArrayContainer * newContainer = new LeafArrayContainer;
+                container = static_cast<Container *>(newContainer);
+            }
+            else if (type == NodeType::BitmapContainer) {
+                BitmapContainer * newContainer = new BitmapContainer;
+                container = static_cast<Container *>(newContainer);
+            }
+            else if (type == NodeType::LeafBitmapContainer) {
+                LeafBitmapContainer * newContainer = new LeafBitmapContainer;
+                container = static_cast<Container *>(newContainer);
+            }
+            else {
+                container = nullptr;
+                throw std::exception("Factory::CreateNewContainer<type>(): Unknown container type");
+            }
+            return container;
+        }
+    };
+
 #pragma pack(pop)
 
 private:
@@ -1159,7 +1161,7 @@ private:
             this->y_index_[yi * 2 + 2] = bottom++;
         }
 #endif
-        this->root_ = Container::createNewContainer<NodeType::ArrayContainer>();
+        this->root_ = new ArrayContainer();
 
         for (size_type i = 0; i < BoardY; i++) {
             this->layer_info_[i].maxLayerSize = 0;

@@ -251,7 +251,7 @@ struct next_power2 {
 
 template <std::size_t Bits, std::size_t N>
 struct CountLeadingZeroBits_impl {
-    static const std::size_t value = (N == 0) ? Bits : CountTrailingZeroBits_impl<Bits + 1, N * 2>::value;
+    static const std::size_t value = (N == 0) ? Bits : CountLeadingZeroBits_impl<Bits + 1, N * 2>::value;
 };
 
 //
