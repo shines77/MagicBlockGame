@@ -239,6 +239,36 @@ namespace SortUtils {
     }
 #endif
 
+#if 1
+    static int binary_search(std::uint16_t * ptr, std::size_t first,
+                             std::size_t last, std::uint16_t value) {
+        std::size_t low = first;
+        std::size_t high = last;
+        //while (std::ptrdiff_t(high - low) >= 8) {
+        while (low < high) {
+            std::size_t mid = (low + high) / 2;
+            std::uint16_t middle = ptr[mid];
+            if (value < middle)
+                high = mid;
+            else if (value > middle)
+                low = mid + 1;
+            else
+                return (int)mid;
+        }
+#if 0
+        std::uint16_t * indexFirst = (std::uint16_t *)ptr + low;
+        std::uint16_t * indexLast  = (std::uint16_t *)ptr + high + 1;
+        for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
+            assert(*indexs != std::uint16_t(-1));
+            if (*indexs != value)
+                continue;
+            else
+                return int(indexs - (std::uint16_t *)ptr);
+        }
+#endif
+        return -1;
+    }
+#else
     static int binary_search(std::uint16_t * ptr, std::size_t first,
                              std::size_t last, std::uint16_t value) {
         std::size_t low = first;
@@ -258,7 +288,7 @@ namespace SortUtils {
             else if (value > middle) {
                 std::uint16_t maximum = ptr[high - 1];
                 if (value < maximum)
-                    low = mid;
+                    low = mid + 1;
                 else if (value > maximum)
                     return -1;
                 else
@@ -280,6 +310,7 @@ namespace SortUtils {
         }
         return -1;
     }
+#endif
 } // namespace SortUtils
 
 template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
