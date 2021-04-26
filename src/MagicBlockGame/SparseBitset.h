@@ -28,18 +28,19 @@ namespace SortUtils {
                            std::size_t first, std::size_t last) {
         assert(indexs != nullptr);
         assert(new_indexs != nullptr);
+        assert(first < last);
         std::size_t left = first;
-        std::size_t mid = (first + last) / 2;
-        std::size_t right = mid;
+        std::size_t middle = (first + last) / 2;
+        std::size_t right = middle;
         std::size_t cur = first;
-        while (left < mid && right < last) {
+        while (left < middle && right < last) {
             if (indexs[left] <= indexs[right])
                 new_indexs[cur++] = indexs[left++];
             else
                 new_indexs[cur++] = indexs[right++];
         }
 
-        while (left < mid) {
+        while (left < middle) {
             new_indexs[cur++] = indexs[left++];
         }
 
@@ -55,11 +56,12 @@ namespace SortUtils {
         assert(new_indexs != nullptr);
         assert(values != nullptr);
         assert(new_values != nullptr);
+        assert(first < last);
         std::size_t left = first;
-        std::size_t mid = (first + last) / 2;
-        std::size_t right = mid;
+        std::size_t middle = (first + last) / 2;
+        std::size_t right = middle;
         std::size_t cur = first;
-        while (left < mid && right < last) {
+        while (left < middle && right < last) {
             if (indexs[left] <= indexs[right]) {
                 new_indexs[cur] = indexs[left];
                 new_values[cur] = values[left];
@@ -72,13 +74,15 @@ namespace SortUtils {
                 cur++;
                 right++;
             }
+            assert(cur <= last);
         }
 
-        while (left < mid) {
+        while (left < middle) {
             new_indexs[cur] = indexs[left];
             new_values[cur] = values[left];
             cur++;
             left++;
+            assert(cur <= last);
         }
 
         while (right < last) {
@@ -86,16 +90,84 @@ namespace SortUtils {
             new_values[cur] = values[right];
             cur++;
             right++;
+            assert(cur <= last);
         }
     }
 
-    static void quick_sort(std::uint16_t * indexs, std::size_t first, std::size_t last) {
+#if 1
+    // Prerequisite: all elements are unique
+    static void quick_sort(std::uint16_t * indexs, std::ptrdiff_t first, std::ptrdiff_t last) {
         assert(indexs != nullptr);
         if (first < last) {
-            std::size_t left = first;
-            std::size_t right = last;
+            std::ptrdiff_t left = first;
+            std::ptrdiff_t right = last;
+            std::uint16_t pivot = indexs[left];
+            while (left < right) {
+                while (left < right && indexs[right] > pivot) {
+                    right--;
+                }
+                if (left < right) {
+                    indexs[left++] = indexs[right];
+                }
+                while (left < right && indexs[left] < pivot) {
+                    left++;
+                }
+                if (left < right) {
+                    indexs[right--] = indexs[left];
+                }
+            }
+            indexs[left] = pivot;
+
+            quick_sort(indexs, first, left - 1);
+            quick_sort(indexs, left + 1, last);
+        }
+    }
+
+    // Prerequisite: all elements are unique
+    static void quick_sort(std::uint16_t * indexs, std::uintptr_t ** values,
+                           std::ptrdiff_t first, std::ptrdiff_t last) {
+        assert(indexs != nullptr);
+        assert(values != nullptr);
+        if (first < last) {
+            std::ptrdiff_t left = first;
+            std::ptrdiff_t right = last;
+            std::uint16_t pivot = indexs[left];
+            std::uintptr_t * pivot_value = values[left];
+            while (left < right) {
+                while (left < right && indexs[right] > pivot) {
+                    right--;
+                }
+                if (left < right) {
+                    indexs[left] = indexs[right];
+                    values[left] = values[right];
+                    left++;
+                }
+                while (left < right && indexs[left] < pivot) {
+                    left++;
+                }
+                if (left < right) {
+                    indexs[right] = indexs[left];
+                    values[right] = values[left];
+                    right--;
+                }
+            }
+            indexs[left] = pivot;
+            values[left] = pivot_value;
+
+            quick_sort(indexs, values, first, left - 1);
+            quick_sort(indexs, values, left + 1, last);
+        }
+    }
+#else
+    // Prerequisite: all elements are unique
+    static void quick_sort(std::uint16_t * indexs, std::ptrdiff_t first, std::ptrdiff_t last) {
+        assert(indexs != nullptr);
+        if (first < last) {
+            std::ptrdiff_t left = first;
+            std::ptrdiff_t right = last;
             std::size_t middle = (left + right) / 2;
-            std::uint16_t pivot = indexs[middle];
+            std::swap(indexs[middle], indexs[right]);
+            std::uint16_t pivot = indexs[right];
             while (left < right) {
                 while (left < right && indexs[left] < pivot) {
                     left++;
@@ -110,23 +182,26 @@ namespace SortUtils {
                     indexs[left++] = indexs[right];
                 }
             }
-            indexs[middle] = pivot;
+            indexs[left] = pivot;
 
             quick_sort(indexs, first, middle - 1);
             quick_sort(indexs, middle + 1, last);
         }
     }
 
+    // Prerequisite: all elements are unique
     static void quick_sort(std::uint16_t * indexs, std::uintptr_t ** values,
-                           std::size_t first, std::size_t last) {
+                           std::ptrdiff_t first, std::ptrdiff_t last) {
         assert(indexs != nullptr);
         assert(values != nullptr);
         if (first < last) {
-            std::size_t left = first;
-            std::size_t right = last;
-            std::size_t middle = (left + right) / 2;
-            std::uint16_t pivot = indexs[middle];
-            std::uintptr_t * pivot_value = values[middle];
+            std::ptrdiff_t left = first;
+            std::ptrdiff_t right = last;
+            std::ptrdiff_t middle = (left + right) / 2;
+            std::swap(indexs[middle], indexs[right]);
+            std::swap(values[middle], values[right]);
+            std::uint16_t pivot = indexs[right];
+            std::uintptr_t * pivot_value = values[right];
             while (left < right) {
                 while (left < right && indexs[left] < pivot) {
                     left++;
@@ -145,13 +220,14 @@ namespace SortUtils {
                     left++;
                 }
             }
-            indexs[middle] = pivot;
-            values[middle] = pivot_value;
+            indexs[left] = pivot;
+            values[left] = pivot_value;
 
             quick_sort(indexs, values, first, middle - 1);
             quick_sort(indexs, values, middle + 1, last);
         }
     }
+#endif
 } // namespace SortUtils
 
 template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
@@ -174,6 +250,8 @@ public:
     static const size_type      kMaxArraySize = size_type(1) << (Bits * BoardX - 1);
     static const std::uint16_t  kInvalidIndex = std::uint16_t(-1);
     static const int            kInvalidIndex32 = -1;
+
+    static const size_type      kArraySizeSortThersold = 16384;
 
 #pragma pack(push, 1)
 
@@ -395,6 +473,11 @@ public:
             return this->sorted_;
         }
 
+        bool isLeaf() const  {
+            return (this->type() == NodeType::LeafArrayContainer ||
+                    this->type() == NodeType::LeafBitmapContainer);
+        }
+
         virtual void destroy() {
             if (this->ptr_ != nullptr) {
                 std::free(this->ptr_);
@@ -472,8 +555,9 @@ public:
             return container;
         }
 
-        bool exists(size_type value) const {
-            return (this->hasChild(value) != nullptr);
+        bool isExists(size_type value) const {
+            Container * child;
+            return this->hasChild(value, child);
         }
 
         virtual Container * hasChild(std::uint16_t value) const {
@@ -485,13 +569,22 @@ public:
             return this->hasChild(static_cast<std::uint16_t>(value));
         }
 
-        virtual bool hasLeafChild(std::uint16_t value) const {
+        virtual bool hasChild(std::uint16_t value, Container *& container) const {
             // Not implemented!
             return nullptr;
         }
 
-        bool hasLeafChild(std::size_t value) const {
-            return this->hasLeafChild(static_cast<std::uint16_t>(value));
+        bool hasChild(std::size_t value, Container *& container) const {
+            return this->hasChild(static_cast<std::uint16_t>(value), container);
+        }
+
+        virtual bool hasLeaf(std::uint16_t value) const {
+            // Not implemented!
+            return nullptr;
+        }
+
+        bool hasLeaf(std::size_t value) const {
+            return this->hasLeaf(static_cast<std::uint16_t>(value));
         }
 
         virtual void append(std::uint16_t value, Container * container) {
@@ -542,7 +635,7 @@ public:
                     std::uint16_t * newIndexEnd = (std::uint16_t *)new_ptr + newCapacity;
                     Container ** valueFirst = (Container **)indexEnd;
                     Container ** newValueFirst = (Container **)newIndexEnd;
-                    if (this->capacity() < 64) {
+                    if (this->capacity() <= kArraySizeSortThersold) {
                         std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
                         std::memcpy(newValueFirst, valueFirst, sizeof(Container *) * this->capacity());
                     }
@@ -555,13 +648,17 @@ public:
                             SortUtils::merge_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
                                                   (std::uint16_t *)new_ptr, (std::uintptr_t **)newValueFirst,
                                                   0, this->capacity());
+                            this->sorted_ = this->capacity_;
                         }
                         else {
                             // Quick sort
                             SortUtils::quick_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
                                                   0, this->capacity() - 1);
+                            // Copy sorted array to new buffer
+                            std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+                            std::memcpy(newValueFirst, valueFirst, sizeof(Container *) * this->capacity());
+                            this->sorted_ = this->capacity_;
                         }
-                        this->sorted_ = this->capacity_;
                     }
                     std::free(this->ptr_);
                     this->ptr_ = new_ptr;
@@ -613,14 +710,25 @@ public:
 
         Container * hasChild(std::uint16_t value) const final {
             int index = this->indexArray_.indexOf(this->ptr_, this->size_, value);
-            if (index >= 0) {
+            if (index != kInvalidIndex32) {
                 Container * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
                 return child;
             }
             return nullptr;
         }
 
-        bool hasLeafChild(std::uint16_t value) const final {
+        bool hasChild(std::uint16_t value, Container *& container) const final {
+            int index = this->indexArray_.indexOf(this->ptr_, this->size_, value);
+            if (index != kInvalidIndex32) {
+                Container * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
+                assert(child != nullptr);
+                container = child;
+                return true;
+            }
+            return false;
+        }
+
+        bool hasLeaf(std::uint16_t value) const final {
             return false;
         }
 
@@ -665,7 +773,7 @@ public:
                 uintptr_t * new_ptr = (uintptr_t *)std::malloc(newSize);
                 if (new_ptr != nullptr) {
                     //assert(this->ptr_ != nullptr);
-                    if (this->capacity() < 64) {
+                    if (this->capacity() <= kArraySizeSortThersold) {
                         std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
                     }
                     else {
@@ -676,12 +784,15 @@ public:
                             // (Half) Merge sort
                             SortUtils::merge_sort((std::uint16_t *)this->ptr_, (std::uint16_t *)new_ptr,
                                                   0, this->capacity());
+                            this->sorted_ = this->capacity_;
                         }
                         else {
                             // Quick sort
                             SortUtils::quick_sort((std::uint16_t *)this->ptr_, 0, this->capacity());
+                            // Copy sorted array to new buffer
+                            std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+                            this->sorted_ = this->capacity_;
                         }
-                        this->sorted_ = this->capacity_;
                     }
                     std::free(this->ptr_);
                     this->ptr_ = new_ptr;
@@ -735,9 +846,14 @@ public:
             return nullptr;
         }
 
-        bool hasLeafChild(std::uint16_t value) const final {
+        bool hasChild(std::uint16_t value, Container *& container) const final {
+            container = nullptr;
+            return this->hasLeaf(value);;
+        }
+
+        bool hasLeaf(std::uint16_t value) const final {
             int index = indexArray_.indexOf(this->ptr_, this->size_, value);
-            return (index >= 0);
+            return (index != kInvalidIndex32);
         }
 
         void append(std::uint16_t value, Container * container) final {
@@ -806,7 +922,12 @@ public:
             return nullptr;
         }
 
-        bool hasLeafChild(std::uint16_t value) const final {
+        bool hasChild(std::uint16_t value, Container *& container) const final {
+            // TODO:
+            return false;
+        }
+
+        bool hasLeaf(std::uint16_t value) const final {
             return false;
         }
 
@@ -870,10 +991,16 @@ public:
         }
 
         Container * hasChild(std::uint16_t value) const final {
+            // TODO:
             return nullptr;
         }
 
-        bool hasLeafChild(std::uint16_t value) const final {
+        bool hasChild(std::uint16_t value, Container *& container) const final {
+            container = nullptr;
+            return this->hasLeaf(value);
+        }
+
+        bool hasLeaf(std::uint16_t value) const final {
             // TODO:
             return false;
         }
@@ -959,15 +1086,15 @@ public:
         this->destroy();
     }
 
-    void destroy_trie_impl(Container * container, size_type depth) {
+    void destroy_trie_impl(Container * container, size_type layer) {
         assert(container != nullptr);
 #if SPARSEBITSET_DISPLAY_TRIE_INFO
         size_type layer_size = container->size();
-        if (layer_size > this->layer_info_[depth].maxLayerSize) {
-            this->layer_info_[depth].maxLayerSize = layer_size;
+        if (layer_size > this->layer_info_[layer].maxLayerSize) {
+            this->layer_info_[layer].maxLayerSize = layer_size;
         }
-        this->layer_info_[depth].childCount++;
-        this->layer_info_[depth].totalLayerSize += layer_size;
+        this->layer_info_[layer].childCount++;
+        this->layer_info_[layer].totalLayerSize += layer_size;
 
         if (container->type() == NodeType::LeafArrayContainer ||
             container->type() == NodeType::LeafBitmapContainer) {
@@ -980,10 +1107,10 @@ public:
 #if (SPARSEBITSET_DISPLAY_TRIE_INFO == 0)
                 if (child->type() != NodeType::LeafArrayContainer &&
                     child->type() != NodeType::LeafBitmapContainer) {
-                    destroy_trie_impl(child, depth + 1);
+                    destroy_trie_impl(child, layer + 1);
                 }
 #else
-                destroy_trie_impl(child, depth + 1);
+                destroy_trie_impl(child, layer + 1);
 #endif
                 delete child;
             }
@@ -1030,13 +1157,13 @@ public:
 #endif
     }
 
-    size_type getLayerValue(const board_type & board, size_type yi) const {
-        size_type layer = this->y_index_[yi];
-        ssize_type cell = layer * BoardY;
+    size_type getLayerValue(const board_type & board, size_type layer) const {
+        size_type y = this->y_index_[layer];
+        ssize_type cell_y = y * BoardY;
         size_type layer_value = 0;
         for (ssize_type x = BoardX - 1; x >= 0; x--) {
             layer_value <<= 3;
-            layer_value |= size_type(board.cells[cell + x] & kBitMask);
+            layer_value |= size_type(board.cells[cell_y + x] & kBitMask);
         }
         return layer_value;
     }
@@ -1044,11 +1171,10 @@ public:
     bool contains(const board_type & board) const {
         Container * container = this->root_;
         assert(container != nullptr);
-        bool is_exists;
         // Normal container
-        size_type yi;
-        for (yi = 0; yi < BoardY - 1; yi++) {
-            size_type layer_value = getLayerValue(board, yi);
+        size_type layer;
+        for (layer = 0; layer < BoardY - 1; layer++) {
+            size_type layer_value = getLayerValue(board, layer);
             assert(container->type() == NodeType::ArrayContainer ||
                    container->type() == NodeType::BitmapContainer);
             Container * child = container->hasChild(layer_value);
@@ -1057,20 +1183,18 @@ public:
                 continue;
             }
             else {
-                is_exists = false;
-                return is_exists;
+                return false;
             }
         }
 
         // Leaf container
         {
-            size_type layer_value = getLayerValue(board, yi);
+            size_type layer_value = getLayerValue(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
-            is_exists = container->hasLeafChild(layer_value);
+            bool is_exists = container->hasLeaf(layer_value);
+            return is_exists;
         }
-
-        return is_exists;
     }
 
     //
@@ -1081,9 +1205,9 @@ public:
         assert(container != nullptr);
         bool insert_new = false;
         // Normal container
-        size_type yi;
-        for (yi = 0; yi < BoardY - 1; yi++) {
-            size_type layer_value = getLayerValue(board, yi);
+        size_type layer;
+        for (layer = 0; layer < BoardY - 1; layer++) {
+            size_type layer_value = getLayerValue(board, layer);
             if (!insert_new) {
                 assert(container->type() == NodeType::ArrayContainer ||
                        container->type() == NodeType::BitmapContainer);
@@ -1096,7 +1220,7 @@ public:
                     insert_new = true;
                 }
             }
-            if (yi < (BoardY - 2))
+            if (layer < (BoardY - 2))
                 container = container->append(layer_value);
             else
                 container = container->appendLeaf(layer_value);
@@ -1104,12 +1228,12 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = getLayerValue(board, yi);
+            size_type layer_value = getLayerValue(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             if (!insert_new) {
-                bool isExists = container->hasLeafChild(layer_value);
-                if (isExists) {
+                bool is_exists = container->hasLeaf(layer_value);
+                if (is_exists) {
                     return false;
                 }
             }
