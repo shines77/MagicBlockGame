@@ -231,7 +231,7 @@ public:
     int check_player_board_colors() {
         int err_code = ErrorCode::Success;
         for (size_t clr = 0; clr < Color::Maximum; clr++) {
-            if (this->data_.player_colors[clr] > kSingelColorNums) {
+            if (this->data_.player_colors[clr] > (int)kSingelColorNums) {
                 err_code = ErrorCode::PlayerBoardColorOverflowFirst + (int)clr;
                 return err_code;
             }
@@ -242,7 +242,7 @@ public:
     int check_target_board_colors() {
         int err_code = ErrorCode::Success;
         for (size_t clr = 0; clr < Color::Maximum; clr++) {
-            if (this->data_.target_colors[clr] > kSingelColorNums) {
+            if (this->data_.target_colors[clr] > (int)kSingelColorNums) {
                 err_code = ErrorCode::TargetBoardColorOverflowFirst + (int)clr;
                 return err_code;
             }

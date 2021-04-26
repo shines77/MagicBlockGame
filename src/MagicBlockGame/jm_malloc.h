@@ -14,6 +14,8 @@
 #include <list>
 #include <map>
 #include <bitset>
+#include <algorithm>        // For std::swap(), until C++11
+#include <utility>          // For std::swap(), since C++11
 #include <exception>
 #include <stdexcept>
 
@@ -643,7 +645,7 @@ public:
             if (chunk_id < this->chunk_list_.size()) {
                 const Chunk & chunk = this->chunk_list_[chunk_id];
                 size_type offset = (handle & (std::uint32_t)kChunkLowMask);
-                return chunk.valueOf<U>(offset);
+                return chunk.template valueOf<U>(offset);
             }
             return nullptr;
         }
@@ -718,7 +720,7 @@ public:
     }
 
     size_type actual_alloc_size() const {
-        return this->chunk_heap_.actual_alloc_size()
+        return this->chunk_heap_.actual_alloc_size();
     }
 #endif
 
@@ -747,12 +749,12 @@ public:
 
     template <typename U>
     U * realPtr(std::uint32_t handle) const {
-        return this->chunk_heap_.realPtr<U>(handle);
+        return this->chunk_heap_.template realPtr<U>(handle);
     }
 
     template <typename U>
     U * realPtr(Handle handle) const {
-        return this->chunk_heap_.realPtr<U>(handle.value());
+        return this->chunk_heap_.template realPtr<U>(handle.value());
     }
 
     static void shutdown() {

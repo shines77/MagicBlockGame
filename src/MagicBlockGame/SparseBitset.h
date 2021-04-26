@@ -14,6 +14,8 @@
 #include <vector>
 #include <map>
 #include <bitset>
+#include <algorithm>        // For std::swap(), until C++11
+#include <utility>          // For std::swap(), since C++11
 #include <exception>
 #include <stdexcept>
 
@@ -1106,7 +1108,7 @@ public:
 
     struct Factory {
         template <size_type type = NodeType::ArrayContainer>
-        static Container * Container::CreateNewContainer() {
+        static Container * CreateNewContainer() {
             Container * container;
             if (type == NodeType::ArrayContainer) {
                 ArrayContainer * newContainer = new ArrayContainer;
