@@ -56,8 +56,8 @@ __m128i _mm_loadu_esi64(int64_t value)
 
 static int find_uint16(std::uint16_t * buf, std::size_t len, std::uint16_t value)
 {
-    std::uint16_t * indexFirst = (std::uint16_t *)buf;
-    std::uint16_t * indexLast  = (std::uint16_t *)buf + len;
+    std::uint16_t * indexFirst = buf;
+    std::uint16_t * indexLast  = buf + len;
     for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
         assert(*indexs != std::uint16_t(-1));
         if (*indexs != value)
@@ -70,8 +70,8 @@ static int find_uint16(std::uint16_t * buf, std::size_t len, std::uint16_t value
 
 static int find_uint16(std::uint16_t * buf, std::size_t first, std::size_t last, std::uint16_t value)
 {
-    std::uint16_t * indexFirst = (std::uint16_t *)buf + first;
-    std::uint16_t * indexLast  = (std::uint16_t *)buf + last;
+    std::uint16_t * indexFirst = buf + first;
+    std::uint16_t * indexLast  = buf + last;
     for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
         assert(*indexs != std::uint16_t(-1));
         if (*indexs != value)
@@ -82,6 +82,9 @@ static int find_uint16(std::uint16_t * buf, std::size_t first, std::size_t last,
     return -1;
 }
 
+//
+// See: https://software.intel.com/sites/landingpage/IntrinsicsGuide/
+//
 static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
                             std::size_t last, std::uint16_t value)
 {
@@ -94,7 +97,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
 
     std::ptrdiff_t len = last - first;
     assert(len > 0);
-    if (len <= 64) {
+    if (len <= 32) {
         return find_uint16(buf, first, last, value);
     }
 
@@ -108,17 +111,15 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
             return int(indexs - buf);
     }
 
-#ifdef __AVX2__
-    __m128i value128_0 = _mm_set1_epi16(value);
-    __m128i value128_1 = _mm_set1_epi16(value);
+#if 1
+    __m128i value128 = _mm_set1_epi16(value);
 #else
     __m128i value32 = _mm_loadu_esi16(value);
     value32 = _mm_unpacklo_epi16(value32, value32);
     value32 = _mm_unpacklo_epi32(value32, value32);
     value32 = _mm_shuffle_epi32(value32, 0);
-    __m128i value128_0 = value32;
-    __m128i value128_1 = value32;
-#endif // __AVX2__
+    __m128i value128 = value32;
+#endif
 
     std::uint16_t * current = aligned_start;
     std::uint16_t * aligned_end = (std::uint16_t *)((std::size_t)(buf + last) & (~kXMMAlignMask));
@@ -126,18 +127,18 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
     while ((current + kCmpEqualStep) <= aligned_end) {
         __m128i index128_0 = _mm_load_si128((__m128i const *)current + 0);
         __m128i index128_1 = _mm_load_si128((__m128i const *)current + 1);
-        __m128i mask128_0 = _mm_cmpeq_epi16(index128_0, value128_0);
-        __m128i mask128_1 = _mm_cmpeq_epi16(index128_1, value128_1);
+        __m128i mask128_0 = _mm_cmpeq_epi16(index128_0, value128);
+        __m128i mask128_1 = _mm_cmpeq_epi16(index128_1, value128);
         int mask32_0 = _mm_movemask_epi8(mask128_0);
         int mask32_1 = _mm_movemask_epi8(mask128_1);
         if (mask32_0 != 0) {
-            unsigned long index = 0;
+            unsigned long index;
             unsigned char non_zero = _BitScanForward(&index, mask32_0);
             (void)non_zero;
             return (int)((current - buf) + index / 2);
         }
         else if (mask32_1 != 0) {
-            unsigned long index = 0;
+            unsigned long index;
             unsigned char non_zero = _BitScanForward(&index, mask32_1);
             (void)non_zero;
             return (int)((current - buf) + kSingelStepSize + index / 2);
