@@ -25,7 +25,7 @@
 
 namespace MagicBlock {
 
-namespace SortUtils {
+namespace Algorithm {
     static void merge_sort(std::uint16_t * indexs, std::uint16_t * new_indexs,
                            std::size_t first, std::size_t last) {
         assert(indexs != nullptr);
@@ -315,7 +315,7 @@ namespace SortUtils {
         return -1;
     }
 #endif
-} // namespace SortUtils
+} // namespace Algorithm
 
 template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
 class SparseBitset {
@@ -472,7 +472,7 @@ public:
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
             if (sorted > 0) {
-                int index = SortUtils::binary_search((std::uint16_t *)ptr, 0, sorted, value);
+                int index = Algorithm::binary_search((std::uint16_t *)ptr, 0, sorted, value);
                 if (index != kInvalidIndex32)
                     return index;
             }
@@ -723,17 +723,17 @@ public:
                     else {
                         if (this->sorted() != 0) {
                             // Quick sort (second half)
-                            SortUtils::quick_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
+                            Algorithm::quick_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
                                                   this->capacity() / 2, this->capacity() - 1);
                             // (Half) Merge sort
-                            SortUtils::merge_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
+                            Algorithm::merge_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
                                                   (std::uint16_t *)new_ptr, (std::uintptr_t **)newValueFirst,
                                                   0, this->capacity());
                             this->sorted_ = this->capacity_;
                         }
                         else {
                             // Quick sort
-                            SortUtils::quick_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
+                            Algorithm::quick_sort((std::uint16_t *)this->ptr_, (std::uintptr_t **)valueFirst,
                                                   0, this->capacity() - 1);
                             // Copy sorted array to new buffer
                             std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
@@ -860,16 +860,16 @@ public:
                     else {
                         if (this->sorted() != 0) {
                             // Quick sort (second half)
-                            SortUtils::quick_sort((std::uint16_t *)this->ptr_,
+                            Algorithm::quick_sort((std::uint16_t *)this->ptr_,
                                                   this->capacity() / 2, this->capacity() - 1);
                             // (Half) Merge sort
-                            SortUtils::merge_sort((std::uint16_t *)this->ptr_, (std::uint16_t *)new_ptr,
+                            Algorithm::merge_sort((std::uint16_t *)this->ptr_, (std::uint16_t *)new_ptr,
                                                   0, this->capacity());
                             this->sorted_ = this->capacity_;
                         }
                         else {
                             // Quick sort
-                            SortUtils::quick_sort((std::uint16_t *)this->ptr_, 0, this->capacity());
+                            Algorithm::quick_sort((std::uint16_t *)this->ptr_, 0, this->capacity());
                             // Copy sorted array to new buffer
                             std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
                             this->sorted_ = this->capacity_;
