@@ -186,6 +186,13 @@ public:
                     return index;
             }
 
+            assert(sorted <= size);
+#ifdef __SSE2__
+            if (sorted < size)
+                return (int)(Algorithm::find_uint16_sse2((std::uint16_t *)ptr, sorted, size, value));
+            else
+                return kInvalidIndex32;
+#else
             std::uint16_t * indexFirst = (std::uint16_t *)ptr + sorted;
             std::uint16_t * indexLast  = (std::uint16_t *)ptr + size;
             for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
@@ -196,6 +203,7 @@ public:
                     return int(indexs - (std::uint16_t *)ptr);
             }
             return kInvalidIndex32;
+#endif
         }
 
         void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) {

@@ -3,6 +3,9 @@
 #include <vld.h>
 #endif
 
+#define __SSE2__
+//#define __AVX2__
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdlib>
@@ -18,6 +21,8 @@
 
 #include "SparseBitset.h"
 #include "jm_malloc.h"
+
+#include "Algorithm.h"
 
 using namespace MagicBlock;
 using namespace jm_malloc;
@@ -184,6 +189,11 @@ void SparseTrieBitset_test()
     visited.append(board);
 
     visited.shutdown();
+
+    std::uint16_t indexs[128];
+    std::fill_n(indexs, 128, 0x1235);
+    indexs[100] = 0x1234;
+    int index = Algorithm::find_uint16_sse2(indexs, 128, 0x1234);
 }
 
 void jm_mallc_SizeClass_test()
