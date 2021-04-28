@@ -38,6 +38,9 @@ template <size_t BoardX, size_t BoardY,
 class Solver
 {
 public:
+    typedef std::size_t         size_type;
+    typedef std::ptrdiff_t      ssize_type;
+
 #ifdef NDEBUG
     static const size_t kMinSearchDepth = 15;
     static const size_t kMaxSearchDepth = 27;
@@ -1266,7 +1269,7 @@ public:
         return solvable;
     }
 
-    bool bitmap_solve(size_t & out_rotate_type) {
+    bool bitset_solve(size_t & out_rotate_type) {
         size_u satisfy_result = is_satisfy(this->player_board_, this->target_board_, this->target_len_);
         if (satisfy_result.low != 0) {
             out_rotate_type = satisfy_result.high;
@@ -1279,7 +1282,9 @@ public:
         Position empty;
         bool found_empty = find_empty(this->player_board_, empty);
         if (found_empty) {
-            SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> visited;
+            typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> bitset_type;
+            typedef typename bitset_type::Container Container;
+            bitset_type visited;
 
             stage_type start;
             start.empty = empty;
@@ -1314,11 +1319,25 @@ public:
 
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
+#if 0
                         if (visited.contains(next_stage.board))
                             continue;
 
                         visited.append(next_stage.board);
+#elif 0
+                        size_t last_layer;
+                        Container * last_container;
+                        if (visited.contains(next_stage.board, last_layer, last_container))
+                            continue;
 
+                        assert(last_layer >= 0 && last_layer <= BoardY);
+                        assert(last_container != nullptr);
+                        visited.append_new(next_stage.board, last_layer, last_container);
+#else
+                        bool insert_new = visited.try_append(next_stage.board);
+                        if (!insert_new)
+                            continue;
+#endif
                         next_stage.empty.value = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;

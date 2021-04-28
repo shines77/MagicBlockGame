@@ -591,7 +591,7 @@ public:
 
             Step123Solver solver_123(&this->data_);
             sw.start();
-            solvable = solver_123.bitmap_solve(out_rotate_type);
+            solvable = solver_123.bitset_solve(out_rotate_type);
             sw.stop();
 
             if (solvable) {

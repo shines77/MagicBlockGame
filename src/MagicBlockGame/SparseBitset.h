@@ -1033,6 +1033,47 @@ public:
         }
     }
 
+    bool contains(const board_type & board, size_type & last_layer, Container *& last_container) const {
+        Container * container = this->root_;
+        assert(container != nullptr);
+        // Normal container
+        size_type layer;
+        for (layer = 0; layer < BoardY - 1; layer++) {
+            size_type layer_value = getLayerValue(board, layer);
+            assert(container->type() == NodeType::ArrayContainer ||
+                   container->type() == NodeType::BitmapContainer);
+            Container * child;
+            bool is_exists = container->hasChild(layer_value, child);
+            if (is_exists) {
+                assert(child != nullptr);
+                assert(child->type() == NodeType::ArrayContainer ||
+                       child->type() == NodeType::BitmapContainer ||
+                       child->type() == NodeType::LeafArrayContainer ||
+                       child->type() == NodeType::LeafBitmapContainer);
+                container = child;
+                continue;
+            }
+            else {
+                last_layer = layer;
+                last_container = container;
+                return false;
+            }
+        }
+
+        // Leaf container
+        {
+            size_type layer_value = getLayerValue(board, layer);
+            assert(container->type() == NodeType::LeafArrayContainer ||
+                   container->type() == NodeType::LeafBitmapContainer);
+            bool is_exists = container->hasLeaf(layer_value);
+            if (!is_exists) {
+                last_layer = layer;
+                last_container = container;
+            }
+            return is_exists;
+        }
+    }
+
     //
     // Root -> (ArrayContainer)0 -> (ArrayContainer)1 -> (ArrayContainer)2 -> (LeafArrayContainer)3 -> 4444
     //
@@ -1050,10 +1091,8 @@ public:
                 Container * child;
                 bool is_exists = container->hasChild(layer_value, child);
                 if (is_exists) {
-                    if (child != nullptr)
-                        container = child;
-                    else
-                        assert(container->isLeaf());
+                    assert(child != nullptr);
+                    container = child;
                     continue;
                 }
                 else {
@@ -1078,13 +1117,88 @@ public:
                 }
             }
             container->appendLeaf(layer_value);
-        }
-
-        if (insert_new) {
             this->size_++;
         }
 
-        return insert_new;
+        return true;
+    }
+
+    //
+    // Root -> (ArrayContainer)0 -> (ArrayContainer)1 -> (ArrayContainer)2 -> (LeafArrayContainer)3 -> 4444
+    //
+    bool try_append(const board_type & board) {
+        Container * container = this->root_;
+        assert(container != nullptr);
+        bool insert_new = false;
+        // Normal container
+        size_type layer;
+        for (layer = 0; layer < BoardY - 1; layer++) {
+            size_type layer_value = getLayerValue(board, layer);
+            if (!insert_new) {
+                assert(container->type() == NodeType::ArrayContainer ||
+                       container->type() == NodeType::BitmapContainer);
+                Container * child;
+                bool is_exists = container->hasChild(layer_value, child);
+                if (is_exists) {
+                    assert(child != nullptr);
+                    assert(child->type() == NodeType::ArrayContainer ||
+                           child->type() == NodeType::BitmapContainer ||
+                           child->type() == NodeType::LeafArrayContainer ||
+                           child->type() == NodeType::LeafBitmapContainer);
+                    container = child;
+                    continue;
+                }
+                else {
+                    insert_new = true;
+                }
+            }
+            if (layer < (BoardY - 2))
+                container = container->append(layer_value);
+            else
+                container = container->appendLeaf(layer_value);
+        }
+
+        // Leaf container
+        {
+            size_type layer_value = getLayerValue(board, layer);
+            assert(container->type() == NodeType::LeafArrayContainer ||
+                   container->type() == NodeType::LeafBitmapContainer);
+            if (!insert_new) {
+                bool is_exists = container->hasLeaf(layer_value);
+                if (is_exists) {
+                    return false;
+                }
+            }
+            container->appendLeaf(layer_value);
+            this->size_++;
+        }
+
+        return true;
+    }
+
+    void append_new(const board_type & board, size_type last_layer, Container * last_container) {
+        Container * container = last_container;
+        assert(container != nullptr);
+        // Normal container
+        size_type layer;
+        for (layer = last_layer; layer < BoardY - 1; layer++) {
+            size_type layer_value = getLayerValue(board, layer);
+            if (layer < (BoardY - 2))
+                container = container->append(layer_value);
+            else
+                container = container->appendLeaf(layer_value);
+        }
+
+        // Leaf container
+        {
+            assert(container != nullptr);
+            size_type layer_value = getLayerValue(board, layer);
+            assert(container->type() == NodeType::LeafArrayContainer ||
+                   container->type() == NodeType::LeafBitmapContainer);
+            container->appendLeaf(layer_value);
+        }
+
+        this->size_++;
     }
 
     bool remove(const board_type & board) {

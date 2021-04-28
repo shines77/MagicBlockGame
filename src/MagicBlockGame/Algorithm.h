@@ -84,6 +84,7 @@ static int find_uint16(std::uint16_t * buf, std::size_t first, std::size_t last,
 
 //
 // See: https://software.intel.com/sites/landingpage/IntrinsicsGuide/
+// See: https://www.felixcloutier.com/x86/punpcklbw:punpcklwd:punpckldq:punpcklqdq
 //
 static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
                             std::size_t last, std::uint16_t value)
@@ -97,18 +98,23 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
 
     std::ptrdiff_t len = last - first;
     assert(len > 0);
-    if (len <= 32) {
-        return find_uint16(buf, first, last, value);
-    }
 
     std::uint16_t * buf_start = buf + first;
-    std::uint16_t * aligned_start = (std::uint16_t *)((std::size_t)buf_start & (~kXMMAlignMask));
+    std::uint16_t * aligned_start;
+    if (len <= 64)
+        aligned_start = buf + last;
+    else
+        aligned_start = (std::uint16_t *)((std::size_t)buf_start & (~kXMMAlignMask));
 
     for (std::uint16_t * indexs = buf_start; indexs < aligned_start; indexs++) {
         if (*indexs != value)
             continue;
         else
             return int(indexs - buf);
+    }
+
+    if (len <= 64) {
+        return -1;
     }
 
 #if 1
