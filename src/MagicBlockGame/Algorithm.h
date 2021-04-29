@@ -217,18 +217,14 @@ static int find_uint16_sse2_has_bug(std::uint16_t * buf, std::size_t len, std::u
         __m128i index128_1 = _mm_load_si128((__m128i const *)current + 1);
         __m128i mask128_0 = _mm_cmpeq_epi16(index128_0, value128_0);
         __m128i mask128_1 = _mm_cmpeq_epi16(index128_1, value128_1);
-        int mask32_0 = _mm_movemask_epi8(mask128_0);
-        int mask32_1 = _mm_movemask_epi8(mask128_1);
+        uint32_t mask32_0 = (uint32_t)_mm_movemask_epi8(mask128_0);
+        uint32_t mask32_1 = (uint32_t)_mm_movemask_epi8(mask128_1);
         if (mask32_0 != 0) {
-            unsigned long index;
-            unsigned char non_zero = _BitScanForward(&index, mask32_0);
-            (void)non_zero;
+            unsigned int index = jstd::run_time::BitScanForward_nonzero(mask32_0);
             return (int)((current - aligned_start) + index / 2);
         }
         else if (mask32_1 != 0) {
-            unsigned long index;
-            unsigned char non_zero = _BitScanForward(&index, mask32_1);
-            (void)non_zero;
+            unsigned int index = jstd::run_time::BitScanForward_nonzero(mask32_1);
             return (int)((current - aligned_start) + kSingelStepSize + index / 2);
         }
         current += kCmpEqualStep;
