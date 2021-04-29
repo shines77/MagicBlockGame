@@ -21,8 +21,13 @@
 
 #include "support/RT_PowerOf2.h"
 
+#ifndef __SSE2__
 //#define __SSE2__
+#endif
+
+#ifndef __AVX2__
 //#define __AVX2__
+#endif
 
 namespace MagicBlock {
 namespace Algorithm {

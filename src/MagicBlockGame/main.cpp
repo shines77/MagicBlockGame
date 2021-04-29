@@ -3,8 +3,13 @@
 #include <vld.h>
 #endif
 
+#ifndef __SSE2__
 #define __SSE2__
+#endif
+
+#ifndef __AVX2__
 //#define __AVX2__
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
