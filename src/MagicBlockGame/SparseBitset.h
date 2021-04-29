@@ -939,8 +939,8 @@ private:
             this->y_index_[yi * 2 + 2] = bottom++;
         }
 #endif
-        //this->root_ = new BitmapContainer();
-        this->root_ = new ArrayContainer();
+        this->root_ = new BitmapContainer();
+        //this->root_ = new ArrayContainer();
 
         for (size_type i = 0; i < BoardY; i++) {
             this->layer_info_[i].maxLayerSize = 0;
