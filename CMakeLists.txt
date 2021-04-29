@@ -46,6 +46,7 @@ endif()
 
 include_directories(include)
 include_directories(src)
+include_directories(src/MagicBlockGame)
 
 set(SOURCE_FILES
     src/MagicBlockGame/main.cpp
