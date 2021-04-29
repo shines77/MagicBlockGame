@@ -28,8 +28,6 @@
 #include "SharedData.h"
 #include "SparseBitset.h"
 
-//#define ENABLE_DEBUG
-
 namespace MagicBlock {
 
 template <size_t BoardX, size_t BoardY,
@@ -243,15 +241,6 @@ public:
     void count_reverse_partial_color_nums(const Board<BoardX, BoardY> & board,
                                           size_t firstX, size_t lastX,
                                           size_t firstY, size_t lastY) {
-#ifdef ENABLE_DEBUG
-        Board<BoardX, BoardY> test_board;
-        for (size_t y = firstY; y < lastY; y++) {
-            ptrdiff_t baseY = y * BoardY;
-            for (size_t x = firstX; x < lastX; x++) {
-                test_board.cells[baseY + x] = 1;
-            }
-        }
-#endif
         this->partial_colors_[Color::Empty] = 0;
         for (size_t clr = Color::First; clr < Color::Last; clr++) {
             this->partial_colors_[clr] = kSingelColorNums;
