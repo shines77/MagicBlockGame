@@ -254,6 +254,7 @@ struct CountLeadingZeroBits_impl {
     static const std::size_t value = (N == 0) ? Bits : CountLeadingZeroBits_impl<Bits + 1, N * 2>::value;
 };
 
+#if 1
 //
 // CountLeadingZeroBits_impl<0, 0> = 0
 //
@@ -262,7 +263,8 @@ struct CountLeadingZeroBits_impl<Bits, std::size_t(0)> {
     static const std::size_t value = (Bits > 0) ? (Bits - 1) : 0;
 };
 
-#if 0
+#else
+
 #define COUNT_LEADING_ZERO_BITS_IMPL(bits) \
     template <> \
     struct CountLeadingZeroBits_impl<std::size_t(bits), std::size_t(0)> { \
@@ -357,6 +359,7 @@ struct CountTrailingZeroBits_impl {
     static const std::size_t value = (N == 0) ? Bits : CountTrailingZeroBits_impl<Bits + 1, N / 2>::value;
 };
 
+#if 1
 //
 // CountTrailingZeroBits<0, 0> = 64
 //
@@ -365,7 +368,8 @@ struct CountTrailingZeroBits_impl<Bits, std::size_t(0)> {
     static const std::size_t value = (Bits > 0) ? (Bits - 1) : (sizeof(std::size_t) * 8);
 };
 
-#if 0
+#else
+
 #define COUNT_TRAILING_ZERO_BITS_IMPL(bits) \
     template <> \
     struct CountTrailingZeroBits_impl<std::size_t(bits), std::size_t(0)> { \

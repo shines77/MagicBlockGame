@@ -32,9 +32,7 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\Move.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SharedData.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseTrieBitmap.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitset.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitsetPool.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Stage.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h" />
