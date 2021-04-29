@@ -1283,7 +1283,6 @@ public:
         bool found_empty = find_empty(this->player_board_, empty);
         if (found_empty) {
             typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> bitset_type;
-            typedef typename bitset_type::Container Container;
             bitset_type visited;
 
             stage_type start;
@@ -1325,6 +1324,8 @@ public:
 
                         visited.append(next_stage.board);
 #elif 0
+                        typedef typename bitset_type::Container Container;
+
                         size_t last_layer;
                         Container * last_container;
                         if (visited.contains(next_stage.board, last_layer, last_container))
