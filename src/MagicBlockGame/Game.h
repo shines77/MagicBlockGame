@@ -598,7 +598,7 @@ public:
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 #if !defined(_NDEBUG) && defined(_MSC_VER)
-                ::system("pause");
+                //::system("pause");
 #endif
                 for (size_t rotate_type = 0; rotate_type < MaxRotateType; rotate_type++) {
                     for (size_t phrase1_type = 0; phrase1_type < MaxPhrase1Type; phrase1_type++) {

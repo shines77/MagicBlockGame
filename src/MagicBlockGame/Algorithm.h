@@ -101,6 +101,10 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
 
     std::uint16_t * buf_start = buf + first;
     std::uint16_t * aligned_start;
+    //
+    // Why do I merge the two pieces of code here?
+    // Because I want to make the generated code smaller.
+    //
     if (len <= 64)
         aligned_start = buf + last;
     else
@@ -113,11 +117,14 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
             return int(indexs - buf);
     }
 
+    // As a side effect of the merger, there will be one more judgment here.
     if (len <= 64) {
         return -1;
     }
 
 #if 1
+    // _mm_set1_epi16() default generated code is like below code,
+    // not use (AVX) vpbroadcastw intrinsic.
     __m128i value128 = _mm_set1_epi16(value);
 #else
     __m128i value32 = _mm_loadu_esi16(value);

@@ -43,7 +43,7 @@ public:
     static const size_type      kDefaultArrayCapacity = 4;
 
     static const size_type      kArraySizeThreshold = 16384;
-    static const size_type      kMaxArraySize = size_type(1) << (Bits * BoardX - 1);
+    static const size_type      kMaxArraySize = size_type(1) << (Bits * BoardX);
     static const std::uint16_t  kInvalidIndex = std::uint16_t(-1);
     static const int            kInvalidIndex32 = -1;
 
@@ -230,6 +230,31 @@ public:
         void resize(size_type newSize) {
         }
 
+        void append(std::uintptr_t * ptr, std::uint16_t size, Container * container) {
+            assert(container != nullptr);
+            assert(size <= std::uint16_t(kMaxArraySize));
+            Container ** value = (Container **)ptr + size;
+            assert(value != nullptr);
+            *value = container;
+        }
+
+        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t capacity, Container * container) {
+            assert(container != nullptr);
+            assert(size <= std::uint16_t(kMaxArraySize));
+            assert(size <= capacity);
+            std::uint16_t * indexEnd = (std::uint16_t *)ptr + capacity;
+            Container ** value = (Container **)indexEnd + size;
+            assert(value != nullptr);
+            *value = container;
+        }
+
+        Container * valueOf(std::uintptr_t * ptr, int index) const {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)kMaxArraySize);
+            Container ** value = (Container **)ptr + index;
+            return *value;
+        }
+
         Container * valueOf(std::uintptr_t * ptr, std::uint16_t capacity, int index) const {
             assert(index != kInvalidIndex32);
             assert(index >= 0 && index < (int)capacity);
@@ -237,17 +262,6 @@ public:
             std::uint16_t * indexEnd = (std::uint16_t *)ptr + capacity;
             Container ** value = (Container **)indexEnd + index;
             return *value;
-        }
-
-        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t capacity, Container * container) {
-            assert(container != nullptr);
-            assert(size <= std::uint16_t(kArraySizeThreshold));
-            assert(size <= std::uint16_t(kMaxArraySize));
-            assert(size <= capacity);
-            std::uint16_t * indexEnd = (std::uint16_t *)ptr + capacity;
-            Container ** value = (Container **)indexEnd + size;
-            assert(value != nullptr);
-            *value = container;
         }
     };
 
@@ -272,6 +286,13 @@ public:
             this->init();
         }
         Container(std::uint16_t type) : type_(type), size_(0), capacity_(0), sorted_(0), ptr_(nullptr) {
+            this->init();
+        }
+        Container(size_type type, size_type size, size_type capacity, std::uintptr_t * ptr)
+            : type_(static_cast<std::uint16_t>(type)),
+              size_(static_cast<std::uint16_t>(size)),
+              capacity_(static_cast<std::uint16_t>(capacity)), sorted_(0),
+              ptr_(ptr) {
             this->init();
         }
 
@@ -299,6 +320,13 @@ public:
 
         bool isLeaf() const  {
             return (this->type() == NodeType::LeafArrayContainer ||
+                    this->type() == NodeType::LeafBitmapContainer);
+        }
+
+        bool isValidType() const  {
+            return (this->type() == NodeType::ArrayContainer ||
+                    this->type() == NodeType::BitmapContainer ||
+                    this->type() == NodeType::LeafArrayContainer ||
                     this->type() == NodeType::LeafBitmapContainer);
         }
 
@@ -358,22 +386,22 @@ public:
             return this->hasChild(value, child);
         }
 
-        virtual Container * hasChild(std::uint16_t value) const {
+        virtual Container * getChild(std::uint16_t value) const {
             // Not implemented!
             return nullptr;
         }
 
-        Container * hasChild(std::size_t value) const {
-            return this->hasChild(static_cast<std::uint16_t>(value));
+        Container * getChild(std::size_t value) const {
+            return this->getChild(static_cast<std::uint16_t>(value));
         }
 
-        virtual bool hasChild(std::uint16_t value, Container *& container) const {
+        virtual bool hasChild(std::uint16_t value, Container *& child) const {
             // Not implemented!
             return false;
         }
 
-        bool hasChild(std::size_t value, Container *& container) const {
-            return this->hasChild(static_cast<std::uint16_t>(value), container);
+        bool hasChild(std::size_t value, Container *& child) const {
+            return this->hasChild(static_cast<std::uint16_t>(value), child);
         }
 
         virtual bool hasLeaf(std::uint16_t value) const {
@@ -479,7 +507,7 @@ public:
         }
 
         void destroy() final {
-            // TODO:
+            // Do nothing !!
         }
 
         size_type begin() const final {
@@ -506,7 +534,7 @@ public:
             this->reallocate(allocSize, newCapacity);
         }
 
-        Container * hasChild(std::uint16_t value) const final {
+        Container * getChild(std::uint16_t value) const final {
             int index = this->indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, value);
             if (index != kInvalidIndex32) {
                 Container * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
@@ -515,12 +543,12 @@ public:
             return nullptr;
         }
 
-        bool hasChild(std::uint16_t value, Container *& container) const final {
+        bool hasChild(std::uint16_t value, Container *& child) const final {
             int index = this->indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, value);
             if (index != kInvalidIndex32) {
-                Container * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
-                assert(child != nullptr);
-                container = child;
+                Container * nextChild = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
+                assert(nextChild != nullptr);
+                child = nextChild;
                 return true;
             }
             return false;
@@ -613,7 +641,7 @@ public:
         }
 
         void destroy() final {
-            // TODO:
+            // Do nothing !!
         }
 
         size_type begin() const final {
@@ -640,12 +668,12 @@ public:
             this->reallocate(allocSize, newCapacity);
         }
 
-        Container * hasChild(std::uint16_t value) const final {
+        Container * getChild(std::uint16_t value) const final {
             return nullptr;
         }
 
-        bool hasChild(std::uint16_t value, Container *& container) const final {
-            container = nullptr;
+        bool hasChild(std::uint16_t value, Container *& child) const final {
+            child = nullptr;
             return this->hasLeaf(value);;
         }
 
@@ -681,8 +709,17 @@ public:
     };
 
     class BitmapContainer final : public Container {
+    private:
+        std::bitset<kMaxArraySize>  bitset_;
+        ValueArray                  valueArray_;
+
+        void init() {
+            size_type allocSize = (sizeof(Container *)) * kMaxArraySize;
+            this->allocate(allocSize, kMaxArraySize);
+        }
+
     public:
-        BitmapContainer() : Container(NodeType::BitmapContainer) {
+        BitmapContainer() : Container(NodeType::BitmapContainer, 0, 0, nullptr) {
             this->init();
         }
         BitmapContainer(const BitmapContainer & src) = delete;
@@ -692,7 +729,7 @@ public:
         }
 
         void destroy() final {
-            // TODO:
+            // Do nothing !!
         }
 
         size_type begin() const final {
@@ -708,20 +745,30 @@ public:
         }
 
         void reserve(size_type capacity) final {
-            // TODO:
+            // Do nothing !!
         }
 
         void resize(size_type newSize) final {
-            // TODO:
+            // Do nothing !!
         }
 
-        Container * hasChild(std::uint16_t value) const final {
-            // TODO:
+        Container * getChild(std::uint16_t value) const final {
+            bool exists = this->bitset_.test(value);
+            if (exists) {
+                Container * child = this->valueArray_.valueOf(this->ptr_, value);
+                return child;
+            }
             return nullptr;
         }
 
-        bool hasChild(std::uint16_t value, Container *& container) const final {
-            // TODO:
+        bool hasChild(std::uint16_t value, Container *& child) const final {
+            bool exists = this->bitset_.test(value);
+            if (exists) {
+                Container * nextChild = this->valueArray_.valueOf(this->ptr_, value);
+                assert(nextChild != nullptr);
+                child = nextChild;
+                return true;
+            }
             return false;
         }
 
@@ -730,7 +777,8 @@ public:
         }
 
         void append(std::uint16_t value, Container * container) final {
-            // TODO:
+            this->bitset_.set(value);
+            this->valueArray_.append(this->ptr_, value, container);
         }
 
         Container * append(std::uint16_t value) final {
@@ -748,14 +796,24 @@ public:
         }
 
         Container * valueOf(int index) const final {
-            // TODO:
-            return nullptr;
+            bool exists = this->bitset_.test(index);
+            if (exists)
+                return this->valueArray_.valueOf(this->ptr_, index);
+            else
+                return nullptr;
         }
     };
 
     class LeafBitmapContainer final : public Container {
+    private:
+        std::bitset<kMaxArraySize>  bitset_;
+
+        void init() {
+            // Do nothing !!
+        }
+
     public:
-        LeafBitmapContainer() : Container(NodeType::LeafBitmapContainer) {
+        LeafBitmapContainer() : Container(NodeType::LeafBitmapContainer, 0, kMaxArraySize, nullptr) {
             this->init();
         }
         LeafBitmapContainer(const LeafBitmapContainer & src) = delete;
@@ -765,7 +823,7 @@ public:
         }
 
         void destroy() final {
-            // TODO:
+            // Do nothing !!
         }
 
         size_type begin() const final {
@@ -781,30 +839,29 @@ public:
         }
 
         void reserve(size_type capacity) final {
-            // TODO:
+            // Do nothing !!
         }
 
         void resize(size_type newSize) final {
-            // TODO:
+            // Do nothing !!
         }
 
-        Container * hasChild(std::uint16_t value) const final {
-            // TODO:
+        Container * getChild(std::uint16_t value) const final {
+            // Do nothing !!
             return nullptr;
         }
 
-        bool hasChild(std::uint16_t value, Container *& container) const final {
-            container = nullptr;
+        bool hasChild(std::uint16_t value, Container *& child) const final {
+            child = nullptr;
             return this->hasLeaf(value);
         }
 
         bool hasLeaf(std::uint16_t value) const final {
-            // TODO:
-            return false;
+            return this->bitset_.test(value);
         }
 
         void append(std::uint16_t value, Container * container) final {
-            // TODO:
+            this->bitset_.set(value);
         }
 
         Container * append(std::uint16_t value) final {
@@ -820,7 +877,7 @@ public:
         }
 
         Container * valueOf(int index) const final {
-            // TODO:
+            // Not supported, do nothing !!
             return nullptr;
         }
     };
@@ -882,6 +939,7 @@ private:
             this->y_index_[yi * 2 + 2] = bottom++;
         }
 #endif
+        //this->root_ = new BitmapContainer();
         this->root_ = new ArrayContainer();
 
         for (size_type i = 0; i < BoardY; i++) {
@@ -1006,16 +1064,8 @@ public:
             Container * child;
             bool is_exists = container->hasChild(layer_value, child);
             if (is_exists) {
-                if (child != nullptr) {
-                    assert(child->type() == NodeType::ArrayContainer ||
-                           child->type() == NodeType::BitmapContainer ||
-                           child->type() == NodeType::LeafArrayContainer ||
-                           child->type() == NodeType::LeafBitmapContainer);
-                    container = child;
-                }
-                else {
-                    assert(container->isLeaf());
-                }
+                assert(child != nullptr);
+                container = child;
                 continue;
             }
             else {
@@ -1046,10 +1096,6 @@ public:
             bool is_exists = container->hasChild(layer_value, child);
             if (is_exists) {
                 assert(child != nullptr);
-                assert(child->type() == NodeType::ArrayContainer ||
-                       child->type() == NodeType::BitmapContainer ||
-                       child->type() == NodeType::LeafArrayContainer ||
-                       child->type() == NodeType::LeafBitmapContainer);
                 container = child;
                 continue;
             }
@@ -1077,7 +1123,7 @@ public:
     //
     // Root -> (ArrayContainer)0 -> (ArrayContainer)1 -> (ArrayContainer)2 -> (LeafArrayContainer)3 -> 4444
     //
-    bool append(const board_type & board) {
+    void append(const board_type & board) {
         Container * container = this->root_;
         assert(container != nullptr);
         bool insert_new = false;
@@ -1113,14 +1159,12 @@ public:
             if (!insert_new) {
                 bool is_exists = container->hasLeaf(layer_value);
                 if (is_exists) {
-                    return false;
+                    return;
                 }
             }
             container->appendLeaf(layer_value);
             this->size_++;
         }
-
-        return true;
     }
 
     //
@@ -1141,10 +1185,6 @@ public:
                 bool is_exists = container->hasChild(layer_value, child);
                 if (is_exists) {
                     assert(child != nullptr);
-                    assert(child->type() == NodeType::ArrayContainer ||
-                           child->type() == NodeType::BitmapContainer ||
-                           child->type() == NodeType::LeafArrayContainer ||
-                           child->type() == NodeType::LeafBitmapContainer);
                     container = child;
                     continue;
                 }
