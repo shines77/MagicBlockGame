@@ -14,13 +14,15 @@ namespace MagicBlock {
 
 template <size_t BoardX, size_t BoardY>
 struct Stage {
+    Board<BoardX, BoardY> board;
+
     Position    empty;
     uint8_t     last_dir, rotate_type;
+    uint8_t     reserve;
 
-    Board<BoardX, BoardY> board;
     std::vector<Position> move_path;
 
-    Stage() {}
+    Stage() : empty(0), last_dir(0), rotate_type(0), reserve(0) {}
     Stage(const Board<BoardX, BoardY> & board) {
         this->board = board;
     }

@@ -49,7 +49,8 @@ include_directories(src)
 include_directories(src/MagicBlockGame)
 
 set(SOURCE_FILES
-    src/MagicBlockGame/main.cpp
+    src/MagicBlockGame/Main.cpp
+    src/MagicBlockGame/UnitTest.cpp
     )
 
 add_custom_target(release
