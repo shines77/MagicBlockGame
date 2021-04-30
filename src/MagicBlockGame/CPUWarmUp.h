@@ -26,7 +26,7 @@ namespace CPU {
 
 #if !defined(_MSC_VER) || (_MSC_VER >= 1800)
 
-void warmup(int delayMillsecs)
+static void warmup(int delayMillsecs)
 {
 #if defined(NDEBUG)
     double delayTimeLimit = (double)delayMillsecs / 1.0;
@@ -58,7 +58,7 @@ void warmup(int delayMillsecs)
 
 #else
 
-void warmup(DWORD delayMillsecs)
+static void warmup(DWORD delayMillsecs)
 {
 #if defined(NDEBUG)
     volatile int sum = 0;

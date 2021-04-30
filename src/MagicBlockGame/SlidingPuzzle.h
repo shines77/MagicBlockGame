@@ -97,7 +97,7 @@ public:
             for (size_t x = 0; x < BoardX; x++) {
                 char color = this->player_board_.cells[y * BoardY + x];
                 if (color == Color::Empty) {
-                    empty_pos.value = (int16_t)(y * BoardY + x);
+                    empty_pos = (uint8_t)(y * BoardY + x);
                     return true;
                 }
             }
@@ -137,7 +137,7 @@ public:
 
             stage_type start;
             start.empty = empty;
-            start.last_dir = -1;
+            start.last_dir = uint8_t(-1);
             start.board = this->player_board_;
             visited.set(start.board.value());
 
@@ -151,7 +151,7 @@ public:
                 for (size_t i = 0; i < cur_stages.size(); i++) {
                     const stage_type & stage = cur_stages[i];
 
-                    int empty_pos = stage.empty.value;
+                    uint8_t empty_pos = stage.empty;
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
                     size_t total_moves = empty_moves.size();
                     for (size_t n = 0; n < total_moves; n++) {
@@ -159,7 +159,7 @@ public:
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        int16_t move_pos = empty_moves[n].pos.value;
+                        uint8_t move_pos = empty_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_t value64 = next_stage.board.value();
@@ -168,7 +168,7 @@ public:
 
                         visited.set(value64);
                         
-                        next_stage.empty.value = move_pos;
+                        next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.move_path = stage.move_path;
                         Position next_move(stage.empty);
@@ -222,7 +222,7 @@ public:
 
             stage_type start;
             start.empty = empty;
-            start.last_dir = -1;
+            start.last_dir = uint8_t(-1);
             start.board = this->player_board_;
             visited.set(start.board.value());           
 
@@ -236,7 +236,7 @@ public:
                 do {
                     const stage_type & stage = cur_stages.front();
 
-                    int empty_pos = stage.empty.value;
+                    uint8_t empty_pos = stage.empty;
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
                     size_t total_moves = empty_moves.size();
                     for (size_t n = 0; n < total_moves; n++) {
@@ -244,7 +244,7 @@ public:
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        int16_t move_pos = empty_moves[n].pos.value;
+                        uint8_t move_pos = empty_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_t value64 = next_stage.board.value();
@@ -253,7 +253,7 @@ public:
 
                         visited.set(value64);
                         
-                        next_stage.empty.value = move_pos;
+                        next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.move_path = stage.move_path;
                         Position next_move(stage.empty);

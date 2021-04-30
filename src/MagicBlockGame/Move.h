@@ -8,11 +8,12 @@ namespace MagicBlock {
 #pragma pack(push, 1)
 
 struct Position8 {
-    int8_t x;
-    int8_t y;
+    uint8_t x;
+    uint8_t y;
 
     Position8() : x(0), y(0) {}
-    Position8(int _x, int _y) : x(_x), y(_y) {}
+    Position8(int _x, int _y) : x(static_cast<uint8_t>(_x)), y(static_cast<uint8_t>(_y)) {}
+
     Position8(const Position8 & src) {
         this->x = src.x;
         this->y = src.y;
@@ -20,12 +21,18 @@ struct Position8 {
 };
 
 struct Position {
-    int16_t value;
+    uint8_t value;
 
     Position() : value(0) {}
-    Position(int16_t _value) : value(_value) {}
-    Position(int32_t _value) : value(static_cast<int16_t>(_value)) {}
-    Position(int64_t _value) : value(static_cast<int16_t>(_value)) {}
+    Position(int8_t _value) : value(static_cast<uint8_t>(_value)) {}
+    Position(uint8_t _value) : value(_value) {}
+    Position(int16_t _value) : value(static_cast<uint8_t>(_value)) {}
+    Position(uint16_t _value) : value(static_cast<uint8_t>(_value)) {}
+    Position(int32_t _value) : value(static_cast<uint8_t>(_value)) {}
+    Position(uint32_t _value) : value(static_cast<uint8_t>(_value)) {}
+    Position(int64_t _value) : value(static_cast<uint8_t>(_value)) {}
+    Position(uint64_t _value) : value(static_cast<uint8_t>(_value)) {}
+
     Position(const Position & src) {
         this->value = src.value;
     }
@@ -35,31 +42,87 @@ struct Position {
         return *this;
     }
 
-    Position & operator = (int64_t rhs) {
-        this->value = static_cast<int16_t>(rhs);
+    Position & operator = (int8_t rhs) {
+        this->value = static_cast<uint8_t>(rhs);
         return *this;
     }
 
-    Position & operator = (int32_t rhs) {
-        this->value = static_cast<int16_t>(rhs);
+    Position & operator = (uint8_t rhs) {
+        this->value = rhs;
         return *this;
     }
 
     Position & operator = (int16_t rhs) {
-        this->value = rhs;
+        this->value = static_cast<uint8_t>(rhs);
         return *this;
+    }
+
+    Position & operator = (uint16_t rhs) {
+        this->value = static_cast<uint8_t>(rhs);
+        return *this;
+    }
+
+    Position & operator = (int32_t rhs) {
+        this->value = static_cast<uint8_t>(rhs);
+        return *this;
+    }
+
+    Position & operator = (uint32_t rhs) {
+        this->value = static_cast<uint8_t>(rhs);
+        return *this;
+    }
+
+    Position & operator = (int64_t rhs) {
+        this->value = static_cast<uint8_t>(rhs);
+        return *this;
+    }
+
+    Position & operator = (uint64_t rhs) {
+        this->value = static_cast<uint8_t>(rhs);
+        return *this;
+    }
+
+    operator int8_t () const {
+        return static_cast<int8_t>(this->value);
+    }
+
+    operator uint8_t () const {
+        return this->value;
+    }
+
+    operator int16_t () const {
+        return static_cast<int16_t>(this->value);
+    }
+
+    operator uint16_t () const {
+        return static_cast<uint16_t>(this->value);
+    }
+
+    operator int32_t () const {
+        return static_cast<int32_t>(this->value);
+    }
+
+    operator uint32_t () const {
+        return this->value;
+    }
+
+    operator int64_t () const {
+        return static_cast<int64_t>(this->value);
+    }
+
+    operator uint64_t () const {
+        return static_cast<uint64_t>(this->value);
     }
 };
 
 struct Move {
     Position    pos;
     uint8_t     dir;
-    uint8_t     reserve;
 };
 
 struct MoveInfo {
     Position    from_pos;
-    Position    move_to_pos;
+    Position    move_pos;
     uint8_t     color;
     uint8_t     dir;
 };

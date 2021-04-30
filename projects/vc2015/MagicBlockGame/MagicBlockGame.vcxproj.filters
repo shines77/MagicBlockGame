@@ -73,9 +73,15 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\Algorithm.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\UnitTest.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\MagicBlockGame\main.cpp">
+    <ClCompile Include="..\..\..\src\MagicBlockGame\Main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\MagicBlockGame\UnitTest.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

@@ -38,10 +38,12 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\RT_PowerOf2.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\jm_malloc.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\UnitTest.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Value128.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\MagicBlockGame\main.cpp" />
+    <ClCompile Include="..\..\..\src\MagicBlockGame\Main.cpp" />
+    <ClCompile Include="..\..\..\src\MagicBlockGame\UnitTest.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2026DFB5-96B4-46EF-9929-6A03C0E29AAC}</ProjectGuid>
