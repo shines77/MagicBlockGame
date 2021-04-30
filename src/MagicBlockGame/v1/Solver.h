@@ -27,12 +27,14 @@
 #include "Stage.h"
 #include "SharedData.h"
 #include "SparseBitset.h"
+#include "Utils.h"
 
 namespace MagicBlock {
+namespace v1 {
 
-template <size_t BoardX, size_t BoardY,
-          size_t TargetX, size_t TargetY,
-          bool AllowRotate, size_t Step>
+template <std::size_t BoardX, std::size_t BoardY,
+          std::size_t TargetX, std::size_t TargetY,
+          bool AllowRotate, std::size_t Step, typename Phase2CallBack>
 class Solver
 {
 public:
@@ -40,28 +42,29 @@ public:
     typedef std::ptrdiff_t      ssize_type;
 
 #ifdef NDEBUG
-    static const size_t kMinSearchDepth = 15;
-    static const size_t kMaxSearchDepth = 27;
+    static const size_type kMinSearchDepth = 15;
+    static const size_type kMaxSearchDepth = 27;
 
-    static const size_t kDefaultSearchDepthLimit = 30;
+    static const size_type kDefaultSearchDepthLimit = 30;
 
-    static const size_t kSlideDepth = 6;
-    static const size_t kMaxSlideDepth = 10;
+    static const size_type kSlideDepth = 6;
+    static const size_type kMaxSlideDepth = 10;
 #else
-    static const size_t kMinSearchDepth = 15;
-    static const size_t kMaxSearchDepth = 21;
+    static const size_type kMinSearchDepth = 15;
+    static const size_type kMaxSearchDepth = 21;
 
-    static const size_t kDefaultSearchDepthLimit = 22;
+    static const size_type kDefaultSearchDepthLimit = 22;
 
-    static const size_t kSlideDepth = 1;
-    static const size_t kMaxSlideDepth = 2;
+    static const size_type kSlideDepth = 1;
+    static const size_type kMaxSlideDepth = 2;
 #endif
-    static const size_t kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
+    static const size_type kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
 
     static const ptrdiff_t startX = (BoardX - TargetX) / 2;
     static const ptrdiff_t startY = (BoardY - TargetY) / 2;
 
     typedef typename SharedData<BoardX, BoardY, TargetX, TargetY>::stage_type stage_type;
+    typedef Phase2CallBack phase2_callback;
 
 private:
     SharedData<BoardX, BoardY, TargetX, TargetY> * data_;
@@ -69,26 +72,26 @@ private:
     Board<BoardX, BoardY> player_board_;
     Board<TargetX, TargetY> target_board_[4];
 
-    size_t target_len_;
-    size_t rotate_type_;
+    size_type target_len_;
+    size_type rotate_type_;
 
     int partial_colors_[Color::Maximum];
 
     std::vector<Position> move_path_;
 
-    size_t map_used_;
+    size_type map_used_;
 
     void assert_color(uint8_t color) const {
         assert(color >= Color::Empty && color < Color::Last);
     }
 
     void count_target_color_nums(const Board<TargetX, TargetY> & target) {
-        for (size_t clr = Color::Empty; clr < Color::Maximum; clr++) {
+        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
             this->data_->target_colors[clr] = 0;
         }
 
-        for (size_t y = 0; y < TargetY; y++) {
-            for (size_t x = 0; x < TargetX; x++) {
+        for (size_type y = 0; y < TargetY; y++) {
+            for (size_type x = 0; x < TargetX; x++) {
                 uint8_t cell = target.cells[y * TargetY + x];
                 assert_color(cell);
                 if (cell >= Color::Empty && cell < Color::Maximum) {
@@ -99,14 +102,14 @@ private:
     }
 
     void count_partial_target_color_nums(const Board<TargetX, TargetY> & target,
-                                         size_t firstTargetX, size_t lastTargetX,
-                                         size_t firstTargetY, size_t lastTargetY) {
-        for (size_t clr = Color::Empty; clr < Color::Maximum; clr++) {
+                                         size_type firstTargetX, size_type lastTargetX,
+                                         size_type firstTargetY, size_type lastTargetY) {
+        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
             this->data_->target_colors[clr] = 0;
         }
 
-        for (size_t y = firstTargetY; y < lastTargetY; y++) {
-            for (size_t x = firstTargetX; x < lastTargetX; x++) {
+        for (size_type y = firstTargetY; y < lastTargetY; y++) {
+            for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t cell = target.cells[y * TargetY + x];
                 assert_color(cell);
                 if (cell >= Color::Empty && cell < Color::Maximum) {
@@ -117,18 +120,18 @@ private:
     }
 
     void locked_partial_board(int locked[BoardX * BoardY],
-                              size_t firstX, size_t lastX,
-                              size_t firstY, size_t lastY) {
-        for (size_t y = 0; y < BoardY; y++) {
+                              size_type firstX, size_type lastX,
+                              size_type firstY, size_type lastY) {
+        for (size_type y = 0; y < BoardY; y++) {
             ptrdiff_t baseY = y * BoardY;
-            for (size_t x = 0; x < BoardX; x++) {
+            for (size_type x = 0; x < BoardX; x++) {
                 locked[baseY + x] = 0;
             }
         }
 
-        for (size_t y = firstY; y < lastY; y++) {
+        for (size_type y = firstY; y < lastY; y++) {
             ptrdiff_t baseY = y * BoardY;
-            for (size_t x = firstX; x < lastX; x++) {
+            for (size_type x = firstX; x < lastX; x++) {
                 locked[baseY + x] = 1;
             }
         }
@@ -137,7 +140,7 @@ private:
     void init() {
         if (Step == 1 || Step == 12 || Step == 123) {
             this->player_board_ = this->data_->player_board;
-            for (size_t i = 0; i < MaxRotateType; i++) {
+            for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
                 this->target_board_[i] = this->data_->target_board[i];
             }
             if (AllowRotate)
@@ -150,8 +153,8 @@ private:
             data_->s123.init(kDefaultSearchDepthLimit);
 
             // Reset lock_inited[]
-            for (size_t phrase1_type = 0; phrase1_type < MaxPhrase1Type; phrase1_type++) {
-                this->data_->s456.lock_inited[phrase1_type] = 0;
+            for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
+                this->data_->s456.lock_inited[phase1_type] = 0;
             }
         }
         else if (Step == 456) {
@@ -160,14 +163,16 @@ private:
     }
 
     void init_target_board_locked(size_t rotate_type) {
-        assert(rotate_type >= 0 && rotate_type < MaxRotateType);
+        this->data_->s456.reset();
+
+        assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
         this->target_board_[0] = this->data_->target_board[rotate_type];
         this->target_len_ = 1;
 
-        size_t phrase1_type = this->data_->s456.phrase1_type;
-        if (this->data_->s456.lock_inited[phrase1_type] == 0) {
-            this->data_->s456.lock_inited[phrase1_type] = 1;
-            switch (phrase1_type) {
+        size_type phase1_type = this->data_->s456.phase1_type;
+        if (this->data_->s456.lock_inited[phase1_type] == 0) {
+            this->data_->s456.lock_inited[phase1_type] = 1;
+            switch (phase1_type) {
                 case 0:
                     // Top partial
                     count_partial_target_color_nums(this->target_board_[0], 0, TargetX, TargetY - 1, TargetY);
@@ -203,7 +208,7 @@ public:
 
     ~Solver() {}
 
-    size_t getMinSteps() const {
+    size_type getMinSteps() const {
         return this->move_path_.size();
     }
 
@@ -211,7 +216,7 @@ public:
         return this->move_path_;
     }
 
-    size_t getMapUsed() const {
+    size_type getMapUsed() const {
         return this->map_used_;
     }
 
@@ -219,15 +224,15 @@ public:
         this->player_board_ = board;
     }
 
-    void setRotateType(size_t rotate_type) {
-        assert(rotate_type >= 0 && rotate_type < MaxRotateType);
+    void setRotateType(size_type rotate_type) {
+        assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
         this->rotate_type_ = rotate_type;
         init_target_board_locked(rotate_type);
     }
 
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
-        for (size_t y = 0; y < BoardY; y++) {
-            for (size_t x = 0; x < BoardX; x++) {
+        for (size_type y = 0; y < BoardY; y++) {
+            for (size_type x = 0; x < BoardX; x++) {
                 uint8_t cell = board.cells[y * BoardY + x];
                 if (cell == Color::Empty) {
                     empty_pos = (uint8_t)(y * BoardY + x);
@@ -239,16 +244,16 @@ public:
     }
 
     void count_reverse_partial_color_nums(const Board<BoardX, BoardY> & board,
-                                          size_t firstX, size_t lastX,
-                                          size_t firstY, size_t lastY) {
+                                          size_type firstX, size_type lastX,
+                                          size_type firstY, size_type lastY) {
         this->partial_colors_[Color::Empty] = 0;
-        for (size_t clr = Color::First; clr < Color::Last; clr++) {
+        for (size_type clr = Color::First; clr < Color::Last; clr++) {
             this->partial_colors_[clr] = kSingelColorNums;
         }
 
-        for (size_t y = firstY; y < lastY; y++) {
+        for (size_type y = firstY; y < lastY; y++) {
             ptrdiff_t baseY = y * BoardY;
-            for (size_t x = firstX; x < lastX; x++) {
+            for (size_type x = firstX; x < lastX; x++) {
                 uint8_t cell = board.cells[baseY + x];
                 assert_color(cell);
                 if (cell >= Color::Empty && cell < Color::Last) {
@@ -259,15 +264,15 @@ public:
     }
 
     void count_partial_color_nums(const Board<BoardX, BoardY> & board,
-                                  size_t firstX, size_t lastX,
-                                  size_t firstY, size_t lastY) {
-        for (size_t clr = Color::Empty; clr < Color::Last; clr++) {
+                                  size_type firstX, size_type lastX,
+                                  size_type firstY, size_type lastY) {
+        for (size_type clr = Color::Empty; clr < Color::Last; clr++) {
             this->partial_colors_[clr] = 0;
         }
 
-        for (size_t y = firstY; y < lastY; y++) {
+        for (size_type y = firstY; y < lastY; y++) {
             ptrdiff_t baseY = y * BoardY;
-            for (size_t x = firstX; x < lastX; x++) {
+            for (size_type x = firstX; x < lastX; x++) {
                 uint8_t cell = board.cells[baseY + x];
                 assert_color(cell);
                 if (cell >= Color::Empty && cell < Color::Last) {
@@ -279,14 +284,14 @@ public:
 
     bool check_partial_color_nums() const {
         if (Step == 456) {
-            for (size_t clr = Color::Empty; clr < Color::Last; clr++) {
+            for (size_type clr = Color::Empty; clr < Color::Last; clr++) {
                 if (this->partial_colors_[clr] < this->data_->target_colors[clr]) {
                     return false;
                 }
             }
         }
         else {
-            for (size_t clr = Color::First; clr < Color::Last; clr++) {
+            for (size_type clr = Color::First; clr < Color::Last; clr++) {
                 if (this->partial_colors_[clr] < this->data_->target_colors[clr]) {
                     return false;
                 }
@@ -297,10 +302,10 @@ public:
 
     bool is_satisfy_full(const Board<BoardX, BoardY> & player,
                          const Board<TargetX, TargetY> & target) const {
-        for (size_t y = 0; y < TargetY; y++) {
+        for (size_type y = 0; y < TargetY; y++) {
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
-            for (size_t x = 0; x < TargetX; x++) {
+            for (size_type x = 0; x < TargetX; x++) {
                 uint8_t target_cell = target.cells[targetBaseY + x];
                 uint8_t cell = player.cells[baseY + (startX + x)];
                 assert_color(target_cell);
@@ -314,10 +319,10 @@ public:
         return true;
     }
 
-    size_t is_satisfy_full(const Board<BoardX, BoardY> & player,
-                           const Board<TargetX, TargetY> target[4],
-                           size_t target_len) const {
-        for (size_t index = 0; index < target_len; index++) {
+    size_type is_satisfy_full(const Board<BoardX, BoardY> & player,
+                              const Board<TargetX, TargetY> target[4],
+                              size_type target_len) const {
+        for (size_type index = 0; index < target_len; index++) {
             if (is_satisfy_full(player, target[index])) {
                 size_u result(1, index);
                 return result.value;
@@ -327,12 +332,12 @@ public:
         return 0;
     }
 
-    size_t is_satisfy_step_1(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_step_1(const Board<BoardX, BoardY> & player,
                              const Board<TargetX, TargetY> & target) {
         static const ptrdiff_t startX = (BoardX - TargetX) / 2;
         static const ptrdiff_t startY = (BoardY - TargetY) / 2;
 
-        size_t mask = 0;
+        size_type mask = 0;
 
         // Left-Top Corner
         static const ptrdiff_t LeftTopX = startX;
@@ -394,11 +399,11 @@ public:
         return result.value;
     }
 
-    size_t is_satisfy_step_1(const Board<BoardX, BoardY> & player,
-                             const Board<TargetX, TargetY> target[4],
-                             size_t target_len) {
-        for (size_t index = 0; index < target_len; index++) {
-            size_t mask = is_satisfy_step_1(player, target[index]);
+    size_type is_satisfy_step_1(const Board<BoardX, BoardY> & player,
+                                const Board<TargetX, TargetY> target[4],
+                                size_type target_len) {
+        for (size_type index = 0; index < target_len; index++) {
+            size_type mask = is_satisfy_step_1(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -411,12 +416,12 @@ public:
     // Check order: up to down
     bool check_board_is_equal(const Board<BoardX, BoardY> & player,
                               const Board<TargetX, TargetY> & target,
-                              size_t firstTargetX, size_t lastTargetX,
-                              size_t firstTargetY, size_t lastTargetY) {
-        for (size_t y = firstTargetY; y < lastTargetY; y++) {
+                              size_type firstTargetX, size_type lastTargetX,
+                              size_type firstTargetY, size_type lastTargetY) {
+        for (size_type y = firstTargetY; y < lastTargetY; y++) {
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
-            for (size_t x = firstTargetX; x < lastTargetX; x++) {
+            for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t target_cell = target.cells[targetBaseY + x];
                 uint8_t cell = player.cells[baseY + (startX + x)];
                 assert_color(target_cell);
@@ -430,12 +435,12 @@ public:
     }
 
     // Check order: up to down
-    size_t check_board_is_equal(const Board<BoardX, BoardY> & player,
-                                const Board<TargetX, TargetY> target[4],
-                                size_t target_len,
-                                size_t firstTargetX, size_t lastTargetX,
-                                size_t firstTargetY, size_t lastTargetY) {
-        for (size_t index = 0; index < target_len; index++) {
+    size_type check_board_is_equal(const Board<BoardX, BoardY> & player,
+                                   const Board<TargetX, TargetY> target[4],
+                                   size_type target_len,
+                                   size_type firstTargetX, size_type lastTargetX,
+                                   size_type firstTargetY, size_type lastTargetY) {
+        for (size_type index = 0; index < target_len; index++) {
             if (check_board_is_equal(player, target[index],
                 firstTargetX, lastTargetX, firstTargetY, lastTargetY)) {
                 size_u result(1, index);
@@ -449,12 +454,12 @@ public:
     // Check order: down to up
     bool reverse_check_board_is_equal(const Board<BoardX, BoardY> & player,
                                       const Board<TargetX, TargetY> & target,
-                                      size_t firstTargetX, size_t lastTargetX,
-                                      size_t firstTargetY, size_t lastTargetY) {
+                                      size_type firstTargetX, size_type lastTargetX,
+                                      size_type firstTargetY, size_type lastTargetY) {
         for (ptrdiff_t y = ptrdiff_t(lastTargetY - 1); y >= ptrdiff_t(firstTargetX); y--) {
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (startY + y) * BoardY;
-            for (size_t x = firstTargetX; x < lastTargetX; x++) {
+            for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t target_cell = target.cells[targetBaseY + x];
                 uint8_t cell = player.cells[baseY + (startX + x)];
                 assert_color(target_cell);
@@ -468,12 +473,12 @@ public:
     }
 
     // Check order: down to up
-    size_t reverse_check_board_is_equal(const Board<BoardX, BoardY> & player,
-                                        const Board<TargetX, TargetY> & target,
-                                        size_t target_len,
-                                        size_t firstTargetX, size_t lastTargetX,
-                                        size_t firstTargetY, size_t lastTargetY) {
-        for (size_t index = 0; index < target_len; index++) {
+    size_type reverse_check_board_is_equal(const Board<BoardX, BoardY> & player,
+                                           const Board<TargetX, TargetY> & target,
+                                           size_type target_len,
+                                           size_type firstTargetX, size_type lastTargetX,
+                                           size_type firstTargetY, size_type lastTargetY) {
+        for (size_type index = 0; index < target_len; index++) {
             if (reverse_check_board_is_equal(player, target[index],
                 firstTargetX, lastTargetX, firstTargetY, lastTargetY)) {
                 size_u result(1, index);
@@ -484,9 +489,9 @@ public:
         return 0;
     }
 
-    size_t is_satisfy_step_12(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_step_12(const Board<BoardX, BoardY> & player,
                               const Board<TargetX, TargetY> & target) {
-        size_t mask = 0;
+        size_type mask = 0;
 
         // Left-Top Corner
         static const ptrdiff_t LeftTopX = startX;
@@ -544,11 +549,11 @@ public:
         return result.value;
     }
 
-    size_t is_satisfy_step_12(const Board<BoardX, BoardY> & player,
-                              const Board<TargetX, TargetY> target[4],
-                              size_t target_len) {
-        for (size_t index = 0; index < target_len; index++) {
-            size_t mask = is_satisfy_step_12(player, target[index]);
+    size_type is_satisfy_step_12(const Board<BoardX, BoardY> & player,
+                                 const Board<TargetX, TargetY> target[4],
+                                 size_type target_len) {
+        for (size_type index = 0; index < target_len; index++) {
+            size_type mask = is_satisfy_step_12(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -558,9 +563,9 @@ public:
         return 0;
     }
 
-    size_t is_satisfy_step_123(const Board<BoardX, BoardY> & player,
-                               const Board<TargetX, TargetY> & target) {
-        size_t mask = 0;
+    size_type is_satisfy_step_123(const Board<BoardX, BoardY> & player,
+                                  const Board<TargetX, TargetY> & target) {
+        size_type mask = 0;
 
         // Top partial
         static const ptrdiff_t TopY = startY;
@@ -614,11 +619,11 @@ public:
         return result.value;
     }
 
-    size_t is_satisfy_step_123(const Board<BoardX, BoardY> & player,
-                               const Board<TargetX, TargetY> target[4],
-                               size_t target_len) {
-        for (size_t index = 0; index < target_len; index++) {
-            size_t mask = is_satisfy_step_123(player, target[index]);
+    size_type is_satisfy_step_123(const Board<BoardX, BoardY> & player,
+                                  const Board<TargetX, TargetY> target[4],
+                                  size_type target_len) {
+        for (size_type index = 0; index < target_len; index++) {
+            size_type mask = is_satisfy_step_123(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -628,11 +633,11 @@ public:
         return 0;
     }
 
-    size_t is_satisfy_step_456(const Board<BoardX, BoardY> & player,
-                               const Board<TargetX, TargetY> & target) {
-        size_t mask = 0;
+    size_type is_satisfy_step_456(const Board<BoardX, BoardY> & player,
+                                  const Board<TargetX, TargetY> & target) {
+        size_type mask = 0;
 
-        if (this->data_->s456.phrase1_type == 0) {
+        if (this->data_->s456.phase1_type == 0) {
             // Top partial
             static const ptrdiff_t TopY = startY;
 
@@ -643,7 +648,7 @@ public:
                     mask |= 1;
             }
         }
-        else if (this->data_->s456.phrase1_type == 1) {
+        else if (this->data_->s456.phase1_type == 1) {
             // Left partial
             static const ptrdiff_t LeftX = startX;
 
@@ -654,7 +659,7 @@ public:
                     mask |= 2;
             }
         }
-        else if (this->data_->s456.phrase1_type == 2) {
+        else if (this->data_->s456.phase1_type == 2) {
             // Right partial
             static const ptrdiff_t RightX = startX + TargetX - 1;
 
@@ -665,7 +670,7 @@ public:
                     mask |= 4;
             }
         }
-        else if (this->data_->s456.phrase1_type == 3) {
+        else if (this->data_->s456.phase1_type == 3) {
             // Bottom partial
             static const ptrdiff_t BottomY = startY + TargetY - 1;
 
@@ -684,10 +689,10 @@ public:
         return result.value;
     }
 
-    size_t is_satisfy_step_456(const Board<BoardX, BoardY> & player,
-                               const Board<TargetX, TargetY> target[4],
-                               size_t target_len) {
-        for (size_t index = 0; index < target_len; index++) {
+    size_type is_satisfy_step_456(const Board<BoardX, BoardY> & player,
+                                  const Board<TargetX, TargetY> target[4],
+                                  size_type target_len) {
+        for (size_type index = 0; index < target_len; index++) {
             if (is_satisfy_step_456(player, target[index]) != 0) {
                 size_u result(1, index);
                 return result.value;
@@ -697,9 +702,9 @@ public:
         return 0;
     }
 
-    size_t is_satisfy_step_456_789(const Board<BoardX, BoardY> & player,
-                                   const Board<TargetX, TargetY> & target) {
-        size_t mask = 0;
+    size_type is_satisfy_step_456_789(const Board<BoardX, BoardY> & player,
+                                      const Board<TargetX, TargetY> & target) {
+        size_type mask = 0;
 
         // Check order: down to up
         if (reverse_check_board_is_equal(player, target, 0, TargetX, 0, TargetY)) {
@@ -710,11 +715,11 @@ public:
         return result.value;
     }
 
-    size_t is_satisfy_step_456_789(const Board<BoardX, BoardY> & player,
-                                   const Board<TargetX, TargetY> target[4],
-                                   size_t target_len) {
-        for (size_t index = 0; index < target_len; index++) {
-            size_t mask = is_satisfy_step_456_789(player, target[index]);
+    size_type is_satisfy_step_456_789(const Board<BoardX, BoardY> & player,
+                                      const Board<TargetX, TargetY> target[4],
+                                      size_type target_len) {
+        for (size_type index = 0; index < target_len; index++) {
+            size_type mask = is_satisfy_step_456_789(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -724,8 +729,8 @@ public:
         return 0;
     }
 
-    size_t is_satisfy(const Board<BoardX, BoardY> & player,
-                      const Board<TargetX, TargetY> & target) {
+    size_type is_satisfy(const Board<BoardX, BoardY> & player,
+                         const Board<TargetX, TargetY> & target) {
         if (Step == 1) {
             return is_satisfy_step_1(player, target);
         }
@@ -739,15 +744,15 @@ public:
             return is_satisfy_step_456_789(player, target);
         }
         else {
-            return (size_t)is_satisfy_full(player, target);
+            return (size_type)is_satisfy_full(player, target);
         }
 
         return 0;
     }
 
-    size_t is_satisfy(const Board<BoardX, BoardY> & player,
-                      const Board<TargetX, TargetY> target[4],
-                      size_t target_len) {
+    size_type is_satisfy(const Board<BoardX, BoardY> & player,
+                         const Board<TargetX, TargetY> target[4],
+                         size_type target_len) {
         if (AllowRotate) {
             if (Step == 1) {
                 return is_satisfy_step_1(player, target, target_len);
@@ -772,11 +777,11 @@ public:
         return 0;
     }
 
-    size_t is_satisfy_all(const Board<BoardX, BoardY> & board,
-                          const Board<TargetX, TargetY> target[4],
-                          size_t target_len) {
-        for (size_t index = 0; index < target_len; index++) {
-            size_t mask = is_satisfy(board, target[index]);
+    size_type is_satisfy_all(const Board<BoardX, BoardY> & board,
+                             const Board<TargetX, TargetY> target[4],
+                             size_type target_len) {
+        for (size_type index = 0; index < target_len; index++) {
+            size_type mask = is_satisfy(board, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -786,18 +791,18 @@ public:
         return 0;
     }
 
-    bool record_phrase1_min_info(size_t depth, size_t rotate_type, size_t satisfy_mask, const stage_type & stage) {
-        size_t reached_mask = 0;
-        size_t mask = 1;
-        size_t phrase1_type = 0;
+    bool record_phase1_min_info(size_type depth, size_type rotate_type, size_type satisfy_mask, const stage_type & stage) {
+        size_type reached_mask = 0;
+        size_type mask = 1;
+        size_type phase1_type = 0;
         while (satisfy_mask != 0) {
             if ((satisfy_mask & mask) == mask) {
                 // record min-move phrase1 stage
-                this->data_->s123.stage_list[rotate_type][phrase1_type].push_back(stage);
+                this->data_->s123.stage_list[rotate_type][phase1_type].push_back(stage);
 
-                if (this->data_->s123.min_depth[rotate_type][phrase1_type] != -1) {
-                    assert(this->data_->s123.max_depth[rotate_type][phrase1_type] != -1);
-                    if ((int)depth >= this->data_->s123.max_depth[rotate_type][phrase1_type]) {
+                if (this->data_->s123.min_depth[rotate_type][phase1_type] != -1) {
+                    assert(this->data_->s123.max_depth[rotate_type][phase1_type] != -1);
+                    if ((int)depth >= this->data_->s123.max_depth[rotate_type][phase1_type]) {
                         reached_mask |= mask;
                     }
                 }
@@ -808,12 +813,12 @@ public:
                         this->data_->s123.depth_limit[rotate_type] = std::min(
                             std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
                     }
-                    this->data_->s123.min_depth[rotate_type][phrase1_type] = (int)depth;
-                    this->data_->s123.max_depth[rotate_type][phrase1_type] = (int)(depth + kSlideDepth);
+                    this->data_->s123.min_depth[rotate_type][phase1_type] = (int)depth;
+                    this->data_->s123.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
                 }
             }
-            phrase1_type++;
-            if (phrase1_type >= MaxPhrase1Type)
+            phase1_type++;
+            if (phase1_type >= MAX_PHASE1_TYPE)
                 break;
             satisfy_mask &= ~mask;
             mask <<= 1;
@@ -822,7 +827,7 @@ public:
         return ((reached_mask & 0x0F) == 0x0F);
     }
 
-    bool solve_full(size_t & rotate_type) {
+    bool solve_full(size_type & rotate_type) {
         size_u result = is_satisfy_full(this->player_board_, this->target_board_, this->target_len_);
         if (result.low != 0) {
             rotate_type = result.high;
@@ -830,7 +835,7 @@ public:
         }
 
         bool solvable = false;
-        size_t depth = 0;
+        size_type depth = 0;
 
         Position empty;
         bool found_empty = find_empty(this->player_board_, empty);
@@ -850,13 +855,13 @@ public:
 
             bool exit = false;
             while (cur_stages.size()) {    
-                for (size_t i = 0; i < cur_stages.size(); i++) {
+                for (size_type i = 0; i < cur_stages.size(); i++) {
                     const stage_type & stage = cur_stages[i];
 
                     uint8_t empty_pos = stage.empty;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_t total_moves = empty_moves.size();
-                    for (size_t n = 0; n < total_moves; n++) {
+                    size_type total_moves = empty_moves.size();
+                    for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = empty_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
@@ -917,7 +922,7 @@ public:
         return solvable;
     }
 
-    bool solve(size_t & out_rotate_type) {
+    bool solve(size_type & out_rotate_type) {
         size_u satisfy_result = is_satisfy(this->player_board_, this->target_board_, this->target_len_);
         if (satisfy_result.low != 0) {
             out_rotate_type = satisfy_result.high;
@@ -925,7 +930,7 @@ public:
         }
 
         bool solvable = false;
-        size_t depth = 0;
+        size_type depth = 0;
 
         Position empty;
         bool found_empty = find_empty(this->player_board_, empty);
@@ -946,13 +951,13 @@ public:
 
             bool exit = false;
             while (cur_stages.size()) {
-                for (size_t i = 0; i < cur_stages.size(); i++) {
+                for (size_type i = 0; i < cur_stages.size(); i++) {
                     const stage_type & stage = cur_stages[i];
 
                     uint8_t empty_pos = stage.empty;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_t total_moves = empty_moves.size();
-                    for (size_t n = 0; n < total_moves; n++) {
+                    size_type total_moves = empty_moves.size();
+                    for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = empty_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
@@ -981,13 +986,13 @@ public:
                         next_stages.push_back(next_stage);
 
                         size_u satisfy_result = is_satisfy(next_stage.board, this->target_board_, this->target_len_);
-                        size_t satisfy_mask = satisfy_result.low;
+                        size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
-                                size_t rotate_type = satisfy_result.high;
+                                size_type rotate_type = satisfy_result.high;
                                 next_stage.rotate_type = (uint8_t)rotate_type;
-                                bool all_reached = record_phrase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
+                                bool all_reached = record_phase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
                                 if (all_reached) {
                                     exit = true;
                                 }
@@ -1022,15 +1027,15 @@ public:
                 next_stages.clear();
 
                 if (Step == 1 || Step == 12 || Step == 123) {
-                    size_t rotate_done = 0;
-                    for (size_t rotate_type = 0; rotate_type < MaxRotateType; rotate_type++) {
+                    size_type rotate_done = 0;
+                    for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                         if (this->data_->s123.depth_limit[rotate_type] != size_t(-1) &&
                             depth > this->data_->s123.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
                     if (AllowRotate) {
-                        if (rotate_done >= MaxRotateType)
+                        if (rotate_done >= MAX_ROTATE_TYPE)
                             exit = true;
                     }
                     else {
@@ -1053,14 +1058,14 @@ public:
 
             if (Step == 1 || Step == 12 || Step == 123) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                for (size_t rotate_type = 0; rotate_type < 4; rotate_type++) {
-                    for (size_t phrase1_type = 0; phrase1_type < 4; phrase1_type++) {
-                        printf("rotate_type = %u, phrase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
+                for (size_type rotate_type = 0; rotate_type < 4; rotate_type++) {
+                    for (size_type phase1_type = 0; phase1_type < 4; phase1_type++) {
+                        printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
-                                (uint32_t)phrase1_type,
-                                this->data_->s123.min_depth[rotate_type][phrase1_type],
-                                this->data_->s123.max_depth[rotate_type][phrase1_type],
-                                (uint32_t)this->data_->s123.stage_list[rotate_type][phrase1_type].size());
+                                (uint32_t)phase1_type,
+                                this->data_->s123.min_depth[rotate_type][phase1_type],
+                                this->data_->s123.max_depth[rotate_type][phase1_type],
+                                (uint32_t)this->data_->s123.stage_list[rotate_type][phase1_type].size());
                     }
                     printf("\n");
                 }
@@ -1069,7 +1074,7 @@ public:
             else if (Step == 456) {
                 //printf("\n");
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                printf("phrase1_type = %u\n", (uint32_t)this->data_->s456.phrase1_type);
+                printf("phase1_type = %u\n", (uint32_t)this->data_->s456.phase1_type);
                 printf("index = %u\n", (uint32_t)(this->data_->s456.index + 1));
                 printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                 if (solvable) {
@@ -1082,7 +1087,7 @@ public:
         return solvable;
     }
 
-    bool queue_solve(size_t & out_rotate_type) {
+    bool queue_solve(size_type & out_rotate_type) {
         size_u satisfy_result = is_satisfy(this->player_board_, this->target_board_, this->target_len_);
         if (satisfy_result.low != 0) {
             out_rotate_type = satisfy_result.high;
@@ -1090,7 +1095,7 @@ public:
         }
 
         bool solvable = false;
-        size_t depth = 0;
+        size_type depth = 0;
 
         Position empty;
         bool found_empty = find_empty(this->player_board_, empty);
@@ -1116,8 +1121,8 @@ public:
 
                     uint8_t empty_pos = stage.empty.value;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_t total_moves = empty_moves.size();
-                    for (size_t n = 0; n < total_moves; n++) {
+                    size_type total_moves = empty_moves.size();
+                    for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = empty_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
@@ -1146,13 +1151,13 @@ public:
                         next_stages.push(next_stage);
 
                         size_u satisfy_result = is_satisfy(next_stage.board, this->target_board_, this->target_len_);
-                        size_t satisfy_mask = satisfy_result.low;
+                        size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
-                                size_t rotate_type = satisfy_result.high;
+                                size_type rotate_type = satisfy_result.high;
                                 next_stage.rotate_type = (uint8_t)rotate_type;
-                                bool all_reached = record_phrase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
+                                bool all_reached = record_phase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
                                 if (all_reached) {
                                     exit = true;
                                 }
@@ -1189,15 +1194,15 @@ public:
                 std::swap(cur_stages, next_stages);
 
                 if (Step == 1 || Step == 12 || Step == 123) {
-                    size_t rotate_done = 0;
-                    for (size_t rotate_type = 0; rotate_type < MaxRotateType; rotate_type++) {
+                    size_type rotate_done = 0;
+                    for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                         if (this->data_->s123.depth_limit[rotate_type] != size_t(-1) &&
                             depth > this->data_->s123.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
                     if (AllowRotate) {
-                        if (rotate_done >= MaxRotateType)
+                        if (rotate_done >= MAX_ROTATE_TYPE)
                             exit = true;
                     }
                     else {
@@ -1220,14 +1225,14 @@ public:
 
             if (Step == 1 || Step == 12 || Step == 123) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                for (size_t rotate_type = 0; rotate_type < 4; rotate_type++) {
-                    for (size_t phrase1_type = 0; phrase1_type < 4; phrase1_type++) {
-                        printf("rotate_type = %u, phrase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
+                for (size_type rotate_type = 0; rotate_type < 4; rotate_type++) {
+                    for (size_type phase1_type = 0; phase1_type < 4; phase1_type++) {
+                        printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
-                                (uint32_t)phrase1_type,
-                                this->data_->s123.min_depth[rotate_type][phrase1_type],
-                                this->data_->s123.max_depth[rotate_type][phrase1_type],
-                                (uint32_t)this->data_->s123.stage_list[rotate_type][phrase1_type].size());
+                                (uint32_t)phase1_type,
+                                this->data_->s123.min_depth[rotate_type][phase1_type],
+                                this->data_->s123.max_depth[rotate_type][phase1_type],
+                                (uint32_t)this->data_->s123.stage_list[rotate_type][phase1_type].size());
                     }
                     printf("\n");
                 }
@@ -1236,7 +1241,7 @@ public:
             else if (Step == 456) {
                 //printf("\n");
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                printf("phrase1_type = %u\n", (uint32_t)this->data_->s456.phrase1_type);
+                printf("phase1_type = %u\n", (uint32_t)this->data_->s456.phase1_type);
                 printf("index = %u\n", (uint32_t)(this->data_->s456.index + 1));
                 printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                 if (solvable) {
@@ -1249,7 +1254,49 @@ public:
         return solvable;
     }
 
-    bool bitset_solve(size_t & out_rotate_type) {
+    bool call_phase2_search(size_type depth, size_type rotate_type, size_type satisfy_mask,
+                            const stage_type & stage, phase2_callback & phase2_search) {
+        size_type reached_mask = 0;
+        size_type mask = 1;
+        size_type phase1_type = 0;
+        while (satisfy_mask != 0) {
+            if ((satisfy_mask & mask) == mask) {
+                // record min-move phrase1 stage
+                this->data_->s123.stage_list[rotate_type][phase1_type].push_back(stage);
+
+                if (this->data_->s123.min_depth[rotate_type][phase1_type] != -1) {
+                    assert(this->data_->s123.max_depth[rotate_type][phase1_type] != -1);
+                    if ((int)depth >= this->data_->s123.max_depth[rotate_type][phase1_type]) {
+                        reached_mask |= mask;
+                    }
+                }
+                else {
+                    if (this->data_->s123.has_solution[rotate_type] == 0) {
+                        this->data_->s123.has_solution[rotate_type] = 1;
+                        // Update the depth limit
+                        this->data_->s123.depth_limit[rotate_type] = std::min(
+                            std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
+                    }
+                    this->data_->s123.min_depth[rotate_type][phase1_type] = (int)depth;
+                    this->data_->s123.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
+                }
+
+                // call phase2_search()
+                if (phase2_search) {
+                    //bool phase2_solvable = phase2_search(rotate_type, phase1_type, stage);
+                }
+            }
+            phase1_type++;
+            if (phase1_type >= MAX_PHASE1_TYPE)
+                break;
+            satisfy_mask &= ~mask;
+            mask <<= 1;
+        }
+
+        return ((reached_mask & 0x0F) == 0x0F);
+    }
+
+    bool bitset_solve(size_type & out_rotate_type, phase2_callback & phase2_search = phase2_callback()) {
         size_u satisfy_result = is_satisfy(this->player_board_, this->target_board_, this->target_len_);
         if (satisfy_result.low != 0) {
             out_rotate_type = satisfy_result.high;
@@ -1257,7 +1304,7 @@ public:
         }
 
         bool solvable = false;
-        size_t depth = 0;
+        size_type depth = 0;
 
         Position empty;
         bool found_empty = find_empty(this->player_board_, empty);
@@ -1279,13 +1326,13 @@ public:
 
             bool exit = false;
             while (cur_stages.size()) {
-                for (size_t i = 0; i < cur_stages.size(); i++) {
+                for (size_type i = 0; i < cur_stages.size(); i++) {
                     const stage_type & stage = cur_stages[i];
 
                     uint8_t empty_pos = stage.empty.value;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_t total_moves = empty_moves.size();
-                    for (size_t n = 0; n < total_moves; n++) {
+                    size_type total_moves = empty_moves.size();
+                    for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = empty_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
@@ -1298,15 +1345,19 @@ public:
 
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-#if 0
+#if 1
+                        bool insert_new = visited.try_append(next_stage.board);
+                        if (!insert_new)
+                            continue;
+#elif 0
                         if (visited.contains(next_stage.board))
                             continue;
 
                         visited.append(next_stage.board);
-#elif 0
+#else
                         typedef typename bitset_type::Container Container;
 
-                        size_t last_layer;
+                        size_type last_layer;
                         Container * last_container;
                         if (visited.contains(next_stage.board, last_layer, last_container))
                             continue;
@@ -1314,10 +1365,6 @@ public:
                         assert(last_layer >= 0 && last_layer <= BoardY);
                         assert(last_container != nullptr);
                         visited.append_new(next_stage.board, last_layer, last_container);
-#else
-                        bool insert_new = visited.try_append(next_stage.board);
-                        if (!insert_new)
-                            continue;
 #endif
                         next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -1329,13 +1376,14 @@ public:
                         next_stages.push_back(next_stage);
 
                         size_u satisfy_result = is_satisfy(next_stage.board, this->target_board_, this->target_len_);
-                        size_t satisfy_mask = satisfy_result.low;
+                        size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
                             if (Step == 1 || Step == 12 || Step == 123) {
-                                size_t rotate_type = satisfy_result.high;
+                                size_type rotate_type = satisfy_result.high;
                                 next_stage.rotate_type = (uint8_t)rotate_type;
-                                bool all_reached = record_phrase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
+                                bool all_reached = call_phase2_search(depth, rotate_type, satisfy_mask,
+                                                                      next_stage, phase2_search);
                                 if (all_reached) {
                                     exit = true;
                                 }
@@ -1370,15 +1418,15 @@ public:
                 next_stages.clear();
 
                 if (Step == 1 || Step == 12 || Step == 123) {
-                    size_t rotate_done = 0;
-                    for (size_t rotate_type = 0; rotate_type < MaxRotateType; rotate_type++) {
+                    size_type rotate_done = 0;
+                    for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                         if (this->data_->s123.depth_limit[rotate_type] != size_t(-1) &&
                             depth > this->data_->s123.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
                     if (AllowRotate) {
-                        if (rotate_done >= MaxRotateType)
+                        if (rotate_done >= MAX_ROTATE_TYPE)
                             exit = true;
                     }
                     else {
@@ -1401,14 +1449,14 @@ public:
 
             if (Step == 1 || Step == 12 || Step == 123) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                for (size_t rotate_type = 0; rotate_type < 4; rotate_type++) {
-                    for (size_t phrase1_type = 0; phrase1_type < 4; phrase1_type++) {
-                        printf("rotate_type = %u, phrase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
+                for (size_type rotate_type = 0; rotate_type < 4; rotate_type++) {
+                    for (size_type phase1_type = 0; phase1_type < 4; phase1_type++) {
+                        printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
-                                (uint32_t)phrase1_type,
-                                this->data_->s123.min_depth[rotate_type][phrase1_type],
-                                this->data_->s123.max_depth[rotate_type][phrase1_type],
-                                (uint32_t)this->data_->s123.stage_list[rotate_type][phrase1_type].size());
+                                (uint32_t)phase1_type,
+                                this->data_->s123.min_depth[rotate_type][phase1_type],
+                                this->data_->s123.max_depth[rotate_type][phase1_type],
+                                (uint32_t)this->data_->s123.stage_list[rotate_type][phase1_type].size());
                     }
                     printf("\n");
                 }
@@ -1416,14 +1464,17 @@ public:
             }
             else if (Step == 456) {
                 //printf("\n");
-                printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                printf("phrase1_type = %u\n", (uint32_t)this->data_->s456.phrase1_type);
-                printf("index = %u\n", (uint32_t)(this->data_->s456.index + 1));
-                printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                 if (solvable) {
-                    printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                    printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
+                    printf("rotate_type = %u\n", (uint32_t)this->data_->s456.rotate_type);
+                    printf("phase1_type = %u\n", (uint32_t)this->data_->s456.phase1_type);
+                    printf("index = %u\n", (uint32_t)(this->data_->s456.index + 1));
+                    printf("next.size() = %u\n", (uint32_t)cur_stages.size());
+                    if (solvable) {
+                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                    }
+                    printf("\n");
                 }
-                printf("\n");
             }
 
             visited.display_trie_info();
@@ -1433,4 +1484,5 @@ public:
     }
 };
 
+} // namespace v1
 } // namespace MagicBlock

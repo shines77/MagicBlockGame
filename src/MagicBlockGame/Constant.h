@@ -1,9 +1,10 @@
 #pragma once
 
-#include <stdlib.h>
-
 #include <stdint.h>
 #include <stddef.h>
+
+#include <cstdint>
+#include <cstddef>
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -11,18 +12,9 @@
 
 namespace MagicBlock {
 
-static const size_t MaxRotateType = 4;
-static const size_t MaxPhrase1Type = 4;
+static const std::size_t MAX_ROTATE_TYPE = 4;
+static const std::size_t MAX_PHASE1_TYPE = 4;
 
-namespace System {
-
-static void pause()
-{
-#if defined(_MSC_VER)
-    ::system("pause");
-#endif
-}
-
-} // namespace System
+static const std::size_t MAX_PHASE2_DEPTH = 35;
 
 } // namespace MagicBlock

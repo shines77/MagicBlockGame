@@ -11,6 +11,9 @@
     <Filter Include="src\support">
       <UniqueIdentifier>{3d15b143-52f8-437c-9486-08ddeb33bdf2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\v1">
+      <UniqueIdentifier>{7f71a537-9b49-4ef1-bff5-a4603fcbbf0d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h">
@@ -61,12 +64,6 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitset.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Game.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Solver.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\jm_malloc.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -74,6 +71,15 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\UnitTest.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Game.h">
+      <Filter>src\v1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Solver.h">
+      <Filter>src\v1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\Utils.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

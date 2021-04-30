@@ -19,7 +19,7 @@
 #include <cstring>
 
 #include "ErrorCode.h"
-#include "Game.h"
+#include "v1/Game.h"
 #include "Algorithm.h"
 #include "UnitTest.h"
 
@@ -33,7 +33,7 @@ void solve_sliding_puzzle()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle()\n\n");
 
-    MagicBlock::Game<5, 5, 3, 3, true> game;
+    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input_test.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -64,7 +64,7 @@ void solve_sliding_puzzle_queue()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle_queue()\n\n");
 
-    MagicBlock::Game<5, 5, 3, 3, true> game;
+    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input_test.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -95,7 +95,7 @@ void solve_magic_block_game()
     printf("-------------------------------------------------------\n\n");
     printf("solve_magic_block_game()\n\n");
 
-    MagicBlock::Game<5, 5, 3, 3, true> game;
+    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
@@ -126,7 +126,7 @@ void solve_magic_block_game_bitmap()
     printf("-------------------------------------------------------\n\n");
     printf("solve_magic_block_game_bitmap()\n\n");
 
-    MagicBlock::Game<5, 5, 3, 3, true> game;
+    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
