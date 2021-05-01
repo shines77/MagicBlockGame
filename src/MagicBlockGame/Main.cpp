@@ -28,6 +28,15 @@
 
 using namespace MagicBlock;
 
+struct FuncId {
+    enum {
+        NormalSolver,
+        QueueSolver,
+        BitSetSolver,
+        StandAloneBitSetSolver,
+    };
+};
+
 void solve_sliding_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
@@ -90,84 +99,52 @@ void solve_sliding_puzzle_queue()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-void magic_block_game_solve()
+template <std::size_t N_FuncId>
+const char * get_func_name()
 {
-    printf("-------------------------------------------------------\n\n");
-    printf("magic_block_game_solve()\n\n");
-
-    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
-    int readStatus = game.readInput("input.txt");
-    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
-    if (ErrorCode::isFailure(readStatus)) {
-        return;
+    if (N_FuncId == FuncId::QueueSolver) {
+        return "FuncId::QueueSolver";
     }
-
-    jtest::StopWatch sw;
-
-    sw.start();
-    bool solvable = game.solve();
-    sw.stop();
-    double elapsed_time = sw.getElapsedMillisec();
-
-    if (solvable) {
-        printf("Found a answer!\n\n");
-        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
-        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+    else if (N_FuncId == FuncId::BitSetSolver) {
+        return "FuncId::BitSetSolver";
+    }
+    else if (N_FuncId == FuncId::StandAloneBitSetSolver) {
+        return "FuncId::StandAloneBitSetSolver";
     }
     else {
-        printf("Not found a answer!\n\n");
+        return "FuncId::NormalSovler";
     }
-
-    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-void magic_block_game_bitset_solve()
+template <std::size_t N_FuncId = FuncId::NormalSolver, bool AllowRotate = true>
+void solve_magic_block_game()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("magic_block_game_bitset_solve()\n\n");
+    printf("solve_magic_block_game<%s>()\n\n", get_func_name<N_FuncId>());
 
-    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
-    int readStatus = game.readInput("input.txt");
+    MagicBlock::v1::Game<5, 5, 3, 3, AllowRotate> game;
+    int readStatus = game.readInput("MagicBlockGame.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
         return;
     }
 
+    bool solvable;
     jtest::StopWatch sw;
 
     sw.start();
-    bool solvable = game.bitset_solve();
-    sw.stop();
-    double elapsed_time = sw.getElapsedMillisec();
-
-    if (solvable) {
-        printf("Found a answer!\n\n");
-        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
-        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+    if (N_FuncId == FuncId::QueueSolver) {
+        solvable = game.queue_solve();
+    }
+    else if (N_FuncId == FuncId::BitSetSolver) {
+        solvable = game.bitset_solve();
+    }
+    else if (N_FuncId == FuncId::StandAloneBitSetSolver) {
+        solvable = game.stand_alone_bitset_solve();
     }
     else {
-        printf("Not found a answer!\n\n");
+        solvable = game.solve();
     }
-
-    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
-}
-
-void magic_block_game_stand_alone_bitset_solve()
-{
-    printf("-------------------------------------------------------\n\n");
-    printf("magic_block_game_stand_alone_bitset_solve()\n\n");
-
-    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
-    int readStatus = game.readInput("input.txt");
-    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
-    if (ErrorCode::isFailure(readStatus)) {
-        return;
-    }
-
-    jtest::StopWatch sw;
-
-    sw.start();
-    bool solvable = game.stand_alone_bitset_solve();
     sw.stop();
     double elapsed_time = sw.getElapsedMillisec();
 
@@ -187,20 +164,25 @@ int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
 
+#ifdef NDEBUG
     UnitTest();
+#endif
 
     solve_sliding_puzzle();
     solve_sliding_puzzle_queue();
 
 #if 0
 #ifdef NDEBUG
-    magic_block_game_solve();
+    solve_magic_block_game<FuncId::NormalSolver, true>();
     System::pause();
 #endif // !NDEBUG
 #endif
 
-    magic_block_game_bitset_solve();
-    //magic_block_game_stand_alone_bitset_solve();
+#if 1
+    solve_magic_block_game<FuncId::BitSetSolver, true>();
+#else
+    solve_magic_block_game<FuncId::StandAloneBitSetSolver, true>();
+#endif
     System::pause();
 
     return 0;

@@ -590,6 +590,11 @@ public:
         return solvable;
     }
 
+    bool queue_solve() {
+        // TODO:
+        return false;
+    }
+
     bool bitset_phase2_search(size_type rotate_type, size_type phase1_type, const stage_type & stage) {
         static size_type phase2_stage_cnt = 0;
         this->data_.phase2.index = phase2_stage_cnt;
