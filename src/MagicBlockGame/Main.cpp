@@ -43,7 +43,7 @@ void solve_sliding_puzzle()
     printf("solve_sliding_puzzle()\n\n");
 
     MagicBlock::v1::Game<5, 5, 3, 3, true> game;
-    int readStatus = game.readInput("input_test.txt");
+    int readStatus = game.readInput("sliding_puzzle.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
         return;
@@ -74,7 +74,7 @@ void solve_sliding_puzzle_queue()
     printf("solve_sliding_puzzle_queue()\n\n");
 
     MagicBlock::v1::Game<5, 5, 3, 3, true> game;
-    int readStatus = game.readInput("input_test.txt");
+    int readStatus = game.readInput("sliding_puzzle.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
         return;
@@ -123,7 +123,7 @@ void solve_magic_block_game()
     printf("solve_magic_block_game<%s>()\n\n", get_func_name<N_FuncId>());
 
     MagicBlock::v1::Game<5, 5, 3, 3, AllowRotate> game;
-    int readStatus = game.readInput("MagicBlockGame.txt");
+    int readStatus = game.readInput("magic_block.txt");
     printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
         return;
