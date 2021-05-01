@@ -34,7 +34,7 @@ namespace v1 {
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
-          bool AllowRotate, std::size_t Step, typename Phase2CallBack>
+          bool AllowRotate, std::size_t N_PhaseType, typename Phase2CallBack>
 class Solver
 {
 public:
@@ -139,7 +139,7 @@ private:
     }
 
     void init() {
-        if (Step == 1 || Step == 12 || Step == 123) {
+        if (this->is_phase1()) {
             this->player_board_ = this->data_->player_board;
             for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
                 this->target_board_[i] = this->data_->target_board[i];
@@ -151,52 +151,54 @@ private:
 
             count_target_color_nums(this->target_board_[0]);
 
-            data_->s123.init(kDefaultSearchDepthLimit);
+            data_->phase1.init(kDefaultSearchDepthLimit);
 
             // Reset lock_inited[]
             for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
-                this->data_->s456.lock_inited[phase1_type] = 0;
+                this->data_->phase2.lock_inited[phase1_type] = 0;
             }
         }
-        else if (Step == 456) {
+        else if (this->is_phase2()) {
             //
         }
     }
 
     void init_target_board_locked(size_t rotate_type) {
-        this->data_->s456.reset();
+        if (this->is_phase2()) {
+            this->data_->phase2.reset();
 
-        assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
-        this->target_board_[0] = this->data_->target_board[rotate_type];
-        this->target_len_ = 1;
+            assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
+            this->target_board_[0] = this->data_->target_board[rotate_type];
+            this->target_len_ = 1;
 
-        size_type phase1_type = this->data_->s456.phase1_type;
-        if (this->data_->s456.lock_inited[phase1_type] == 0) {
-            this->data_->s456.lock_inited[phase1_type] = 1;
-            switch (phase1_type) {
-                case 0:
-                    // Top partial
-                    count_partial_target_color_nums(this->target_board_[0], 0, TargetX, TargetY - 1, TargetY);
-                    locked_partial_board(this->data_->s456.locked, 0, BoardX, 0, startY + 1);
-                    break;
-                case 1:
-                    // Left partial
-                    count_partial_target_color_nums(this->target_board_[0], TargetX - 1, TargetX, 0, TargetY);
-                    locked_partial_board(this->data_->s456.locked, 0, startX + 1, 0, BoardY);
-                    break;
-                case 2:
-                    // Right partial
-                    count_partial_target_color_nums(this->target_board_[0], 0, 1, 0, TargetY);
-                    locked_partial_board(this->data_->s456.locked, startX + TargetX - 1, BoardX, 0, BoardY);
-                    break;
-                case 3:
-                    // Bottom partial
-                    count_partial_target_color_nums(this->target_board_[0], 0, TargetX, 0, 1);
-                    locked_partial_board(this->data_->s456.locked, 0, BoardX, startY + TargetY - 1, BoardY);
-                    break;
-                default:
-                    assert(false);
-                    break;
+            size_type phase1_type = this->data_->phase2.phase1_type;
+            if (this->data_->phase2.lock_inited[phase1_type] == 0) {
+                this->data_->phase2.lock_inited[phase1_type] = 1;
+                switch (phase1_type) {
+                    case 0:
+                        // Top partial
+                        count_partial_target_color_nums(this->target_board_[0], 0, TargetX, TargetY - 1, TargetY);
+                        locked_partial_board(this->data_->phase2.locked, 0, BoardX, 0, startY + 1);
+                        break;
+                    case 1:
+                        // Left partial
+                        count_partial_target_color_nums(this->target_board_[0], TargetX - 1, TargetX, 0, TargetY);
+                        locked_partial_board(this->data_->phase2.locked, 0, startX + 1, 0, BoardY);
+                        break;
+                    case 2:
+                        // Right partial
+                        count_partial_target_color_nums(this->target_board_[0], 0, 1, 0, TargetY);
+                        locked_partial_board(this->data_->phase2.locked, startX + TargetX - 1, BoardX, 0, BoardY);
+                        break;
+                    case 3:
+                        // Bottom partial
+                        count_partial_target_color_nums(this->target_board_[0], 0, TargetX, 0, 1);
+                        locked_partial_board(this->data_->phase2.locked, 0, BoardX, startY + TargetY - 1, BoardY);
+                        break;
+                    default:
+                        assert(false);
+                        break;
+                }
             }
         }
     }
@@ -208,6 +210,16 @@ public:
     }
 
     ~Solver() {}
+
+    bool is_phase1() const {
+        return (N_PhaseType == PhaseType::Phase1_1 ||
+                N_PhaseType == PhaseType::Phase1_12 ||
+                N_PhaseType == PhaseType::Phase1_123);
+    }
+
+    bool is_phase2() const {
+        return (N_PhaseType == PhaseType::Phase2);
+    }
 
     size_type getMinSteps() const {
         return this->move_path_.size();
@@ -284,7 +296,7 @@ public:
     }
 
     bool check_partial_color_nums() const {
-        if (Step == 456) {
+        if (this->is_phase2()) {
             for (size_type clr = Color::Empty; clr < Color::Last; clr++) {
                 if (this->partial_colors_[clr] < this->target_colors_[clr]) {
                     return false;
@@ -333,7 +345,7 @@ public:
         return 0;
     }
 
-    size_type is_satisfy_step_1(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_phase1_1(const Board<BoardX, BoardY> & player,
                              const Board<TargetX, TargetY> & target) {
         static const ptrdiff_t startX = (BoardX - TargetX) / 2;
         static const ptrdiff_t startY = (BoardY - TargetY) / 2;
@@ -400,11 +412,11 @@ public:
         return result.value;
     }
 
-    size_type is_satisfy_step_1(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_phase1_1(const Board<BoardX, BoardY> & player,
                                 const Board<TargetX, TargetY> target[4],
                                 size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
-            size_type mask = is_satisfy_step_1(player, target[index]);
+            size_type mask = is_satisfy_phase1_1(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -490,7 +502,7 @@ public:
         return 0;
     }
 
-    size_type is_satisfy_step_12(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_phase1_12(const Board<BoardX, BoardY> & player,
                                  const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
@@ -550,11 +562,11 @@ public:
         return result.value;
     }
 
-    size_type is_satisfy_step_12(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_phase1_12(const Board<BoardX, BoardY> & player,
                                  const Board<TargetX, TargetY> target[4],
                                  size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
-            size_type mask = is_satisfy_step_12(player, target[index]);
+            size_type mask = is_satisfy_phase1_12(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -564,7 +576,7 @@ public:
         return 0;
     }
 
-    size_type is_satisfy_step_123(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_phase1_123(const Board<BoardX, BoardY> & player,
                                   const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
@@ -620,11 +632,11 @@ public:
         return result.value;
     }
 
-    size_type is_satisfy_step_123(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_phase1_123(const Board<BoardX, BoardY> & player,
                                   const Board<TargetX, TargetY> target[4],
                                   size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
-            size_type mask = is_satisfy_step_123(player, target[index]);
+            size_type mask = is_satisfy_phase1_123(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -638,7 +650,7 @@ public:
                                   const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
-        if (this->data_->s456.phase1_type == 0) {
+        if (this->data_->phase2.phase1_type == 0) {
             // Top partial
             static const ptrdiff_t TopY = startY;
 
@@ -649,7 +661,7 @@ public:
                     mask |= 1;
             }
         }
-        else if (this->data_->s456.phase1_type == 1) {
+        else if (this->data_->phase2.phase1_type == 1) {
             // Left partial
             static const ptrdiff_t LeftX = startX;
 
@@ -660,7 +672,7 @@ public:
                     mask |= 2;
             }
         }
-        else if (this->data_->s456.phase1_type == 2) {
+        else if (this->data_->phase2.phase1_type == 2) {
             // Right partial
             static const ptrdiff_t RightX = startX + TargetX - 1;
 
@@ -671,7 +683,7 @@ public:
                     mask |= 4;
             }
         }
-        else if (this->data_->s456.phase1_type == 3) {
+        else if (this->data_->phase2.phase1_type == 3) {
             // Bottom partial
             static const ptrdiff_t BottomY = startY + TargetY - 1;
 
@@ -703,7 +715,7 @@ public:
         return 0;
     }
 
-    size_type is_satisfy_step_456_789(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_phase2(const Board<BoardX, BoardY> & player,
                                       const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
@@ -716,11 +728,11 @@ public:
         return result.value;
     }
 
-    size_type is_satisfy_step_456_789(const Board<BoardX, BoardY> & player,
+    size_type is_satisfy_phase2(const Board<BoardX, BoardY> & player,
                                       const Board<TargetX, TargetY> target[4],
                                       size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
-            size_type mask = is_satisfy_step_456_789(player, target[index]);
+            size_type mask = is_satisfy_phase2(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;
@@ -732,17 +744,17 @@ public:
 
     size_type is_satisfy(const Board<BoardX, BoardY> & player,
                          const Board<TargetX, TargetY> & target) {
-        if (Step == 1) {
-            return is_satisfy_step_1(player, target);
+        if (N_PhaseType == PhaseType::Phase1_1) {
+            return is_satisfy_phase1_1(player, target);
         }
-        if (Step == 12) {
-            return is_satisfy_step_12(player, target);
+        if (N_PhaseType == PhaseType::Phase1_12) {
+            return is_satisfy_phase1_12(player, target);
         }
-        else if (Step == 123) {
-            return is_satisfy_step_123(player, target);
+        else if (N_PhaseType == PhaseType::Phase1_123) {
+            return is_satisfy_phase1_123(player, target);
         }
-        else if (Step == 456) {
-            return is_satisfy_step_456_789(player, target);
+        else if (N_PhaseType == PhaseType::Phase2) {
+            return is_satisfy_phase2(player, target);
         }
         else {
             return (size_type)is_satisfy_full(player, target);
@@ -755,17 +767,17 @@ public:
                          const Board<TargetX, TargetY> target[4],
                          size_type target_len) {
         if (AllowRotate) {
-            if (Step == 1) {
-                return is_satisfy_step_1(player, target, target_len);
+            if (N_PhaseType == PhaseType::Phase1_1) {
+                return is_satisfy_phase1_1(player, target, target_len);
             }
-            if (Step == 12) {
-                return is_satisfy_step_12(player, target, target_len);
+            if (N_PhaseType == PhaseType::Phase1_12) {
+                return is_satisfy_phase1_12(player, target, target_len);
             }
-            else if (Step == 123) {
-                return is_satisfy_step_123(player, target, target_len);
+            else if (N_PhaseType == PhaseType::Phase1_123) {
+                return is_satisfy_phase1_123(player, target, target_len);
             }
-            else if (Step == 456) {
-                return is_satisfy_step_456_789(player, target, target_len);
+            else if (N_PhaseType == PhaseType::Phase2) {
+                return is_satisfy_phase2(player, target, target_len);
             }
             else {
                 return (size_t)is_satisfy_full(player, target, target_len);
@@ -799,23 +811,23 @@ public:
         while (satisfy_mask != 0) {
             if ((satisfy_mask & mask) == mask) {
                 // record min-move phrase1 stage
-                this->data_->s123.stage_list[rotate_type][phase1_type].push_back(stage);
+                this->data_->phase1.stage_list[rotate_type][phase1_type].push_back(stage);
 
-                if (this->data_->s123.min_depth[rotate_type][phase1_type] != -1) {
-                    assert(this->data_->s123.max_depth[rotate_type][phase1_type] != -1);
-                    if ((int)depth >= this->data_->s123.max_depth[rotate_type][phase1_type]) {
+                if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
+                    assert(this->data_->phase1.max_depth[rotate_type][phase1_type] != -1);
+                    if ((int)depth >= this->data_->phase1.max_depth[rotate_type][phase1_type]) {
                         reached_mask |= mask;
                     }
                 }
                 else {
-                    if (this->data_->s123.has_solution[rotate_type] == 0) {
-                        this->data_->s123.has_solution[rotate_type] = 1;
+                    if (this->data_->phase1.has_solution[rotate_type] == 0) {
+                        this->data_->phase1.has_solution[rotate_type] = 1;
                         // Update the depth limit
-                        this->data_->s123.depth_limit[rotate_type] = std::min(
+                        this->data_->phase1.depth_limit[rotate_type] = std::min(
                             std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
                     }
-                    this->data_->s123.min_depth[rotate_type][phase1_type] = (int)depth;
-                    this->data_->s123.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
+                    this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
+                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
                 }
             }
             phase1_type++;
@@ -964,8 +976,8 @@ public:
                             continue;
 
                         uint8_t move_pos = empty_moves[n].pos;
-                        if (Step == 456) {
-                            if (this->data_->s456.locked[move_pos] != 0)
+                        if (N_PhaseType == PhaseType::Phase2) {
+                            if (this->data_->phase2.locked[move_pos] != 0)
                                 continue;
                         }
 
@@ -990,7 +1002,7 @@ public:
                         size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
-                            if (Step == 1 || Step == 12 || Step == 123) {
+                            if (this->is_phase1()) {
                                 size_type rotate_type = satisfy_result.high;
                                 next_stage.rotate_type = (uint8_t)rotate_type;
                                 bool all_reached = record_phase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
@@ -1006,7 +1018,7 @@ public:
                             }
                         }
                     }
-                    if (!(Step == 1 || Step == 12 || Step == 123)) {
+                    if (!(this->is_phase1())) {
                         if (exit) {
                             break;
                         }
@@ -1014,7 +1026,7 @@ public:
                 }
 
                 depth++;
-                if (Step == 1 || Step == 12 || Step == 123) {
+                if (this->is_phase1()) {
                     printf("depth = %u\n", (uint32_t)depth);
                     printf("cur.size() = %u, next.size() = %u\n",
                            (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
@@ -1027,11 +1039,11 @@ public:
                 std::swap(cur_stages, next_stages);
                 next_stages.clear();
 
-                if (Step == 1 || Step == 12 || Step == 123) {
+                if (this->is_phase1()) {
                     size_type rotate_done = 0;
                     for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
-                        if (this->data_->s123.depth_limit[rotate_type] != size_t(-1) &&
-                            depth > this->data_->s123.depth_limit[rotate_type]) {
+                        if (this->data_->phase1.depth_limit[rotate_type] != size_t(-1) &&
+                            depth > this->data_->phase1.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
@@ -1044,8 +1056,8 @@ public:
                             exit = true;
                     }
                 }
-                else if (Step == 456) {
-                    if (depth > this->data_->s456.depth_limit) {
+                else if (this->is_phase2()) {
+                    if (depth > this->data_->phase2.depth_limit) {
                         exit = true;
                     }
                 }
@@ -1057,26 +1069,26 @@ public:
 
             this->map_used_ = visited.size();
 
-            if (Step == 1 || Step == 12 || Step == 123) {
+            if (this->is_phase1()) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
                 for (size_type rotate_type = 0; rotate_type < 4; rotate_type++) {
                     for (size_type phase1_type = 0; phase1_type < 4; phase1_type++) {
                         printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
                                 (uint32_t)phase1_type,
-                                this->data_->s123.min_depth[rotate_type][phase1_type],
-                                this->data_->s123.max_depth[rotate_type][phase1_type],
-                                (uint32_t)this->data_->s123.stage_list[rotate_type][phase1_type].size());
+                                this->data_->phase1.min_depth[rotate_type][phase1_type],
+                                this->data_->phase1.max_depth[rotate_type][phase1_type],
+                                (uint32_t)this->data_->phase1.stage_list[rotate_type][phase1_type].size());
                     }
                     printf("\n");
                 }
                 out_rotate_type = 0;
             }
-            else if (Step == 456) {
+            else if (this->is_phase2()) {
                 //printf("\n");
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                printf("phase1_type = %u\n", (uint32_t)this->data_->s456.phase1_type);
-                printf("index = %u\n", (uint32_t)(this->data_->s456.index + 1));
+                printf("phase1_type = %u\n", (uint32_t)this->data_->phase2.phase1_type);
+                printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                 printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                 if (solvable) {
                     printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
@@ -1129,8 +1141,8 @@ public:
                             continue;
 
                         uint8_t move_pos = empty_moves[n].pos;
-                        if (Step == 456) {
-                            if (this->data_->s456.locked[move_pos] != 0)
+                        if (this->is_phase2()) {
+                            if (this->data_->phase2.locked[move_pos] != 0)
                                 continue;
                         }
 
@@ -1155,7 +1167,7 @@ public:
                         size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
-                            if (Step == 1 || Step == 12 || Step == 123) {
+                            if (this->is_phase1()) {
                                 size_type rotate_type = satisfy_result.high;
                                 next_stage.rotate_type = (uint8_t)rotate_type;
                                 bool all_reached = record_phase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
@@ -1174,7 +1186,7 @@ public:
 
                     cur_stages.pop();
 
-                    if (!(Step == 1 || Step == 12 || Step == 123)) {
+                    if (!(this->is_phase1())) {
                         if (exit) {
                             break;
                         }
@@ -1182,7 +1194,7 @@ public:
                 } while (!cur_stages.empty());
 
                 depth++;
-                if (Step == 1 || Step == 12 || Step == 123) {
+                if (this->is_phase1()) {
                     printf("depth = %u\n", (uint32_t)depth);
                     printf("cur.size() = %u, next.size() = %u\n",
                            (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
@@ -1194,11 +1206,11 @@ public:
 
                 std::swap(cur_stages, next_stages);
 
-                if (Step == 1 || Step == 12 || Step == 123) {
+                if (this->is_phase1()) {
                     size_type rotate_done = 0;
                     for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
-                        if (this->data_->s123.depth_limit[rotate_type] != size_t(-1) &&
-                            depth > this->data_->s123.depth_limit[rotate_type]) {
+                        if (this->data_->phase1.depth_limit[rotate_type] != size_t(-1) &&
+                            depth > this->data_->phase1.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
@@ -1211,8 +1223,8 @@ public:
                             exit = true;
                     }
                 }
-                else if (Step == 456) {
-                    if (depth > this->data_->s456.depth_limit) {
+                else if (this->is_phase2()) {
+                    if (depth > this->data_->phase2.depth_limit) {
                         exit = true;
                     }
                 }
@@ -1224,26 +1236,26 @@ public:
 
             this->map_used_ = visited.size();
 
-            if (Step == 1 || Step == 12 || Step == 123) {
+            if (this->is_phase1()) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
                 for (size_type rotate_type = 0; rotate_type < 4; rotate_type++) {
                     for (size_type phase1_type = 0; phase1_type < 4; phase1_type++) {
                         printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
                                 (uint32_t)phase1_type,
-                                this->data_->s123.min_depth[rotate_type][phase1_type],
-                                this->data_->s123.max_depth[rotate_type][phase1_type],
-                                (uint32_t)this->data_->s123.stage_list[rotate_type][phase1_type].size());
+                                this->data_->phase1.min_depth[rotate_type][phase1_type],
+                                this->data_->phase1.max_depth[rotate_type][phase1_type],
+                                (uint32_t)this->data_->phase1.stage_list[rotate_type][phase1_type].size());
                     }
                     printf("\n");
                 }
                 out_rotate_type = 0;
             }
-            else if (Step == 456) {
+            else if (this->is_phase2()) {
                 //printf("\n");
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                printf("phase1_type = %u\n", (uint32_t)this->data_->s456.phase1_type);
-                printf("index = %u\n", (uint32_t)(this->data_->s456.index + 1));
+                printf("phase1_type = %u\n", (uint32_t)this->data_->phase2.phase1_type);
+                printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                 printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                 if (solvable) {
                     printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
@@ -1263,23 +1275,23 @@ public:
         while (satisfy_mask != 0) {
             if ((satisfy_mask & mask) == mask) {
                 // record min-move phrase1 stage
-                this->data_->s123.stage_list[rotate_type][phase1_type].push_back(stage);
+                this->data_->phase1.stage_list[rotate_type][phase1_type].push_back(stage);
 
-                if (this->data_->s123.min_depth[rotate_type][phase1_type] != -1) {
-                    assert(this->data_->s123.max_depth[rotate_type][phase1_type] != -1);
-                    if ((int)depth >= this->data_->s123.max_depth[rotate_type][phase1_type]) {
+                if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
+                    assert(this->data_->phase1.max_depth[rotate_type][phase1_type] != -1);
+                    if ((int)depth >= this->data_->phase1.max_depth[rotate_type][phase1_type]) {
                         reached_mask |= mask;
                     }
                 }
                 else {
-                    if (this->data_->s123.has_solution[rotate_type] == 0) {
-                        this->data_->s123.has_solution[rotate_type] = 1;
+                    if (this->data_->phase1.has_solution[rotate_type] == 0) {
+                        this->data_->phase1.has_solution[rotate_type] = 1;
                         // Update the depth limit
-                        this->data_->s123.depth_limit[rotate_type] = std::min(
+                        this->data_->phase1.depth_limit[rotate_type] = std::min(
                             std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
                     }
-                    this->data_->s123.min_depth[rotate_type][phase1_type] = (int)depth;
-                    this->data_->s123.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
+                    this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
+                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
                 }
 
                 // call phase2_search()
@@ -1339,8 +1351,8 @@ public:
                             continue;
 
                         uint8_t move_pos = empty_moves[n].pos;
-                        if (Step == 456) {
-                            if (this->data_->s456.locked[move_pos] != 0)
+                        if (this->is_phase2()) {
+                            if (this->data_->phase2.locked[move_pos] != 0)
                                 continue;
                         }
 
@@ -1380,7 +1392,7 @@ public:
                         size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
-                            if (Step == 1 || Step == 12 || Step == 123) {
+                            if (this->is_phase1()) {
                                 size_type rotate_type = satisfy_result.high;
                                 next_stage.rotate_type = (uint8_t)rotate_type;
                                 bool all_reached = call_phase2_search(depth, rotate_type, satisfy_mask,
@@ -1397,7 +1409,7 @@ public:
                             }
                         }
                     }
-                    if (!(Step == 1 || Step == 12 || Step == 123)) {
+                    if (!(this->is_phase1())) {
                         if (exit) {
                             break;
                         }
@@ -1405,7 +1417,7 @@ public:
                 }
 
                 depth++;
-                if (Step == 1 || Step == 12 || Step == 123) {
+                if (this->is_phase1()) {
                     printf("depth = %u\n", (uint32_t)depth);
                     printf("cur.size() = %u, next.size() = %u\n",
                            (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
@@ -1418,11 +1430,11 @@ public:
                 std::swap(cur_stages, next_stages);
                 next_stages.clear();
 
-                if (Step == 1 || Step == 12 || Step == 123) {
+                if (this->is_phase1()) {
                     size_type rotate_done = 0;
                     for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
-                        if (this->data_->s123.depth_limit[rotate_type] != size_t(-1) &&
-                            depth > this->data_->s123.depth_limit[rotate_type]) {
+                        if (this->data_->phase1.depth_limit[rotate_type] != size_t(-1) &&
+                            depth > this->data_->phase1.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
@@ -1435,8 +1447,8 @@ public:
                             exit = true;
                     }
                 }
-                else if (Step == 456) {
-                    if (depth > this->data_->s456.depth_limit) {
+                else if (this->is_phase2()) {
+                    if (depth > this->data_->phase2.depth_limit) {
                         exit = true;
                     }
                 }
@@ -1448,28 +1460,28 @@ public:
 
             this->map_used_ = visited.size();
 
-            if (Step == 1 || Step == 12 || Step == 123) {
+            if (this->is_phase1()) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
                 for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                     for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
                         printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
                                 (uint32_t)phase1_type,
-                                this->data_->s123.min_depth[rotate_type][phase1_type],
-                                this->data_->s123.max_depth[rotate_type][phase1_type],
-                                (uint32_t)this->data_->s123.stage_list[rotate_type][phase1_type].size());
+                                this->data_->phase1.min_depth[rotate_type][phase1_type],
+                                this->data_->phase1.max_depth[rotate_type][phase1_type],
+                                (uint32_t)this->data_->phase1.stage_list[rotate_type][phase1_type].size());
                     }
                     printf("\n");
                 }
                 out_rotate_type = 0;
             }
-            else if (Step == 456) {
+            else if (this->is_phase2()) {
                 //printf("\n");
                 if (solvable) {
                     printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                    printf("rotate_type = %u\n", (uint32_t)this->data_->s456.rotate_type);
-                    printf("phase1_type = %u\n", (uint32_t)this->data_->s456.phase1_type);
-                    printf("index = %u\n", (uint32_t)(this->data_->s456.index + 1));
+                    printf("rotate_type = %u\n", (uint32_t)this->data_->phase2.rotate_type);
+                    printf("phase1_type = %u\n", (uint32_t)this->data_->phase2.phase1_type);
+                    printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                     printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                     if (solvable) {
                         printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());

@@ -51,11 +51,11 @@ public:
 
     typedef Game<BoardX, BoardY, TargetX, TargetY, AllowRotate>                     this_type;
     typedef typename SharedData<BoardX, BoardY, TargetX, TargetY>::stage_type       stage_type;
+
     typedef std::function<bool(std::size_t, std::size_t, const stage_type & stage)> phase2_callback;
 
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, 1,   phase2_callback>  Step1Solver;
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, 123, phase2_callback>  Step123Solver;
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       456, phase2_callback>  Step456Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, PhaseType::Phase1_123, phase2_callback>  Phase1Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       PhaseType::Phase2,     phase2_callback>  Phase2Solver;
 
 private:
     SharedData<BoardX, BoardY, TargetX, TargetY> data_;
@@ -517,7 +517,7 @@ public:
         if (found_empty) {
             jtest::StopWatch sw;
 
-            Step123Solver solver_123(&this->data_);
+            Phase1Solver solver_123(&this->data_);
             sw.start();
             solvable = solver_123.solve(out_rotate_type);
             sw.stop();
@@ -529,20 +529,20 @@ public:
 
                 for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                     for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
-                        this->data_.s456.phase1_type = phase1_type;
-                        const std::vector<stage_type> & stage_list = this->data_.s123.stage_list[rotate_type][phase1_type];
+                        this->data_.phase2.phase1_type = phase1_type;
+                        const std::vector<stage_type> & stage_list = this->data_.phase1.stage_list[rotate_type][phase1_type];
                         size_type totalStage = stage_list.size();
                         for (size_type n = 0; n < totalStage; n++) {
-                            this->data_.s456.index = n;
+                            this->data_.phase2.index = n;
                             if (this->min_steps_ > stage_list[n].move_path.size()) {
-                                this->data_.s456.depth_limit = std::min(size_type(MAX_PHASE2_DEPTH),
+                                this->data_.phase2.depth_limit = std::min(size_type(MAX_PHASE2_DEPTH),
                                     size_type(this->min_steps_ - stage_list[n].move_path.size()));
                             }
                             else {
                                 continue;
                             }
 
-                            Step456Solver solver_456(&this->data_);
+                            Phase2Solver solver_456(&this->data_);
                             solver_456.setPlayerBoard(stage_list[n].board);
                             solver_456.setRotateType(stage_list[n].rotate_type);
 
@@ -550,7 +550,7 @@ public:
                             if (solvable) {
                                 this->move_path_ = solver_456.getMovePath();
                                 size_type total_steps = stage_list[n].move_path.size() + this->move_path_.size();
-                                printf("Step123 moves: %u, Step456 moves: %u, Total moves: %u\n\n",
+                                printf("Phase1 moves: %u, Phase2 moves: %u, Total moves: %u\n\n",
                                        (uint32_t)stage_list[n].move_path.size(),
                                        (uint32_t)this->move_path_.size(),
                                        (uint32_t)total_steps);
@@ -587,19 +587,19 @@ public:
 
     bool bitset_phase2_search(size_type rotate_type, size_type phase1_type, const stage_type & stage) {
         static size_type phase2_stage_cnt = 0;
-        this->data_.s456.index = phase2_stage_cnt;
+        this->data_.phase2.index = phase2_stage_cnt;
         phase2_stage_cnt++;
 
-        this->data_.s456.rotate_type = rotate_type;
-        this->data_.s456.phase1_type = phase1_type;
+        this->data_.phase2.rotate_type = rotate_type;
+        this->data_.phase2.phase1_type = phase1_type;
 
-        Step456Solver solver(&this->data_);
+        Phase2Solver solver(&this->data_);
         solver.setPlayerBoard(stage.board);
         solver.setRotateType(rotate_type);
 
         size_type move_path_size = stage.move_path.size();
         if (this->min_steps_ > move_path_size) {
-            this->data_.s456.depth_limit = std::min(size_type(MAX_PHASE2_DEPTH),
+            this->data_.phase2.depth_limit = std::min(size_type(MAX_PHASE2_DEPTH),
                 size_type(this->min_steps_ - move_path_size));
         }
         else {
@@ -613,7 +613,7 @@ public:
         if (solvable) {
             this->move_path_ = solver.getMovePath();
             size_type total_steps = stage.move_path.size() + this->move_path_.size();
-            printf("Step123 moves: %u, Step456 moves: %u, Total moves: %u\n\n",
+            printf("Phase1 moves: %u, Phase2 moves: %u, Total moves: %u\n\n",
                     (uint32_t)stage.move_path.size(),
                     (uint32_t)this->move_path_.size(),
                     (uint32_t)total_steps);
@@ -648,7 +648,7 @@ public:
         if (found_empty) {
             jtest::StopWatch sw;
 
-            Step123Solver solver(&this->data_);
+            Phase1Solver solver(&this->data_);
             sw.start();
             solvable = solver.bitset_solve(out_rotate_type, phase_search_cb);
             sw.stop();

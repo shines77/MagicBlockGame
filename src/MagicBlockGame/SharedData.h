@@ -16,7 +16,7 @@
 namespace MagicBlock {
 
 template <std::size_t BoardX, std::size_t BoardY>
-struct Step123
+struct Phase1
 {
     typedef Stage<BoardX, BoardY> stage_type;
 
@@ -28,15 +28,15 @@ struct Step123
 
     std::vector<stage_type> stage_list[MAX_ROTATE_TYPE][MAX_PHASE1_TYPE];
 
-    Step123() {
+    Phase1() {
         this->init(std::size_t(-1));
     }
-    ~Step123() {}
+    ~Phase1() {}
 
-    void init(std::size_t defaultSearchDepthLimit) {
+    void init(std::size_t depth_limit) {
         for (std::size_t rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
             this->has_solution[rotate_type] = 0;
-            this->depth_limit[rotate_type] = defaultSearchDepthLimit;
+            this->depth_limit[rotate_type] = depth_limit;
 
             for (std::size_t phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
                 this->min_depth[rotate_type][phase1_type] = -1;
@@ -47,7 +47,7 @@ struct Step123
 };
 
 template <std::size_t BoardX, std::size_t BoardY>
-struct Step456
+struct Phase2
 {
     std::size_t rotate_type;
     std::size_t phase1_type;
@@ -56,12 +56,12 @@ struct Step456
     int lock_inited[4];
     int locked[BoardX * BoardY];
 
-    Step456() : rotate_type(std::size_t(-1)), phase1_type(std::size_t(-1)),
+    Phase2() : rotate_type(std::size_t(-1)), phase1_type(std::size_t(-1)),
                 index(std::size_t(-1)), depth_limit(std::size_t(-1)) {
         this->reset();
     }
 
-    ~Step456() {}
+    ~Phase2() {}
 
     void reset() {
         //this->rotate_type = std::size_t(-1);
@@ -81,9 +81,9 @@ template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY>
 struct SharedData
 {
-    typedef typename Step123<BoardX, BoardY>::stage_type stage_type;
+    typedef typename Phase1<BoardX, BoardY>::stage_type stage_type;
 
-    Board<BoardX, BoardY> player_board;
+    Board<BoardX, BoardY>   player_board;
     Board<TargetX, TargetY> target_board[4];
 
     std::size_t target_len;
@@ -93,8 +93,8 @@ struct SharedData
 
     std::vector<Move> empty_moves[BoardX * BoardY];
 
-    Step123<BoardX, BoardY> s123;
-    Step456<BoardX, BoardY> s456;
+    Phase1<BoardX, BoardY> phase1;
+    Phase2<BoardX, BoardY> phase2;
 
     SharedData() : target_len(0) {}
     ~SharedData() {}
