@@ -1297,7 +1297,7 @@ public:
         return ((reached_mask & 0x0F) == 0x0F);
     }
 
-    bool bitset_solve(size_type & out_rotate_type, phase2_callback & phase2_search = phase2_callback()) {
+    bool bitset_solve(size_type & out_rotate_type, phase2_callback & phase2_search) {
         size_u satisfy_result = is_satisfy(this->player_board_, this->target_board_, this->target_len_);
         if (satisfy_result.low != 0) {
             out_rotate_type = satisfy_result.high;

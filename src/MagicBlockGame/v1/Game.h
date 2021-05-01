@@ -607,7 +607,9 @@ public:
         }
 
         size_type out_rotate_type = 0;
-        bool solvable = solver.bitset_solve(out_rotate_type);
+        phase2_callback dummy_phase2_search;
+
+        bool solvable = solver.bitset_solve(out_rotate_type, dummy_phase2_search);
         if (solvable) {
             this->move_path_ = solver.getMovePath();
             size_type total_steps = stage.move_path.size() + this->move_path_.size();
