@@ -151,7 +151,7 @@ private:
 
             count_target_color_nums(this->target_board_[0]);
 
-            data_->phase1.init(kDefaultSearchDepthLimit);
+            this->data_->phase1.init(kDefaultSearchDepthLimit);
 
             // Reset lock_inited[]
             for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
@@ -346,7 +346,7 @@ public:
     }
 
     size_type is_satisfy_phase1_1(const Board<BoardX, BoardY> & player,
-                             const Board<TargetX, TargetY> & target) {
+                                  const Board<TargetX, TargetY> & target) {
         static const ptrdiff_t startX = (BoardX - TargetX) / 2;
         static const ptrdiff_t startY = (BoardY - TargetY) / 2;
 
@@ -413,8 +413,8 @@ public:
     }
 
     size_type is_satisfy_phase1_1(const Board<BoardX, BoardY> & player,
-                                const Board<TargetX, TargetY> target[4],
-                                size_type target_len) {
+                                  const Board<TargetX, TargetY> target[4],
+                                  size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
             size_type mask = is_satisfy_phase1_1(player, target[index]);
             if (mask != 0) {
@@ -503,7 +503,7 @@ public:
     }
 
     size_type is_satisfy_phase1_12(const Board<BoardX, BoardY> & player,
-                                 const Board<TargetX, TargetY> & target) {
+                                   const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
         // Left-Top Corner
@@ -563,8 +563,8 @@ public:
     }
 
     size_type is_satisfy_phase1_12(const Board<BoardX, BoardY> & player,
-                                 const Board<TargetX, TargetY> target[4],
-                                 size_type target_len) {
+                                   const Board<TargetX, TargetY> target[4],
+                                   size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
             size_type mask = is_satisfy_phase1_12(player, target[index]);
             if (mask != 0) {
@@ -577,7 +577,7 @@ public:
     }
 
     size_type is_satisfy_phase1_123(const Board<BoardX, BoardY> & player,
-                                  const Board<TargetX, TargetY> & target) {
+                                    const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
         // Top partial
@@ -633,8 +633,8 @@ public:
     }
 
     size_type is_satisfy_phase1_123(const Board<BoardX, BoardY> & player,
-                                  const Board<TargetX, TargetY> target[4],
-                                  size_type target_len) {
+                                    const Board<TargetX, TargetY> target[4],
+                                    size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
             size_type mask = is_satisfy_phase1_123(player, target[index]);
             if (mask != 0) {
@@ -646,8 +646,8 @@ public:
         return 0;
     }
 
-    size_type is_satisfy_step_456(const Board<BoardX, BoardY> & player,
-                                  const Board<TargetX, TargetY> & target) {
+    size_type is_satisfy_phase2_456(const Board<BoardX, BoardY> & player,
+                                    const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
         if (this->data_->phase2.phase1_type == 0) {
@@ -702,11 +702,11 @@ public:
         return result.value;
     }
 
-    size_type is_satisfy_step_456(const Board<BoardX, BoardY> & player,
-                                  const Board<TargetX, TargetY> target[4],
-                                  size_type target_len) {
+    size_type is_satisfy_phase2_456(const Board<BoardX, BoardY> & player,
+                                    const Board<TargetX, TargetY> target[4],
+                                    size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
-            if (is_satisfy_step_456(player, target[index]) != 0) {
+            if (is_satisfy_phase2_456(player, target[index]) != 0) {
                 size_u result(1, index);
                 return result.value;
             }
@@ -716,7 +716,7 @@ public:
     }
 
     size_type is_satisfy_phase2(const Board<BoardX, BoardY> & player,
-                                      const Board<TargetX, TargetY> & target) {
+                                const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
         // Check order: down to up
@@ -729,8 +729,8 @@ public:
     }
 
     size_type is_satisfy_phase2(const Board<BoardX, BoardY> & player,
-                                      const Board<TargetX, TargetY> target[4],
-                                      size_type target_len) {
+                                const Board<TargetX, TargetY> target[4],
+                                size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
             size_type mask = is_satisfy_phase2(player, target[index]);
             if (mask != 0) {
