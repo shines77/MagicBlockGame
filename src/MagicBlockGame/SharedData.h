@@ -64,9 +64,7 @@ struct Phase2
     ~Phase2() {}
 
     void reset() {
-        //this->rotate_type = std::size_t(-1);
-        //this->phase1_type = std::size_t(-1);
-        this->depth_limit = std::size_t(-1);
+        //this->depth_limit = std::size_t(-1);
         for (std::size_t i = 0; i < 4; i++) {
             this->lock_inited[i] = 0;
         }

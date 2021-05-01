@@ -90,10 +90,10 @@ void solve_sliding_puzzle_queue()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-void solve_magic_block_game()
+void magic_block_game_solve()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block_game()\n\n");
+    printf("magic_block_game_solve()\n\n");
 
     MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input.txt");
@@ -121,10 +121,10 @@ void solve_magic_block_game()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-void solve_magic_block_game_bitset()
+void magic_block_game_bitset_solve()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block_game_bitset()\n\n");
+    printf("magic_block_game_bitset_solve()\n\n");
 
     MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input.txt");
@@ -152,6 +152,37 @@ void solve_magic_block_game_bitset()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
+void magic_block_game_stand_alone_bitset_solve()
+{
+    printf("-------------------------------------------------------\n\n");
+    printf("magic_block_game_stand_alone_bitset_solve()\n\n");
+
+    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
+    int readStatus = game.readInput("input.txt");
+    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+    if (ErrorCode::isFailure(readStatus)) {
+        return;
+    }
+
+    jtest::StopWatch sw;
+
+    sw.start();
+    bool solvable = game.stand_alone_bitset_solve();
+    sw.stop();
+    double elapsed_time = sw.getElapsedMillisec();
+
+    if (solvable) {
+        printf("Found a answer!\n\n");
+        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
+        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+    }
+    else {
+        printf("Not found a answer!\n\n");
+    }
+
+    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+}
+
 int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
@@ -163,12 +194,13 @@ int main(int argc, char * argv[])
 
 #if 0
 #ifdef NDEBUG
-    solve_magic_block_game();
+    magic_block_game_solve();
     System::pause();
 #endif // !NDEBUG
 #endif
 
-    solve_magic_block_game_bitset();
+    magic_block_game_bitset_solve();
+    //magic_block_game_stand_alone_bitset_solve();
     System::pause();
 
     return 0;

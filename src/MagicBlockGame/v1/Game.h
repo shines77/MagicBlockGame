@@ -20,6 +20,7 @@
 #include <functional>
 #include <algorithm>    // For std::swap(), until C++11
 #include <utility>      // For std::swap(), since C++11
+#include <climits>      // For std::numeric_limits<T>
 
 #include "Constant.h"
 #include "Color.h"
@@ -99,7 +100,7 @@ private:
     }
 
 public:
-    Game() : min_steps_(size_t(-1)), map_used_(0) {
+    Game() : min_steps_(std::numeric_limits<ssize_type>::max()), map_used_(0) {
         this->init();
     }
 
@@ -517,46 +518,50 @@ public:
         if (found_empty) {
             jtest::StopWatch sw;
 
-            Phase1Solver solver_123(&this->data_);
+            Phase1Solver solver(&this->data_);
             sw.start();
-            solvable = solver_123.solve(out_rotate_type);
+            bool phase1_solvable = solver.solve(out_rotate_type);
             sw.stop();
 
-            if (solvable) {
+            if (phase1_solvable) {
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
                 System::pause();
 
                 for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                     for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
-                        this->data_.phase2.phase1_type = phase1_type;
                         const std::vector<stage_type> & stage_list = this->data_.phase1.stage_list[rotate_type][phase1_type];
                         size_type totalStage = stage_list.size();
                         for (size_type n = 0; n < totalStage; n++) {
-                            this->data_.phase2.index = n;
-                            if (this->min_steps_ > stage_list[n].move_path.size()) {
-                                this->data_.phase2.depth_limit = std::min(size_type(MAX_PHASE2_DEPTH),
-                                    size_type(this->min_steps_ - stage_list[n].move_path.size()));
+                            size_type move_path_size = stage_list[n].move_path.size();
+                            if (this->min_steps_ > move_path_size) {
+                                this->data_.phase2.depth_limit = std::min(ssize_type(MAX_PHASE2_DEPTH),
+                                    std::max(ssize_type(this->min_steps_ - 1 - move_path_size), ssize_type(1)));
                             }
                             else {
                                 continue;
                             }
 
-                            Phase2Solver solver_456(&this->data_);
-                            solver_456.setPlayerBoard(stage_list[n].board);
-                            solver_456.setRotateType(stage_list[n].rotate_type);
+                            this->data_.phase2.rotate_type = rotate_type;
+                            this->data_.phase2.phase1_type = phase1_type;
+                            this->data_.phase2.index = n;
 
-                            solvable = solver_456.solve(out_rotate_type);
-                            if (solvable) {
-                                this->move_path_ = solver_456.getMovePath();
-                                size_type total_steps = stage_list[n].move_path.size() + this->move_path_.size();
+                            Phase2Solver phase2_solver(&this->data_);
+                            phase2_solver.setPlayerBoard(stage_list[n].board);
+                            phase2_solver.setRotateType(stage_list[n].rotate_type);
+
+                            bool phase2_solvable = phase2_solver.solve(out_rotate_type);
+                            if (phase2_solvable) {
+                                solvable = true;
+                                this->move_path_ = phase2_solver.getMovePath();
+                                size_type total_steps = move_path_size + this->move_path_.size();
                                 printf("Phase1 moves: %u, Phase2 moves: %u, Total moves: %u\n\n",
-                                       (uint32_t)stage_list[n].move_path.size(),
+                                       (uint32_t)move_path_size,
                                        (uint32_t)this->move_path_.size(),
                                        (uint32_t)total_steps);
 
                                 if (total_steps < this->min_steps_) {
-                                    this->map_used_ = solver_456.getMapUsed();
+                                    this->map_used_ = phase2_solver.getMapUsed();
                                     this->min_steps_ = total_steps;
                                     this->best_move_path_ = stage_list[n].move_path;
                                     for (auto iter : this->move_path_) {
@@ -590,21 +595,21 @@ public:
         this->data_.phase2.index = phase2_stage_cnt;
         phase2_stage_cnt++;
 
+        size_type move_path_size = stage.move_path.size();
+        if (this->min_steps_ > move_path_size) {
+            this->data_.phase2.depth_limit = std::min(ssize_type(MAX_PHASE2_DEPTH),
+                std::max(ssize_type(this->min_steps_ - 1 - move_path_size), ssize_type(1)));
+        }
+        else {
+            return false;
+        }
+
         this->data_.phase2.rotate_type = rotate_type;
         this->data_.phase2.phase1_type = phase1_type;
 
         Phase2Solver solver(&this->data_);
         solver.setPlayerBoard(stage.board);
         solver.setRotateType(rotate_type);
-
-        size_type move_path_size = stage.move_path.size();
-        if (this->min_steps_ > move_path_size) {
-            this->data_.phase2.depth_limit = std::min(size_type(MAX_PHASE2_DEPTH),
-                size_type(this->min_steps_ - move_path_size));
-        }
-        else {
-            return false;
-        }
 
         size_type out_rotate_type = 0;
         phase2_callback dummy_phase2_search;
@@ -656,6 +661,92 @@ public:
             if (solvable) {
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+
+                printf("min_steps: %u\n", (uint32_t)this->min_steps_);
+                printf("Total moves: %u\n", (uint32_t)this->best_move_path_.size());
+                printf("\n");
+
+                if (this->min_steps_ != size_type(-1) || this->best_move_path_.size() > 0) {
+                    solvable = true;
+                    if (translateMovePath(this->best_move_path_)) {
+                        displayAnswer(this->answer_);
+                    }
+                }
+            }
+        }
+
+        return solvable;
+    }
+
+    bool stand_alone_bitset_solve() {
+        if (is_satisfy(this->data_.player_board, this->data_.target_board, this->data_.target_len) != 0) {
+            return true;
+        }
+
+        bool solvable = false;
+        size_type out_rotate_type = 0;
+        phase2_callback phase_search_cb;
+
+        Position empty;
+        bool found_empty = find_empty(this->data_.player_board, empty);
+        if (found_empty) {
+            jtest::StopWatch sw;
+
+            Phase1Solver solver(&this->data_);
+            sw.start();
+            bool phase1_solvable = solver.bitset_solve(out_rotate_type, phase_search_cb);
+            sw.stop();
+
+            if (phase1_solvable) {
+                double elapsed_time = sw.getElapsedMillisec();
+                printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+                //System::pause();
+
+                for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
+                    for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
+                        const std::vector<stage_type> & stage_list = this->data_.phase1.stage_list[rotate_type][phase1_type];
+                        size_type totalStage = stage_list.size();
+                        for (size_type n = 0; n < totalStage; n++) {
+                            size_type move_path_size = stage_list[n].move_path.size();
+                            if (this->min_steps_ > move_path_size) {
+                                this->data_.phase2.depth_limit = std::min(ssize_type(MAX_PHASE2_DEPTH),
+                                    std::max(ssize_type(this->min_steps_ - 1 - move_path_size), ssize_type(5)));
+                            }
+                            else {
+                                continue;
+                            }
+
+                            this->data_.phase2.rotate_type = rotate_type;
+                            this->data_.phase2.phase1_type = phase1_type;
+                            this->data_.phase2.index = n;
+
+                            Phase2Solver phase2_solver(&this->data_);
+                            phase2_solver.setPlayerBoard(stage_list[n].board);
+                            phase2_solver.setRotateType(stage_list[n].rotate_type);
+
+                            bool phase2_solvable = phase2_solver.bitset_solve(out_rotate_type, phase_search_cb);
+                            if (phase2_solvable) {
+                                solvable = true;
+                                this->move_path_ = phase2_solver.getMovePath();
+                                size_type total_steps = move_path_size + this->move_path_.size();
+                                printf("Phase1 moves: %u, Phase2 moves: %u, Total moves: %u\n\n",
+                                       (uint32_t)move_path_size,
+                                       (uint32_t)this->move_path_.size(),
+                                       (uint32_t)total_steps);
+
+                                if (total_steps < this->min_steps_) {
+                                    this->map_used_ = phase2_solver.getMapUsed();
+                                    this->min_steps_ = total_steps;
+                                    this->best_move_path_ = stage_list[n].move_path;
+                                    for (auto iter : this->move_path_) {
+                                        this->best_move_path_.push_back(iter);
+                                    }
+                                    printf("Total moves: %u\n\n", (uint32_t)this->best_move_path_.size());
+                                }
+                            }
+                        }
+                    }
+                }
 
                 printf("min_steps: %u\n", (uint32_t)this->min_steps_);
                 printf("Total moves: %u\n", (uint32_t)this->best_move_path_.size());

@@ -1057,7 +1057,7 @@ public:
                     }
                 }
                 else if (this->is_phase2()) {
-                    if (depth > this->data_->phase2.depth_limit) {
+                    if (depth >= this->data_->phase2.depth_limit) {
                         exit = true;
                     }
                 }
@@ -1085,15 +1085,19 @@ public:
                 out_rotate_type = 0;
             }
             else if (this->is_phase2()) {
-                //printf("\n");
-                printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                printf("phase1_type = %u\n", (uint32_t)this->data_->phase2.phase1_type);
-                printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
-                printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                 if (solvable) {
-                    printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                    //printf("\n");
+                    printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
+                    printf("rotate_type = %u\n", (uint32_t)this->data_->phase2.rotate_type);
+                    printf("phase1_type = %u\n", (uint32_t)this->data_->phase2.phase1_type);
+                    printf("depth_limit = %u\n", (uint32_t)this->data_->phase2.depth_limit);
+                    printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
+                    printf("next.size() = %u\n", (uint32_t)cur_stages.size());
+                    if (solvable) {
+                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                    }
+                    printf("\n");
                 }
-                printf("\n");
             }
         }
 
@@ -1224,7 +1228,7 @@ public:
                     }
                 }
                 else if (this->is_phase2()) {
-                    if (depth > this->data_->phase2.depth_limit) {
+                    if (depth >= this->data_->phase2.depth_limit) {
                         exit = true;
                     }
                 }
@@ -1252,15 +1256,19 @@ public:
                 out_rotate_type = 0;
             }
             else if (this->is_phase2()) {
-                //printf("\n");
-                printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                printf("phase1_type = %u\n", (uint32_t)this->data_->phase2.phase1_type);
-                printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
-                printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                 if (solvable) {
-                    printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                    //printf("\n");
+                    printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
+                    printf("rotate_type = %u\n", (uint32_t)this->data_->phase2.rotate_type);
+                    printf("phase1_type = %u\n", (uint32_t)this->data_->phase2.phase1_type);
+                    printf("depth_limit = %u\n", (uint32_t)this->data_->phase2.depth_limit);
+                    printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
+                    printf("next.size() = %u\n", (uint32_t)cur_stages.size());
+                    if (solvable) {
+                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                    }
+                    printf("\n");
                 }
-                printf("\n");
             }
         }
 
@@ -1448,7 +1456,7 @@ public:
                     }
                 }
                 else if (this->is_phase2()) {
-                    if (depth > this->data_->phase2.depth_limit) {
+                    if (depth >= this->data_->phase2.depth_limit) {
                         exit = true;
                     }
                 }
@@ -1481,6 +1489,7 @@ public:
                     printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
                     printf("rotate_type = %u\n", (uint32_t)this->data_->phase2.rotate_type);
                     printf("phase1_type = %u\n", (uint32_t)this->data_->phase2.phase1_type);
+                    printf("depth_limit = %u\n", (uint32_t)this->data_->phase2.depth_limit);
                     printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                     printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                     if (solvable) {
