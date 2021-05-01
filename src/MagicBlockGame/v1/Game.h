@@ -587,11 +587,11 @@ public:
 
     bool bitset_phase2_search(size_type rotate_type, size_type phase1_type, const stage_type & stage) {
         static size_type phase2_stage_cnt = 0;
+        this->data_.s456.index = phase2_stage_cnt;
+        phase2_stage_cnt++;
 
         this->data_.s456.rotate_type = rotate_type;
         this->data_.s456.phase1_type = phase1_type;
-        this->data_.s456.index = phase2_stage_cnt;
-        phase2_stage_cnt++;
 
         Step456Solver solver(&this->data_);
         solver.setPlayerBoard(stage.board);
@@ -630,7 +630,7 @@ public:
         return solvable;
     }
 
-    bool bitmap_solve() {
+    bool bitset_solve() {
         if (is_satisfy(this->data_.player_board, this->data_.target_board, this->data_.target_len) != 0) {
             return true;
         }

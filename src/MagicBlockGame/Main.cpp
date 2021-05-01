@@ -121,10 +121,10 @@ void solve_magic_block_game()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-void solve_magic_block_game_bitmap()
+void solve_magic_block_game_bitset()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block_game_bitmap()\n\n");
+    printf("solve_magic_block_game_bitset()\n\n");
 
     MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("input.txt");
@@ -136,7 +136,7 @@ void solve_magic_block_game_bitmap()
     jtest::StopWatch sw;
 
     sw.start();
-    bool solvable = game.bitmap_solve();
+    bool solvable = game.bitset_solve();
     sw.stop();
     double elapsed_time = sw.getElapsedMillisec();
 
@@ -168,7 +168,7 @@ int main(int argc, char * argv[])
 #endif // !NDEBUG
 #endif
 
-    solve_magic_block_game_bitmap();
+    solve_magic_block_game_bitset();
     System::pause();
 
     return 0;

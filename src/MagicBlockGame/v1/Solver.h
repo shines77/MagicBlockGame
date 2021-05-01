@@ -75,6 +75,7 @@ private:
     size_type target_len_;
     size_type rotate_type_;
 
+    int target_colors_[Color::Maximum];  
     int partial_colors_[Color::Maximum];
 
     std::vector<Position> move_path_;
@@ -87,7 +88,7 @@ private:
 
     void count_target_color_nums(const Board<TargetX, TargetY> & target) {
         for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->data_->target_colors[clr] = 0;
+            this->target_colors_[clr] = 0;
         }
 
         for (size_type y = 0; y < TargetY; y++) {
@@ -95,7 +96,7 @@ private:
                 uint8_t cell = target.cells[y * TargetY + x];
                 assert_color(cell);
                 if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->data_->target_colors[cell]++;
+                    this->target_colors_[cell]++;
                 }
             }
         }
@@ -105,7 +106,7 @@ private:
                                          size_type firstTargetX, size_type lastTargetX,
                                          size_type firstTargetY, size_type lastTargetY) {
         for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->data_->target_colors[clr] = 0;
+            this->target_colors_[clr] = 0;
         }
 
         for (size_type y = firstTargetY; y < lastTargetY; y++) {
@@ -113,7 +114,7 @@ private:
                 uint8_t cell = target.cells[y * TargetY + x];
                 assert_color(cell);
                 if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->data_->target_colors[cell]++;
+                    this->target_colors_[cell]++;
                 }
             }
         }
@@ -285,14 +286,14 @@ public:
     bool check_partial_color_nums() const {
         if (Step == 456) {
             for (size_type clr = Color::Empty; clr < Color::Last; clr++) {
-                if (this->partial_colors_[clr] < this->data_->target_colors[clr]) {
+                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
                     return false;
                 }
             }
         }
         else {
             for (size_type clr = Color::First; clr < Color::Last; clr++) {
-                if (this->partial_colors_[clr] < this->data_->target_colors[clr]) {
+                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
                     return false;
                 }
             }
@@ -490,7 +491,7 @@ public:
     }
 
     size_type is_satisfy_step_12(const Board<BoardX, BoardY> & player,
-                              const Board<TargetX, TargetY> & target) {
+                                 const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
         // Left-Top Corner
@@ -1283,7 +1284,7 @@ public:
 
                 // call phase2_search()
                 if (phase2_search) {
-                    //bool phase2_solvable = phase2_search(rotate_type, phase1_type, stage);
+                    bool phase2_solvable = phase2_search(rotate_type, phase1_type, stage);
                 }
             }
             phase1_type++;
@@ -1449,8 +1450,8 @@ public:
 
             if (Step == 1 || Step == 12 || Step == 123) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                for (size_type rotate_type = 0; rotate_type < 4; rotate_type++) {
-                    for (size_type phase1_type = 0; phase1_type < 4; phase1_type++) {
+                for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
+                    for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
                         printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
                                 (uint32_t)phase1_type,
