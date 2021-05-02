@@ -115,7 +115,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
     if (len <= 64)
         aligned_start = buf + last;
     else
-        aligned_start = (std::uint16_t *)((std::size_t)buf_start & (~kXMMAlignMask));
+        aligned_start = (std::uint16_t *)(((std::size_t)buf_start + kXMMAlignMask) & (~kXMMAlignMask));
 
     for (std::uint16_t * indexs = buf_start; indexs < aligned_start; indexs++) {
         if (*indexs != value)
