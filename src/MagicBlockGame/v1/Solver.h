@@ -53,8 +53,8 @@ public:
 
     static const size_type kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
 
-    static const ptrdiff_t nStartX = (BoardX - TargetX) / 2;
-    static const ptrdiff_t nStartY = (BoardY - TargetY) / 2;
+    static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
+    static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
 #ifdef NDEBUG
     static const size_type kMinSearchDepth = 15;
