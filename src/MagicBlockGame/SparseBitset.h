@@ -915,10 +915,10 @@ public:
 private:
     Container *     root_;
     size_type       size_;
+    size_type       y_index_[BoardY];
 #if SPARSEBITSET_USE_TRIE_INFO
     LayerInfo       layer_info_[BoardY];
 #endif
-    size_type       y_index_[BoardY];
 
     void init() {
 #if 1
