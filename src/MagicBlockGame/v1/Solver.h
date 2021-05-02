@@ -87,7 +87,7 @@ private:
             else
                 this->target_len_ = 1;
 
-            count_target_color_nums(this->target_board_[0]);
+            this->count_target_color_nums(this->target_board_[0]);
 
             this->data_->phase1.init(kDefaultSearchDepthLimit);
 
@@ -116,23 +116,23 @@ private:
                 switch (phase1_type) {
                     case 0:
                         // Top partial
-                        count_partial_target_color_nums(this->target_board_[0], 0, TargetX, TargetY - 1, TargetY);
-                        locked_partial_board(this->data_->phase2.locked, 0, BoardX, 0, kStartY + 1);
+                        this->count_partial_target_color_nums(this->target_board_[0], 0, TargetX, TargetY - 1, TargetY);
+                        this->locked_partial_board(this->data_->phase2.locked, 0, BoardX, 0, kStartY + 1);
                         break;
                     case 1:
                         // Left partial
-                        count_partial_target_color_nums(this->target_board_[0], TargetX - 1, TargetX, 0, TargetY);
-                        locked_partial_board(this->data_->phase2.locked, 0, kStartX + 1, 0, BoardY);
+                        this->count_partial_target_color_nums(this->target_board_[0], TargetX - 1, TargetX, 0, TargetY);
+                        this->locked_partial_board(this->data_->phase2.locked, 0, kStartX + 1, 0, BoardY);
                         break;
                     case 2:
                         // Right partial
-                        count_partial_target_color_nums(this->target_board_[0], 0, 1, 0, TargetY);
-                        locked_partial_board(this->data_->phase2.locked, kStartX + TargetX - 1, BoardX, 0, BoardY);
+                        this->count_partial_target_color_nums(this->target_board_[0], 0, 1, 0, TargetY);
+                        this->locked_partial_board(this->data_->phase2.locked, kStartX + TargetX - 1, BoardX, 0, BoardY);
                         break;
                     case 3:
                         // Bottom partial
-                        count_partial_target_color_nums(this->target_board_[0], 0, TargetX, 0, 1);
-                        locked_partial_board(this->data_->phase2.locked, 0, BoardX, kStartY + TargetY - 1, BoardY);
+                        this->count_partial_target_color_nums(this->target_board_[0], 0, TargetX, 0, 1);
+                        this->locked_partial_board(this->data_->phase2.locked, 0, BoardX, kStartY + TargetY - 1, BoardY);
                         break;
                     default:
                         assert(false);
