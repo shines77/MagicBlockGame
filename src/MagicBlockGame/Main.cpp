@@ -37,6 +37,23 @@ struct FuncId {
     };
 };
 
+template <std::size_t N_FuncId>
+static const char * get_func_name()
+{
+    if (N_FuncId == FuncId::QueueSolver) {
+        return "FuncId::QueueSolver";
+    }
+    else if (N_FuncId == FuncId::BitSetSolver) {
+        return "FuncId::BitSetSolver";
+    }
+    else if (N_FuncId == FuncId::StandAloneBitSetSolver) {
+        return "FuncId::StandAloneBitSetSolver";
+    }
+    else {
+        return "FuncId::NormalSovler";
+    }
+}
+
 void solve_sliding_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
@@ -99,23 +116,6 @@ void solve_sliding_puzzle_queue()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-template <std::size_t N_FuncId>
-const char * get_func_name()
-{
-    if (N_FuncId == FuncId::QueueSolver) {
-        return "FuncId::QueueSolver";
-    }
-    else if (N_FuncId == FuncId::BitSetSolver) {
-        return "FuncId::BitSetSolver";
-    }
-    else if (N_FuncId == FuncId::StandAloneBitSetSolver) {
-        return "FuncId::StandAloneBitSetSolver";
-    }
-    else {
-        return "FuncId::NormalSovler";
-    }
-}
-
 template <std::size_t N_FuncId = FuncId::NormalSolver, bool AllowRotate = true>
 void solve_magic_block_game()
 {
@@ -133,10 +133,7 @@ void solve_magic_block_game()
     jtest::StopWatch sw;
 
     sw.start();
-    if (N_FuncId == FuncId::QueueSolver) {
-        solvable = game.queue_solve();
-    }
-    else if (N_FuncId == FuncId::BitSetSolver) {
+    if (N_FuncId == FuncId::BitSetSolver) {
         solvable = game.bitset_solve();
     }
     else if (N_FuncId == FuncId::StandAloneBitSetSolver) {

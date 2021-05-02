@@ -32,7 +32,7 @@
 #include "Utils.h"
 
 namespace MagicBlock {
-namespace v1 {
+namespace TwoEndpoint {
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
@@ -75,77 +75,6 @@ public:
 #endif
 
 private:
-    shared_data_type * data_;
-
-    Board<BoardX, BoardY> player_board_;
-    Board<TargetX, TargetY> target_board_[4];
-
-    size_type target_len_;
-    size_type rotate_type_;
-
-    int target_colors_[Color::Maximum];  
-    int partial_colors_[Color::Maximum];
-
-    std::vector<Position> move_path_;
-
-    size_type map_used_;
-
-    void assert_color(uint8_t color) const {
-        assert(color >= Color::Empty && color < Color::Last);
-    }
-
-    void count_target_color_nums(const Board<TargetX, TargetY> & target) {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->target_colors_[clr] = 0;
-        }
-
-        for (size_type y = 0; y < TargetY; y++) {
-            for (size_type x = 0; x < TargetX; x++) {
-                uint8_t cell = target.cells[y * TargetY + x];
-                assert_color(cell);
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->target_colors_[cell]++;
-                }
-            }
-        }
-    }
-
-    void count_partial_target_color_nums(const Board<TargetX, TargetY> & target,
-                                         size_type firstTargetX, size_type lastTargetX,
-                                         size_type firstTargetY, size_type lastTargetY) {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->target_colors_[clr] = 0;
-        }
-
-        for (size_type y = firstTargetY; y < lastTargetY; y++) {
-            for (size_type x = firstTargetX; x < lastTargetX; x++) {
-                uint8_t cell = target.cells[y * TargetY + x];
-                assert_color(cell);
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->target_colors_[cell]++;
-                }
-            }
-        }
-    }
-
-    void locked_partial_board(int locked[BoardX * BoardY],
-                              size_type firstX, size_type lastX,
-                              size_type firstY, size_type lastY) {
-        for (size_type y = 0; y < BoardY; y++) {
-            ptrdiff_t baseY = y * BoardY;
-            for (size_type x = 0; x < BoardX; x++) {
-                locked[baseY + x] = 0;
-            }
-        }
-
-        for (size_type y = firstY; y < lastY; y++) {
-            ptrdiff_t baseY = y * BoardY;
-            for (size_type x = firstX; x < lastX; x++) {
-                locked[baseY + x] = 1;
-            }
-        }
-    }
-
     void init() {
         if (this->is_phase1()) {
             this->player_board_ = this->data_->player_board;
@@ -186,22 +115,22 @@ private:
                     case 0:
                         // Top partial
                         count_partial_target_color_nums(this->target_board_[0], 0, TargetX, TargetY - 1, TargetY);
-                        locked_partial_board(this->data_->phase2.locked, 0, BoardX, 0, kStartY + 1);
+                        locked_partial_board(this->data_->phase2.locked, 0, BoardX, 0, nStartY + 1);
                         break;
                     case 1:
                         // Left partial
                         count_partial_target_color_nums(this->target_board_[0], TargetX - 1, TargetX, 0, TargetY);
-                        locked_partial_board(this->data_->phase2.locked, 0, kStartX + 1, 0, BoardY);
+                        locked_partial_board(this->data_->phase2.locked, 0, nStartX + 1, 0, BoardY);
                         break;
                     case 2:
                         // Right partial
                         count_partial_target_color_nums(this->target_board_[0], 0, 1, 0, TargetY);
-                        locked_partial_board(this->data_->phase2.locked, kStartX + TargetX - 1, BoardX, 0, BoardY);
+                        locked_partial_board(this->data_->phase2.locked, nStartX + TargetX - 1, BoardX, 0, BoardY);
                         break;
                     case 3:
                         // Bottom partial
                         count_partial_target_color_nums(this->target_board_[0], 0, TargetX, 0, 1);
-                        locked_partial_board(this->data_->phase2.locked, 0, BoardX, kStartY + TargetY - 1, BoardY);
+                        locked_partial_board(this->data_->phase2.locked, 0, BoardX, nStartY + TargetY - 1, BoardY);
                         break;
                     default:
                         assert(false);
@@ -284,7 +213,7 @@ public:
             stage_type start;
             start.empty = empty;
             start.last_dir = uint8_t(-1);
-            start.board = this->player_board_;
+            start.board = this->data_->player;
             visited.insert(start.board.value128());
 
             std::vector<stage_type> cur_stages;
@@ -932,5 +861,5 @@ public:
     }
 };
 
-} // namespace v1
+} // namespace TwoEndpoint
 } // namespace MagicBlock

@@ -87,7 +87,7 @@ struct SharedData
     std::size_t target_len;
 
     int player_colors[Color::Maximum];
-    int target_colors[Color::Maximum];    
+    int target_colors[Color::Maximum];
 
     std::vector<Move> empty_moves[BoardX * BoardY];
 

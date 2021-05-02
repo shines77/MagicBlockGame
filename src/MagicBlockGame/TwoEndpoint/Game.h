@@ -35,8 +35,11 @@
 #include "Utils.h"
 #include "StopWatch.h"
 
+//
+// Two endpoint / two leg algorithm
+//
 namespace MagicBlock {
-namespace v1 {
+namespace TwoEndpoint {
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
@@ -47,20 +50,20 @@ public:
     typedef internal::BaseGame<BoardX, BoardY, TargetX, TargetY, AllowRotate>   base_type;
     typedef Game<BoardX, BoardY, TargetX, TargetY, AllowRotate>                 this_type;
 
-    typedef typename base_type::size_type   size_type;
-    typedef typename base_type::ssize_type  ssize_type;
+    typedef typename base_type::size_type           size_type;
+    typedef typename base_type::ssize_type          ssize_type;
 
-    typedef typename base_type::shared_data_type        shared_data_type;
-    typedef typename base_type::stage_type              stage_type;
-    typedef typename base_type::phase2_callback         phase2_callback;
-
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, PhaseType::Phase1_123, phase2_callback>  Phase1Solver;
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       PhaseType::Phase2,     phase2_callback>  Phase2Solver;
+    typedef typename base_type::shared_data_type    shared_data_type;
+    typedef typename base_type::stage_type          stage_type;
+    typedef typename base_type::phase2_callback     phase2_callback;
 
     static const size_type kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
 
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
+
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, PhaseType::Phase1_123, phase2_callback>  Phase1Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       PhaseType::Phase2,     phase2_callback>  Phase2Solver;
 
 private:
     //
@@ -70,7 +73,7 @@ public:
         this->init();
     }
 
-    ~Game() {
+    virtual ~Game() {
         this->destory();
     }
 
@@ -155,8 +158,8 @@ public:
 
                 if (this->min_steps_ != size_t(-1) || this->best_move_path_.size() > 0) {
                     solvable = true;
-                    if (this->translateMovePath(this->best_move_path_)) {
-                        this->displayAnswer(this->answer_);
+                    if (translateMovePath(this->best_move_path_)) {
+                        displayAnswer(this->answer_);
                     }
                 }
             }
@@ -245,8 +248,8 @@ public:
 
                 if (this->min_steps_ != size_type(-1) || this->best_move_path_.size() > 0) {
                     solvable = true;
-                    if (this->translateMovePath(this->best_move_path_)) {
-                        this->displayAnswer(this->answer_);
+                    if (translateMovePath(this->best_move_path_)) {
+                        displayAnswer(this->answer_);
                     }
                 }
             }
@@ -333,8 +336,8 @@ public:
 
                 if (this->min_steps_ != size_type(-1) || this->best_move_path_.size() > 0) {
                     solvable = true;
-                    if (this->translateMovePath(this->best_move_path_)) {
-                        this->displayAnswer(this->answer_);
+                    if (translateMovePath(this->best_move_path_)) {
+                        displayAnswer(this->answer_);
                     }
                 }
             }
@@ -342,33 +345,7 @@ public:
 
         return solvable;
     }
-
-    bool solve_sliding_puzzle() {
-        SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player_board,
-                                                         this->data_.target_board,
-                                                         this->data_.target_len);
-        bool solvable = slidingPuzzle.solve();
-        if (solvable) {
-            this->best_move_path_ = slidingPuzzle.getMovePath();
-            this->map_used_ = slidingPuzzle.getMapUsed();
-        }
-        return solvable;
-    }
-
-    bool queue_solve_sliding_puzzle() {
-        SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player_board,
-                                                         this->data_.target_board,
-                                                         this->data_.target_len);
-        bool solvable = slidingPuzzle.queue_solve();
-        if (solvable) {
-            this->best_move_path_ = slidingPuzzle.getMovePath();
-            this->map_used_ = slidingPuzzle.getMapUsed();
-        }
-        return solvable;
-    }
 };
 
-} // namespace v1
+} // namespace TwoEndpoint
 } // namespace MagicBlock

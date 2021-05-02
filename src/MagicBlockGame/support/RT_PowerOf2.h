@@ -211,7 +211,7 @@ bool BitScanForward(std::uint32_t mask, unsigned int * index)
 {
     assert(index != nullptr);
 #if defined(_MSC_VER)
-    unsigned char non_zero = _BitScanForward((unsigned long *)index, mask);
+    unsigned char non_zero = ::_BitScanForward((unsigned long *)index, mask);
     return (non_zero != 0);
 #elif defined(__has_builtin_ctz)
     int trailing_zeros = __builtin_ctz((unsigned int)mask);
@@ -230,7 +230,7 @@ int BitScanForward_nonzero(std::uint32_t mask)
     assert(mask != 0);
 #if defined(_MSC_VER)
     unsigned long index;
-    unsigned char non_zero = _BitScanForward(&index, mask);
+    unsigned char non_zero = ::_BitScanForward(&index, mask);
     (void)non_zero;
     return (int)index;
 #elif defined(__has_builtin_ctz)
@@ -249,7 +249,7 @@ bool BitScanForward(std::uint64_t mask, unsigned int * index)
 {
     assert(index != nullptr);
 #if defined(_MSC_VER)
-    unsigned char non_zero = _BitScanForward64((unsigned long *)index, mask);
+    unsigned char non_zero = ::_BitScanForward64((unsigned long *)index, mask);
     return (non_zero != 0);
 #elif defined(__has_builtin_ctzll)
     int trailing_zeros = __builtin_ctzll((unsigned long long)mask);
@@ -268,7 +268,7 @@ int BitScanForward_nonzero(std::uint64_t mask)
     assert(mask != 0);
 #if defined(_MSC_VER)
     unsigned long index;
-    unsigned char non_zero = _BitScanForward64(&index, mask);
+    unsigned char non_zero = ::_BitScanForward64(&index, mask);
     (void)non_zero;
     return (int)index;
 #elif defined(__has_builtin_ctzll)
@@ -290,7 +290,7 @@ bool BitScanReverse(std::uint32_t mask, unsigned int * index)
 {
     assert(index != nullptr);
 #if defined(_MSC_VER)
-    unsigned char non_zero = _BitScanReverse((unsigned long *)index, mask);
+    unsigned char non_zero = ::_BitScanReverse((unsigned long *)index, mask);
     return (non_zero != 0);
 #elif defined(__has_builtin_clz)
     int leading_zeros = __builtin_clz((unsigned int)mask);
@@ -308,7 +308,7 @@ int BitScanReverse_nonzero(std::uint32_t mask)
     assert(mask != 0);
 #if defined(_MSC_VER)
     unsigned long index;
-    unsigned char non_zero = _BitScanReverse(&index, mask);
+    unsigned char non_zero = ::_BitScanReverse(&index, mask);
     (void)non_zero;
     return (int)index;
 #elif defined(__has_builtin_clz)
@@ -327,7 +327,7 @@ bool BitScanReverse(std::uint64_t mask, unsigned int * index)
 {
     assert(index != nullptr);
 #if defined(_MSC_VER)
-    unsigned char non_zero = _BitScanReverse64((unsigned long *)index, mask);
+    unsigned char non_zero = ::_BitScanReverse64((unsigned long *)index, mask);
     return (non_zero != 0);
 #elif defined(__has_builtin_clzll)
     int leading_zeros = __builtin_clzll((unsigned long long)mask);
@@ -345,7 +345,7 @@ int BitScanReverse_nonzero(std::uint64_t mask)
     assert(mask != 0);
 #if defined(_MSC_VER)
     unsigned long index;
-    unsigned char non_zero = _BitScanReverse64(&index, mask);
+    unsigned char non_zero = ::_BitScanReverse64(&index, mask);
     (void)non_zero;
     return (int)index;
 #elif defined(__has_builtin_clzll)
@@ -399,7 +399,7 @@ bool CountLeadingZeroBits(std::uint32_t mask, unsigned int * index)
     assert(index != nullptr);
 #if defined(_MSC_VER)
     unsigned long result;
-    unsigned char non_zero = _BitScanReverse(&result, mask);
+    unsigned char non_zero = ::_BitScanReverse(&result, mask);
     // Now Invert the result: clz will count *down* from the msb to the lsb, so the msb index is 31
     // and the lsb index is 0. The result for the index when counting up: msb index is 0 (because it
     // starts there), and the lsb index is 31.
@@ -423,7 +423,7 @@ int CountLeadingZeroBits_nonzero(std::uint32_t mask)
     assert(mask != 0);
 #if defined(_MSC_VER)
     unsigned long index;
-    unsigned char non_zero = _BitScanReverse(&index, mask);
+    unsigned char non_zero = ::_BitScanReverse(&index, mask);
     // Now Invert the result: clz will count *down* from the msb to the lsb, so the msb index is 31
     // and the lsb index is 0. The result for the index when counting up: msb index is 0 (because it
     // starts there), and the lsb index is 31.
@@ -447,7 +447,7 @@ bool CountLeadingZeroBits(std::uint64_t mask, unsigned int * index)
     assert(index != nullptr);
 #if defined(_MSC_VER)
     unsigned long result;
-    unsigned char non_zero = _BitScanReverse64(&result, mask);
+    unsigned char non_zero = ::_BitScanReverse64(&result, mask);
     // Now Invert the result: clzll will count *down* from the msb to the lsb, so the msb index is 63
     // and the lsb index is 0. The result for the index when counting up: msb index is 0 (because it
     // starts there), and the lsb index is 63.
@@ -471,7 +471,7 @@ int CountLeadingZeroBits_nonzero(std::uint64_t mask)
     assert(mask != 0);
 #if defined(_MSC_VER)
     unsigned long index;
-    unsigned char non_zero = _BitScanReverse64(&index, mask);
+    unsigned char non_zero = ::_BitScanReverse64(&index, mask);
     // Now Invert the result: clzll will count *down* from the msb to the lsb, so the msb index is 63
     // and the lsb index is 0. The result for the index when counting up: msb index is 0 (because it
     // starts there), and the lsb index is 63.

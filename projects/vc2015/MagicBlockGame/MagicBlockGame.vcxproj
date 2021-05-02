@@ -27,6 +27,8 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\Constant.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\CPUWarmUp.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\ErrorCode.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\internal\BaseGame.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\internal\BaseSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Move.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SharedData.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h" />
@@ -36,6 +38,8 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\support\RT_PowerOf2.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\jm_malloc.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\Game.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\Solver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\UnitTest.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Utils.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Game.h" />
