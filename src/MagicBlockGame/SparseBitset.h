@@ -22,7 +22,7 @@
 #include "Value128.h"
 #include "Algorithm.h"
 
-#define SPARSEBITSET_DISPLAY_TRIE_INFO  0
+#define SPARSEBITSET_USE_TRIE_INFO  0
 
 namespace MagicBlock {
 
@@ -915,7 +915,9 @@ public:
 private:
     Container *     root_;
     size_type       size_;
+#if SPARSEBITSET_USE_TRIE_INFO
     LayerInfo       layer_info_[BoardY];
+#endif
     size_type       y_index_[BoardY];
 
     void init() {
@@ -997,11 +999,13 @@ public:
     }
 
     void clear_trie_info() {
+#if SPARSEBITSET_USE_TRIE_INFO
         for (size_type i = 0; i < BoardY; i++) {
             this->layer_info_[i].maxLayerSize = 0;
             this->layer_info_[i].childCount = 0;
             this->layer_info_[i].totalLayerSize = 0;
         }
+#endif
     }
 
     size_type getLayerValue(const board_type & board, size_type layer) const {
@@ -1214,13 +1218,14 @@ public:
 
     void count_trie_info_impl(Container * container, size_type layer) {
         assert(container != nullptr);
+#if SPARSEBITSET_USE_TRIE_INFO
         size_type layer_size = container->size();
         if (layer_size > this->layer_info_[layer].maxLayerSize) {
             this->layer_info_[layer].maxLayerSize = layer_size;
         }
         this->layer_info_[layer].childCount++;
         this->layer_info_[layer].totalLayerSize += layer_size;
-
+#endif
         if (container->type() == NodeType::LeafArrayContainer ||
             container->type() == NodeType::LeafBitmapContainer) {
             return;
@@ -1242,13 +1247,14 @@ public:
             return;
         }
 
+#if SPARSEBITSET_USE_TRIE_INFO
         size_type layer_size = container->size();
         if (layer_size > this->layer_info_[0].maxLayerSize) {
             this->layer_info_[0].maxLayerSize = layer_size;
         }
         this->layer_info_[0].childCount++;
         this->layer_info_[0].totalLayerSize += layer_size;
-
+#endif
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
             if (child != nullptr) {
@@ -1258,9 +1264,9 @@ public:
     }
 
     void display_trie_info() {
-#if SPARSEBITSET_DISPLAY_TRIE_INFO
         this->count_trie_info();
 
+#if SPARSEBITSET_USE_TRIE_INFO
         printf("SparseBitset<T> trie info:\n\n");
         for (size_type i = 0; i < BoardY; i++) {
             printf("[%u]: maxLayerSize = %8u, childCount = %8u, averageSize = %0.2f\n\n",
