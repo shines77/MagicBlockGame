@@ -196,7 +196,7 @@ public:
     }
 
     bool solve_full(size_type & rotate_type) {
-        size_u result = is_satisfy_full(this->player_board_, this->target_board_, this->target_len_);
+        size_u result = this->is_satisfy_full(this->player_board_, this->target_board_, this->target_len_);
         if (result.low != 0) {
             rotate_type = result.high;
             return true;
@@ -206,7 +206,7 @@ public:
         size_type depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(this->player_board_, empty);
+        bool found_empty = this->find_empty(this->player_board_, empty);
         if (found_empty) {
             std::set<Value128> visited;
 
@@ -251,7 +251,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        size_u result = is_satisfy_full(next_stage.board, this->target_board_, this->target_len_);
+                        size_u result = this->is_satisfy_full(next_stage.board, this->target_board_, this->target_len_);
                         if (result.low != 0) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
@@ -291,7 +291,7 @@ public:
     }
 
     bool solve(size_type & out_rotate_type) {
-        size_u satisfy_result = is_satisfy(this->player_board_, this->target_board_, this->target_len_);
+        size_u satisfy_result = this->is_satisfy(this->player_board_, this->target_board_, this->target_len_);
         if (satisfy_result.low != 0) {
             out_rotate_type = satisfy_result.high;
             return true;
@@ -301,7 +301,7 @@ public:
         size_type depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(this->player_board_, empty);
+        bool found_empty = this->find_empty(this->player_board_, empty);
         if (found_empty) {
             std::set<Value128> visited;
 
@@ -353,7 +353,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        size_u satisfy_result = is_satisfy(next_stage.board, this->target_board_, this->target_len_);
+                        size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
                         size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
@@ -460,7 +460,7 @@ public:
     }
 
     bool queue_solve(size_type & out_rotate_type) {
-        size_u satisfy_result = is_satisfy(this->player_board_, this->target_board_, this->target_len_);
+        size_u satisfy_result = this->is_satisfy(this->player_board_, this->target_board_, this->target_len_);
         if (satisfy_result.low != 0) {
             out_rotate_type = satisfy_result.high;
             return true;
@@ -470,7 +470,7 @@ public:
         size_type depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(this->player_board_, empty);
+        bool found_empty = this->find_empty(this->player_board_, empty);
         if (found_empty) {
             std::set<Value128> visited;
 
@@ -522,7 +522,7 @@ public:
 
                         next_stages.push(next_stage);
 
-                        size_u satisfy_result = is_satisfy(next_stage.board, this->target_board_, this->target_len_);
+                        size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
                         size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
@@ -673,7 +673,7 @@ public:
     }
 
     bool bitset_solve(size_type & out_rotate_type, phase2_callback & phase2_search) {
-        size_u satisfy_result = is_satisfy(this->player_board_, this->target_board_, this->target_len_);
+        size_u satisfy_result = this->is_satisfy(this->player_board_, this->target_board_, this->target_len_);
         if (satisfy_result.low != 0) {
             out_rotate_type = satisfy_result.high;
             return true;
@@ -683,7 +683,7 @@ public:
         size_type depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(this->player_board_, empty);
+        bool found_empty = this->find_empty(this->player_board_, empty);
         if (found_empty) {
             typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> bitset_type;
             bitset_type visited;
@@ -751,7 +751,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        size_u satisfy_result = is_satisfy(next_stage.board, this->target_board_, this->target_len_);
+                        size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
                         size_type satisfy_mask = satisfy_result.low;
                         if (satisfy_mask != 0) {
                             solvable = true;
