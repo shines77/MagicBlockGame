@@ -76,6 +76,7 @@ public:
 
 private:
     void init() {
+        assert(this->data_ != nullptr);
         if (this->is_phase1()) {
             this->player_board_ = this->data_->player_board;
             for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
@@ -101,6 +102,7 @@ private:
     }
 
     void init_target_board_locked(size_t rotate_type) {
+        assert(this->data_ != nullptr);
         if (this->is_phase2()) {
             this->data_->phase2.reset();
 

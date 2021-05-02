@@ -75,78 +75,8 @@ public:
 #endif
 
 private:
-    shared_data_type * data_;
-
-    Board<BoardX, BoardY> player_board_;
-    Board<TargetX, TargetY> target_board_[4];
-
-    size_type target_len_;
-    size_type rotate_type_;
-
-    int target_colors_[Color::Maximum];  
-    int partial_colors_[Color::Maximum];
-
-    std::vector<Position> move_path_;
-
-    size_type map_used_;
-
-    void assert_color(uint8_t color) const {
-        assert(color >= Color::Empty && color < Color::Last);
-    }
-
-    void count_target_color_nums(const Board<TargetX, TargetY> & target) {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->target_colors_[clr] = 0;
-        }
-
-        for (size_type y = 0; y < TargetY; y++) {
-            for (size_type x = 0; x < TargetX; x++) {
-                uint8_t cell = target.cells[y * TargetY + x];
-                assert_color(cell);
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->target_colors_[cell]++;
-                }
-            }
-        }
-    }
-
-    void count_partial_target_color_nums(const Board<TargetX, TargetY> & target,
-                                         size_type firstTargetX, size_type lastTargetX,
-                                         size_type firstTargetY, size_type lastTargetY) {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->target_colors_[clr] = 0;
-        }
-
-        for (size_type y = firstTargetY; y < lastTargetY; y++) {
-            for (size_type x = firstTargetX; x < lastTargetX; x++) {
-                uint8_t cell = target.cells[y * TargetY + x];
-                assert_color(cell);
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->target_colors_[cell]++;
-                }
-            }
-        }
-    }
-
-    void locked_partial_board(int locked[BoardX * BoardY],
-                              size_type firstX, size_type lastX,
-                              size_type firstY, size_type lastY) {
-        for (size_type y = 0; y < BoardY; y++) {
-            ptrdiff_t baseY = y * BoardY;
-            for (size_type x = 0; x < BoardX; x++) {
-                locked[baseY + x] = 0;
-            }
-        }
-
-        for (size_type y = firstY; y < lastY; y++) {
-            ptrdiff_t baseY = y * BoardY;
-            for (size_type x = firstX; x < lastX; x++) {
-                locked[baseY + x] = 1;
-            }
-        }
-    }
-
     void init() {
+        assert(this->data_ != nullptr);
         if (this->is_phase1()) {
             this->player_board_ = this->data_->player_board;
             for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
@@ -172,6 +102,7 @@ private:
     }
 
     void init_target_board_locked(size_t rotate_type) {
+        assert(this->data_ != nullptr);
         if (this->is_phase2()) {
             this->data_->phase2.reset();
 
