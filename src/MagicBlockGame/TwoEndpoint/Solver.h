@@ -856,7 +856,9 @@ public:
                 }
             }
 
-            visited.display_trie_info();
+            if (this->is_phase1()) {
+                visited.display_trie_info();
+            }
         }
 
         return solvable;

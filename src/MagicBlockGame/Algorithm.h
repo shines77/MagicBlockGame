@@ -130,8 +130,8 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
     }
 
 #if 1
-    // _mm_set1_epi16() default generated code is like below code,
-    // not use (AVX) vpbroadcastw intrinsic.
+    // _mm_set1_epi16() default generated code is like below SSE2 code,
+    // It don't use (AVX) vpbroadcastw intrinsic if not specified switch AVX intrinsic.
     __m128i value128 = _mm_set1_epi16(value);
 #else
     __m128i value32 = _mm_loadu_esi16(value);

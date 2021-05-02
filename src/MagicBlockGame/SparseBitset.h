@@ -941,12 +941,6 @@ private:
 #endif
         this->root_ = new BitmapContainer();
         //this->root_ = new ArrayContainer();
-
-        for (size_type i = 0; i < BoardY; i++) {
-            this->layer_info_[i].maxLayerSize = 0;
-            this->layer_info_[i].childCount = 0;
-            this->layer_info_[i].totalLayerSize = 0;
-        }
     }
 
 public:
@@ -972,30 +966,13 @@ public:
 
     void destroy_trie_impl(Container * container, size_type layer) {
         assert(container != nullptr);
-#if SPARSEBITSET_DISPLAY_TRIE_INFO
-        size_type layer_size = container->size();
-        if (layer_size > this->layer_info_[layer].maxLayerSize) {
-            this->layer_info_[layer].maxLayerSize = layer_size;
-        }
-        this->layer_info_[layer].childCount++;
-        this->layer_info_[layer].totalLayerSize += layer_size;
-
-        if (container->type() == NodeType::LeafArrayContainer ||
-            container->type() == NodeType::LeafBitmapContainer) {
-            return;
-        }
-#endif
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
             if (child != nullptr) {
-#if (SPARSEBITSET_DISPLAY_TRIE_INFO == 0)
                 if (child->type() != NodeType::LeafArrayContainer &&
                     child->type() != NodeType::LeafBitmapContainer) {
                     destroy_trie_impl(child, layer + 1);
                 }
-#else
-                destroy_trie_impl(child, layer + 1);
-#endif
                 delete child;
             }
         }
@@ -1007,14 +984,6 @@ public:
             return;
         }
 
-#if SPARSEBITSET_DISPLAY_TRIE_INFO
-        size_type layer_size = container->size();
-        if (layer_size > this->layer_info_[0].maxLayerSize) {
-            this->layer_info_[0].maxLayerSize = layer_size;
-        }
-        this->layer_info_[0].childCount++;
-        this->layer_info_[0].totalLayerSize += layer_size;
-#endif
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
             if (child != nullptr) {
@@ -1027,22 +996,20 @@ public:
         this->root_ = nullptr;
     }
 
-    void display_trie_info() {
-#if SPARSEBITSET_DISPLAY_TRIE_INFO
-        printf("SparseBitset<T> trie info:\n\n");
+    void clear_trie_info() {
         for (size_type i = 0; i < BoardY; i++) {
-            printf("[%u]: maxLayerSize = %8u, childCount = %8u, averageSize = %0.2f\n\n",
-                   uint32_t(i + 1),
-                   uint32_t(this->layer_info_[i].maxLayerSize),
-                   uint32_t(this->layer_info_[i].childCount),
-                   (double)this->layer_info_[i].totalLayerSize / this->layer_info_[i].childCount);
+            this->layer_info_[i].maxLayerSize = 0;
+            this->layer_info_[i].childCount = 0;
+            this->layer_info_[i].totalLayerSize = 0;
         }
-        printf("\n");
-#endif
     }
 
     size_type getLayerValue(const board_type & board, size_type layer) const {
+#if 1
         size_type y = this->y_index_[layer];
+#else
+        size_type y = layer;
+#endif
         ssize_type cell_y = y * BoardY;
         size_type layer_value = 0;
         for (ssize_type x = BoardX - 1; x >= 0; x--) {
@@ -1243,6 +1210,74 @@ public:
 
     bool remove(const board_type & board) {
         return true;
+    }
+
+    void count_trie_info_impl(Container * container, size_type layer) {
+        assert(container != nullptr);
+        size_type layer_size = container->size();
+        if (layer_size > this->layer_info_[layer].maxLayerSize) {
+            this->layer_info_[layer].maxLayerSize = layer_size;
+        }
+        this->layer_info_[layer].childCount++;
+        this->layer_info_[layer].totalLayerSize += layer_size;
+
+        if (container->type() == NodeType::LeafArrayContainer ||
+            container->type() == NodeType::LeafBitmapContainer) {
+            return;
+        }
+
+        for (size_type i = container->begin(); i < container->end(); container->next(i)) {
+            Container * child = container->valueOf(i);
+            if (child != nullptr) {
+                count_trie_info_impl(child, layer + 1);
+            }
+        }
+    }
+
+    void count_trie_info() {
+        this->clear_trie_info();
+
+        Container * container = this->root_;
+        if (container == nullptr) {
+            return;
+        }
+
+        size_type layer_size = container->size();
+        if (layer_size > this->layer_info_[0].maxLayerSize) {
+            this->layer_info_[0].maxLayerSize = layer_size;
+        }
+        this->layer_info_[0].childCount++;
+        this->layer_info_[0].totalLayerSize += layer_size;
+
+        for (size_type i = container->begin(); i < container->end(); container->next(i)) {
+            Container * child = container->valueOf(i);
+            if (child != nullptr) {
+                count_trie_info_impl(child, 1);
+            }
+        }
+    }
+
+    void display_trie_info() {
+#if SPARSEBITSET_DISPLAY_TRIE_INFO
+        this->count_trie_info();
+
+        printf("SparseBitset<T> trie info:\n\n");
+        for (size_type i = 0; i < BoardY; i++) {
+            printf("[%u]: maxLayerSize = %8u, childCount = %8u, averageSize = %0.2f\n\n",
+                   uint32_t(i + 1),
+                   uint32_t(this->layer_info_[i].maxLayerSize),
+                   uint32_t(this->layer_info_[i].childCount),
+                   (double)this->layer_info_[i].totalLayerSize / this->layer_info_[i].childCount);
+            if (i == BoardY - 1) {
+                printf("[%u]: maxLayerSize = %8u, childCount = %8u, averageSize = %0.2f\n\n",
+                       uint32_t(i + 2),
+                       uint32_t(0),
+                       uint32_t(this->layer_info_[i].totalLayerSize),
+                       (double)0.0);
+            }
+        }
+        printf("\n");
+#endif
     }
 };
 
