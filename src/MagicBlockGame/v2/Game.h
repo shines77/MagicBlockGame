@@ -70,7 +70,7 @@ public:
         this->init();
     }
 
-    ~Game() {
+    virtual ~Game() {
         this->destory();
     }
 
@@ -340,32 +340,6 @@ public:
             }
         }
 
-        return solvable;
-    }
-
-    bool solve_sliding_puzzle() {
-        SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player_board,
-                                                         this->data_.target_board,
-                                                         this->data_.target_len);
-        bool solvable = slidingPuzzle.solve();
-        if (solvable) {
-            this->best_move_path_ = slidingPuzzle.getMovePath();
-            this->map_used_ = slidingPuzzle.getMapUsed();
-        }
-        return solvable;
-    }
-
-    bool queue_solve_sliding_puzzle() {
-        SlidingPuzzle<TargetX, TargetY> slidingPuzzle;
-        slidingPuzzle.template setPuzzle<BoardX, BoardY>(this->data_.player_board,
-                                                         this->data_.target_board,
-                                                         this->data_.target_len);
-        bool solvable = slidingPuzzle.queue_solve();
-        if (solvable) {
-            this->best_move_path_ = slidingPuzzle.getMovePath();
-            this->map_used_ = slidingPuzzle.getMapUsed();
-        }
         return solvable;
     }
 };
