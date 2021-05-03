@@ -8,7 +8,7 @@
 #endif
 
 #ifndef __AVX2__
-//#define __AVX2__
+#define __AVX2__
 #endif
 
 #include <stdlib.h>

@@ -17,8 +17,8 @@
 #include <exception>
 #include <stdexcept>
 
-#include <immintrin.h>
-#include <emmintrin.h>
+#include <emmintrin.h>      // For SSE2
+#include <immintrin.h>      // For AVX2
 
 #include "support/RT_PowerOf2.h"
 
@@ -116,14 +116,14 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
 
     std::uint32_t kIndexMask = 0x0000FFFFUL;
 
-    alignas(16) static const std::uint32_t head_backward_index_mask[16] = {
+    alignas(64) static const std::uint32_t head_backward_index_mask[16] = {
         0x0000FFFFUL, 0x00000000UL, 0x0000FFF3UL, 0x00000000UL,
         0x0000FFF0UL, 0x00000000UL, 0x0000FF30UL, 0x00000000UL, 
         0x0000FF00UL, 0x00000000UL, 0x0000F300UL, 0x00000000UL,
         0x0000F000UL, 0x00000000UL, 0x00003000UL, 0x00000000UL
     };
 
-    alignas(16) static const std::uint32_t tail_forward_index_mask[16] = {
+    alignas(64) static const std::uint32_t tail_forward_index_mask[16] = {
         0x00000000UL, 0x00000000UL, 0x00000003UL, 0x00000000UL,
         0x0000000FUL, 0x00000000UL, 0x0000003FUL, 0x00000000UL,
         0x000000FFUL, 0x00000000UL, 0x000003FFUL, 0x00000000UL,
@@ -172,16 +172,14 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
         __m128i index128 = _mm_load_si128((__m128i const *)current);
         __m128i mask128 = _mm_cmpeq_epi16(index128, value128);
         std::uint32_t mask32 = (std::uint32_t)_mm_movemask_epi8(mask128);
-#if 0
+
         assert(misaligned_bytes > 0 && misaligned_bytes < kSSE2Alignment);
+#if 0
         mask32 &= head_backward_index_mask[misaligned_bytes];
 #elif 0
-        // Get the backward offset
-        assert(misaligned_bytes > 0 && misaligned_bytes < kSSE2Alignment);
         std::uint32_t index_mask = kIndexMask << (std::uint32_t)(misaligned_bytes);
         mask32 &= index_mask;
 #else
-        assert(misaligned_bytes > 0 && misaligned_bytes < kSSE2Alignment);
         mask32 >>= misaligned_bytes;
         mask32 <<= misaligned_bytes;
 #endif
@@ -248,6 +246,8 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
         __m128i index128 = _mm_load_si128((__m128i const *)current);
         __m128i mask128 = _mm_cmpeq_epi16(index128, value128);
         uint32_t mask32 = (uint32_t)_mm_movemask_epi8(mask128);
+
+        assert(misaligned_bytes > 0 && misaligned_bytes <= kSSE2Alignment);
 #if 0
         mask32 &= tail_forward_index_mask[misaligned_bytes];
 #else
@@ -361,6 +361,182 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t len, std::uint16_t 
     return find_uint16_sse2(buf, 0, len, value);
 }
 
+//
+// See: https://software.intel.com/sites/landingpage/IntrinsicsGuide/
+// See: https://www.felixcloutier.com/x86/punpcklbw:punpcklwd:punpckldq:punpcklqdq
+//
+static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
+                            std::size_t last, std::uint16_t value)
+{
+#ifdef __AVX2__
+    static const std::size_t kAVX2Alignment = sizeof(__m256i);
+    static const std::size_t kAVX2AlignMask = kAVX2Alignment - 1;
+
+    static const std::size_t kSingelStepSize = sizeof(__m256i) / sizeof(std::uint16_t);
+    static const std::size_t kDoubleStepSize = 2 * kSingelStepSize;
+    static const std::size_t kDoubleStepBytes = kDoubleStepSize * sizeof(std::uint16_t);
+
+    static const std::size_t kDefaultAVX2Threshold = 64;
+    static const std::size_t kAVX2Threshold = std::max(kDoubleStepSize, kDefaultAVX2Threshold);
+
+    std::uint32_t kIndexMask = 0xFFFFFFFFUL;
+
+    alignas(64) static const std::uint32_t head_backward_index_mask[32] = {
+        0xFFFFFFFFUL, 0x00000000UL, 0xFFFFFFF3UL, 0x00000000UL,
+        0xFFFFFFF0UL, 0x00000000UL, 0xFFFFFF30UL, 0x00000000UL, 
+        0xFFFFFF00UL, 0x00000000UL, 0xFFFFF300UL, 0x00000000UL,
+        0xFFFFF000UL, 0x00000000UL, 0xFFFF3000UL, 0x00000000UL,
+
+        0xFFFF0000UL, 0x00000000UL, 0xFFF30000UL, 0x00000000UL,
+        0xFFF00000UL, 0x00000000UL, 0xFF300000UL, 0x00000000UL, 
+        0xFF000000UL, 0x00000000UL, 0xF3000000UL, 0x00000000UL,
+        0xF0000000UL, 0x00000000UL, 0x30000000UL, 0x00000000UL
+    };
+
+    alignas(64) static const std::uint32_t tail_forward_index_mask[32] = {
+        0x00000000UL, 0x00000000UL, 0x00000003UL, 0x00000000UL,
+        0x0000000FUL, 0x00000000UL, 0x0000003FUL, 0x00000000UL,
+        0x000000FFUL, 0x00000000UL, 0x000003FFUL, 0x00000000UL,
+        0x00000FFFUL, 0x00000000UL, 0x00003FFFUL, 0x00000000UL,
+
+        0x0000FFFFUL, 0x00000000UL, 0x0003FFFFUL, 0x00000000UL,
+        0x000FFFFFUL, 0x00000000UL, 0x003FFFFFUL, 0x00000000UL,
+        0x00FFFFFFUL, 0x00000000UL, 0x03FFFFFFUL, 0x00000000UL,
+        0x0FFFFFFFUL, 0x00000000UL, 0x3FFFFFFFUL, 0x00000000UL
+    };
+
+    std::size_t len = last - first;
+    assert((std::ptrdiff_t)len >= 0);
+
+    std::uint16_t * buf_start = buf + first;
+    std::uint16_t * buf_end = buf + last;
+
+    //
+    // If length is too small, maybe use normal code is faster than AVX2 optimized code.
+    //
+    if (len <= kAVX2Threshold) {
+        for (std::uint16_t * indexs = buf_start; indexs < buf_end; indexs++) {
+            if (*indexs != value)
+                continue;
+            else
+                return int(indexs - buf);
+        }
+        return -1;
+    }
+
+    __m256i value256 = _mm256_set1_epi16(value);
+
+    std::uint16_t * aligned_start = (std::uint16_t *)((std::size_t)buf_start & (~kAVX2AlignMask));
+    std::uint16_t * current = aligned_start;
+
+    std::ptrdiff_t misaligned_bytes = (std::uint8_t *)buf_start - (std::uint8_t *)aligned_start;
+    assert(misaligned_bytes >= 0 && misaligned_bytes < kAVX2Alignment);
+
+    // First misaligned 32 bytes
+    if (misaligned_bytes > 0) {
+        __m256i index256 = _mm256_load_si256((__m256i const *)current);
+        __m256i mask256 = _mm256_cmpeq_epi16(index256, value256);
+        std::uint32_t mask32 = (std::uint32_t)_mm256_movemask_epi8(mask256);
+
+        assert(misaligned_bytes > 0 && misaligned_bytes < kAVX2Alignment);
+#if 0
+        mask32 &= head_backward_index_mask[misaligned_bytes];
+#elif 0
+        std::uint32_t index_mask = kIndexMask << (std::uint32_t)(misaligned_bytes);
+        mask32 &= index_mask;
+#else
+        mask32 >>= misaligned_bytes;
+        mask32 <<= misaligned_bytes;
+#endif
+        if (mask32 != 0) {
+            unsigned int index = jstd::run_time::BitScanForward_nonzero(mask32);
+            return (int)((current - buf) + index / 2);
+        }
+        current += kSingelStepSize;
+    }
+    
+    std::uint16_t * aligned_end = (std::uint16_t *)((std::size_t)buf_end & (~kAVX2AlignMask));
+    assert(aligned_end <= buf_end);
+
+    while ((current + kDoubleStepSize) <= aligned_end) {
+        __m256i index256_0 = _mm256_load_si256((__m256i const *)current + 0);
+        __m256i index256_1 = _mm256_load_si256((__m256i const *)current + 1);
+        __m256i mask256_0 = _mm256_cmpeq_epi16(index256_0, value256);
+        __m256i mask256_1 = _mm256_cmpeq_epi16(index256_1, value256);
+        uint32_t mask32_0 = (uint32_t)_mm256_movemask_epi8(mask256_0);
+        uint32_t mask32_1 = (uint32_t)_mm256_movemask_epi8(mask256_1);
+        if (mask32_0 != 0) {
+            unsigned int index = jstd::run_time::BitScanForward_nonzero(mask32_0);
+            return (int)((current - buf) + index / 2);
+        }
+        else if (mask32_1 != 0) {
+            unsigned int index = jstd::run_time::BitScanForward_nonzero(mask32_1);
+            return (int)((current - buf) + kSingelStepSize + index / 2);
+        }
+        current += kDoubleStepSize;
+    }
+
+    misaligned_bytes = (std::uint8_t *)buf_end - (std::uint8_t *)current;
+    assert(misaligned_bytes >= 0 && misaligned_bytes < kDoubleStepBytes);
+
+    if (misaligned_bytes > kAVX2Alignment) {
+        // Last misaligned 64 bytes
+        __m256i index256_0 = _mm256_load_si256((__m256i const *)current + 0);
+        __m256i index256_1 = _mm256_load_si256((__m256i const *)current + 1);
+        __m256i mask256_0 = _mm256_cmpeq_epi16(index256_0, value256);
+        __m256i mask256_1 = _mm256_cmpeq_epi16(index256_1, value256);
+        uint32_t mask32_0 = (uint32_t)_mm256_movemask_epi8(mask256_0);
+        uint32_t mask32_1 = (uint32_t)_mm256_movemask_epi8(mask256_1);
+        if (mask32_0 != 0) {
+            unsigned int index = jstd::run_time::BitScanForward_nonzero(mask32_0);
+            return (int)((current - buf) + index / 2);
+        }
+        else {
+            misaligned_bytes -= kAVX2Alignment;
+            assert(misaligned_bytes >= 0 && misaligned_bytes < kAVX2Alignment);
+#if 0
+            mask32_1 &= tail_forward_index_mask[misaligned_bytes];
+#else
+            std::uint32_t index_mask = kIndexMask >> (std::uint32_t)(kAVX2Alignment - misaligned_bytes);
+            mask32_1 &= index_mask;
+#endif
+            if (mask32_1 != 0) {
+                unsigned int index = jstd::run_time::BitScanForward_nonzero(mask32_1);
+                return (int)((current - buf) + kSingelStepSize + index / 2);
+            }
+        }
+    }
+    else if (misaligned_bytes > 0) {
+        // Last misaligned 32 bytes
+        __m256i index256 = _mm256_load_si256((__m256i const *)current);
+        __m256i mask256 = _mm256_cmpeq_epi16(index256, value256);
+        uint32_t mask32 = (uint32_t)_mm256_movemask_epi8(mask256);
+
+        assert(misaligned_bytes > 0 && misaligned_bytes <= kAVX2Alignment);
+#if 0
+        mask32 &= tail_forward_index_mask[misaligned_bytes];
+#else
+        std::uint32_t index_mask = kIndexMask >> (std::uint32_t)(kAVX2Alignment - misaligned_bytes);
+        mask32 &= index_mask;
+#endif
+        if (mask32 != 0) {
+            unsigned int index = jstd::run_time::BitScanForward_nonzero(mask32);
+            return (int)((current - buf) + index / 2);
+        }
+    }
+
+    return -1;
+#else
+    return find_uint16(buf, first, last, value);
+#endif // __AVX2__
+}
+
+static int find_uint16_avx2(std::uint16_t * buf, std::size_t len, std::uint16_t value) {
+    return find_uint16_avx2(buf, 0, len, value);
+}
+
+#if 0
+
 static int find_uint16_sse2_has_bug(std::uint16_t * buf, std::size_t len, std::uint16_t value)
 {
 #ifdef __SSE2__
@@ -429,6 +605,8 @@ static int find_uint16_sse2_has_bug(std::uint16_t * buf, std::size_t len, std::u
     return find_uint16(buf, len, value);
 #endif // __SSE2__
 }
+
+#endif
 
 static void merge_sort(std::uint16_t * indexs, std::uint16_t * new_indexs,
                        std::size_t first, std::size_t last)
@@ -672,7 +850,12 @@ static int binary_search(std::uint16_t * buf, std::size_t first,
 
     return -1;
 
-#ifdef __SSE2__
+#ifdef __AVX2__
+    if (low < high)
+        return Algorithm::find_uint16_avx2(buf, low, high, value);
+    else
+        return -1;
+#elif __SSE2__
     if (low < high)
         return Algorithm::find_uint16_sse2(buf, low, high, value);
     else
