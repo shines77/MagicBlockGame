@@ -214,7 +214,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
     misaligned_bytes = (std::uint8_t *)buf_end - (std::uint8_t *)current;
     assert(misaligned_bytes >= 0 && misaligned_bytes < kDoubleStepBytes);
 
-    if (misaligned_bytes > kSSE2Alignment) {
+    if (misaligned_bytes > (std::ptrdiff_t )kSSE2Alignment) {
         // Last misaligned 32 bytes
         __m128i index128_0 = _mm_load_si128((__m128i const *)current + 0);
         __m128i index128_1 = _mm_load_si128((__m128i const *)current + 1);
@@ -479,7 +479,7 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
     misaligned_bytes = (std::uint8_t *)buf_end - (std::uint8_t *)current;
     assert(misaligned_bytes >= 0 && misaligned_bytes < kDoubleStepBytes);
 
-    if (misaligned_bytes > kAVX2Alignment) {
+    if (misaligned_bytes > (std::ptrdiff_t)kAVX2Alignment) {
         // Last misaligned 64 bytes
         __m256i index256_0 = _mm256_load_si256((__m256i const *)current + 0);
         __m256i index256_1 = _mm256_load_si256((__m256i const *)current + 1);
