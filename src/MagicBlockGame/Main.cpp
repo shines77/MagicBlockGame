@@ -23,6 +23,7 @@
 
 #include "ErrorCode.h"
 #include "v1/Game.h"
+#include "TwoEndpoint/Game.h"
 #include "Algorithm.h"
 #include "UnitTest.h"
 
@@ -120,10 +121,10 @@ void solve_sliding_puzzle_queue()
 }
 
 template <std::size_t N_FuncId = FuncId::NormalSolver, bool AllowRotate = true>
-void solve_magic_block_game()
+void solve_magic_block_game_v1()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block_game<%s>()\n\n", get_func_name<N_FuncId>());
+    printf("solve_magic_block_game_v1<%s>()\n\n", get_func_name<N_FuncId>());
 
     MagicBlock::v1::Game<5, 5, 3, 3, AllowRotate> game;
     int readStatus = game.readInput("magic_block.txt");
@@ -160,6 +161,47 @@ void solve_magic_block_game()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
+template <std::size_t N_FuncId = FuncId::NormalSolver, bool AllowRotate = true>
+void solve_magic_block_game_two_endpoint()
+{
+    printf("-------------------------------------------------------\n\n");
+    printf("solve_magic_block_game_two_endpoint<%s>()\n\n", get_func_name<N_FuncId>());
+
+    MagicBlock::TwoEndpoint::Game<5, 5, 3, 3, AllowRotate> game;
+    int readStatus = game.readInput("magic_block.txt");
+    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+    if (ErrorCode::isFailure(readStatus)) {
+        return;
+    }
+
+    bool solvable;
+    jtest::StopWatch sw;
+
+    std::size_t max_forward_depth = MAX_FORWARD_DEPTH;
+    std::size_t max_backward_depth = MAX_BACKWARD_DEPTH;
+
+    sw.start();
+    if (N_FuncId == FuncId::BitSetSolver) {
+        solvable = game.bitset_solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
+    }
+    else {
+        solvable = game.solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
+    }
+    sw.stop();
+    double elapsed_time = sw.getElapsedMillisec();
+
+    if (solvable) {
+        printf("Found a answer!\n\n");
+        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
+        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+    }
+    else {
+        printf("Not found a answer!\n\n");
+    }
+
+    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+}
+
 int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
@@ -179,9 +221,14 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
-    solve_magic_block_game<FuncId::BitSetSolver, true>();
+    solve_magic_block_game_two_endpoint<FuncId::BitSetSolver, true>();
+    System::pause();
+#endif
+
+#if 1
+    solve_magic_block_game_v1<FuncId::BitSetSolver, true>();
 #else
-    solve_magic_block_game<FuncId::StandAloneBitSetSolver, true>();
+    solve_magic_block_game_v1<FuncId::StandAloneBitSetSolver, true>();
 #endif
     System::pause();
 

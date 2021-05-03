@@ -36,13 +36,13 @@ namespace v2 {
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
-          bool AllowRotate, std::size_t N_PhaseType,
+          bool AllowRotate, std::size_t N_SolverType,
           typename Phase2CallBack>
-class Solver : public internal::BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_PhaseType, Phase2CallBack>
+class Solver : public internal::BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>
 {
 public:
-    typedef internal::BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_PhaseType, Phase2CallBack> base_type;
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_PhaseType, Phase2CallBack>               this_type;
+    typedef internal::BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack> base_type;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>               this_type;
 
     typedef typename base_type::size_type           size_type;
     typedef typename base_type::ssize_type          ssize_type;
@@ -333,7 +333,7 @@ public:
                             continue;
 
                         uint8_t move_pos = empty_moves[n].pos;
-                        if (N_PhaseType == PhaseType::Phase2) {
+                        if (this->is_phase2()) {
                             if (this->data_->phase2.locked[move_pos] != 0)
                                 continue;
                         }

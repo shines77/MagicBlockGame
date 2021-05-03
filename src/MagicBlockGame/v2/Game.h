@@ -47,20 +47,20 @@ public:
     typedef internal::BaseGame<BoardX, BoardY, TargetX, TargetY, AllowRotate>   base_type;
     typedef Game<BoardX, BoardY, TargetX, TargetY, AllowRotate>                 this_type;
 
-    typedef typename base_type::size_type   size_type;
-    typedef typename base_type::ssize_type  ssize_type;
+    typedef typename base_type::size_type           size_type;
+    typedef typename base_type::ssize_type          ssize_type;
 
-    typedef typename base_type::shared_data_type        shared_data_type;
-    typedef typename base_type::stage_type              stage_type;
-    typedef typename base_type::phase2_callback         phase2_callback;
-
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, PhaseType::Phase1_123, phase2_callback>  Phase1Solver;
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       PhaseType::Phase2,     phase2_callback>  Phase2Solver;
+    typedef typename base_type::shared_data_type    shared_data_type;
+    typedef typename base_type::stage_type          stage_type;
+    typedef typename base_type::phase2_callback     phase2_callback;
 
     static const size_type kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
 
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
+
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, SolverType::Phase1_123, phase2_callback>  Phase1Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       SolverType::Phase2,     phase2_callback>  Phase2Solver;
 
 private:
     //

@@ -33,7 +33,7 @@ namespace internal {
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
-          bool AllowRotate, std::size_t N_PhaseType,
+          bool AllowRotate, std::size_t N_SolverType,
           typename Phase2CallBack>
 class BaseSolver
 {
@@ -41,7 +41,7 @@ public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    typedef BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_PhaseType, Phase2CallBack>  this_type;
+    typedef BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>  this_type;
 
     typedef SharedData<BoardX, BoardY, TargetX, TargetY>    shared_data_type;
     typedef typename shared_data_type::stage_type           stage_type;
@@ -88,14 +88,14 @@ public:
     }
 
     bool is_phase1() const {
-        return (N_PhaseType == PhaseType::Phase1_1 ||
-                N_PhaseType == PhaseType::Phase1_12 ||
-                N_PhaseType == PhaseType::Phase1_123);
+        return (N_SolverType == SolverType::Phase1_1 ||
+                N_SolverType == SolverType::Phase1_12 ||
+                N_SolverType == SolverType::Phase1_123);
     }
 
     bool is_phase2() const {
-        return (N_PhaseType == PhaseType::Phase2_456 ||
-                N_PhaseType == PhaseType::Phase2);
+        return (N_SolverType == SolverType::Phase2_456 ||
+                N_SolverType == SolverType::Phase2);
     }
 
     size_type getMinSteps() const {
@@ -676,19 +676,19 @@ protected:
 
     size_type is_satisfy(const Board<BoardX, BoardY> & player,
                          const Board<TargetX, TargetY> & target) {
-        if (N_PhaseType == PhaseType::Phase1_1) {
+        if (N_SolverType == SolverType::Phase1_1) {
             return this->is_satisfy_phase1_1(player, target);
         }
-        if (N_PhaseType == PhaseType::Phase1_12) {
+        if (N_SolverType == SolverType::Phase1_12) {
             return this->is_satisfy_phase1_12(player, target);
         }
-        else if (N_PhaseType == PhaseType::Phase1_123) {
+        else if (N_SolverType == SolverType::Phase1_123) {
             return this->is_satisfy_phase1_123(player, target);
         }
-        else if (N_PhaseType == PhaseType::Phase2_456) {
+        else if (N_SolverType == SolverType::Phase2_456) {
             return this->is_satisfy_phase2_456(player, target);
         }
-        else if (N_PhaseType == PhaseType::Phase2) {
+        else if (N_SolverType == SolverType::Phase2) {
             return this->is_satisfy_phase2(player, target);
         }
         else {
@@ -702,19 +702,19 @@ protected:
                          const Board<TargetX, TargetY> target[4],
                          size_type target_len) {
         if (AllowRotate) {
-            if (N_PhaseType == PhaseType::Phase1_1) {
+            if (N_SolverType == SolverType::Phase1_1) {
                 return this->is_satisfy_phase1_1(player, target, target_len);
             }
-            if (N_PhaseType == PhaseType::Phase1_12) {
+            if (N_SolverType == SolverType::Phase1_12) {
                 return this->is_satisfy_phase1_12(player, target, target_len);
             }
-            else if (N_PhaseType == PhaseType::Phase1_123) {
+            else if (N_SolverType == SolverType::Phase1_123) {
                 return this->is_satisfy_phase1_123(player, target, target_len);
             }
-            else if (N_PhaseType == PhaseType::Phase2_456) {
+            else if (N_SolverType == SolverType::Phase2_456) {
                 return this->is_satisfy_phase2_456(player, target, target_len);
             }
-            else if (N_PhaseType == PhaseType::Phase2) {
+            else if (N_SolverType == SolverType::Phase2) {
                 return this->is_satisfy_phase2(player, target, target_len);
             }
             else {

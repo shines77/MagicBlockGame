@@ -91,9 +91,6 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\Game.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\Solver.h">
-      <Filter>src\TwoEndpoint</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\internal\BaseSolver.h">
       <Filter>src\internal</Filter>
     </ClInclude>
@@ -105,6 +102,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Solver.h">
       <Filter>src\v2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\ForwardSolver.h">
+      <Filter>src\TwoEndpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\BackwardSolver.h">
+      <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
