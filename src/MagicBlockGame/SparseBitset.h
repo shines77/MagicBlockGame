@@ -536,6 +536,7 @@ public:
 
         Container * getChild(std::uint16_t value) const final {
             int index = this->indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, value);
+            assert(index >= kInvalidIndex32);
             if (index != kInvalidIndex32) {
                 Container * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
                 return child;
@@ -545,6 +546,7 @@ public:
 
         bool hasChild(std::uint16_t value, Container *& child) const final {
             int index = this->indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, value);
+            assert(index >= kInvalidIndex32);
             if (index != kInvalidIndex32) {
                 Container * nextChild = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
                 assert(nextChild != nullptr);
@@ -674,11 +676,12 @@ public:
 
         bool hasChild(std::uint16_t value, Container *& child) const final {
             child = nullptr;
-            return this->hasLeaf(value);;
+            return this->hasLeaf(value);
         }
 
         bool hasLeaf(std::uint16_t value) const final {
             int index = indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, value);
+            assert(index >= kInvalidIndex32);
             return (index != kInvalidIndex32);
         }
 

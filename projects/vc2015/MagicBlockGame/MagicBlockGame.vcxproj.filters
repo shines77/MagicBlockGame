@@ -17,6 +17,9 @@
     <Filter Include="src\internal">
       <UniqueIdentifier>{767cb640-5a1a-424a-be4d-d50d7a02bf44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\v2">
+      <UniqueIdentifier>{28337b17-e245-406c-901e-9d7db178f621}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h">
@@ -96,6 +99,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlockGame\internal\BaseGame.h">
       <Filter>src\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Game.h">
+      <Filter>src\v2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Solver.h">
+      <Filter>src\v2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

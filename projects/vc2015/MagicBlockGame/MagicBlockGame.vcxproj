@@ -44,6 +44,8 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\Utils.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Game.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Solver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Game.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Solver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Value128.h" />
   </ItemGroup>
   <ItemGroup>
