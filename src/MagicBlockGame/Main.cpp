@@ -11,6 +11,9 @@
 #define __AVX2__
 #endif
 
+#define _USE_SSE2_  1
+#define _USE_AVX2_  1
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdlib>

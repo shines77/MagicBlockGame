@@ -187,12 +187,12 @@ public:
             }
 
             assert(sorted <= size);
-#ifdef __AVX2__
+#if _USE_AVX2_
             if (sorted < size)
                 return (int)(Algorithm::find_uint16_avx2((std::uint16_t *)ptr, sorted, size, value));
             else
                 return kInvalidIndex32;
-#elif __SSE2__
+#elif _USE_SSE2_
             if (sorted < size)
                 return (int)(Algorithm::find_uint16_sse2((std::uint16_t *)ptr, sorted, size, value));
             else
