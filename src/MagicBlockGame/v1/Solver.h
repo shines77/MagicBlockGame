@@ -97,7 +97,10 @@ private:
             }
         }
         else if (this->is_phase2()) {
-            this->player_board_ = this->data_->player_board;
+            //
+            // We need to use setPlayerBoard(...) to setting player board in phase 2.
+            //
+            //this->player_board_ = this->data_->player_board;
         }
     }
 
