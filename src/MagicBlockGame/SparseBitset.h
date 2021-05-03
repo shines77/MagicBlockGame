@@ -22,7 +22,8 @@
 #include "Value128.h"
 #include "Algorithm.h"
 
-#define SPARSEBITSET_USE_TRIE_INFO  0
+#define SPARSEBITSET_USE_INDEX_SORT     0
+#define SPARSEBITSET_USE_TRIE_INFO      0
 
 namespace MagicBlock {
 
@@ -180,12 +181,13 @@ public:
         int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t sorted, std::uint16_t value) const {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
+#if SPARSEBITSET_USE_INDEX_SORT
             if (sorted > 0) {
                 int index = Algorithm::binary_search((std::uint16_t *)ptr, 0, sorted, value);
                 if (index != kInvalidIndex32)
                     return index;
             }
-
+#endif
             assert(sorted <= size);
 #if _USE_AVX2_
             if (sorted < size)
@@ -466,6 +468,7 @@ public:
                     std::uint16_t * newIndexEnd = (std::uint16_t *)new_ptr + newCapacity;
                     Container ** valueFirst = (Container **)indexEnd;
                     Container ** newValueFirst = (Container **)newIndexEnd;
+#if SPARSEBITSET_USE_INDEX_SORT
                     if (this->capacity() <= kArraySizeSortThersold) {
                         std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
                         std::memcpy(newValueFirst, valueFirst, sizeof(Container *) * this->capacity());
@@ -491,6 +494,10 @@ public:
                             this->sorted_ = this->capacity_;
                         }
                     }
+#else
+                    std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+                    std::memcpy(newValueFirst, valueFirst, sizeof(Container *) * this->capacity());
+#endif
                     std::free(this->ptr_);
                     this->ptr_ = new_ptr;
                     this->capacity_ = std::uint16_t(newCapacity);
@@ -606,6 +613,7 @@ public:
                 uintptr_t * new_ptr = (uintptr_t *)std::malloc(newSize);
                 if (new_ptr != nullptr) {
                     //assert(this->ptr_ != nullptr);
+#if SPARSEBITSET_USE_INDEX_SORT
                     if (this->capacity() <= kArraySizeSortThersold) {
                         std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
                     }
@@ -627,6 +635,9 @@ public:
                             this->sorted_ = this->capacity_;
                         }
                     }
+#else
+                    std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
+#endif
                     std::free(this->ptr_);
                     this->ptr_ = new_ptr;
                     this->capacity_ = std::uint16_t(newCapacity);
