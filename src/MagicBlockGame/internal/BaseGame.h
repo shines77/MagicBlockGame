@@ -466,7 +466,7 @@ public:
             else {
                 printf("translateMovePath():\n\n"
                        "Move path have error, [from_pos] is a empty gird.\n"
-                       "index = %u, from_pos = (%u, %u), color = %u\n",
+                       "index = %u, from_pos = (%u, %u), color = %u\n\n",
                        (uint32_t)(i + 1), (uint32_t)(from_pos / BoardY),
                        (uint32_t)(from_pos % BoardY), (uint32_t)from_cell);
                 success = false;

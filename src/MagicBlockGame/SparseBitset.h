@@ -29,6 +29,12 @@
 
 namespace MagicBlock {
 
+template <std::size_t BoardX, std::size_t BoardY>
+struct SegmentPair {
+    std::uint16_t fw_segments[BoardY];
+    std::uint16_t bw_segments[BoardY];
+};
+
 template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
 class SparseBitset {
 public:
@@ -51,6 +57,8 @@ public:
     static const int            kInvalidIndex32 = -1;
 
     static const size_type      kArraySizeSortThersold = 64;
+
+    typedef SegmentPair<BoardX, BoardY> segment_pair_t;
 
 #pragma pack(push, 1)
 
@@ -1101,8 +1109,8 @@ public:
         return layer_value;
     }
 
-    void compose_segments_to_board(board_type & board, const int segment_list[8], size_type segment_len) {
-        for (size_type segment = 0; segment < segment_len; segment++) {
+    void compose_segments_to_board(board_type & board, const std::uint16_t segment_list[BoardY]) {
+        for (size_type segment = 0; segment < BoardY; segment++) {
             std::uint32_t value = (std::uint32_t)segment_list[segment];
             size_type y = this->y_index_[segment];
             size_type base_pos = y * BoardY;

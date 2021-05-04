@@ -301,11 +301,12 @@ public:
             }
 
             depth++;
+#if 0
             printf("BackwardSolver:: depth = %u\n", (uint32_t)depth);
             printf("cur.size() = %u, next.size() = %u\n",
                     (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
             printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
-
+#endif
             std::swap(this->cur_stages_, this->next_stages_);
             this->next_stages_.clear();
 
@@ -322,10 +323,12 @@ public:
         this->map_used_ = this->visited_.size();
 
         if (result == 1) {
+#if 0
             printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
             printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
             printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
             printf("\n");
+#endif
         }
 
         this->visited_.display_trie_info();

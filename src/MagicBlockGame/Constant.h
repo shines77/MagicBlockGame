@@ -17,8 +17,8 @@ static const std::size_t MAX_PHASE1_TYPE = 4;
 
 static const std::size_t MAX_PHASE2_DEPTH = 35;
 
-static const std::size_t MAX_FORWARD_DEPTH = 28;
-static const std::size_t MAX_BACKWARD_DEPTH = 48;
+static const std::size_t MAX_FORWARD_DEPTH = 24;
+static const std::size_t MAX_BACKWARD_DEPTH = 20;
 
 struct SolverType {
     enum {
