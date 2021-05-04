@@ -41,6 +41,7 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\BackwardSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\Game.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\ForwardSolver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\TargetBWSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\UnitTest.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\Utils.h" />
     <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Game.h" />

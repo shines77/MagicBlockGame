@@ -19,7 +19,7 @@
 #include <algorithm>    // For std::swap(), until C++11. std::min()
 #include <utility>      // For std::swap(), since C++11
 
-#include "internal/BaseSolver.h"
+#include "TwoEndpoint/TargetBWSolver.h"
 
 #include "Constant.h"
 #include "Color.h"
@@ -38,11 +38,11 @@ template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
           bool AllowRotate, std::size_t N_SolverType,
           typename Phase2CallBack>
-class BackwardSolver : public internal::BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>
+class BackwardSolver : public TargetBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>
 {
 public:
-    typedef internal::BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack> base_type;
-    typedef BackwardSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>       this_type;
+    typedef TargetBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack> base_type;
+    typedef BackwardSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack> this_type;
 
     typedef typename base_type::size_type           size_type;
     typedef typename base_type::ssize_type          ssize_type;
@@ -70,23 +70,6 @@ private:
     std::vector<stage_type> cur_stages_;
     std::vector<stage_type> next_stages_;
 
-    void init() {
-        assert(this->data_ != nullptr);
-
-        this->player_board_ = this->data_->player_board;
-        for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
-            this->target_board_[i] = this->data_->target_board[i];
-        }
-        if (AllowRotate)
-            this->target_len_ = this->data_->target_len;
-        else
-            this->target_len_ = 1;
-
-        this->count_target_color_nums(this->target_board_[0]);
-
-        this->data_->phase1.init(kDefaultSearchDepthLimit);
-    }
-
 public:
     BackwardSolver(shared_data_type * data) : base_type(data) {
         this->init();
@@ -98,6 +81,14 @@ public:
 
     void destory() {
         // TODO:
+    }
+
+    bitset_type & visited() {
+        return this->visited_;
+    }
+
+    const bitset_type & visited() const {
+        return this->visited_;
     }
 
     void respawn() {
@@ -114,24 +105,30 @@ public:
     int bitset_solve(size_type depth, size_type max_depth) {
         int result = 0;
         if (depth == 0) {
-            size_u satisfy_result = this->is_satisfy(this->player_board_,
-                                                     this->target_board_,
-                                                     this->target_len_);
-            if (satisfy_result.low != 0) {
-                return 1;
-            }
+            for (size_type i = 0; i < this->target_len_; i++) {
+                std::vector<Position> unknown_list;
+                this->find_all_colors(this->player_board_[i], Color::Unknown, unknown_list);
 
-            Position empty;
-            bool found_empty = this->find_empty(this->player_board_, empty);
-            if (found_empty) {
-                stage_type start;
-                start.empty = empty;
-                start.last_dir = uint8_t(-1);
-                start.rotate_type = 0;
-                start.board = this->player_board_;
+                for (size_type n = 0; n < unknown_list.size(); n++) {
+                    Position empty_pos = unknown_list[i];
+                    assert(this->player_board_[i].cells[empty_pos] == Color::Unknown);
+                    // Setting empty color
+                    this->player_board_[i].cells[empty_pos] = Color::Empty;
 
-                this->visited_.append(start.board);
-                this->cur_stages_.push_back(start);
+                    stage_type start;
+                    start.empty = unknown_list[i];
+                    start.last_dir = uint8_t(-1);
+                    start.rotate_type = uint8_t(i);
+                    start.board = this->player_board_[i];
+
+                    // Restore unknown color
+                    this->player_board_[i].cells[empty_pos] = Color::Unknown;
+
+                    bool insert_new = this->visited_.try_append(start.board);
+                    if (!insert_new)
+                            continue;
+                    this->cur_stages_.push_back(start);
+                }
             }
         }
 
@@ -167,25 +164,11 @@ public:
                         next_stage.move_path.push_back(next_move);
 
                         this->next_stages_.push_back(next_stage);
-
-                        size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
-                        size_type satisfy_mask = satisfy_result.low;
-                        if (satisfy_mask != 0) {
-                            result = 1;
-
-                            this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            break;
-                        }
-                    }
-
-                    if (result == 1) {
-                        break;
                     }
                 }
 
                 depth++;
-                printf("depth = %u\n", (uint32_t)depth);
+                printf("BackwardSolver:: depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n",
                         (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
@@ -193,7 +176,7 @@ public:
                 std::swap(this->cur_stages_, this->next_stages_);
                 this->next_stages_.clear();
 
-                if (result != 1 && depth >= max_depth) {
+                if (depth >= max_depth) {
                     exit = true;
                     result = -1;
                 }

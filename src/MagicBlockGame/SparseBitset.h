@@ -163,6 +163,14 @@ public:
         void resize(size_type newSize) {
         }
 
+        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) {
+            assert(size <= kArraySizeThreshold);
+            assert(size <= kMaxArraySize);
+            std::uint16_t * target = (std::uint16_t *)ptr + size;
+            assert(target != nullptr);
+            *target = value;
+        }
+
         int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) const {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
@@ -213,12 +221,11 @@ public:
 #endif
         }
 
-        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) {
-            assert(size <= kArraySizeThreshold);
-            assert(size <= kMaxArraySize);
-            std::uint16_t * target = (std::uint16_t *)ptr + size;
-            assert(target != nullptr);
-            *target = value;
+        std::uint16_t valueOf(std::uintptr_t * ptr, std::uint16_t index) const {
+            assert(index != kInvalidIndex);
+            assert(index >= 0 && index < (std::uint16_t)kMaxArraySize);
+            std::uint16_t * value = (std::uint16_t *)ptr + index;
+            return *value;
         }
     };
 
@@ -442,6 +449,15 @@ public:
             return this->appendLeaf(static_cast<std::uint16_t>(value));
         }
 
+        virtual int indexOf(std::uint16_t index) const {
+            // Not implemented!
+            return kInvalidIndex;
+        }
+
+        int indexOf(size_type index) const {
+            return this->indexOf(static_cast<std::uint16_t>(index));
+        }
+
         virtual Container * valueOf(int index) const {
             // Not implemented!
             return nullptr;
@@ -597,7 +613,13 @@ public:
             return container;
         }
 
+        int indexOf(std::uint16_t index) const final {
+            assert(index < this->size_);
+            return this->indexArray_.valueOf(this->ptr_, index);
+        }
+
         Container * valueOf(int index) const final {
+            assert(index < (int)this->size_);
             return this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
         }
     };
@@ -722,7 +744,13 @@ public:
             return nullptr;
         }
 
+        int indexOf(std::uint16_t index) const final {
+            assert(index < this->size_);
+            return this->indexArray_.valueOf(this->ptr_, index);
+        }
+
         Container * valueOf(int index) const final {
+            assert(index < (int)this->size_);
             return nullptr;
         }
     };
@@ -814,7 +842,14 @@ public:
             return container;
         }
 
+        int indexOf(std::uint16_t index) const final {
+            assert(index < this->size_);
+            bool exists = this->bitset_.test(index);
+            return ((exists) ? index : kInvalidIndex32);
+        }
+
         Container * valueOf(int index) const final {
+            assert(index < (int)this->size_);
             bool exists = this->bitset_.test(index);
             if (exists)
                 return this->valueArray_.valueOf(this->ptr_, index);
@@ -895,8 +930,15 @@ public:
             return nullptr;
         }
 
+        int indexOf(std::uint16_t index) const final {
+            assert(index < this->size_);
+            bool exists = this->bitset_.test(index);
+            return ((exists) ? index : kInvalidIndex32);
+        }
+
         Container * valueOf(int index) const final {
             // Not supported, do nothing !!
+            assert(index < (int)this->size_);
             return nullptr;
         }
     };
@@ -972,6 +1014,14 @@ public:
         this->destroy();
     }
 
+    Container * root() {
+        return this->root_;
+    }
+
+    const Container * root() const {
+        return this->root_;
+    }
+
     size_type size() const {
         return this->size_;
     }
@@ -980,7 +1030,7 @@ public:
         this->destroy_trie();
     }
 
-    Container * create_new(type = NodeType::BitmapContainer) {
+    Container * create_new(size_type type = NodeType::BitmapContainer) {
         Container * container = nullptr;
         if (this->root_ == nullptr) {
             if (type == NodeType::ArrayContainer)

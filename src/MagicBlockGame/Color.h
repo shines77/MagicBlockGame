@@ -7,17 +7,18 @@ namespace MagicBlock {
 
 struct Color {
     enum {
-        Empty,
-        First,
-        Red = First,
-        Green,
-        Blue,
-        White,
-        Orange,
-        Yellow,
-        Last,
-        Unknown = Last,
-        Maximum
+        Empty,              // 0
+        First,              // 1
+        Red = First,        // 1
+        Green,              // 2
+        Blue,               // 3
+        White,              // 4
+        Orange,             // 5
+        Yellow,             // 6
+        Unknown,            // 7
+        Last = Unknown,     // 7
+        Illegal,            // 8
+        Maximum = Illegal   // 8
     };
 
     static uint8_t charToColor(uint8_t value) {
@@ -37,8 +38,33 @@ struct Color {
             return Color::Orange;
         case 'Y':
             return Color::Yellow;
-        default:
+        case '?':
             return Color::Unknown;
+        default:
+            return Color::Illegal;
+        }
+    }
+
+    static const char * colorToChar(size_t color) {
+        switch (color) {
+            case Color::Empty:
+                return "E";
+            case Color::Red:
+                return "R";
+            case Color::Green:
+                return "G";
+            case Color::Blue:
+                return "B";
+            case Color::White:
+                return "W";
+            case Color::Orange:
+                return "O";
+            case Color::Yellow:
+                return "Y";
+            case Color::Unknown:
+                return "?";
+            default:
+                return "*";
         }
     }
 
@@ -62,29 +88,6 @@ struct Color {
                 return "Unknown";
             default:
                 return "Illegal";
-        }
-    }
-
-    static const char * toShortString(size_t color) {
-        switch (color) {
-            case Color::Empty:
-                return "E";
-            case Color::Red:
-                return "R";
-            case Color::Green:
-                return "G";
-            case Color::Blue:
-                return "B";
-            case Color::White:
-                return "W";
-            case Color::Orange:
-                return "O";
-            case Color::Yellow:
-                return "Y";
-            case Color::Unknown:
-                return "*";
-            default:
-                return "?";
         }
     }
 };

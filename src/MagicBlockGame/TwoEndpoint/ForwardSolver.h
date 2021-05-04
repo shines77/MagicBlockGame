@@ -83,7 +83,6 @@ private:
             this->target_len_ = 1;
 
         this->count_target_color_nums(this->target_board_[0]);
-        this->data_->phase1.init(kDefaultSearchDepthLimit);
     }
 
 public:
@@ -97,6 +96,14 @@ public:
 
     void destory() {
         // TODO:
+    }
+
+    bitset_type & visited() {
+        return this->visited_;
+    }
+
+    const bitset_type & visited() const {
+        return this->visited_;
     }
 
     void respawn() {
@@ -166,25 +173,11 @@ public:
                         next_stage.move_path.push_back(next_move);
 
                         this->next_stages_.push_back(next_stage);
-
-                        size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
-                        size_type satisfy_mask = satisfy_result.low;
-                        if (satisfy_mask != 0) {
-                            result = 1;
-
-                            this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            break;
-                        }
-                    }
-
-                    if (result == 1) {
-                        break;
                     }
                 }
 
                 depth++;
-                printf("depth = %u\n", (uint32_t)depth);
+                printf("ForwardSolver::  depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n",
                         (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
@@ -192,7 +185,7 @@ public:
                 std::swap(this->cur_stages_, this->next_stages_);
                 this->next_stages_.clear();
 
-                if (result != 1 && depth >= max_depth) {
+                if (depth >= max_depth) {
                     exit = true;
                     result = -1;
                 }

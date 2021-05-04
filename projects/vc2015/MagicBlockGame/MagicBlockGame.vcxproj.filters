@@ -109,6 +109,9 @@
     <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\BackwardSolver.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\TargetBWSolver.h">
+      <Filter>src\TwoEndpoint</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlockGame\UnitTest.cpp">

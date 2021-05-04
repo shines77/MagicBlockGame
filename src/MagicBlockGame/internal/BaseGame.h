@@ -508,7 +508,7 @@ public:
             size_type dir       = iter.dir;
             printf("    [%2u]: [%s], %c%u --> %c%u, dir: %-5s (%u)\n",
                    (uint32_t)(index + 1),
-                   Color::toShortString(color),
+                   Color::colorToChar(color),
                    (uint32_t)posToChr(from_pos / BoardY), (uint32_t)(from_pos % BoardY) + 1,
                    (uint32_t)posToChr(move_pos / BoardY), (uint32_t)(move_pos % BoardY) + 1,
                    Direction::toString(dir),
