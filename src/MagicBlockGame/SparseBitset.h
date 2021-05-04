@@ -1024,6 +1024,7 @@ public:
 
     void destroy() {
         this->destroy_trie();
+        this->size_ = 0;
     }
 
     Container * create_root(size_type type = NodeType::BitmapContainer) {

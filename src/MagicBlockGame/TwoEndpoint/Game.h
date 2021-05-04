@@ -330,19 +330,23 @@ public:
 
                 std::vector<Position> fw_move_path;
                 Value128 fw_board_value = this->fw_answer_board_.value128();
-                bool fw_found = forward_solver.find_board_in_last(fw_board_value, fw_move_path);
+                bool fw_found = forward_solver.find_board_in_last(fw_board_value, this->fw_answer_board_, fw_move_path);
                 if (fw_found) {
-                    printf("Forward solver found value.\n\n");
+                    printf("-----------------------------------------------\n\n");
+                    printf("ForwardSolver: found target value in last depth.\n\n");
                     printf("Move path size: %u\n\n", (std::uint32_t)fw_move_path.size());
                 }
 
                 std::vector<Position> bw_move_path;
                 Value128 bw_board_value = this->bw_answer_board_.value128();
-                bool bw_found = backward_solver.find_board_in_last(bw_board_value, bw_move_path);
+                bool bw_found = backward_solver.find_board_in_last(bw_board_value, this->bw_answer_board_, bw_move_path);
                 if (bw_found) {
-                    printf("Backward solver found value.\n\n");
+                    printf("-----------------------------------------------\n\n");
+                    printf("BackwardSolver: found target value in last depth.\n\n");
                     printf("Move path size: %u\n\n", (std::uint32_t)bw_move_path.size());
                 }
+
+                printf("-----------------------------------------------\n\n");
 
                 forward_solver.clear_prev_depth();
                 backward_solver.clear_prev_depth();
@@ -352,6 +356,35 @@ public:
 
                 base_type::display_player_board("Forward answer:", this->fw_answer_board_);
                 base_type::display_player_board("Backward answer:", this->bw_answer_board_);
+
+                printf("-----------------------------------------------\n\n");
+                System::pause();
+
+                fw_move_path.clear();
+                forward_solver.respawn();
+
+                forward_status = forward_solver.bitset_find_board(fw_board_value, this->fw_answer_board_,
+                                                                  max_forward_depth, fw_move_path);
+                if (forward_status == 1) {
+                    printf("-----------------------------------------------\n\n");
+                    printf("ForwardSolver::bitset_find_board(): found target value.\n\n");
+                    printf("Move path size: %u\n\n", (std::uint32_t)fw_move_path.size());
+                }
+
+                printf("-----------------------------------------------\n\n");
+
+                bw_move_path.clear();
+                backward_solver.respawn();
+
+                backward_status = backward_solver.bitset_find_board(bw_board_value, this->bw_answer_board_,
+                                                                    max_backward_depth, bw_move_path);
+                if (backward_status == 1) {
+                    printf("-----------------------------------------------\n\n");
+                    printf("BackwardSolver::bitset_find_board(): found target value.\n\n");
+                    printf("Move path size: %u\n\n", (std::uint32_t)bw_move_path.size());
+                }
+
+                printf("-----------------------------------------------\n\n");
 
                 this->move_path_ = forward_solver.getMovePath();
                 size_type total_steps = forward_solver.getMovePath().size() +
