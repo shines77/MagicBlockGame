@@ -213,8 +213,8 @@ public:
                             phase2_solver.setPlayerBoard(stage_list[n].board);
                             phase2_solver.setRotateType(stage_list[n].rotate_type);
 
-                            bool phase2_solvable = phase2_solver.bitset_solve(out_rotate_type, phase_search_cb);
-                            //bool phase2_solvable = phase2_solver.solve(out_rotate_type);
+                            //bool phase2_solvable = phase2_solver.bitset_solve(out_rotate_type, phase_search_cb);
+                            bool phase2_solvable = phase2_solver.solve(out_rotate_type);
                             if (phase2_solvable) {
                                 solvable = true;
                                 this->move_path_ = phase2_solver.getMovePath();

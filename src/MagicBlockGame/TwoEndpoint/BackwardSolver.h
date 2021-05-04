@@ -180,6 +180,7 @@ public:
                     exit = true;
                     result = -1;
                 }
+                (void)exit;
             }
 
             this->map_used_ = this->visited_.size();
