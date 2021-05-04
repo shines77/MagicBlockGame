@@ -426,10 +426,6 @@ public:
         return 0;
     }
 
-    const char posToChr(size_type pos) const {
-        return (char)('A' + (uint8_t)(pos % 256));
-    }
-
     bool translateMovePath(const std::vector<Position> & move_path) {
         bool success = true;
 
@@ -437,93 +433,46 @@ public:
         this->answer_.clear();
 
         Board<BoardX, BoardY> board(this->data_.player_board);
-        size_type index = 0;
         uint8_t from_pos, move_pos;
+        uint8_t move_cell, from_cell;
         uint8_t last_dir = uint8_t(-1);
-        if (move_path.size() > 0) {
-            index++;
-            move_pos = move_path[0].value;
-            uint8_t move_cell = board.cells[move_pos];
+        Position empty_pos;
+        bool found_empty = this->find_empty(board, empty_pos);
+        if (!found_empty) {
+            empty_pos = uint8_t(-1);
+        }
+        move_pos = empty_pos;
+        for (size_type i = 0; i < move_path.size(); i++) {
+            if (move_pos != uint8_t(-1))
+                move_cell = board.cells[move_pos];
+            else
+                move_cell = Color::Unknown;
             assert_color(move_cell);
-            if (move_cell == Color::Empty) {
-                for (size_type i = 1; i < move_path.size(); i++) {
-                    from_pos = move_path[i].value;
-                    uint8_t from_cell = board.cells[from_pos];
-                    assert_color(from_cell);
-                    if (from_cell != Color::Empty) {
-                        last_dir = Direction::template getDir<BoardX, BoardY>(from_pos, move_pos);
-                        MoveInfo move_info;
-                        move_info.from_pos = from_pos;
-                        move_info.move_pos = move_pos;
-                        move_info.color = board.cells[from_pos];
-                        move_info.dir = last_dir;
-                        this->answer_.push_back(move_info);
+            from_pos = move_path[i].value;
+            from_cell = board.cells[from_pos];
+            assert_color(from_cell);
+            if ((move_cell == Color::Empty || move_cell == Color::Unknown) &&
+                (from_cell != Color::Empty)) {
+                last_dir = Direction::template getDir<BoardX, BoardY>(from_pos, move_pos);
+                MoveInfo move_info;
+                move_info.from_pos = from_pos;
+                move_info.move_pos = move_pos;
+                move_info.color = from_cell;
+                move_info.dir = last_dir;
+                this->answer_.push_back(move_info);
 
-                        std::swap(board.cells[from_pos], board.cells[move_pos]);
-                    }
-                    else {
-                        printf("translateMovePath():\n\n"
-                               "Move path have error, [from_pos] is a empty gird.\n"
-                               "index = %u, from_pos = (%u, %u), color = %u\n",
-                               (uint32_t)(index + 1), (uint32_t)(from_pos / BoardY),
-                               (uint32_t)(from_pos % BoardY), (uint32_t)from_cell);
-                        success = false;
-                        break;
-                    }
-                    move_pos = from_pos;
-                    index++;
-                }
-
-                if (success) {
-                    bool foundLastStep = false;
-                    move_cell = board.cells[move_pos];
-                    assert_color(move_cell);
-                    if (move_cell == Color::Empty) {
-                        const std::vector<Move> & empty_moves = this->data_.empty_moves[move_pos];
-                        size_type total_moves = empty_moves.size();
-                        for (size_type n = 0; n < total_moves; n++) {
-                            uint8_t dir = empty_moves[n].dir;
-                            from_pos = empty_moves[n].pos;
-                            uint8_t cur_dir = Direction::template getDir<BoardX, BoardY>(from_pos, move_pos);
-                            assert(dir != cur_dir);
-                            if (cur_dir == last_dir)
-                                continue;
-
-                            std::swap(board.cells[from_pos], board.cells[move_pos]);
-
-                            if (this->partial_target_is_satisfy(board,
-                                                                this->data_.target_board,
-                                                                this->data_.target_len,
-                                                                0, TargetX, 0, TargetY)) {
-                                MoveInfo move_info;
-                                move_info.from_pos = from_pos;
-                                move_info.move_pos = move_pos;
-                                move_info.color = board.cells[move_pos];
-                                move_info.dir = cur_dir;
-                                this->answer_.push_back(move_info);
-                                foundLastStep = true;
-                                break;
-                            }
-                            else {
-                                std::swap(board.cells[from_pos], board.cells[move_pos]);
-                            }
-                        }
-                    }
-
-                    if (!foundLastStep) {
-                        printf("translateMovePath():\n\n"
-                               "The last step move is wrong.\n\n");
-                    }
-                }
+                std::swap(board.cells[from_pos], board.cells[move_pos]);
             }
             else {
                 printf("translateMovePath():\n\n"
-                       "Move path have error, [move_pos] is not a empty gird,\n"
-                       "index = %u, from_pos = (%u, %u), color = %u\n\n",
-                       (uint32_t)(index + 1), (uint32_t)(move_pos / BoardY),
-                       (uint32_t)(move_pos % BoardY), (uint32_t)move_cell);
+                       "Move path have error, [from_pos] is a empty gird.\n"
+                       "index = %u, from_pos = (%u, %u), color = %u\n",
+                       (uint32_t)(i + 1), (uint32_t)(from_pos / BoardY),
+                       (uint32_t)(from_pos % BoardY), (uint32_t)from_cell);
                 success = false;
+                break;
             }
+            move_pos = from_pos;
         }
 
         //printf("translateMovePath() end ...\n\n");
@@ -534,15 +483,15 @@ public:
         size_type index = 0;
         printf("Answer_Move_Path[%u] = {\n", (uint32_t)answer.size());
         for (auto iter : answer) {
-            size_type from_pos  = iter.from_pos.value;
-            size_type move_pos  = iter.move_pos.value;
+            size_type from_pos  = iter.from_pos;
+            size_type move_pos  = iter.move_pos;
             size_type color     = iter.color;
             size_type dir       = iter.dir;
             printf("    [%2u]: [%s], %c%u --> %c%u, dir: %-5s (%u)\n",
                    (uint32_t)(index + 1),
                    Color::colorToChar(color),
-                   (uint32_t)posToChr(from_pos / BoardY), (uint32_t)(from_pos % BoardY) + 1,
-                   (uint32_t)posToChr(move_pos / BoardY), (uint32_t)(move_pos % BoardY) + 1,
+                   (uint32_t)Position::posToChr(from_pos / BoardY), (uint32_t)(from_pos % BoardY) + 1,
+                   (uint32_t)Position::posToChr(move_pos / BoardY), (uint32_t)(move_pos % BoardY) + 1,
                    Direction::toString(dir),
                    (uint32_t)dir);
             index++;

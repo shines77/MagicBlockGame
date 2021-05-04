@@ -113,6 +113,13 @@ struct Position {
     operator uint64_t () const {
         return static_cast<uint64_t>(this->value);
     }
+
+    static const char posToChr(size_t pos) {
+        if (pos != uint8_t(-1))
+            return (char)('A' + (uint8_t)(pos % 256));
+        else
+            return '?';
+    }
 };
 
 struct Move {

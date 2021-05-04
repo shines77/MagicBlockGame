@@ -101,15 +101,9 @@ public:
         this->next_stages_.clear();
     }
 
-    bool find_board_in_last(const Value128 & target_value,
-                            const Board<BoardX, BoardY> & target_board,
-                            std::vector<Position> & move_path) {
+    bool find_board_in_last(const Value128 & target_value, std::vector<Position> & move_path) {
         for (size_type i = 0; i < this->cur_stages_.size(); i++) {
             const stage_type & stage = this->cur_stages_[i];
-            if (stage.board == target_board) {
-                move_path = stage.move_path;
-                return true;
-            }
             const Value128 & value = stage.board.value128();
             if (value == target_value) {
                 move_path = stage.move_path;
@@ -118,10 +112,6 @@ public:
         }
         for (size_type i = 0; i < this->next_stages_.size(); i++) {
             const stage_type & stage = this->next_stages_[i];
-            if (stage.board == target_board) {
-                move_path = stage.move_path;
-                return true;
-            }
             const Value128 & value = stage.board.value128();
             if (value == target_value) {
                 move_path = stage.move_path;
@@ -145,9 +135,9 @@ public:
                     this->player_board_[i].cells[empty_pos] = Color::Empty;
 
                     stage_type start;
-                    start.empty = unknown_list[i];
+                    start.empty = empty_pos;
                     start.last_dir = uint8_t(-1);
-                    start.rotate_type = uint8_t(i);
+                    start.rotate_type = uint8_t((i & 0x03U) | (size_type(empty_pos) << 2U));
                     start.board = this->player_board_[i];
 
                     // Restore unknown color
@@ -189,10 +179,9 @@ public:
 
                         next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
-                        next_stage.rotate_type = 0;
+                        next_stage.rotate_type = stage.rotate_type;
                         next_stage.move_path = stage.move_path;
-                        Position next_move(stage.empty);
-                        next_stage.move_path.push_back(next_move);
+                        next_stage.move_path.push_back(move_pos);
 
                         this->next_stages_.push_back(next_stage);
                     }
@@ -226,8 +215,7 @@ public:
         return result;
     }
 
-    int bitset_find_board(const Value128 & target_value, const Board<BoardX, BoardY> & target_board,
-                          size_type max_depth, std::vector<Position> & move_path) {
+    int bitset_find_board(const Value128 & target_value, size_type max_depth, std::vector<Position> & move_path) {
         int result = 0;
         size_type depth = 0;
 
@@ -242,9 +230,9 @@ public:
                 this->player_board_[i].cells[empty_pos] = Color::Empty;
 
                 stage_type start;
-                start.empty = unknown_list[i];
+                start.empty = empty_pos;
                 start.last_dir = uint8_t(-1);
-                start.rotate_type = uint8_t(i);
+                start.rotate_type = uint8_t((i & 0x03U) | (size_type(empty_pos) << 2U));
                 start.board = this->player_board_[i];
 
                 // Restore unknown color
@@ -290,15 +278,15 @@ public:
 
                     next_stage.empty = move_pos;
                     next_stage.last_dir = cur_dir;
-                    next_stage.rotate_type = 0;
+                    next_stage.rotate_type = stage.rotate_type;
                     next_stage.move_path = stage.move_path;
-                    Position next_move(stage.empty);
-                    next_stage.move_path.push_back(next_move);
+                    next_stage.move_path.push_back(move_pos);
 
                     Value128 board_value = next_stage.board.value128();
-                    if (board_value == target_value || next_stage.board == target_board) {
+                    if (board_value == target_value) {
                         result = 1;
                         exit = true;
+                        this->rotate_type_ = next_stage.rotate_type;
                         move_path = next_stage.move_path;
                         this->move_path_ = next_stage.move_path;
                         break;
@@ -321,7 +309,7 @@ public:
             std::swap(this->cur_stages_, this->next_stages_);
             this->next_stages_.clear();
 
-            if (result != 1 && depth >= max_depth) {
+            if (result != 1 && (depth >= max_depth || this->cur_stages_.size() == 0)) {
                 result = -1;
                 exit = true;
             }

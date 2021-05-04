@@ -116,15 +116,9 @@ public:
         this->next_stages_.clear();
     }
 
-    bool find_board_in_last(const Value128 & target_value,
-                            const Board<BoardX, BoardY> & target_board,
-                            std::vector<Position> & move_path) {
+    bool find_board_in_last(const Value128 & target_value, std::vector<Position> & move_path) {
         for (size_type i = 0; i < this->cur_stages_.size(); i++) {
             const stage_type & stage = this->cur_stages_[i];
-            if (stage.board == target_board) {
-                move_path = stage.move_path;
-                return true;
-            }
             const Value128 & value = stage.board.value128();
             if (value == target_value) {
                 move_path = stage.move_path;
@@ -133,10 +127,6 @@ public:
         }
         for (size_type i = 0; i < this->next_stages_.size(); i++) {
             const stage_type & stage = this->next_stages_[i];
-            if (stage.board == target_board) {
-                move_path = stage.move_path;
-                return true;
-            }
             const Value128 & value = stage.board.value128();
             if (value == target_value) {
                 move_path = stage.move_path;
@@ -199,8 +189,7 @@ public:
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
                         next_stage.move_path = stage.move_path;
-                        Position next_move(stage.empty);
-                        next_stage.move_path.push_back(next_move);
+                        next_stage.move_path.push_back(move_pos);
 
                         this->next_stages_.push_back(next_stage);
                     }
@@ -234,8 +223,7 @@ public:
         return result;
     }
 
-    int bitset_find_board(const Value128 & target_value, const Board<BoardX, BoardY> & target_board,
-                          size_type max_depth, std::vector<Position> & move_path) {
+    int bitset_find_board(const Value128 & target_value, size_type max_depth, std::vector<Position> & move_path) {
         size_u satisfy_result = this->is_satisfy(this->player_board_,
                                                  this->target_board_,
                                                  this->target_len_);
@@ -285,11 +273,10 @@ public:
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
                         next_stage.move_path = stage.move_path;
-                        Position next_move(stage.empty);
-                        next_stage.move_path.push_back(next_move);
+                        next_stage.move_path.push_back(move_pos);
 
                         Value128 board_value = next_stage.board.value128();
-                        if (board_value == target_value || next_stage.board == target_board) {
+                        if (board_value == target_value) {
                             result = 1;
                             exit = true;
                             move_path = next_stage.move_path;

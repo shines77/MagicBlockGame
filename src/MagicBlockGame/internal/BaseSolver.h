@@ -126,6 +126,10 @@ public:
         return this->target_board_[0];
     }
 
+    size_type getRotateType() const {
+        return this->rotate_type_;
+    }
+
     void setPlayerBoard(const Board<BoardX, BoardY> & board) {
         this->player_board_ = board;
     }

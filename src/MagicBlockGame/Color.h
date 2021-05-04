@@ -43,7 +43,7 @@ struct Color {
             return Color::Orange;
         case 'Y':
             return Color::Yellow;
-        case '?':
+        case '*':
             return Color::Unknown;
         default:
             return Color::Illegal;
@@ -67,9 +67,9 @@ struct Color {
             case Color::Yellow:
                 return "Y";
             case Color::Unknown:
-                return "?";
-            default:
                 return "*";
+            default:
+                return "?";
         }
     }
 

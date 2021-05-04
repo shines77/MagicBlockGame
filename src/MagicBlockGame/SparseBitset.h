@@ -19,6 +19,8 @@
 #include <exception>
 #include <stdexcept>
 
+#include "Color.h"
+#include "Board.h"
 #include "Value128.h"
 #include "Algorithm.h"
 
@@ -998,7 +1000,7 @@ private:
             this->y_index_[yi * 2 + 2] = bottom++;
         }
 #endif
-        this->create_root();
+        this->create_root(NodeType::ArrayContainer);
     }
 
 public:
@@ -1084,7 +1086,7 @@ public:
 #endif
     }
 
-    size_type getLayerValue(const board_type & board, size_type layer) const {
+    size_type get_layer_value(const board_type & board, size_type layer) const {
 #if 1
         size_type y = this->y_index_[layer];
 #else
@@ -1099,13 +1101,29 @@ public:
         return layer_value;
     }
 
+    void compose_segments_to_board(board_type & board, const int segment_list[8], size_type segment_len) {
+        for (size_type segment = 0; segment < segment_len; segment++) {
+            std::uint32_t value = (std::uint32_t)segment_list[segment];
+            size_type y = this->y_index_[segment];
+            size_type base_pos = y * BoardY;
+            for (size_type x = 0; x < BoardX; x++) {
+                std::uint32_t color = value & Color::Mask32;
+                assert(color >= Color::Empty && color < Color::Maximum);
+                size_type pos = base_pos + x;
+                assert(pos < (BoardX * BoardY));
+                board.cells[pos] = (std::uint8_t)color;
+                value >>= Color::Shift32;
+            }
+        }
+    }
+
     bool contains(const board_type & board) const {
         Container * container = this->root_;
         assert(container != nullptr);
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             assert(container->type() == NodeType::ArrayContainer ||
                    container->type() == NodeType::BitmapContainer);
             Container * child;
@@ -1122,7 +1140,7 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             bool is_exists = container->hasLeaf(layer_value);
@@ -1136,7 +1154,7 @@ public:
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             assert(container->type() == NodeType::ArrayContainer ||
                    container->type() == NodeType::BitmapContainer);
             Container * child;
@@ -1155,7 +1173,7 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             bool is_exists = container->hasLeaf(layer_value);
@@ -1177,7 +1195,7 @@ public:
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             if (!insert_new) {
                 assert(container->type() == NodeType::ArrayContainer ||
                        container->type() == NodeType::BitmapContainer);
@@ -1200,7 +1218,7 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             if (!insert_new) {
@@ -1224,7 +1242,7 @@ public:
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             if (!insert_new) {
                 assert(container->type() == NodeType::ArrayContainer ||
                        container->type() == NodeType::BitmapContainer);
@@ -1247,7 +1265,7 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             if (!insert_new) {
@@ -1269,7 +1287,7 @@ public:
         // Normal container
         size_type layer;
         for (layer = last_layer; layer < BoardY - 1; layer++) {
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             if (layer < (BoardY - 2))
                 container = container->append(layer_value);
             else
@@ -1279,7 +1297,7 @@ public:
         // Leaf container
         {
             assert(container != nullptr);
-            size_type layer_value = getLayerValue(board, layer);
+            size_type layer_value = get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             container->appendLeaf(layer_value);
