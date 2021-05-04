@@ -344,8 +344,9 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         Value128 board_value = next_stage.board.value128();
-                        if (visited.count(board_value) > 0)
+                        if (visited.count(board_value) > 0) {
                             continue;
+                        }
 
                         visited.insert(board_value);
 
@@ -513,8 +514,9 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         Value128 board_value = next_stage.board.value128();
-                        if (visited.count(board_value) > 0)
+                        if (visited.count(board_value) > 0) {
                             continue;
+                        }
 
                         visited.insert(board_value);
 
@@ -728,11 +730,13 @@ public:
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 #if 1
                         bool insert_new = visited.try_append(next_stage.board);
-                        if (!insert_new)
+                        if (!insert_new) {
                             continue;
+                        }
 #elif 0
-                        if (visited.contains(next_stage.board))
+                        if (visited.contains(next_stage.board)) {
                             continue;
+                        }
 
                         visited.append(next_stage.board);
 #else
@@ -740,8 +744,9 @@ public:
 
                         size_type last_layer;
                         Container * last_container;
-                        if (visited.contains(next_stage.board, last_layer, last_container))
+                        if (visited.contains(next_stage.board, last_layer, last_container)) {
                             continue;
+                        }
 
                         assert(last_layer >= 0 && last_layer <= BoardY);
                         assert(last_container != nullptr);

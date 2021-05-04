@@ -102,6 +102,31 @@ public:
         this->next_stages_.clear();
     }
 
+    void clear_prev_depth() {
+        std::swap(this->cur_stages_, this->next_stages_);
+        this->next_stages_.clear();
+    }
+
+    bool find_board_in_last(const Value128 & target_value, std::vector<Position> & move_path) {
+        for (size_type i = 0; i < this->cur_stages_.size(); i++) {
+            const stage_type & stage = this->cur_stages_[i];
+            const Value128 & value = stage.board.value128();
+            if (value == target_value) {
+                move_path = stage.move_path;
+                return true;
+            }
+        }
+        for (size_type i = 0; i < this->next_stages_.size(); i++) {
+            const stage_type & stage = this->next_stages_[i];
+            const Value128 & value = stage.board.value128();
+            if (value == target_value) {
+                move_path = stage.move_path;
+                return true;
+            }
+        }
+        return false;
+    }
+
     int bitset_solve(size_type depth, size_type max_depth) {
         int result = 0;
         if (depth == 0) {
@@ -110,7 +135,7 @@ public:
                 this->find_all_colors(this->player_board_[i], Color::Unknown, unknown_list);
 
                 for (size_type n = 0; n < unknown_list.size(); n++) {
-                    Position empty_pos = unknown_list[i];
+                    Position empty_pos = unknown_list[n];
                     assert(this->player_board_[i].cells[empty_pos] == Color::Unknown);
                     // Setting empty color
                     this->player_board_[i].cells[empty_pos] = Color::Empty;
@@ -125,8 +150,9 @@ public:
                     this->player_board_[i].cells[empty_pos] = Color::Unknown;
 
                     bool insert_new = this->visited_.try_append(start.board);
-                    if (!insert_new)
-                            continue;
+                    if (!insert_new) {
+                        continue;
+                    }
                     this->cur_stages_.push_back(start);
                 }
             }
@@ -153,8 +179,9 @@ public:
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
                         bool insert_new = this->visited_.try_append(next_stage.board);
-                        if (!insert_new)
+                        if (!insert_new) {
                             continue;
+                        }
 
                         next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -172,9 +199,6 @@ public:
                 printf("cur.size() = %u, next.size() = %u\n",
                         (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
-
-                std::swap(this->cur_stages_, this->next_stages_);
-                this->next_stages_.clear();
 
                 if (depth >= max_depth) {
                     exit = true;

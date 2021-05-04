@@ -225,7 +225,7 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-#if 1
+#if 0
 #if 1
     solve_magic_block_game_v1<FuncId::BitSetSolver, true>();
 #else

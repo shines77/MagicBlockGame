@@ -92,19 +92,29 @@ public:
         std::uint32_t fw_value32 = (std::uint32_t)fw_value;
         std::uint32_t bw_value32 = (std::uint32_t)bw_value;
         if ((bw_value32 & 0x00000007U) == 0x00000007U) {
-            fw_value32 |= 0x00000007U;
+            if ((fw_value32 & 0x00000007U) != 0) {
+                fw_value32 |= 0x00000007U;
+            }
         }
         if ((bw_value32 & 0x00000038U) == 0x00000038U) {
-            fw_value32 |= 0x00000038U;
+            if ((fw_value32 & 0x00000038U) != 0) {
+                fw_value32 |= 0x00000038U;
+            }
         }
         if ((bw_value32 & 0x000001C0U) == 0x000001C0U) {
-            fw_value32 |= 0x000001C0U;
+            if ((fw_value32 & 0x000001C0U) != 0) {
+                fw_value32 |= 0x000001C0U;
+            }
         }
         if ((bw_value32 & 0x00000E00U) == 0x00000E00U) {
-            fw_value32 |= 0x00000E00U;
+            if ((fw_value32 & 0x00000E00U) != 0) {
+                fw_value32 |= 0x00000E00U;
+            }
         }
         if ((bw_value32 & 0x00007000U) == 0x00007000U) {
-            fw_value32 |= 0x00007000U;
+            if ((fw_value32 & 0x00007000U) != 0) {
+                fw_value32 |= 0x00007000U;
+            }
         }
         return (fw_value32 == bw_value32);
     }
@@ -241,29 +251,52 @@ public:
         }
 
         bool solvable = false;
-        size_type out_rotate_type = 0;
 
         Position empty;
         bool found_empty = this->find_empty(this->data_.player_board, empty);
         if (found_empty) {
             jtest::StopWatch sw;
 
-            TForwardSolver  forward_solver(&this->data_);
+            TForwardSolver forward_solver(&this->data_);
             TBackwardSolver backward_solver(&this->data_);
 
             int forward_status, backward_status;
             size_type forward_depth = 0;
             size_type backward_depth = 0;
 
+            printf("-----------------------------------------------\n\n");
+
             sw.start();
             while (forward_depth < max_forward_depth && backward_depth < max_backward_depth) {
-                printf("-------------------------------------------------\n\n");
-                forward_status  = forward_solver.bitset_solve(forward_depth, max_forward_depth);
-                printf("-----------------------------\n\n");
-                backward_status = backward_solver.bitset_solve(backward_depth, max_backward_depth);
-
-                forward_depth++;
-                backward_depth++;
+                int iterative_type = 0;
+#if 1
+                if (forward_depth > 15) {
+                    size_type fw_visited_size = forward_solver.visited().size();
+                    size_type bw_visited_size = backward_solver.visited().size();
+                    if (fw_visited_size >= bw_visited_size * 2) {
+                        iterative_type = 1;
+                    }
+                    else if (bw_visited_size >= fw_visited_size * 2) {
+                        iterative_type = 2;
+                    }
+                }
+#endif
+                if (iterative_type == 1) {
+                    forward_status  = 0;
+                    backward_status = backward_solver.bitset_solve(backward_depth++, max_backward_depth);
+                    printf("-----------------------------------------------\n\n");
+                }
+                else if (iterative_type == 2) {
+                    forward_status  = forward_solver.bitset_solve(forward_depth++, max_forward_depth);
+                    backward_status = 0;
+                    printf("-----------------------------------------------\n\n");
+                }
+                else {
+                    forward_status  = forward_solver.bitset_solve(forward_depth++, max_forward_depth);
+                    printf("----------------------------------\n\n");
+                    backward_status = backward_solver.bitset_solve(backward_depth++, max_backward_depth);
+                    printf("-----------------------------------------------\n\n");
+                }
 
                 if (forward_status == 1 && backward_status == 1) {
                     solvable = true;
@@ -276,6 +309,17 @@ public:
                     solvable = true;
                     break;
                 }
+
+                if (iterative_type == 1) {
+                    backward_solver.clear_prev_depth();
+                }
+                else if (iterative_type == 2) {
+                    forward_solver.clear_prev_depth();
+                }
+                else {
+                    forward_solver.clear_prev_depth();
+                    backward_solver.clear_prev_depth();
+                }
             }
             sw.stop();
 
@@ -283,6 +327,25 @@ public:
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
                 //System::pause();
+
+                std::vector<Position> fw_move_path;
+                Value128 fw_board_value = this->fw_answer_board_.value128();
+                bool fw_found = forward_solver.find_board_in_last(fw_board_value, fw_move_path);
+                if (fw_found) {
+                    printf("Forward solver found value.\n\n");
+                    printf("Move path size: %u\n\n", (std::uint32_t)fw_move_path.size());
+                }
+
+                std::vector<Position> bw_move_path;
+                Value128 bw_board_value = this->bw_answer_board_.value128();
+                bool bw_found = backward_solver.find_board_in_last(bw_board_value, bw_move_path);
+                if (bw_found) {
+                    printf("Backward solver found value.\n\n");
+                    printf("Move path size: %u\n\n", (std::uint32_t)bw_move_path.size());
+                }
+
+                forward_solver.clear_prev_depth();
+                backward_solver.clear_prev_depth();
 
                 base_type::display_target_board("Target board:", forward_solver.getTargetBoard());
                 base_type::display_player_board("Player board:", forward_solver.getPlayerBoard());
