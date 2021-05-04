@@ -94,7 +94,6 @@ public:
 
         bool solvable = false;
         size_type out_rotate_type = 0;
-        phase2_callback phase_search_cb;
 
         Position empty;
         bool found_empty = this->find_empty(this->data_.player_board, empty);
@@ -113,6 +112,14 @@ public:
                    backward_depth < max_backward_depth) {
                 forward_status  = forward_solver.bitset_solve(forward_depth, max_forward_depth);
                 backward_status = backward_solver.bitset_solve(backward_depth, max_backward_depth);
+
+                if (forward_status == 1 && backward_status == 1) {
+                    solvable = true;
+                    break;
+                }
+
+                forward_depth++;
+                backward_depth++;
             }
             sw.stop();
 

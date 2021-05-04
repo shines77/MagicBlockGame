@@ -65,10 +65,10 @@ public:
 #endif
 
 private:
-    bitset_type visited;
+    bitset_type visited_;
 
-    std::vector<stage_type> cur_stages;
-    std::vector<stage_type> next_stages;
+    std::vector<stage_type> cur_stages_;
+    std::vector<stage_type> next_stages_;
 
     void init() {
         assert(this->data_ != nullptr);
@@ -100,6 +100,17 @@ public:
         // TODO:
     }
 
+    void respawn() {
+        this->clear();
+        this->visited_.create_new();
+    }
+
+    void clear() {
+        this->visited_.destroy();
+        this->cur_stages_.clear();
+        this->next_stages_.clear();
+    }
+
     int bitset_solve(size_type depth, size_type max_depth) {
         int result = 0;
         if (depth == 0) {
@@ -119,17 +130,17 @@ public:
                 start.rotate_type = 0;
                 start.board = this->player_board_;
 
-                this->visited.append(start.board);
-                this->cur_stages.push_back(start);
+                this->visited_.append(start.board);
+                this->cur_stages_.push_back(start);
             }
         }
 
         // Search one depth only
         {
             bool exit = false;
-            if (this->cur_stages.size() > 0) {
-                for (size_type i = 0; i < this->cur_stages.size(); i++) {
-                    const stage_type & stage = this->cur_stages[i];
+            if (this->cur_stages_.size() > 0) {
+                for (size_type i = 0; i < this->cur_stages_.size(); i++) {
+                    const stage_type & stage = this->cur_stages_[i];
 
                     uint8_t empty_pos = stage.empty.value;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
@@ -144,7 +155,7 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
-                        bool insert_new = this->visited.try_append(next_stage.board);
+                        bool insert_new = this->visited_.try_append(next_stage.board);
                         if (!insert_new)
                             continue;
 
@@ -155,7 +166,7 @@ public:
                         Position next_move(stage.empty);
                         next_stage.move_path.push_back(next_move);
 
-                        this->next_stages.push_back(next_stage);
+                        this->next_stages_.push_back(next_stage);
 
                         size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
                         size_type satisfy_mask = satisfy_result.low;
@@ -176,11 +187,11 @@ public:
                 depth++;
                 printf("depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n",
-                        (uint32_t)(this->cur_stages.size()), (uint32_t)(this->next_stages.size()));
-                printf("visited.size() = %u\n\n", (uint32_t)(this->visited.size()));
+                        (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
+                printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
-                std::swap(this->cur_stages, this->next_stages);
-                this->next_stages.clear();
+                std::swap(this->cur_stages_, this->next_stages_);
+                this->next_stages_.clear();
 
                 if (result != 1 && depth >= max_depth) {
                     exit = true;
@@ -188,16 +199,16 @@ public:
                 }
             }
 
-            this->map_used_ = this->visited.size();
+            this->map_used_ = this->visited_.size();
 
             if (result == 1) {
                 printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
-                printf("next.size() = %u\n", (uint32_t)this->cur_stages.size());
+                printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
                 printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
                 printf("\n");
             }
 
-            this->visited.display_trie_info();
+            this->visited_.display_trie_info();
         }
 
         return result;

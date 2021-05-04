@@ -960,8 +960,7 @@ private:
             this->y_index_[yi * 2 + 2] = bottom++;
         }
 #endif
-        this->root_ = new BitmapContainer();
-        //this->root_ = new ArrayContainer();
+        this->create_new();
     }
 
 public:
@@ -979,6 +978,18 @@ public:
 
     void destroy() {
         this->destroy_trie();
+    }
+
+    Container * create_new(type = NodeType::BitmapContainer) {
+        Container * container = nullptr;
+        if (this->root_ == nullptr) {
+            if (type == NodeType::ArrayContainer)
+                container = new ArrayContainer();
+            else
+                container = new BitmapContainer();
+            this->root_ = container;
+        }
+        return container;
     }
 
     void shutdown() {
