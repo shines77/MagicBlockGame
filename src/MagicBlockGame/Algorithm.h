@@ -111,7 +111,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
     static const std::size_t kDoubleStepSize = 2 * kSingelStepSize;
     static const std::size_t kDoubleStepBytes = kDoubleStepSize * sizeof(std::uint16_t);
 
-    static const std::size_t kDefaultSSE2Threshold = 16;
+    static const std::size_t kDefaultSSE2Threshold = 32;
     static const std::size_t kSSE2Threshold = std::max(kDoubleStepSize, kDefaultSSE2Threshold);
 
     std::uint32_t kIndexMask = 0x0000FFFFUL;
@@ -376,7 +376,7 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
     static const std::size_t kDoubleStepSize = 2 * kSingelStepSize;
     static const std::size_t kDoubleStepBytes = kDoubleStepSize * sizeof(std::uint16_t);
 
-    static const std::size_t kDefaultAVX2Threshold = 16;
+    static const std::size_t kDefaultAVX2Threshold = 32;
     static const std::size_t kAVX2Threshold = std::max(kDoubleStepSize, kDefaultAVX2Threshold);
 
     std::uint32_t kIndexMask = 0xFFFFFFFFUL;

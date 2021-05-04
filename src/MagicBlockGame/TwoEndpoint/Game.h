@@ -262,6 +262,9 @@ public:
                 printf("-----------------------------\n\n");
                 backward_status = backward_solver.bitset_solve(backward_depth, max_backward_depth);
 
+                forward_depth++;
+                backward_depth++;
+
                 if (forward_status == 1 && backward_status == 1) {
                     solvable = true;
                     break;
@@ -273,9 +276,6 @@ public:
                     solvable = true;
                     break;
                 }
-
-                forward_depth++;
-                backward_depth++;
             }
             sw.stop();
 
