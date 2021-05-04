@@ -110,6 +110,22 @@ public:
         return this->map_used_;
     }
 
+    Board<BoardX, BoardY> & getPlayerBoard() {
+        return this->player_board_;
+    }
+
+    const Board<BoardX, BoardY> & getPlayerBoard() const {
+        return this->player_board_;
+    }
+
+    Board<TargetX, TargetY> & getTargetBoard() {
+        return this->target_board_[0];
+    }
+
+    const Board<TargetX, TargetY> & getTargetBoard() const {
+        return this->target_board_[0];
+    }
+
     void setPlayerBoard(const Board<BoardX, BoardY> & board) {
         this->player_board_ = board;
     }

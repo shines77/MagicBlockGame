@@ -113,6 +113,30 @@ public:
         return this->map_used_;
     }
 
+    Board<BoardX, BoardY> & getPlayerBoard() {
+        return this->player_board_[0];
+    }
+
+    const Board<BoardX, BoardY> & getPlayerBoard() const {
+        return this->player_board_[0];
+    }
+
+    Board<BoardX, BoardY> & getTargetBoard() {
+        return this->target_board_;
+    }
+
+    const Board<BoardX, BoardY> & getTargetBoard() const {
+        return this->target_board_;
+    }
+
+    Board<TargetX, TargetY> & getFwTargetBoard() {
+        return this->fw_target_board_[0];
+    }
+
+    const Board<TargetX, TargetY> & getFwTargetBoard() const {
+        return this->fw_target_board_[0];
+    }
+
     void setPlayerBoard(const Board<TargetX, TargetY> target_board[4],
                         size_type rotate_type = size_type(-1)) {
         if (AllowRotate) {

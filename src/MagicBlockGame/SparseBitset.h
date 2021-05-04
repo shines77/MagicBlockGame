@@ -843,13 +843,11 @@ public:
         }
 
         int indexOf(std::uint16_t index) const final {
-            assert(index < this->size_);
             bool exists = this->bitset_.test(index);
-            return ((exists) ? index : kInvalidIndex32);
+            return (exists ? index : kInvalidIndex32);
         }
 
         Container * valueOf(int index) const final {
-            assert(index < (int)this->size_);
             bool exists = this->bitset_.test(index);
             if (exists)
                 return this->valueArray_.valueOf(this->ptr_, index);
@@ -931,14 +929,12 @@ public:
         }
 
         int indexOf(std::uint16_t index) const final {
-            assert(index < this->size_);
             bool exists = this->bitset_.test(index);
-            return ((exists) ? index : kInvalidIndex32);
+            return (exists ? index : kInvalidIndex32);
         }
 
         Container * valueOf(int index) const final {
             // Not supported, do nothing !!
-            assert(index < (int)this->size_);
             return nullptr;
         }
     };
@@ -1050,13 +1046,12 @@ public:
         assert(container != nullptr);
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
-            if (child != nullptr) {
-                if (child->type() != NodeType::LeafArrayContainer &&
-                    child->type() != NodeType::LeafBitmapContainer) {
-                    destroy_trie_impl(child, layer + 1);
-                }
-                delete child;
+            assert(child != nullptr);
+            if (child->type() != NodeType::LeafArrayContainer &&
+                child->type() != NodeType::LeafBitmapContainer) {
+                destroy_trie_impl(child, layer + 1);
             }
+            delete child;
         }
     }
 
@@ -1297,15 +1292,15 @@ public:
     }
 
     void count_trie_info_impl(Container * container, size_type layer) {
-        assert(container != nullptr);
 #if SPARSEBITSET_USE_TRIE_INFO
+        assert(container != nullptr);
         size_type layer_size = container->size();
         if (layer_size > this->layer_info_[layer].maxLayerSize) {
             this->layer_info_[layer].maxLayerSize = layer_size;
         }
         this->layer_info_[layer].childCount++;
         this->layer_info_[layer].totalLayerSize += layer_size;
-#endif
+
         if (container->type() == NodeType::LeafArrayContainer ||
             container->type() == NodeType::LeafBitmapContainer) {
             return;
@@ -1313,13 +1308,14 @@ public:
 
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
-            if (child != nullptr) {
-                count_trie_info_impl(child, layer + 1);
-            }
+            assert(child != nullptr);
+            count_trie_info_impl(child, layer + 1);
         }
+#endif
     }
 
     void count_trie_info() {
+#if SPARSEBITSET_USE_TRIE_INFO
         this->clear_trie_info();
 
         Container * container = this->root_;
@@ -1327,26 +1323,26 @@ public:
             return;
         }
 
-#if SPARSEBITSET_USE_TRIE_INFO
         size_type layer_size = container->size();
         if (layer_size > this->layer_info_[0].maxLayerSize) {
             this->layer_info_[0].maxLayerSize = layer_size;
         }
         this->layer_info_[0].childCount++;
         this->layer_info_[0].totalLayerSize += layer_size;
-#endif
+
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
             if (child != nullptr) {
                 count_trie_info_impl(child, 1);
             }
         }
+#endif
     }
 
     void display_trie_info() {
+#if SPARSEBITSET_USE_TRIE_INFO
         this->count_trie_info();
 
-#if SPARSEBITSET_USE_TRIE_INFO
         printf("SparseBitset<T> trie info:\n\n");
         for (size_type i = 0; i < BoardY; i++) {
             printf("[%u]: maxLayerSize = %8u, childCount = %8u, averageSize = %0.2f\n\n",

@@ -21,6 +21,11 @@ struct Color {
         Maximum = Illegal   // 8
     };
 
+    static const std::size_t   Mask    = 0x00000007ULL;
+    static const std::size_t   Shift   = 3;
+    static const std::uint32_t Mask32  = 0x00000007UL;
+    static const std::uint32_t Shift32 = 3;
+
     static uint8_t charToColor(uint8_t value) {
         switch (value) {
         case ' ':

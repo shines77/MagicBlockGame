@@ -22,7 +22,7 @@ static const std::size_t MAX_BACKWARD_DEPTH = 36;
 
 struct SolverType {
     enum {
-        Unknown,
+        Default,
         Full,
         BackwardFull,
         Phase1_1,
