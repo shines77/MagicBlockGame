@@ -91,8 +91,8 @@ void solve_sliding_puzzle()
 
     MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("sliding_puzzle.txt");
-    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
+        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
         return;
     }
 
@@ -122,8 +122,8 @@ void solve_sliding_puzzle_queue()
 
     MagicBlock::v1::Game<5, 5, 3, 3, true> game;
     int readStatus = game.readInput("sliding_puzzle.txt");
-    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
+        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
         return;
     }
 

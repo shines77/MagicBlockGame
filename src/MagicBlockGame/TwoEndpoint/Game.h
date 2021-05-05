@@ -83,11 +83,8 @@ private:
     segment_pair_t              segment_pair_;
     std::vector<segment_pair_t> segment_list_;
 
-    typename TForwardSolver::bitset_type * forward_visited_;
-    typename TBackwardSolver::bitset_type * backward_visited_;
-
 public:
-    Game() : base_type(), forward_visited_(nullptr), backward_visited_(nullptr) {
+    Game() : base_type() {
         this->init();
     }
 
@@ -322,9 +319,6 @@ public:
                     break;
                 }
 
-                this->forward_visited_ = &forward_solver.visited();
-                this->backward_visited_ = &backward_solver.visited();
-
                 int total = this->find_intersection(forward_solver.visited(), backward_solver.visited());
                 if (this->segment_list_.size() > 0) {
                     // Got some answers
@@ -460,9 +454,7 @@ public:
                 stage_type bw_stage;
 
                 for (size_type i = 0; i < this->segment_list_.size(); i++) {
-                    assert(this->forward_visited_ != nullptr);
                     forward_solver.visited().compose_segments_to_board(this->fw_answer_board_, this->segment_list_[i].fw_segments);
-                    assert(this->backward_visited_ != nullptr);
                     backward_solver.visited().compose_segments_to_board(this->bw_answer_board_, this->segment_list_[i].bw_segments);
 
                     fw_stage.move_path.clear();
@@ -513,9 +505,7 @@ public:
                 stage_type fw_stage;
                 stage_type bw_stage;
 
-                assert(this->forward_visited_ != nullptr);
                 forward_solver.visited().compose_segments_to_board(this->fw_answer_board_, this->segment_pair_.fw_segments);
-                assert(this->backward_visited_ != nullptr);
                 backward_solver.visited().compose_segments_to_board(this->bw_answer_board_, this->segment_pair_.bw_segments);
 
                 fw_stage.move_path.clear();
