@@ -271,6 +271,11 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
+    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
+    System::pause();
+#endif
+
+#if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
     System::pause();
 #endif

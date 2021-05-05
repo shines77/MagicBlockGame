@@ -156,7 +156,7 @@ public:
                 if (this->min_steps_ != size_t(-1) || this->best_move_path_.size() > 0) {
                     solvable = true;
                     if (this->translateMovePath(this->best_move_path_)) {
-                        this->displayAnswer(this->answer_);
+                        this->displayAnswer();
                     }
                 }
             }
@@ -246,7 +246,7 @@ public:
                 if (this->min_steps_ != size_type(-1) || this->best_move_path_.size() > 0) {
                     solvable = true;
                     if (this->translateMovePath(this->best_move_path_)) {
-                        this->displayAnswer(this->answer_);
+                        this->displayAnswer();
                     }
                 }
             }
@@ -334,7 +334,7 @@ public:
                 if (this->min_steps_ != size_type(-1) || this->best_move_path_.size() > 0) {
                     solvable = true;
                     if (this->translateMovePath(this->best_move_path_)) {
-                        this->displayAnswer(this->answer_);
+                        this->displayAnswer();
                     }
                 }
             }

@@ -116,12 +116,12 @@ public:
         this->next_stages_.clear();
     }
 
-    bool find_board_in_last(const Value128 & target_value, std::vector<Position> & move_path) {
+    bool find_stage_in_list(const Value128 & target_value, stage_type & target_stage) {
         for (size_type i = 0; i < this->cur_stages_.size(); i++) {
             const stage_type & stage = this->cur_stages_[i];
             const Value128 & value = stage.board.value128();
             if (value == target_value) {
-                move_path = stage.move_path;
+                target_stage = stage;
                 return true;
             }
         }
@@ -129,7 +129,7 @@ public:
             const stage_type & stage = this->next_stages_[i];
             const Value128 & value = stage.board.value128();
             if (value == target_value) {
-                move_path = stage.move_path;
+                target_stage = stage;
                 return true;
             }
         }
@@ -223,7 +223,7 @@ public:
         return result;
     }
 
-    int bitset_find_board(const Value128 & target_value, size_type max_depth, std::vector<Position> & move_path) {
+    int bitset_find_stage(const Value128 & target_value, stage_type & target_stage, size_type max_depth) {
         size_u satisfy_result = this->is_satisfy(this->player_board_,
                                                  this->target_board_,
                                                  this->target_len_);
@@ -279,7 +279,7 @@ public:
                         if (board_value == target_value) {
                             result = 1;
                             exit = true;
-                            move_path = next_stage.move_path;
+                            target_stage = next_stage;
                             this->move_path_ = next_stage.move_path;
                             break;
                         }

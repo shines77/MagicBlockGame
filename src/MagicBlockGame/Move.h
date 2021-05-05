@@ -153,6 +153,7 @@ struct Direction {
         Left,
         Up,
         Right,
+        Unknown,
         Last
     };
 
@@ -174,6 +175,22 @@ struct Direction {
         }
 
         return uint8_t(-1);
+    }
+
+    // Get the opposite direction
+    static uint8_t getOppDir(uint8_t dir) {
+        switch (dir) {
+            case Direction::Down:
+                return (uint8_t)Direction::Up;
+            case Direction::Left:
+                return (uint8_t)Direction::Right;
+            case Direction::Up:
+                return (uint8_t)Direction::Down;
+            case Direction::Right:
+                return (uint8_t)Direction::Left;
+            default:
+                return (uint8_t)Direction::Unknown;
+        }
     }
 
     static const char * toString(size_t dir) {

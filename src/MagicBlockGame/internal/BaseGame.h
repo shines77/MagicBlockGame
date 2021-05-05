@@ -465,10 +465,13 @@ public:
             }
             else {
                 printf("translateMovePath():\n\n"
-                       "Move path have error, [from_pos] is a empty gird.\n"
-                       "index = %u, from_pos = (%u, %u), color = %u\n\n",
-                       (uint32_t)(i + 1), (uint32_t)(from_pos / BoardY),
-                       (uint32_t)(from_pos % BoardY), (uint32_t)from_cell);
+                        "Move path have error, [from_pos] is a empty gird.\n"
+                        "index = %u, from_pos = %c%u, color = %s (%u)\n\n",
+                        (uint32_t)(i + 1),
+                        (uint32_t)Position::posToChr(from_pos / BoardY),
+                        (uint32_t)(from_pos % BoardY) + 1,
+                        Color::colorToChar(from_cell),
+                        (uint32_t)from_cell);
                 success = false;
                 break;
             }
@@ -479,7 +482,11 @@ public:
         return success;
     }
 
-    void displayAnswer(const std::vector<MoveInfo> & answer) {
+    bool translateMovePath(const stage_type & target_stage) {
+        return this->translateMovePath(target_stage.move_path);
+    }
+
+    void displayAnswer(const std::vector<MoveInfo> & answer) const {
         size_type index = 0;
         printf("Answer_Move_Path[%u] = {\n", (uint32_t)answer.size());
         for (auto iter : answer) {
@@ -497,6 +504,10 @@ public:
             index++;
         }
         printf("};\n\n");
+    }
+
+    void displayAnswer() const {
+        return this->displayAnswer(this->answer_);
     }
 };
 

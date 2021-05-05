@@ -151,13 +151,6 @@ public:
                     // Got a answer
                     this->segment_list_.push_back(this->segment_pair_);
                     total++;
-#if 0
-                    assert(this->forward_visited_ != nullptr);
-                    this->forward_visited_->compose_segments_to_board(this->fw_answer_board_, this->segment_pair_.fw_segments);
-                    assert(this->backward_visited_ != nullptr);
-                    this->backward_visited_->compose_segments_to_board(this->bw_answer_board_, this->segment_pair_.bw_segments);
-#endif
-                    //return total;
                 }
             }
         }
@@ -190,21 +183,11 @@ public:
                         // Travel the next layer if it's not a leaf container
                         int count = this->travel_forward_visited(fw_child, bw_child, layer + 1);
                         total += count;
-#if 0
-                        if (total > 0) {
-                            return total;
-                        }
-#endif
                     }
                     else {
                         // Search and compare the leaf containers
                         int count = this->travel_forward_visited_leaf(fw_child, bw_child, layer + 1);
                         total += count;
-#if 0
-                        if (total > 0) {
-                            return total;
-                        }
-#endif
                     }
                 }
             }
@@ -246,11 +229,6 @@ public:
                             // Travel the next layer
                             int count = this->travel_forward_visited(fw_child, bw_child, 1);
                             total += count;
-#if 0
-                            if (total > 0) {
-                                return total;
-                            }
-#endif
                         }
                     }
                 }
@@ -258,6 +236,26 @@ public:
         }
 
         return total;
+    }
+
+    size_type merge_move_path(std::vector<Position> & move_path,
+                              TBackwardSolver & backward_solver,
+                              const stage_type & fw_stage,
+                              const stage_type & bw_stage) {
+        // Copy the move path of forward stage first
+        move_path = fw_stage.move_path;
+
+        // Translate backward stage move path to move info
+        if (backward_solver.translateMovePath(bw_stage)) {
+            const std::vector<MoveInfo> & bw_answer = backward_solver.getAnswer();
+            for (ssize_type i = bw_answer.size() - 1; i >= 0; i--) {
+                MoveInfo move_info = bw_answer[i];
+                // Opposite the from_pos and move_pos
+                move_path.push_back(move_info.move_pos);
+            }
+        }
+
+        return move_path.size();
     }
 
     bool solve(size_type max_forward_depth, size_type max_backward_depth) {
@@ -330,83 +328,110 @@ public:
                 int total = this->find_intersection(forward_solver.visited(), backward_solver.visited());
                 if (this->segment_list_.size() > 0) {
                     // Got some answers
-                    printf("Got some answers: %d, segment_list_.size() = %u\n\n", total, (uint32_t)this->segment_list_.size());
+                    assert(total == (int)this->segment_list_.size());
+                    printf("Got some answers: %d\n\n", total);
                     solvable = true;
-                    //break;
                     //System::pause();
 #if 1
-                    std::vector<Position> fw_move_path;
-                    std::vector<Position> bw_move_path;
+                    stage_type fw_stage;
+                    stage_type bw_stage;
 
                     for (size_type i = 0; i < this->segment_list_.size(); i++) {
                         forward_solver.visited().compose_segments_to_board(this->fw_answer_board_, this->segment_list_[i].fw_segments);
                         backward_solver.visited().compose_segments_to_board(this->bw_answer_board_, this->segment_list_[i].bw_segments);
 
-                        fw_move_path.clear();
+                        fw_stage.move_path.clear();
+
                         Value128 fw_board_value = this->fw_answer_board_.value128();
-                        bool fw_found = forward_solver.find_board_in_last(fw_board_value, fw_move_path);
+                        bool fw_found = forward_solver.find_stage_in_list(fw_board_value, fw_stage);
                         if (fw_found) {
-                            //printf("-----------------------------------------------\n\n");
-                            //printf("ForwardSolver: found target value in last depth.\n\n");
-                            //printf("Move path size: %u\n\n", (std::uint32_t)fw_move_path.size());
+                            printf("-----------------------------------------------\n\n");
+                            printf("ForwardSolver: found target value in last depth.\n\n");
+                            printf("Move path size: %u\n\n", (std::uint32_t)fw_stage.move_path.size());
                         }
                         else {
                             TForwardSolver forward_solver2(&this->data_);
-                            forward_status = forward_solver2.bitset_find_board(fw_board_value, max_forward_depth, fw_move_path);
+                            forward_status = forward_solver2.bitset_find_stage(fw_board_value, fw_stage, max_forward_depth);
                             if (forward_status == 1) {
                                 fw_found = true;
-                                //printf("-----------------------------------------------\n\n");
-                                //printf("ForwardSolver::bitset_find_board(): found target value.\n\n");
-                                //printf("Move path size: %u\n\n", (std::uint32_t)fw_move_path.size());
+                                printf("-----------------------------------------------\n\n");
+                                printf("ForwardSolver::bitset_find_stage(): found target value.\n\n");
+                                printf("Move path size: %u\n\n", (std::uint32_t)fw_stage.move_path.size());
                             }
                         }
 
-                        bw_move_path.clear();
+                        bw_stage.move_path.clear();
+
                         Value128 bw_board_value = this->bw_answer_board_.value128();
-                        bool bw_found = backward_solver.find_board_in_last(bw_board_value, bw_move_path);
+                        bool bw_found = backward_solver.find_stage_in_list(bw_board_value, bw_stage);
                         if (bw_found) {
-                            //printf("-----------------------------------------------\n\n");
-                            //printf("BackwardSolver: found target value in last depth.\n\n");
-                            //printf("Move path size: %u\n\n", (std::uint32_t)bw_move_path.size());
+                            printf("-----------------------------------------------\n\n");
+                            printf("BackwardSolver: found target value in last depth.\n\n");
+                            printf("Move path size: %u\n\n", (std::uint32_t)bw_stage.move_path.size());
                         }
                         else {
                             TBackwardSolver backward_solver2(&this->data_);
-                            backward_status = backward_solver2.bitset_find_board(bw_board_value, max_backward_depth, bw_move_path);
+                            backward_status = backward_solver2.bitset_find_stage(bw_board_value, bw_stage, max_backward_depth);
                             if (backward_status == 1) {
                                 bw_found = true;
-                                //printf("-----------------------------------------------\n\n");
-                                //printf("BackwardSolver::bitset_find_board(): found target value.\n\n");
-                                //printf("Move path size: %u\n\n", (std::uint32_t)bw_move_path.size());
+                                printf("-----------------------------------------------\n\n");
+                                printf("BackwardSolver::bitset_find_stage(): found target value.\n\n");
+                                printf("Move path size: %u\n\n", (std::uint32_t)bw_stage.move_path.size());
                             }
                         }
 
                         if (fw_found && bw_found) {
-                            //System::pause();
-                            size_type total_steps = fw_move_path.size() + bw_move_path.size();
+                            std::vector<Position> & fw_move_path = fw_stage.move_path;
+                            std::vector<Position> & bw_move_path = bw_stage.move_path;
+
+                            size_type total_steps = this->merge_move_path(this->move_path_, backward_solver, fw_stage, bw_stage);
+                            size_type total_size = fw_move_path.size() + bw_move_path.size();
+                            (void)total_size;
+                            assert(total_steps == total_size);
                             if (total_steps < this->min_steps_) {
+                                base_type::display_target_board("Target board:", forward_solver.getTargetBoard());
+                                base_type::display_player_board("Player board:", forward_solver.getPlayerBoard());
+
+                                base_type::display_player_board("Forward answer:", this->fw_answer_board_);
+                                base_type::display_player_board("Backward answer:", this->bw_answer_board_);
+
+                                if (this->translateMovePath(fw_move_path)) {
+                                    this->displayAnswer();
+                                }
+
+                                size_type n_rotate_type = bw_stage.rotate_type;
+                                size_type empty_pos = n_rotate_type >> 2;
+                                size_type rotate_type = n_rotate_type & 0x03;
+                                printf("backward_solver: rotate_type = %u, empty_pos = %u\n\n",
+                                       (uint32_t)rotate_type, (uint32_t)empty_pos);
+
+                                if (backward_solver.translateMovePath(bw_stage)) {
+                                    backward_solver.displayAnswer();
+                                }
+
                                 printf("-----------------------------------------------\n\n");
                                 printf("Forward moves: %u, Backward moves: %u, Total moves: %u\n\n",
                                         (uint32_t)fw_move_path.size(),
                                         (uint32_t)bw_move_path.size(),
                                         (uint32_t)total_steps);
-                                this->map_used_ = forward_solver.getMapUsed();
+                                this->map_used_ = forward_solver.getMapUsed() + backward_solver.getMapUsed();
                                 this->min_steps_ = total_steps;
-                                this->best_move_path_ = fw_move_path;
-                                //for (ssize_type i = bw_move_path.size() - 1; i >= 0; i--) {
-                                //    this->best_move_path_.push_back(bw_move_path[i]);
-                                //}
+                                this->best_move_path_ = this->move_path_;
                                 printf("Total moves: %u\n\n", (uint32_t)this->best_move_path_.size());
 
-                                if (this->translateMovePath(fw_move_path)) {
-                                    this->displayAnswer(this->answer_);
+                                if (this->translateMovePath(this->best_move_path_)) {
+                                    this->displayAnswer();
                                 }
-                                System::pause();
+                                //System::pause();
                             }
                         }
                     }
 
-                    if (this->segment_list_.size() > 200)
+                    if (this->segment_list_.size() > 1) {
+                        forward_solver.clear_prev_depth();
+                        backward_solver.clear_prev_depth();
                         break;
+                    }
 #endif
                 }
 
@@ -426,10 +451,13 @@ public:
             if (solvable) {
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
-                System::pause();
+                if (this->translateMovePath(this->best_move_path_)) {
+                    this->displayAnswer();
+                }
+                //System::pause();
 #if 0
-                std::vector<Position> fw_move_path;
-                std::vector<Position> bw_move_path;
+                stage_type fw_stage;
+                stage_type bw_stage;
 
                 for (size_type i = 0; i < this->segment_list_.size(); i++) {
                     assert(this->forward_visited_ != nullptr);
@@ -437,25 +465,28 @@ public:
                     assert(this->backward_visited_ != nullptr);
                     backward_solver.visited().compose_segments_to_board(this->bw_answer_board_, this->segment_list_[i].bw_segments);
 
-                    fw_move_path.clear();
+                    fw_stage.move_path.clear();
                     Value128 fw_board_value = this->fw_answer_board_.value128();
-                    bool fw_found = forward_solver.find_board_in_last(fw_board_value, fw_move_path);
+                    bool fw_found = forward_solver.find_stage_in_list(fw_board_value, fw_stage);
                     if (fw_found) {
                         printf("-----------------------------------------------\n\n");
                         printf("ForwardSolver: found target value in last depth.\n\n");
-                        printf("Move path size: %u\n\n", (std::uint32_t)fw_move_path.size());
+                        printf("Move path size: %u\n\n", (std::uint32_t)fw_stage.move_path.size());
                     }
 
-                    bw_move_path.clear();
+                    bw_stage.move_path.clear();
                     Value128 bw_board_value = this->bw_answer_board_.value128();
-                    bool bw_found = backward_solver.find_board_in_last(bw_board_value, bw_move_path);
+                    bool bw_found = backward_solver.find_stage_in_list(bw_board_value, bw_stage);
                     if (bw_found) {
                         printf("-----------------------------------------------\n\n");
                         printf("BackwardSolver: found target value in last depth.\n\n");
-                        printf("Move path size: %u\n\n", (std::uint32_t)bw_move_path.size());
+                        printf("Move path size: %u\n\n", (std::uint32_t)bw_stage.move_path.size());
                     }
 
                     if (fw_found && bw_found) {
+                        std::vector<Position> & fw_move_path = fw_stage.move_path;
+                        std::vector<Position> & bw_move_path = bw_stage.move_path;
+
                         size_type total_steps = fw_move_path.size() + bw_move_path.size();
                         printf("-----------------------------------------------\n\n");
                         printf("Forward moves: %u, Backward moves: %u, Total moves: %u\n\n",
@@ -474,36 +505,37 @@ public:
                         }
                     }
                 }
-#endif
-                printf("-----------------------------------------------\n\n");
 
-#if 1
-                std::vector<Position> fw_move_path;
-                std::vector<Position> bw_move_path;
+                printf("-----------------------------------------------\n\n");
+#endif
+
+#if 0
+                stage_type fw_stage;
+                stage_type bw_stage;
 
                 assert(this->forward_visited_ != nullptr);
                 forward_solver.visited().compose_segments_to_board(this->fw_answer_board_, this->segment_pair_.fw_segments);
                 assert(this->backward_visited_ != nullptr);
                 backward_solver.visited().compose_segments_to_board(this->bw_answer_board_, this->segment_pair_.bw_segments);
 
-                fw_move_path.clear();
+                fw_stage.move_path.clear();
                 Value128 fw_board_value = this->fw_answer_board_.value128();
-                bool fw_found = forward_solver.find_board_in_last(fw_board_value, fw_move_path);
+                bool fw_found = forward_solver.find_stage_in_list(fw_board_value, fw_stage);
                 if (fw_found) {
                     printf("-----------------------------------------------\n\n");
                     printf("ForwardSolver: found target value in last depth.\n\n");
-                    printf("Move path size: %u\n\n", (std::uint32_t)fw_move_path.size());
+                    printf("Move path size: %u\n\n", (std::uint32_t)fw_stage.move_path.size());
                 }
 
-                bw_move_path.clear();
+                bw_stage.move_path.clear();
                 Value128 bw_board_value = this->bw_answer_board_.value128();
-                bool bw_found = backward_solver.find_board_in_last(bw_board_value, bw_move_path);
+                bool bw_found = backward_solver.find_stage_in_list(bw_board_value, bw_stage);
                 if (bw_found) {
                     printf("-----------------------------------------------\n\n");
                     printf("BackwardSolver: found target value in last depth.\n\n");
-                    printf("Move path size: %u\n\n", (std::uint32_t)bw_move_path.size());
+                    printf("Move path size: %u\n\n", (std::uint32_t)bw_stage.move_path.size());
                 }
-#endif
+
                 forward_solver.clear_prev_depth();
                 backward_solver.clear_prev_depth();
 
@@ -515,31 +547,33 @@ public:
 
                 printf("-----------------------------------------------\n\n");
                 System::pause();
-#if 1
-                fw_move_path.clear();
+
+                fw_stage.move_path.clear();
                 forward_solver.respawn();
 
-                forward_status = forward_solver.bitset_find_board(fw_board_value, max_forward_depth, fw_move_path);
+                forward_status = forward_solver.bitset_find_stage(fw_board_value, fw_stage, max_forward_depth);
                 if (forward_status == 1) {
                     printf("-----------------------------------------------\n\n");
-                    printf("ForwardSolver::bitset_find_board(): found target value.\n\n");
-                    printf("Move path size: %u\n\n", (std::uint32_t)fw_move_path.size());
+                    printf("ForwardSolver::bitset_find_stage(): found target value.\n\n");
+                    printf("Move path size: %u\n\n", (std::uint32_t)fw_stage.move_path.size());
                 }
 
                 printf("-----------------------------------------------\n\n");
 
-                bw_move_path.clear();
+                bw_stage.move_path.clear();
                 backward_solver.respawn();
 
-                backward_status = backward_solver.bitset_find_board(bw_board_value, max_backward_depth, bw_move_path);
+                backward_status = backward_solver.bitset_find_stage(bw_board_value, bw_stage, max_backward_depth);
                 if (backward_status == 1) {
                     printf("-----------------------------------------------\n\n");
-                    printf("BackwardSolver::bitset_find_board(): found target value.\n\n");
-                    printf("Move path size: %u\n\n", (std::uint32_t)bw_move_path.size());
+                    printf("BackwardSolver::bitset_find_stage(): found target value.\n\n");
+                    printf("Move path size: %u\n\n", (std::uint32_t)bw_stage.move_path.size());
                 }
 
                 printf("-----------------------------------------------\n\n");
 #endif
+
+#if 0
                 this->move_path_ = backward_solver.getMovePath();
                 size_type total_steps = forward_solver.getMovePath().size() +
                                         backward_solver.getMovePath().size();
@@ -565,7 +599,7 @@ public:
                 if (this->min_steps_ != size_type(-1) || this->best_move_path_.size() > 0) {
                     solvable = true;
                     if (this->translateMovePath(forward_solver.getMovePath())) {
-                        this->displayAnswer(this->answer_);
+                        this->displayAnswer();
                     }
 
                     size_type n_rotate_type = backward_solver.getRotateType();
@@ -575,9 +609,10 @@ public:
                            (uint32_t)rotate_type, (uint32_t)empty_pos);
 
                     if (backward_solver.translateMovePath(backward_solver.getMovePath(), rotate_type, empty_pos)) {
-                        backward_solver.displayAnswer(backward_solver.getAnswer());
+                        backward_solver.displayAnswer();
                     }
                 }
+#endif
             }
         }
 
