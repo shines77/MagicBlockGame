@@ -32,29 +32,55 @@
 
 using namespace MagicBlock;
 
-struct FuncId {
+struct Category {
     enum {
-        NormalSolver,
-        QueueSolver,
-        BitSetSolver,
-        StandAloneBitSetSolver,
+        TwoPhase_v1,
+        TwoPhase_v2,
+        TwoEndpoint,
+        Last
     };
 };
 
-template <std::size_t N_FuncId>
-static const char * get_func_name()
+struct SolverId {
+    enum {
+        Normal,
+        Queue,
+        BitSet,
+        StandAloneBitSet,
+    };
+};
+
+template <std::size_t CategoryId>
+static const char * get_category_name()
 {
-    if (N_FuncId == FuncId::QueueSolver) {
-        return "FuncId::QueueSolver";
+    if (CategoryId == Category::TwoPhase_v1) {
+        return "Algorithm::TwoPhase_v1";
     }
-    else if (N_FuncId == FuncId::BitSetSolver) {
-        return "FuncId::BitSetSolver";
+    else if (CategoryId == Category::TwoPhase_v2) {
+        return "Algorithm::TwoPhase_v2";
     }
-    else if (N_FuncId == FuncId::StandAloneBitSetSolver) {
-        return "FuncId::StandAloneBitSetSolver";
+    else if (CategoryId == Category::TwoEndpoint) {
+        return "Algorithm::TwoEndpoint";
     }
     else {
-        return "FuncId::NormalSovler";
+        return "Algorithm::Unkown";
+    }
+}
+
+template <std::size_t N_SolverId>
+static const char * get_solver_name()
+{
+    if (N_SolverId == SolverId::Queue) {
+        return "SolverId::Queue";
+    }
+    else if (N_SolverId == SolverId::BitSet) {
+        return "SolverId::BitSet";
+    }
+    else if (N_SolverId == SolverId::StandAloneBitSet) {
+        return "SolverId::StandAloneBitSet";
+    }
+    else {
+        return "SolverId::Normal";
     }
 }
 
@@ -120,16 +146,18 @@ void solve_sliding_puzzle_queue()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-template <std::size_t N_FuncId = FuncId::NormalSolver, bool AllowRotate = true>
-void solve_magic_block_game_v1()
+template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = true>
+void solve_magic_block_two_phase()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block_game_v1<%s>()\n\n", get_func_name<N_FuncId>());
+    printf("solve_magic_block<%s, %s>()\n\n", get_category_name<CategoryId>(),
+                                              get_solver_name<N_SolverId>());
 
     MagicBlock::v1::Game<5, 5, 3, 3, AllowRotate> game;
+
     int readStatus = game.readInput("magic_block.txt");
-    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
+        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
         return;
     }
 
@@ -137,10 +165,10 @@ void solve_magic_block_game_v1()
     jtest::StopWatch sw;
 
     sw.start();
-    if (N_FuncId == FuncId::BitSetSolver) {
+    if (N_SolverId == SolverId::BitSet) {
         solvable = game.bitset_solve();
     }
-    else if (N_FuncId == FuncId::StandAloneBitSetSolver) {
+    else if (N_SolverId == SolverId::StandAloneBitSet) {
         solvable = game.stand_alone_bitset_solve();
     }
     else {
@@ -161,31 +189,36 @@ void solve_magic_block_game_v1()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
-template <std::size_t N_FuncId = FuncId::NormalSolver, bool AllowRotate = true>
-void solve_magic_block_game_two_endpoint()
+template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = true>
+void solve_magic_block_two_endpoint()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block_game_two_endpoint<%s>()\n\n", get_func_name<N_FuncId>());
+    printf("solve_magic_block<%s, %s>()\n\n", get_category_name<CategoryId>(),
+                                              get_solver_name<N_SolverId>());
 
     MagicBlock::TwoEndpoint::Game<5, 5, 3, 3, AllowRotate> game;
+
     int readStatus = game.readInput("magic_block.txt");
-    printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
     if (ErrorCode::isFailure(readStatus)) {
+        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
         return;
     }
 
     bool solvable;
     jtest::StopWatch sw;
 
-    std::size_t max_forward_depth = MAX_FORWARD_DEPTH;
-    std::size_t max_backward_depth = MAX_BACKWARD_DEPTH;
-
     sw.start();
-    if (N_FuncId == FuncId::BitSetSolver) {
-        solvable = game.bitset_solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
+    if (N_SolverId == SolverId::BitSet) {
+        if (AllowRotate)
+            solvable = game.bitset_solve(MAX_ROTATE_FORWARD_DEPTH, MAX_ROTATE_BACKWARD_DEPTH);
+        else
+            solvable = game.bitset_solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
     }
     else {
-        solvable = game.solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
+        if (AllowRotate)
+            solvable = game.solve(MAX_ROTATE_FORWARD_DEPTH, MAX_ROTATE_BACKWARD_DEPTH);
+        else
+            solvable = game.solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
     }
     sw.stop();
     double elapsed_time = sw.getElapsedMillisec();
@@ -202,6 +235,23 @@ void solve_magic_block_game_two_endpoint()
     printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
+template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = true>
+void solve_magic_block()
+{
+    if (CategoryId == Category::TwoPhase_v1) {
+        solve_magic_block_two_phase<CategoryId, N_SolverId, AllowRotate>();
+    }
+    else if (CategoryId == Category::TwoPhase_v2) {
+        //solve_magic_block_two_phase<CategoryId, N_SolverId, AllowRotate>();
+    }
+    else if (CategoryId == Category::TwoEndpoint) {
+        solve_magic_block_two_endpoint<CategoryId, N_SolverId, AllowRotate>();
+    }
+    else {
+        static_assert((CategoryId < Category::Last), "Error: Unknown CategoryId.");
+    }
+}
+
 int main(int argc, char * argv[])
 {
     jtest::CPU::warmup(1000);
@@ -215,22 +265,23 @@ int main(int argc, char * argv[])
 
 #if 0
 #ifdef NDEBUG
-    solve_magic_block_game<FuncId::NormalSolver, true>();
+    solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, true>();
     System::pause();
 #endif // !NDEBUG
 #endif
 
 #if 1
-    solve_magic_block_game_two_endpoint<FuncId::BitSetSolver, true>();
+    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
+    System::pause();
+#endif
+
+#if 1
+    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
     System::pause();
 #endif
 
 #if 0
-#if 1
-    solve_magic_block_game_v1<FuncId::BitSetSolver, true>();
-#else
-    solve_magic_block_game_v1<FuncId::StandAloneBitSetSolver, true>();
-#endif
+    solve_magic_block<Category::TwoPhase_v1, SolverId::StandAloneBitSet, false>();
     System::pause();
 #endif
 

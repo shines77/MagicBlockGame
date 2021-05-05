@@ -41,6 +41,12 @@
 namespace MagicBlock {
 namespace TwoEndpoint {
 
+template <std::size_t BoardX, std::size_t BoardY>
+struct SegmentPair {
+    std::uint16_t fw_segments[BoardY];
+    std::uint16_t bw_segments[BoardY];
+};
+
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
           bool AllowRotate = true>
