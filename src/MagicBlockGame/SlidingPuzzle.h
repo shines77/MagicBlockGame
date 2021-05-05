@@ -171,8 +171,7 @@ public:
                         next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.move_path = stage.move_path;
-                        Position next_move(stage.empty);
-                        next_stage.move_path.push_back(next_move);
+                        next_stage.move_path.push_back(move_pos);
 
                         next_stages.push_back(next_stage);
 
@@ -256,8 +255,7 @@ public:
                         next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.move_path = stage.move_path;
-                        Position next_move(stage.empty);
-                        next_stage.move_path.push_back(next_move);
+                        next_stage.move_path.push_back(move_pos);
 
                         next_stages.push(next_stage);
 

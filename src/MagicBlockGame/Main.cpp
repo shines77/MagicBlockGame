@@ -89,7 +89,7 @@ void solve_sliding_puzzle()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle()\n\n");
 
-    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
+    MagicBlock::v1::Game<5, 5, 3, 3, false> game;
     int readStatus = game.readInput("sliding_puzzle.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
@@ -120,7 +120,7 @@ void solve_sliding_puzzle_queue()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle_queue()\n\n");
 
-    MagicBlock::v1::Game<5, 5, 3, 3, true> game;
+    MagicBlock::v1::Game<5, 5, 3, 3, false> game;
     int readStatus = game.readInput("sliding_puzzle.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
@@ -257,11 +257,13 @@ int main(int argc, char * argv[])
     jtest::CPU::warmup(1000);
 
 #ifdef NDEBUG
-    UnitTest();
+    //UnitTest();
 #endif
 
+#if 1
     solve_sliding_puzzle();
     solve_sliding_puzzle_queue();
+#endif
 
 #if 0
 #ifdef NDEBUG
@@ -276,12 +278,12 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
-    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
+    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
     System::pause();
 #endif
 
 #if 1
-    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
+    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
     System::pause();
 #endif
 
