@@ -31,7 +31,8 @@ struct Phase1
     Phase1() {
         this->init(std::size_t(-1));
     }
-    ~Phase1() {}
+
+    virtual ~Phase1() {}
 
     void init(std::size_t depth_limit) {
         for (std::size_t rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
@@ -57,11 +58,11 @@ struct Phase2
     int locked[BoardX * BoardY];
 
     Phase2() : rotate_type(std::size_t(-1)), phase1_type(std::size_t(-1)),
-                index(std::size_t(-1)), depth_limit(std::size_t(-1)) {
+               index(std::size_t(-1)), depth_limit(std::size_t(-1)) {
         this->reset();
     }
 
-    ~Phase2() {}
+    virtual ~Phase2() {}
 
     void reset() {
         //this->depth_limit = std::size_t(-1);
@@ -95,7 +96,7 @@ struct SharedData
     Phase2<BoardX, BoardY> phase2;
 
     SharedData() : target_len(0) {}
-    ~SharedData() {}
+    virtual ~SharedData() {}
 };
 
 } // namespace MagicBlock
