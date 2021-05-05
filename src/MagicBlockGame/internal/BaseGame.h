@@ -140,9 +140,9 @@ public:
         std::ifstream ifs;
         try {
             ifs.open(filename, std::ios::in);
-            if (ifs.good()) {
+            if (!ifs.fail()) {
                 err_code = 0;
-                do {
+                while (!ifs.eof()) {
                     char line[256];
                     std::fill_n(line, sizeof(line), 0);
                     ifs.getline(line, 256);
@@ -174,17 +174,26 @@ public:
                     if (ErrorCode::isFailure(err_code))
                         break;
                     line_no++;
-                } while (!ifs.eof());
+                }
 
                 ifs.close();
-
-                if (ErrorCode::isFailure(err_code)) {
-                    char err_info[256] = {0};
-                    snprintf(err_info, sizeof(err_info) - 1,
-                             "MagicBlockBaseGame::readInput() Error code: %d, reason: %s",
-                             err_code, ErrorCode::toString(err_code));
-                    throw std::runtime_error(err_info);
+            }
+            else {
+                std::ios::iostate rdstate = ifs.rdstate();
+                if ((rdstate & std::ifstream::failbit) != 0) {
+                    err_code = ErrorCode::ifstream_IsFailed;
                 }
+                else if ((rdstate & std::ifstream::badbit) != 0) {
+                    err_code = ErrorCode::ifstream_IsBad;
+                }
+            }
+
+            if (ErrorCode::isFailure(err_code)) {
+                char err_info[256] = {0};
+                snprintf(err_info, sizeof(err_info) - 1,
+                         "MagicBlockBaseGame::readInput() Error code: %d, reason: %s",
+                         err_code, ErrorCode::toString(err_code));
+                throw std::runtime_error(err_info);
             }
         }
         catch (std::exception & ex) {
