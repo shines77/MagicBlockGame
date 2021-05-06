@@ -115,9 +115,14 @@ void solve_sliding_puzzle()
 
         printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
     }
+    catch (...) {
+        printf("Exception: unknown\n\n");
+    }
+#if 0
     catch (std::exception & ex) {
         printf("Exception: %s\n\n", ex.what());
     }
+#endif
 }
 
 void solve_sliding_puzzle_queue()
