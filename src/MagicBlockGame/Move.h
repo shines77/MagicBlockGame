@@ -35,11 +35,14 @@ struct Position {
     Position(int64_t _value) : value(static_cast<uint8_t>(_value)) {}
     Position(uint64_t _value) : value(static_cast<uint8_t>(_value)) {}
 
-    ~Position() {}
-
     Position(const Position & src) {
         this->value = src.value;
     }
+    Position(Position && src) {
+        std::swap(this->value, src.value);
+    }
+
+    ~Position() {}
 
     Position & operator = (const Position & rhs) {
         this->value = rhs.value;
@@ -118,6 +121,10 @@ struct Position {
         return static_cast<uint64_t>(this->value);
     }
 
+    void swap(Position & other) {
+        std::swap(this->value, other.value);
+    }
+
     static const char posToChr(size_t pos) {
         if (pos != uint8_t(-1))
             return (char)('A' + (uint8_t)(pos % 256));
@@ -129,6 +136,23 @@ struct Position {
 struct Move {
     Position    pos;
     uint8_t     dir;
+
+    Move() : pos(0), dir(0) {}
+    Move(const Move & src) {
+        this->pos = src.pos;
+        this->dir = src.dir;
+    }
+    Move(Move && src) {
+        this->pos.swap(src.pos);
+        std::swap(this->dir, src.dir);
+    }
+    ~Move() {}
+
+    Move & operator = (const Move & rhs) {
+        this->pos = rhs.pos;
+        this->dir = rhs.dir;
+        return *this;
+    }
 };
 
 struct MoveInfo {
@@ -136,6 +160,29 @@ struct MoveInfo {
     Position    move_pos;
     uint8_t     color;
     uint8_t     dir;
+
+    MoveInfo() : from_pos(0), move_pos(0), color(Color::Empty), dir(0) {}
+    MoveInfo(const MoveInfo & src) {
+        this->from_pos = src.from_pos;
+        this->move_pos = src.move_pos;
+        this->color = src.color;
+        this->dir = src.dir;
+    }
+    MoveInfo(MoveInfo && src) {
+        this->from_pos.swap(src.from_pos);
+        this->move_pos.swap(src.move_pos);
+        std::swap(this->color, src.color);
+        std::swap(this->dir, src.dir);
+    }
+    ~MoveInfo() {}
+
+    MoveInfo & operator = (const MoveInfo & rhs) {
+        this->from_pos = rhs.from_pos;
+        this->move_pos = rhs.move_pos;
+        this->color = rhs.color;
+        this->dir = rhs.dir;
+        return *this;
+    }
 };
 
 struct Offset {

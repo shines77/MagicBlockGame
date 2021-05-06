@@ -40,13 +40,26 @@ union Board
     Board() {
         this->clear();
     }
-    Board(const Board & other) {
-        this->copy(other);
+    Board(const Board & src) noexcept {
+        this->internal_copy(src);
+    }
+    Board(Board && src) noexcept {
+        this->internal_swap(src);
     }
 
     ~Board() {}
 
-    void clear() {
+    Board & operator = (const Board & rhs) noexcept {
+        this->copy(rhs);
+        return *this;
+    }
+
+    Board & operator = (Board && rhs) noexcept {
+        this->swap(rhs);
+        return *this;
+    }
+
+    void clear() noexcept {
 #if 0
         std::fill_n(this->cells, sizeof(cells), Color::Empty);
 #else
@@ -56,15 +69,19 @@ union Board
 #endif
     }
 
-    void copy(const Board & other) {
-        if (&other != this) {
-            for (size_type n = 0; n < kUnits; n++) {
-                this->uints[n] = other.uints[n];
-            }
+    void internal_copy(const Board & other) noexcept {
+        for (size_type n = 0; n < kUnits; n++) {
+            this->uints[n] = other.uints[n];
         }
     }
 
-    void copy(uint8_t cells[BoardX * BoardY]) {
+    void copy(const Board & other) noexcept {
+        if (&other != this) {
+            this->internal_copy(other);
+        }
+    }
+
+    void copy(uint8_t cells[BoardX * BoardY]) noexcept {
         size_type cell;
         for (cell = 0; cell < BoardSize; cell++) {
             this->cells[cell] = cells[cell];
@@ -74,13 +91,18 @@ union Board
         }
     }
 
-    Board & operator = (const Board & other) {
-        if (&other != this) {
-            for (size_type n = 0; n < kUnits; n++) {
-                this->uints[n] = other.uints[n];
-            }
+    void internal_swap(Board & other) noexcept {
+        for (size_type n = 0; n < kUnits; n++) {
+            unit_type temp = this->uints[n];
+            this->uints[n] = other.uints[n];
+            other.uints[n] = temp;
         }
-        return *this;
+    }
+
+    void swap(Board & other) noexcept {
+        if (&other != this) {
+            this->internal_swap(other);
+        }
     }
 
     bool is_equal(const Board & other) const noexcept {
@@ -186,6 +208,12 @@ template <std::size_t BoardX, std::size_t BoardY>
 inline
 bool operator != (const Board<BoardX, BoardY> & lhs, const Board<BoardX, BoardY> & rhs) noexcept {
     return !(lhs.is_equal(rhs));
+}
+
+template <std::size_t BoardX, std::size_t BoardY>
+inline
+void swap(Board<BoardX, BoardY> & lhs, Board<BoardX, BoardY> & rhs) noexcept {
+    lhs.swap(rhs);
 }
 
 } // namespace MagicBlock
