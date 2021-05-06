@@ -80,6 +80,7 @@ protected:
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 std::vector<Move> empty_moves;
+                printf("BaseGame::init(): Start -- (y * BoardY + x) = %u\n", (uint32_t)(y * BoardY + x));
                 for (size_type dir = Direction::First; dir < Direction::Last; dir++) {
                     int board_x = (int)x + Dir_Offset[dir].x;
                     if (board_x < 0 || board_x >= (int)BoardX)
@@ -93,7 +94,7 @@ protected:
                     empty_moves.push_back(move);
                 }
                 assert((y * BoardY + x) < (BoardX * BoardY));
-                printf("BaseGame::init(): (y * BoardY + x) = %u\n", (uint32_t)(y * BoardY + x));
+                printf("BaseGame::init(): End -- (y * BoardY + x) = %u\n", (uint32_t)(y * BoardY + x));
                 this->data_.empty_moves[y * BoardY + x] = empty_moves;
             }
         }

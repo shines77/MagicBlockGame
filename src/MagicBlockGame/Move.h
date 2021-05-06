@@ -49,6 +49,11 @@ struct Position {
         return *this;
     }
 
+    Position & operator = (Position && rhs) {
+        this->value = rhs.value;
+        return *this;
+    }
+
     Position & operator = (int8_t rhs) {
         this->value = static_cast<uint8_t>(rhs);
         return *this;
@@ -205,7 +210,7 @@ struct Direction {
         Up,
         Right,
         Unknown,
-        Last
+        Last = Unknown
     };
 
     template <size_t BoardX, size_t BoardY>
