@@ -32,7 +32,13 @@ struct Phase1
         this->init(std::size_t(-1));
     }
 
-    ~Phase1() {}
+    ~Phase1() {
+        for (std::size_t rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
+            for (std::size_t phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
+                this->stage_list[rotate_type][phase1_type].clear();
+            }
+        }
+    }
 
     void init(std::size_t depth_limit) {
         for (std::size_t rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
@@ -62,7 +68,9 @@ struct Phase2
         this->reset();
     }
 
-    ~Phase2() {}
+    ~Phase2() {
+        index = 0;
+    }
 
     void reset() {
         //this->depth_limit = std::size_t(-1);
@@ -95,8 +103,13 @@ struct SharedData
     Phase1<BoardX, BoardY> phase1;
     Phase2<BoardX, BoardY> phase2;
 
-    SharedData() : target_len(0) {}
-    ~SharedData() {}
+    SharedData() : target_len(0) {
+        //
+    }
+
+    ~SharedData() {
+        this->target_len = 0;
+    }
 };
 
 } // namespace MagicBlock
