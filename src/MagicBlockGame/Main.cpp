@@ -277,7 +277,7 @@ int main(int argc, char * argv[])
 #endif // !NDEBUG
 #endif
 
-#if 0
+#if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
     System::pause();
 #endif
