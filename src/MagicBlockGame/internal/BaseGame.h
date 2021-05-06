@@ -92,6 +92,8 @@ protected:
                     move.dir = (uint8_t)dir;
                     empty_moves.push_back(move);
                 }
+                assert((y * BoardY + x) < (BoardX * BoardY));
+                printf("BaseGame::init(): (y * BoardY + x) = %u\n", (uint32_t)(y * BoardY + x));
                 this->data_.empty_moves[y * BoardY + x] = empty_moves;
             }
         }
