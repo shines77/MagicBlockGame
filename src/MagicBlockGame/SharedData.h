@@ -104,7 +104,7 @@ struct SharedData
     Phase2<BoardX, BoardY> phase2;
 
     SharedData() : target_len(0) {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
+        for (std::size_t clr = Color::Empty; clr < Color::Maximum; clr++) {
             this->player_colors[clr] = Color::Empty;
             this->target_colors[clr] = Color::Empty;
         }

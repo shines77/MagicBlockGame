@@ -165,7 +165,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
     std::uint16_t * current = aligned_start;
 
     std::ptrdiff_t misaligned_bytes = (std::uint8_t *)buf_start - (std::uint8_t *)aligned_start;
-    assert(misaligned_bytes >= 0 && misaligned_bytes < kSSE2Alignment);
+    assert(misaligned_bytes >= 0 && misaligned_bytes < (std::ptrdiff_t)kSSE2Alignment);
 
     // First misaligned 16 bytes
     if (misaligned_bytes > 0) {
@@ -173,7 +173,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
         __m128i mask128 = _mm_cmpeq_epi16(index128, value128);
         std::uint32_t mask32 = (std::uint32_t)_mm_movemask_epi8(mask128);
 
-        assert(misaligned_bytes > 0 && misaligned_bytes < kSSE2Alignment);
+        assert(misaligned_bytes > 0 && misaligned_bytes < (std::ptrdiff_t)kSSE2Alignment);
 #if 0
         mask32 &= head_backward_index_mask[misaligned_bytes];
 #elif 0
@@ -212,7 +212,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
     }
 
     misaligned_bytes = (std::uint8_t *)buf_end - (std::uint8_t *)current;
-    assert(misaligned_bytes >= 0 && misaligned_bytes < kDoubleStepBytes);
+    assert(misaligned_bytes >= 0 && misaligned_bytes < (std::ptrdiff_t)kDoubleStepBytes);
 
     if (misaligned_bytes > (std::ptrdiff_t )kSSE2Alignment) {
         // Last misaligned 32 bytes
@@ -228,7 +228,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
         }
         else {
             misaligned_bytes -= kSSE2Alignment;
-            assert(misaligned_bytes >= 0 && misaligned_bytes < kSSE2Alignment);
+            assert(misaligned_bytes >= 0 && misaligned_bytes < (std::ptrdiff_t)kSSE2Alignment);
 #if 0
             mask32_1 &= tail_forward_index_mask[misaligned_bytes];
 #else
@@ -247,7 +247,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
         __m128i mask128 = _mm_cmpeq_epi16(index128, value128);
         uint32_t mask32 = (uint32_t)_mm_movemask_epi8(mask128);
 
-        assert(misaligned_bytes > 0 && misaligned_bytes <= kSSE2Alignment);
+        assert(misaligned_bytes > 0 && misaligned_bytes <= (std::ptrdiff_t)kSSE2Alignment);
 #if 0
         mask32 &= tail_forward_index_mask[misaligned_bytes];
 #else
@@ -430,7 +430,7 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
     std::uint16_t * current = aligned_start;
 
     std::ptrdiff_t misaligned_bytes = (std::uint8_t *)buf_start - (std::uint8_t *)aligned_start;
-    assert(misaligned_bytes >= 0 && misaligned_bytes < kAVX2Alignment);
+    assert(misaligned_bytes >= 0 && misaligned_bytes < (std::ptrdiff_t)kAVX2Alignment);
 
     // First misaligned 32 bytes
     if (misaligned_bytes > 0) {
@@ -438,7 +438,7 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
         __m256i mask256 = _mm256_cmpeq_epi16(index256, value256);
         std::uint32_t mask32 = (std::uint32_t)_mm256_movemask_epi8(mask256);
 
-        assert(misaligned_bytes > 0 && misaligned_bytes < kAVX2Alignment);
+        assert(misaligned_bytes > 0 && misaligned_bytes < (std::ptrdiff_t)kAVX2Alignment);
 #if 0
         mask32 &= head_backward_index_mask[misaligned_bytes];
 #elif 0
@@ -477,7 +477,7 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
     }
 
     misaligned_bytes = (std::uint8_t *)buf_end - (std::uint8_t *)current;
-    assert(misaligned_bytes >= 0 && misaligned_bytes < kDoubleStepBytes);
+    assert(misaligned_bytes >= 0 && misaligned_bytes < (std::ptrdiff_t)kDoubleStepBytes);
 
     if (misaligned_bytes > (std::ptrdiff_t)kAVX2Alignment) {
         // Last misaligned 64 bytes
@@ -493,7 +493,7 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
         }
         else {
             misaligned_bytes -= kAVX2Alignment;
-            assert(misaligned_bytes >= 0 && misaligned_bytes < kAVX2Alignment);
+            assert(misaligned_bytes >= 0 && misaligned_bytes < (std::ptrdiff_t)kAVX2Alignment);
 #if 0
             mask32_1 &= tail_forward_index_mask[misaligned_bytes];
 #else
@@ -512,7 +512,7 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
         __m256i mask256 = _mm256_cmpeq_epi16(index256, value256);
         uint32_t mask32 = (uint32_t)_mm256_movemask_epi8(mask256);
 
-        assert(misaligned_bytes > 0 && misaligned_bytes <= kAVX2Alignment);
+        assert(misaligned_bytes > 0 && misaligned_bytes <= (std::ptrdiff_t)kAVX2Alignment);
 #if 0
         mask32 &= tail_forward_index_mask[misaligned_bytes];
 #else
