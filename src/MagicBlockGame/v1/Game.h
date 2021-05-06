@@ -67,7 +67,7 @@ private:
 
 public:
     Game() : base_type() {
-        base_type::init();
+        //base_type::init();
     }
 
     ~Game() {
