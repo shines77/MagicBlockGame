@@ -1,6 +1,10 @@
 
 #if defined(_MSC_VER)
+#if 0
+#ifndef NDEBUG
 #include <vld.h>
+#endif
+#endif
 #endif
 
 #ifndef __SSE2__
@@ -257,7 +261,7 @@ int main(int argc, char * argv[])
     jtest::CPU::warmup(1000);
 
 #ifdef NDEBUG
-    //UnitTest();
+    UnitTest();
 #endif
 
 #if 1
