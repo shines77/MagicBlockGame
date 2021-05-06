@@ -103,11 +103,15 @@ protected:
 
 public:
     BaseGame() : min_steps_(std::numeric_limits<ssize_type>::max()), map_used_(0) {
+        printf("BaseGame::BaseGame() Enter...\n\n");
         this->init();
+        printf("BaseGame::BaseGame() Leave...\n\n");
     }
 
     ~BaseGame() {
+        printf("BaseGame::~BaseGame() Enter...\n\n");
         this->destory();
+        printf("BaseGame::~BaseGame() Leave...\n\n");
     }
 
     void destory() {

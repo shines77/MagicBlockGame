@@ -70,12 +70,12 @@ public:
     }
 
     ~Game() {
-        this->destory();
+        //this->destory();
     }
 
-    void destory() {
-        // TODO:
-    }
+    //void destory() {
+    //    // TODO:
+    //}
 
     bool solve() {
         if (this->is_satisfy(this->data_.player_board,

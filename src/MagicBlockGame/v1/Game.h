@@ -67,15 +67,19 @@ private:
 
 public:
     Game() : base_type() {
+        printf("v1::Game::Game() Enter...\n\n");
+        printf("v1::Game::Game() Leave...\n\n");
     }
 
     ~Game() {
-        this->destory();
+        printf("v1::Game::~Game() Enter...\n\n");
+        //this->destory();
+        printf("v1::Game::~Game() Leave...\n\n");
     }
 
-    void destory() {
-        // TODO:
-    }
+    //void destory() {
+    //    // TODO:
+    //}
 
     bool solve() {
         if (this->is_satisfy(this->data_.player_board,

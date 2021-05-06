@@ -85,15 +85,19 @@ private:
 
 public:
     Game() : base_type() {
+        printf("TwoEndpoint::Game::Game() Enter...\n\n");
+        printf("TwoEndpoint::Game::Game() Leave...\n\n");
     }
 
     ~Game() {
-        this->destory();
+        printf("TwoEndpoint::Game::~Game() Enter...\n\n");
+        //this->destory();
+        printf("TwoEndpoint::Game::~Game() Leave...\n\n");
     }
 
-    void destory() {
-        // TODO:
-    }
+    //void destory() {
+    //    // TODO:
+    //}
 
     bool is_coincident(int fw_value, int bw_value) const {
         std::uint32_t fw_value32 = (std::uint32_t)fw_value;
