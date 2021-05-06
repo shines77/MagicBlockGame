@@ -76,11 +76,9 @@ protected:
 
     // Initialize empty_moves[BoardX * BoardY]
     void init() {
-        printf("BaseGame::init() Enter...\n\n");
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 std::vector<Move> empty_moves;
-                printf("BaseGame::init(): Start -- (y * BoardY + x) = %u\n", (uint32_t)(y * BoardY + x));
                 for (size_type dir = Direction::First; dir < Direction::Last; dir++) {
                     int board_x = (int)x + Dir_Offset[dir].x;
                     if (board_x < 0 || board_x >= (int)BoardX)
@@ -94,32 +92,23 @@ protected:
                     empty_moves.push_back(move);
                 }
                 assert((y * BoardY + x) < (BoardX * BoardY));
-                printf("BaseGame::init(): End -- (y * BoardY + x) = %u\n", (uint32_t)(y * BoardY + x));
                 this->data_.empty_moves[y * BoardY + x] = empty_moves;
             }
         }
-
-        printf("BaseGame::init() Middle...\n\n");
 
         if (AllowRotate)
             this->data_.target_len = MAX_ROTATE_TYPE;
         else
             this->data_.target_len = 1;
-
-        printf("BaseGame::init() Leave...\n\n");
     }
 
 public:
     BaseGame() : min_steps_(std::numeric_limits<ssize_type>::max()), map_used_(0) {
-        printf("BaseGame::BaseGame() Enter...\n\n");
         this->init();
-        printf("BaseGame::BaseGame() Leave...\n\n");
     }
 
     ~BaseGame() {
-        printf("BaseGame::~BaseGame() Enter...\n\n");
         this->destory();
-        printf("BaseGame::~BaseGame() Leave...\n\n");
     }
 
     void destory() {

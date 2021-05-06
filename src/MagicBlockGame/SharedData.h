@@ -127,7 +127,6 @@ struct Phase2
     }
 
     void reset() {
-        //this->depth_limit = std::size_t(-1);
         for (std::size_t i = 0; i < 4; i++) {
             this->lock_inited[i] = 0;
         }
