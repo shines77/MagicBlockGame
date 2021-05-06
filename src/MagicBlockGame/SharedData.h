@@ -69,7 +69,7 @@ struct Phase2
     }
 
     ~Phase2() {
-        index = 0;
+        this->index = 0;
     }
 
     void reset() {
@@ -104,11 +104,14 @@ struct SharedData
     Phase2<BoardX, BoardY> phase2;
 
     SharedData() : target_len(0) {
-        //
+        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
+            this->player_colors[clr] = Color::Empty;
+            this->target_colors[clr] = Color::Empty;
+        }
     }
 
     ~SharedData() {
-        this->target_len = 0;
+        this->target_len = std::size_t(-1);
     }
 };
 
