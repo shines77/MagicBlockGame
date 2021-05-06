@@ -89,30 +89,35 @@ void solve_sliding_puzzle()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle()\n\n");
 
-    MagicBlock::v1::Game<5, 5, 3, 3, false> game;
-    int readStatus = game.readInput("sliding_puzzle.txt");
-    if (ErrorCode::isFailure(readStatus)) {
-        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
-        return;
+    try {
+        MagicBlock::v1::Game<5, 5, 3, 3, false> game;
+        int readStatus = game.readInput("sliding_puzzle.txt");
+        if (ErrorCode::isFailure(readStatus)) {
+            printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+            return;
+        }
+
+        jtest::StopWatch sw;
+
+        sw.start();
+        bool solvable = game.solve_sliding_puzzle();
+        sw.stop();
+        double elapsed_time = sw.getElapsedMillisec();
+
+        if (solvable) {
+            printf("Found a answer!\n\n");
+            printf("MinSteps: %d\n\n", (int)game.getMinSteps());
+            printf("Map Used: %d\n\n", (int)game.getMapUsed());
+        }
+        else {
+            printf("Not found a answer!\n\n");
+        }
+
+        printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
     }
-
-    jtest::StopWatch sw;
-
-    sw.start();
-    bool solvable = game.solve_sliding_puzzle();
-    sw.stop();
-    double elapsed_time = sw.getElapsedMillisec();
-
-    if (solvable) {
-        printf("Found a answer!\n\n");
-        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
-        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+    catch (std::exception & ex) {
+        printf("Exception: %s\n\n", ex.what());
     }
-    else {
-        printf("Not found a answer!\n\n");
-    }
-
-    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 }
 
 void solve_sliding_puzzle_queue()
