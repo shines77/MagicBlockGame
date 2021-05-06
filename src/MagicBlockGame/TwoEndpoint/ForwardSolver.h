@@ -84,7 +84,7 @@ public:
         this->init();
     }
 
-    virtual ~ForwardSolver() {
+    ~ForwardSolver() {
         this->destory();
     }
 

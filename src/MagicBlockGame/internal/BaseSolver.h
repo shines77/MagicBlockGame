@@ -79,7 +79,7 @@ public:
         this->init();
     }
 
-    virtual ~BaseSolver() {
+    ~BaseSolver() {
         this->destory();
     }
 

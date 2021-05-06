@@ -69,7 +69,7 @@ public:
         this->init();
     }
 
-    virtual ~BackwardSolver() {
+    ~BackwardSolver() {
         this->destory();
     }
 

@@ -32,7 +32,7 @@ struct Phase1
         this->init(std::size_t(-1));
     }
 
-    virtual ~Phase1() {}
+    ~Phase1() {}
 
     void init(std::size_t depth_limit) {
         for (std::size_t rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
@@ -62,7 +62,7 @@ struct Phase2
         this->reset();
     }
 
-    virtual ~Phase2() {}
+    ~Phase2() {}
 
     void reset() {
         //this->depth_limit = std::size_t(-1);
@@ -96,7 +96,7 @@ struct SharedData
     Phase2<BoardX, BoardY> phase2;
 
     SharedData() : target_len(0) {}
-    virtual ~SharedData() {}
+    ~SharedData() {}
 };
 
 } // namespace MagicBlock

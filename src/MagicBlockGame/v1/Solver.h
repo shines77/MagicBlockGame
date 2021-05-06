@@ -150,7 +150,7 @@ public:
         this->init();
     }
 
-    virtual ~Solver() {
+    ~Solver() {
         this->destory();
     }
 

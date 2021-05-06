@@ -26,6 +26,8 @@ struct Stage {
     Stage(const Board<BoardX, BoardY> & board) {
         this->board = board;
     }
+
+    ~Stage() {}
 };
 
 #pragma pack(pop)

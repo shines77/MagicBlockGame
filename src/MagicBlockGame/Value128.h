@@ -19,6 +19,7 @@ union size_u {
 
     size_u(size_t _value) : value(_value) {}
     size_u(size_t _low, size_t _high) : low(half_type(_low)), high(half_type(_high)) {}
+    ~size_u() {}
 
     size_u & operator = (size_t rhs) {
         this->value = rhs;
@@ -36,6 +37,7 @@ struct Value128 {
         this->low  = other.low;
         this->high = other.high;
     }
+    ~Value128() {}
 
     bool is_equal(const Value128 & other) const noexcept {
         return ((this->low == other.low) && (this->high == other.high));

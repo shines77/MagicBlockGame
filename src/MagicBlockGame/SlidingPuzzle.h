@@ -61,6 +61,7 @@ public:
     SlidingPuzzle() : target_len_(0), map_used_(0) {
         this->init();
     }
+
     ~SlidingPuzzle() {}
 
     size_t getMinSteps() const {

@@ -70,7 +70,7 @@ public:
         this->init();
     }
 
-    virtual ~Game() {
+    ~Game() {
         this->destory();
     }
 

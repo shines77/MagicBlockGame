@@ -18,6 +18,8 @@ struct Position8 {
         this->x = src.x;
         this->y = src.y;
     }
+
+    ~Position8() {}
 };
 
 struct Position {
@@ -32,6 +34,8 @@ struct Position {
     Position(uint32_t _value) : value(static_cast<uint8_t>(_value)) {}
     Position(int64_t _value) : value(static_cast<uint8_t>(_value)) {}
     Position(uint64_t _value) : value(static_cast<uint8_t>(_value)) {}
+
+    ~Position() {}
 
     Position(const Position & src) {
         this->value = src.value;

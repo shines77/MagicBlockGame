@@ -272,17 +272,17 @@ int main(int argc, char * argv[])
 #endif // !NDEBUG
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
     System::pause();
 #endif
 
-#if 1
-    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
+#if 0
+    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
     System::pause();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
     System::pause();
 #endif

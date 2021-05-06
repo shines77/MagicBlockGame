@@ -106,7 +106,7 @@ public:
         this->init();
     }
 
-    virtual ~BaseGame() {
+    ~BaseGame() {
         this->destory();
     }
 

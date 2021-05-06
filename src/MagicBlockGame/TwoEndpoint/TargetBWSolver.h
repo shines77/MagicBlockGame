@@ -94,7 +94,7 @@ public:
         this->init();
     }
 
-    virtual ~TargetBWSolver() {
+    ~TargetBWSolver() {
         this->destory();
     }
 

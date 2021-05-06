@@ -1008,7 +1008,7 @@ public:
         this->init();
     }
 
-    virtual ~SparseBitset() {
+    ~SparseBitset() {
         this->destroy();
     }
 
