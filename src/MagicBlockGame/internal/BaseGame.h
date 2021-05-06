@@ -76,6 +76,7 @@ protected:
 
     // Initialize empty_moves[BoardX * BoardY]
     void init() {
+        printf("BaseGame::init() Enter...\n\n");
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 std::vector<Move> empty_moves;
@@ -95,10 +96,14 @@ protected:
             }
         }
 
+        printf("BaseGame::init() Middle...\n\n");
+
         if (AllowRotate)
             this->data_.target_len = MAX_ROTATE_TYPE;
         else
             this->data_.target_len = 1;
+
+        printf("BaseGame::init() Leave...\n\n");
     }
 
 public:
