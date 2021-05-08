@@ -354,7 +354,10 @@ public:
         }
         assert(target_len > 0);
 
-        this->data_.target_len = target_len;
+        if (AllowRotate)
+            this->data_.target_len = target_len;
+        else
+            this->data_.target_len = 1;
     }
 
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {

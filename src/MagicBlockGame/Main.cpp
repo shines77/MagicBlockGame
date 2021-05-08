@@ -92,7 +92,8 @@ template <std::size_t N_SolverId, bool AllowRotate = true>
 void solve_sliding_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_sliding_puzzle<%s>()\n\n", get_solver_name<N_SolverId>());
+    printf("solve_sliding_puzzle<%s, %s>()\n\n", get_solver_name<N_SolverId>(),
+                                                 (AllowRotate ? "true" : "false"));
 
     MagicBlock::SlidingPuzzle<3, 3, AllowRotate> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig("sliding_puzzle.txt");
@@ -130,8 +131,9 @@ template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = tru
 void solve_magic_block_two_phase()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block<%s, %s>()\n\n", get_category_name<CategoryId>(),
-                                              get_solver_name<N_SolverId>());
+    printf("solve_magic_block<%s, %s, %s>()\n\n", get_category_name<CategoryId>(),
+                                                  get_solver_name<N_SolverId>(),
+                                                  (AllowRotate ? "true" : "false"));
 
     MagicBlock::v1::Game<5, 5, 3, 3, AllowRotate> game;
 
@@ -173,8 +175,9 @@ template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = tru
 void solve_magic_block_two_endpoint()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block<%s, %s>()\n\n", get_category_name<CategoryId>(),
-                                              get_solver_name<N_SolverId>());
+    printf("solve_magic_block<%s, %s, %s>()\n\n", get_category_name<CategoryId>(),
+                                                  get_solver_name<N_SolverId>(),
+                                                  (AllowRotate ? "true" : "false"));
 
     MagicBlock::TwoEndpoint::Game<5, 5, 3, 3, AllowRotate> game;
 
@@ -241,21 +244,26 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
-    solve_sliding_puzzle<SolverId::Normal>();
-    solve_sliding_puzzle<SolverId::Queue>();
+    solve_sliding_puzzle<SolverId::Normal, false>();
+    solve_sliding_puzzle<SolverId::Queue, false>();
+
+    solve_sliding_puzzle<SolverId::Normal, true>();
+    solve_sliding_puzzle<SolverId::Queue, true>();
+
+    System::pause();
 #endif
 
-#if 0
+#if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
     System::pause();
 #endif
 
-#if 0
+#if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
     System::pause();
 #endif
 
-#if 0
+#if 1
 #ifdef NDEBUG
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, true>();
     System::pause();
