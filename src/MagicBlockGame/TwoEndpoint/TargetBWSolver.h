@@ -916,7 +916,7 @@ public:
                 std::swap(board.cells[from_pos], board.cells[move_pos]);
             }
             else {
-                printf("translateMovePath():\n\n"
+                printf("TargetBWSolver::translateMovePath():\n\n"
                         "Move path have error, [from_pos] is a empty gird.\n"
                         "index = %u, from_pos = %c%u, color = %s (%u)\n\n",
                         (uint32_t)(i + 1),

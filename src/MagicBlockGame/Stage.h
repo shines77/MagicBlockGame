@@ -22,30 +22,30 @@ struct Stage {
 
     std::vector<Position> move_path;
 
-    Stage() : empty(0), last_dir(0), rotate_type(0), reserve(0) {}
-    Stage(const Stage & src) {
+    Stage() noexcept : empty(0), last_dir(0), rotate_type(0), reserve(0) {}
+    Stage(const Stage & src) noexcept {
         this->internal_copy(src);
     }
-    Stage(Stage && src) {
+    Stage(Stage && src) noexcept {
         this->internal_swap(src);
     }
-    Stage(const Board<BoardX, BoardY> & _board) : board(_board),
+    Stage(const Board<BoardX, BoardY> & _board) noexcept : board(_board),
         empty(0), last_dir(0), rotate_type(0), reserve(0) {
     }
 
     ~Stage() {}
 
-    Stage & operator = (const Stage & rhs) {
+    Stage & operator = (const Stage & rhs) noexcept {
         this->copy(rhs);
         return *this;
     }
 
-    Stage & operator = (Stage && rhs) {
+    Stage & operator = (Stage && rhs) noexcept {
         this->swap(rhs);
         return *this;
     }
 
-    void internal_copy(const Stage & other) {
+    void internal_copy(const Stage & other) noexcept {
         this->board         = other.board;
 
         this->empty         = other.empty;
@@ -56,13 +56,13 @@ struct Stage {
         this->move_path     = other.move_path;
     }
 
-    void copy(const Stage & other) {
+    void copy(const Stage & other) noexcept {
         if (&other != this) {
             this->internal_copy(other);
         }
     }
 
-    void internal_swap(Stage & other) {
+    void internal_swap(Stage & other) noexcept {
         this->board.swap(other.board);
 
         this->empty.swap(other.empty);
@@ -73,7 +73,7 @@ struct Stage {
         std::swap(this->move_path, other.move_path);
     }
 
-    void swap(Stage & other) {
+    void swap(Stage & other) noexcept {
         if (&other != this) {
             this->internal_swap(other);
         }

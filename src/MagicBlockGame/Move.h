@@ -35,21 +35,21 @@ struct Position {
     Position(int64_t _value) : value(static_cast<uint8_t>(_value)) {}
     Position(uint64_t _value) : value(static_cast<uint8_t>(_value)) {}
 
-    Position(const Position & src) {
+    Position(const Position & src) noexcept {
         this->value = src.value;
     }
-    Position(Position && src) {
+    Position(Position && src) noexcept {
         std::swap(this->value, src.value);
     }
 
     ~Position() {}
 
-    Position & operator = (const Position & rhs) {
+    Position & operator = (const Position & rhs) noexcept {
         this->value = rhs.value;
         return *this;
     }
 
-    Position & operator = (Position && rhs) {
+    Position & operator = (Position && rhs) noexcept {
         this->value = rhs.value;
         return *this;
     }
@@ -126,7 +126,7 @@ struct Position {
         return static_cast<uint64_t>(this->value);
     }
 
-    void swap(Position & other) {
+    void swap(Position & other) noexcept {
         std::swap(this->value, other.value);
     }
 
@@ -142,18 +142,18 @@ struct Move {
     Position    pos;
     uint8_t     dir;
 
-    Move() : pos(0), dir(0) {}
-    Move(const Move & src) {
+    Move() noexcept : pos(0), dir(0) {}
+    Move(const Move & src) noexcept {
         this->pos = src.pos;
         this->dir = src.dir;
     }
-    Move(Move && src) {
+    Move(Move && src) noexcept {
         this->pos.swap(src.pos);
         std::swap(this->dir, src.dir);
     }
     ~Move() {}
 
-    Move & operator = (const Move & rhs) {
+    Move & operator = (const Move & rhs) noexcept {
         this->pos = rhs.pos;
         this->dir = rhs.dir;
         return *this;
@@ -166,14 +166,14 @@ struct MoveInfo {
     uint8_t     color;
     uint8_t     dir;
 
-    MoveInfo() : from_pos(0), move_pos(0), color(Color::Empty), dir(0) {}
-    MoveInfo(const MoveInfo & src) {
+    MoveInfo() noexcept : from_pos(0), move_pos(0), color(Color::Empty), dir(0) {}
+    MoveInfo(const MoveInfo & src) noexcept {
         this->from_pos = src.from_pos;
         this->move_pos = src.move_pos;
         this->color = src.color;
         this->dir = src.dir;
     }
-    MoveInfo(MoveInfo && src) {
+    MoveInfo(MoveInfo && src) noexcept {
         this->from_pos.swap(src.from_pos);
         this->move_pos.swap(src.move_pos);
         std::swap(this->color, src.color);
@@ -181,7 +181,7 @@ struct MoveInfo {
     }
     ~MoveInfo() {}
 
-    MoveInfo & operator = (const MoveInfo & rhs) {
+    MoveInfo & operator = (const MoveInfo & rhs) noexcept {
         this->from_pos = rhs.from_pos;
         this->move_pos = rhs.move_pos;
         this->color = rhs.color;
