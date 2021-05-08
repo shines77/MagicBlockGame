@@ -88,60 +88,36 @@ static const char * get_solver_name()
     }
 }
 
+template <std::size_t N_SolverId, bool AllowRotate = true>
 void solve_sliding_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_sliding_puzzle()\n\n");
+    printf("solve_sliding_puzzle<%s>()\n\n", get_solver_name<N_SolverId>());
 
-    MagicBlock::v1::Game<5, 5, 3, 3, false> game;
-    int readStatus = game.readInput("sliding_puzzle.txt");
+    MagicBlock::SlidingPuzzle<3, 3, AllowRotate> slidingPuzzle;
+    int readStatus = slidingPuzzle.readConfig("sliding_puzzle.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
         return;
     }
 
+    bool solvable;
     jtest::StopWatch sw;
 
     sw.start();
-    bool solvable = game.solve_sliding_puzzle();
-    sw.stop();
-    double elapsed_time = sw.getElapsedMillisec();
-
-    if (solvable) {
-        printf("Found a answer!\n\n");
-        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
-        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+    if (N_SolverId == SolverId::Queue) {
+        solvable = slidingPuzzle.queue_solve();
     }
     else {
-        printf("Not found a answer!\n\n");
+        solvable = slidingPuzzle.solve();
     }
-
-    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
-}
-
-void solve_sliding_puzzle_queue()
-{
-    printf("-------------------------------------------------------\n\n");
-    printf("solve_sliding_puzzle_queue()\n\n");
-
-    MagicBlock::v1::Game<5, 5, 3, 3, false> game;
-    int readStatus = game.readInput("sliding_puzzle.txt");
-    if (ErrorCode::isFailure(readStatus)) {
-        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
-        return;
-    }
-
-    jtest::StopWatch sw;
-
-    sw.start();
-    bool solvable = game.queue_solve_sliding_puzzle();
     sw.stop();
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
         printf("Found a answer!\n\n");
-        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
-        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+        printf("MinSteps: %d\n\n", (int)slidingPuzzle.getMinSteps());
+        printf("Map Used: %d\n\n", (int)slidingPuzzle.getMapUsed());
     }
     else {
         printf("Not found a answer!\n\n");
@@ -159,7 +135,7 @@ void solve_magic_block_two_phase()
 
     MagicBlock::v1::Game<5, 5, 3, 3, AllowRotate> game;
 
-    int readStatus = game.readInput("magic_block.txt");
+    int readStatus = game.readConfig("magic_block.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
         return;
@@ -202,7 +178,7 @@ void solve_magic_block_two_endpoint()
 
     MagicBlock::TwoEndpoint::Game<5, 5, 3, 3, AllowRotate> game;
 
-    int readStatus = game.readInput("magic_block.txt");
+    int readStatus = game.readConfig("magic_block.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
         return;
@@ -265,8 +241,8 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
-    solve_sliding_puzzle();
-    solve_sliding_puzzle_queue();
+    solve_sliding_puzzle<SolverId::Normal>();
+    solve_sliding_puzzle<SolverId::Queue>();
 #endif
 
 #if 0
@@ -279,19 +255,19 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-#if 1
+#if 0
 #ifdef NDEBUG
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, true>();
     System::pause();
 #endif // !NDEBUG
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
     System::pause();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::StandAloneBitSet, false>();
     System::pause();
 #endif

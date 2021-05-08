@@ -63,9 +63,6 @@ protected:
     size_type min_steps_;
     size_type map_used_;
 
-    int player_colors[Color::Maximum];
-    int target_colors[Color::Maximum];
-
     std::vector<Position> move_path_;
     std::vector<Position> best_move_path_;
     std::vector<MoveInfo> answer_;
@@ -135,14 +132,13 @@ public:
         return this->map_used_;
     }
 
-    int readInput(const char * filename) {
+    int readConfig(const char * filename) {
         int err_code = ErrorCode::Success;
         size_type line_no = 0;
         std::ifstream ifs;
         try {
             ifs.open(filename, std::ios::in);
             if (!ifs.fail()) {
-                err_code = 0;
                 while (!ifs.eof()) {
                     char line[256];
                     std::fill_n(line, sizeof(line), 0);
@@ -192,7 +188,7 @@ public:
             if (ErrorCode::isFailure(err_code)) {
                 char err_info[256] = {0};
                 snprintf(err_info, sizeof(err_info) - 1,
-                         "MagicBlockBaseGame::readInput() Error code: %d, reason: %s",
+                         "MagicBlockBaseGame::readConfig() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
                 throw std::runtime_error(err_info);
             }
@@ -205,30 +201,39 @@ public:
         }
 
         if (ErrorCode::isSuccess(err_code)) {
-            this->count_all_color_nums();
-
-            int result = this->check_all_board_colors();
-            if (ErrorCode::isFailure(result)) {
-                if (result >= ErrorCode::TargetBoardColorOverflowFirst &&
-                    result <= ErrorCode::TargetBoardColorOverflowLast) {
-                    err_code = ErrorCode::TargetBoardColorOverflow;
-                }
-                else if (result >= ErrorCode::PlayerBoardColorOverflowFirst &&
-                         result <= ErrorCode::PlayerBoardColorOverflowLast) {
-                    err_code = ErrorCode::PlayerBoardColorOverflow;
-                }
-
-                if (ErrorCode::isFailure(err_code)) {
-                    char err_info[256] = {0};
-                    snprintf(err_info, sizeof(err_info) - 1,
-                             "MagicBlockBaseGame::readInput() Error code: %d, reason: %s",
-                             err_code, ErrorCode::toString(err_code));
-                }
-            }
-
-            this->rotate_target_board();
+            err_code = this->verify_board_validity();
         }
 
+        return err_code;
+    }
+
+    int verify_board_validity() {
+        int err_code = ErrorCode::Success;
+
+        this->count_all_color_nums();
+
+        int result = this->check_all_board_colors();
+        if (ErrorCode::isSuccess(result)) {
+            this->rotate_target_board();
+        }
+        else {
+            if (result >= ErrorCode::TargetBoardColorOverflowFirst &&
+                result <= ErrorCode::TargetBoardColorOverflowLast) {
+                err_code = ErrorCode::TargetBoardColorOverflow;
+            }
+            else if (result >= ErrorCode::PlayerBoardColorOverflowFirst &&
+                     result <= ErrorCode::PlayerBoardColorOverflowLast) {
+                err_code = ErrorCode::PlayerBoardColorOverflow;
+            }
+
+            if (ErrorCode::isFailure(err_code)) {
+                char err_info[256] = {0};
+                snprintf(err_info, sizeof(err_info) - 1,
+                         "BaseGame::verify_board_validity() Error code: %d, reason: %s",
+                         err_code, ErrorCode::toString(err_code));
+            }
+        }
+        
         return err_code;
     }
 
@@ -312,9 +317,9 @@ public:
     }
 
     int check_all_board_colors() {
-        int err_code = check_player_board_colors();
+        int err_code = this->check_player_board_colors();
         if (ErrorCode::isSuccess(err_code)) {
-            err_code = check_target_board_colors();
+            err_code = this->check_target_board_colors();
         }
         return err_code;
     }
