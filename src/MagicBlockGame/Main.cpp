@@ -243,12 +243,12 @@ int main(int argc, char * argv[])
     UnitTest();
 #endif
 
-#if 1
-    solve_sliding_puzzle<SolverId::Normal, false>();
-    solve_sliding_puzzle<SolverId::Queue, false>();
-
+#if 0
     solve_sliding_puzzle<SolverId::Normal, true>();
     solve_sliding_puzzle<SolverId::Queue, true>();
+
+    solve_sliding_puzzle<SolverId::Normal, false>();
+    solve_sliding_puzzle<SolverId::Queue, false>();
 
     System::pause();
 #endif
@@ -263,15 +263,25 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-#if 1
 #ifdef NDEBUG
+
+#if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, true>();
     System::pause();
-#endif // !NDEBUG
 #endif
 
-#if 0
+#if 1
+    solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
+    System::pause();
+#endif
+
+#if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
+    System::pause();
+#endif
+
+#if 1
+    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
     System::pause();
 #endif
 
@@ -279,6 +289,8 @@ int main(int argc, char * argv[])
     solve_magic_block<Category::TwoPhase_v1, SolverId::StandAloneBitSet, false>();
     System::pause();
 #endif
+
+#endif // NDEBUG
 
     return 0;
 }
