@@ -253,17 +253,9 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-#if 1
-    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
-    System::pause();
-#endif
-
-#if 1
-    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
-    System::pause();
-#endif
-
 #ifdef NDEBUG
+
+    ////////////////////////////////////////////////////////////////////////
 
 #if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, true>();
@@ -271,7 +263,7 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
-    solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
+    solve_magic_block<Category::TwoPhase_v1, SolverId::StandAloneBitSet, true>();
     System::pause();
 #endif
 
@@ -281,14 +273,33 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
+    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
+    System::pause();
+#endif
+
+    ////////////////////////////////////////////////////////////////////////
+
+#if 1
+    solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
+    System::pause();
+#endif
+
+#if 1
+    solve_magic_block<Category::TwoPhase_v1, SolverId::StandAloneBitSet, false>();
+    System::pause();
+#endif
+
+#if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
     System::pause();
 #endif
 
-#if 0
-    solve_magic_block<Category::TwoPhase_v1, SolverId::StandAloneBitSet, false>();
+#if 1
+    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
     System::pause();
 #endif
+
+    ////////////////////////////////////////////////////////////////////////
 
 #endif // NDEBUG
 
