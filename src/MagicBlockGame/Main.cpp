@@ -92,13 +92,14 @@ template <std::size_t N_SolverId, bool AllowRotate = true>
 void solve_sliding_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_sliding_puzzle<%s, %s>()\n\n", get_solver_name<N_SolverId>(),
-                                                 (AllowRotate ? "true" : "false"));
+    printf("solve_sliding_puzzle<%s, AllowRotate = %s>()\n\n",
+            get_solver_name<N_SolverId>(),
+            (AllowRotate ? "true" : "false"));
 
     MagicBlock::SlidingPuzzle<3, 3, AllowRotate> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig("sliding_puzzle.txt");
     if (ErrorCode::isFailure(readStatus)) {
-        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toErrorString(readStatus));
         return;
     }
 
@@ -131,15 +132,16 @@ template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = tru
 void solve_magic_block_two_phase()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block<%s, %s, %s>()\n\n", get_category_name<CategoryId>(),
-                                                  get_solver_name<N_SolverId>(),
-                                                  (AllowRotate ? "true" : "false"));
+    printf("solve_magic_block<%s, %s, AllowRotate = %s>()\n\n",
+            get_category_name<CategoryId>(),
+            get_solver_name<N_SolverId>(),
+            (AllowRotate ? "true" : "false"));
 
     MagicBlock::v1::Game<5, 5, 3, 3, AllowRotate> game;
 
     int readStatus = game.readConfig("magic_block.txt");
     if (ErrorCode::isFailure(readStatus)) {
-        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toErrorString(readStatus));
         return;
     }
 
@@ -159,6 +161,11 @@ void solve_magic_block_two_phase()
     sw.stop();
     double elapsed_time = sw.getElapsedMillisec();
 
+    printf("solve_magic_block<%s, %s, AllowRotate = %s>()\n\n",
+            get_category_name<CategoryId>(),
+            get_solver_name<N_SolverId>(),
+            (AllowRotate ? "true" : "false"));
+
     if (solvable) {
         printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)game.getMinSteps());
@@ -175,15 +182,16 @@ template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = tru
 void solve_magic_block_two_endpoint()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_magic_block<%s, %s, %s>()\n\n", get_category_name<CategoryId>(),
-                                                  get_solver_name<N_SolverId>(),
-                                                  (AllowRotate ? "true" : "false"));
+    printf("solve_magic_block<%s, %s, AllowRotate = %s>()\n\n",
+            get_category_name<CategoryId>(),
+            get_solver_name<N_SolverId>(),
+            (AllowRotate ? "true" : "false"));
 
     MagicBlock::TwoEndpoint::Game<5, 5, 3, 3, AllowRotate> game;
 
     int readStatus = game.readConfig("magic_block.txt");
     if (ErrorCode::isFailure(readStatus)) {
-        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toStatusString(readStatus));
+        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toErrorString(readStatus));
         return;
     }
 
@@ -205,6 +213,11 @@ void solve_magic_block_two_endpoint()
     }
     sw.stop();
     double elapsed_time = sw.getElapsedMillisec();
+
+    printf("solve_magic_block<%s, %s, AllowRotate = %s>()\n\n",
+            get_category_name<CategoryId>(),
+            get_solver_name<N_SolverId>(),
+            (AllowRotate ? "true" : "false"));
 
     if (solvable) {
         printf("Found a answer!\n\n");

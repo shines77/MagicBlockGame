@@ -48,7 +48,7 @@ struct ErrorCode {
         }
     }
 
-    static const char * toStatusString(int errCode) {
+    static const char * toErrorString(int errCode) {
         switch (errCode) {
             case ErrorType::TargetBoardColorOverflow:
                 return "Error: Target board color overflow";
