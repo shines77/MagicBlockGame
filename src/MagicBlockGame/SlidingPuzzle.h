@@ -166,7 +166,7 @@ public:
         }
 
         if (ErrorCode::isSuccess(err_code)) {
-            err_code = this->verify_board_validity();
+            err_code = this->verify_board();
         }
 
         return err_code;
@@ -263,7 +263,7 @@ public:
             this->target_len_ = 1;
     }
 
-    int verify_board_validity() {
+    int verify_board() {
         int err_code = ErrorCode::Success;
 
         this->count_all_color_nums();
@@ -285,7 +285,7 @@ public:
             if (ErrorCode::isFailure(err_code)) {
                 char err_info[256] = {0};
                 snprintf(err_info, sizeof(err_info) - 1,
-                         "SlidingPuzzle::verify_board_validity() Error code: %d, reason: %s",
+                         "SlidingPuzzle::verify_board() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
             }
         }

@@ -95,7 +95,8 @@ public:
 
     bool is_phase2() const {
         return (N_SolverType == SolverType::Phase2_456 ||
-                N_SolverType == SolverType::Phase2);
+                N_SolverType == SolverType::Phase2 ||
+                N_SolverType == Phase2_Compact);
     }
 
     size_type getMinSteps() const {

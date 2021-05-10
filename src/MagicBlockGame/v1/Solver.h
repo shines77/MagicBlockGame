@@ -726,30 +726,12 @@ public:
 
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-#if 1
+
                         bool insert_new = visited.try_append(next_stage.board);
                         if (!insert_new) {
                             continue;
                         }
-#elif 0
-                        if (visited.contains(next_stage.board)) {
-                            continue;
-                        }
 
-                        visited.append(next_stage.board);
-#else
-                        typedef typename bitset_type::Container Container;
-
-                        size_type last_layer;
-                        Container * last_container;
-                        if (visited.contains(next_stage.board, last_layer, last_container)) {
-                            continue;
-                        }
-
-                        assert(last_layer >= 0 && last_layer <= BoardY);
-                        assert(last_container != nullptr);
-                        visited.append_new(next_stage.board, last_layer, last_container);
-#endif
                         next_stage.empty = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;

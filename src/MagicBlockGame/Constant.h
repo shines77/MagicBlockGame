@@ -33,7 +33,8 @@ struct SolverType {
         Phase1_12,
         Phase1_123,
         Phase2_456,
-        Phase2
+        Phase2,
+        Phase2_Compact
     };
 };
 

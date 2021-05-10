@@ -57,6 +57,8 @@ public:
     typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, SolverType::Phase1_123, phase2_callback>  Phase1Solver;
     typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       SolverType::Phase2,     phase2_callback>  Phase2Solver;
 
+    typedef Solver<BoardX, BoardY - 2, TargetX, TargetY - 1, false, SolverType::Phase2_Compact, phase2_callback>  CompactPhase2Solver;
+
     static const size_type kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
 
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;

@@ -130,32 +130,32 @@ union Board
     }
 
     Value128 value128() const noexcept {
-        std::uint64_t low_value = 0, high_value = 0;
+        std::uint64_t low = 0, high = 0;
         if (BoardSize <= 21) {
             for (std::ptrdiff_t cell = BoardSize - 1; cell >= 0; cell--) {
-                low_value <<= 3;
-                low_value |= std::uint64_t(this->cells[cell] & 0x07U);
+                low <<= 3;
+                low |= std::uint64_t(this->cells[cell] & 0x07U);
             }
         }
         else {
             // Low: bit 0 ~ 62, 21 * 3 = 63 bits
             for (std::ptrdiff_t cell = 20; cell >= 0; cell--) {
-                low_value <<= 3;
-                low_value |= std::uint64_t(this->cells[cell] & 0x07U);
+                low <<= 3;
+                low |= std::uint64_t(this->cells[cell] & 0x07U);
             }
             // Low: bit 63
-            low_value |= std::uint64_t(this->cells[21] & 0x01U) << 63;
+            low |= std::uint64_t(this->cells[21] & 0x01U) << 63;
 
             // High: bit 2 ~ 63
             for (std::ptrdiff_t cell = BoardSize - 1; cell >= 21; cell--) {
-                high_value <<= 3;
-                high_value |= std::uint64_t(this->cells[cell] & 0x07U);
+                high <<= 3;
+                high |= std::uint64_t(this->cells[cell] & 0x07U);
             }
 
             // High: bit 0 ~ 1
-            high_value >>= 1;
+            high >>= 1;
         }
-        return Value128(low_value, high_value);
+        return Value128(low, high);
     }
 
     // clockwise rotate 90 degrees
