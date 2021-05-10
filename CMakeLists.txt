@@ -46,11 +46,10 @@ endif()
 
 include_directories(include)
 include_directories(src)
-include_directories(src/MagicBlockGame)
 
 set(SOURCE_FILES
-    src/MagicBlockGame/Main.cpp
-    src/MagicBlockGame/UnitTest.cpp
+    src/MagicBlock/AI/Main.cpp
+    src/MagicBlock/AI/UnitTest.cpp
     )
 
 add_custom_target(release

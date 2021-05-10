@@ -19,40 +19,40 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Algorithm.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\BitUtils.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Board.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\BitSet.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Constant.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\CPUWarmUp.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\ErrorCode.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\internal\BaseGame.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\internal\BaseSolver.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Move.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SharedData.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitset.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Stage.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\support\RT_PowerOf2.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\jm_malloc.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\BackwardSolver.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\Game.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\ForwardSolver.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\TargetBWSolver.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\UnitTest.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Utils.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Game.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Solver.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Game.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Solver.h" />
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Value128.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Algorithm.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\BitUtils.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Board.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Color.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\BitSet.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Constant.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\CPUWarmUp.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\ErrorCode.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseGame.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseSolver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Move.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SharedData.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SparseBitset.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Stage.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\StopWatch.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\support\CT_PowerOf2.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\support\RT_PowerOf2.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\jm_malloc.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\BackwardSolver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\Game.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\ForwardSolver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\TargetBWSolver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\UnitTest.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Utils.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\v1\Game.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\v1\Solver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\v2\Game.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\v2\Solver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Value128.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\MagicBlockGame\Main.cpp" />
-    <ClCompile Include="..\..\..\src\MagicBlockGame\UnitTest.cpp" />
+    <ClCompile Include="..\..\..\src\MagicBlock\AI\Main.cpp" />
+    <ClCompile Include="..\..\..\src\MagicBlock\AI\UnitTest.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2026DFB5-96B4-46EF-9929-6A03C0E29AAC}</ProjectGuid>
@@ -132,7 +132,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\MagicBlockGame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,7 +146,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\MagicBlockGame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -162,7 +162,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\MagicBlockGame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -180,7 +180,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\MagicBlockGame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

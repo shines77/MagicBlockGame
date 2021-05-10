@@ -22,102 +22,102 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Color.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Color.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SlidingPuzzle.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Move.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Move.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\BitSet.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\BitSet.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Board.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Board.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\CPUWarmUp.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\CPUWarmUp.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\StopWatch.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\StopWatch.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\BitUtils.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\BitUtils.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SharedData.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SharedData.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Stage.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Stage.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\ErrorCode.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\ErrorCode.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Constant.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Constant.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Value128.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Value128.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\support\CT_PowerOf2.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\support\CT_PowerOf2.h">
       <Filter>src\support</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\support\RT_PowerOf2.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\support\RT_PowerOf2.h">
       <Filter>src\support</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\SparseBitset.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SparseBitset.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\jm_malloc.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\jm_malloc.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Algorithm.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Algorithm.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\UnitTest.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\UnitTest.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Game.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\v1\Game.h">
       <Filter>src\v1</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\v1\Solver.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\v1\Solver.h">
       <Filter>src\v1</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\Utils.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Utils.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\Game.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\Game.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\internal\BaseSolver.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseSolver.h">
       <Filter>src\internal</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\internal\BaseGame.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseGame.h">
       <Filter>src\internal</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Game.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\v2\Game.h">
       <Filter>src\v2</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\v2\Solver.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\v2\Solver.h">
       <Filter>src\v2</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\ForwardSolver.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\ForwardSolver.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\BackwardSolver.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\BackwardSolver.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlockGame\TwoEndpoint\TargetBWSolver.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\TargetBWSolver.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\MagicBlockGame\UnitTest.cpp">
+    <ClCompile Include="..\..\..\src\MagicBlock\AI\UnitTest.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\MagicBlockGame\Main.cpp">
+    <ClCompile Include="..\..\..\src\MagicBlock\AI\Main.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
