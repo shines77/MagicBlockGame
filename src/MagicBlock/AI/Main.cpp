@@ -5,7 +5,7 @@
 #include <vld.h>
 #endif
 #endif
-#endif
+#endif // _MSC_VER
 
 #ifndef __SSE2__
 #define __SSE2__
@@ -26,7 +26,7 @@
 #include <cstring>
 
 #include "MagicBlock/AI/ErrorCode.h"
-#include "MagicBlock/AI/v1/Game.h"
+#include "MagicBlock/AI/TwoPhase_v1/Game.h"
 #include "MagicBlock/AI/TwoEndpoint/Game.h"
 #include "MagicBlock/AI/Algorithm.h"
 #include "MagicBlock/AI/UnitTest.h"
@@ -130,7 +130,7 @@ void solve_sliding_puzzle()
 }
 
 template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = true>
-void solve_magic_block_two_phase()
+void solve_magic_block_two_phase_v1()
 {
     printf("-------------------------------------------------------\n\n");
     printf("solve_magic_block<%s, %s, AllowRotate = %s>()\n\n",
@@ -138,7 +138,7 @@ void solve_magic_block_two_phase()
             get_solver_name<N_SolverId>(),
             (AllowRotate ? "true" : "false"));
 
-    AI::v1::Game<5, 5, 3, 3, AllowRotate> game;
+    AI::TwoPhase_v1::Game<5, 5, 3, 3, AllowRotate> game;
 
     int readStatus = game.readConfig("magic_block.txt");
     if (ErrorCode::isFailure(readStatus)) {
@@ -236,10 +236,10 @@ template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = tru
 void solve_magic_block()
 {
     if (CategoryId == Category::TwoPhase_v1) {
-        solve_magic_block_two_phase<CategoryId, N_SolverId, AllowRotate>();
+        solve_magic_block_two_phase_v1<CategoryId, N_SolverId, AllowRotate>();
     }
     else if (CategoryId == Category::TwoPhase_v2) {
-        //solve_magic_block_two_phase<CategoryId, N_SolverId, AllowRotate>();
+        //solve_magic_block_two_phase_v2<CategoryId, N_SolverId, AllowRotate>();
     }
     else if (CategoryId == Category::TwoEndpoint) {
         solve_magic_block_two_endpoint<CategoryId, N_SolverId, AllowRotate>();

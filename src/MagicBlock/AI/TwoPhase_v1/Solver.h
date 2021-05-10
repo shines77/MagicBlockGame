@@ -33,7 +33,7 @@
 
 namespace MagicBlock {
 namespace AI {
-namespace v1 {
+namespace TwoPhase_v1 {
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
@@ -853,6 +853,6 @@ public:
     }
 };
 
-} // namespace v1
+} // namespace TwoPhase_v1
 } // namespace AI
 } // namespace MagicBlock

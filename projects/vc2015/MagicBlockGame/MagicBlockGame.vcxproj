@@ -44,10 +44,10 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\TargetBWSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\UnitTest.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Utils.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\v1\Game.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\v1\Solver.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\v2\Game.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\v2\Solver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_v1\Game.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_v1\Solver.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_v2\Game.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_v2\Solver.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Value128.h" />
   </ItemGroup>
   <ItemGroup>
