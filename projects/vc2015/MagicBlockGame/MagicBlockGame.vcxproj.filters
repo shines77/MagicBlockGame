@@ -112,6 +112,9 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingColorPuzzle.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlock\AI\UnitTest.cpp">

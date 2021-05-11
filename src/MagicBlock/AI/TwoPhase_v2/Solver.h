@@ -214,7 +214,7 @@ public:
             std::set<Value128> visited;
 
             stage_type start;
-            start.empty = empty;
+            start.empty_pos = empty;
             start.last_dir = uint8_t(-1);
             start.board = this->player_board_;
             visited.insert(start.board.value128());
@@ -246,7 +246,7 @@ public:
 
                         visited.insert(board_value);
 
-                        next_stage.empty = move_pos;
+                        next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
                         next_stage.move_path = stage.move_path;
@@ -309,7 +309,7 @@ public:
             std::set<Value128> visited;
 
             stage_type start;
-            start.empty = empty;
+            start.empty_pos = empty;
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
@@ -347,7 +347,7 @@ public:
 
                         visited.insert(board_value);
 
-                        next_stage.empty = move_pos;
+                        next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
                         next_stage.move_path = stage.move_path;
@@ -477,7 +477,7 @@ public:
             std::set<Value128> visited;
 
             stage_type start;
-            start.empty = empty;
+            start.empty_pos = empty;
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
@@ -493,7 +493,7 @@ public:
                 do {
                     const stage_type & stage = cur_stages.front();
 
-                    uint8_t empty_pos = stage.empty.value;
+                    uint8_t empty_pos = stage.empty_pos;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
                     size_type total_moves = empty_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
@@ -515,7 +515,7 @@ public:
 
                         visited.insert(board_value);
 
-                        next_stage.empty = move_pos;
+                        next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
                         next_stage.move_path = stage.move_path;
@@ -690,7 +690,7 @@ public:
             bitset_type visited;
 
             stage_type start;
-            start.empty = empty;
+            start.empty_pos = empty;
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
@@ -706,7 +706,7 @@ public:
                 for (size_type i = 0; i < cur_stages.size(); i++) {
                     const stage_type & stage = cur_stages[i];
 
-                    uint8_t empty_pos = stage.empty.value;
+                    uint8_t empty_pos = stage.empty_pos;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
                     size_type total_moves = empty_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
@@ -743,7 +743,7 @@ public:
                         assert(last_container != nullptr);
                         visited.append_new(next_stage.board, last_layer, last_container);
 #endif
-                        next_stage.empty = move_pos;
+                        next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
                         next_stage.move_path = stage.move_path;

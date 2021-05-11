@@ -258,7 +258,7 @@ int main(int argc, char * argv[])
     UnitTest();
 #endif
 
-#if 1
+#if 0
     solve_sliding_color_puzzle<SolverId::Normal, true>();
     solve_sliding_color_puzzle<SolverId::Queue, true>();
 

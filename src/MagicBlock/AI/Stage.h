@@ -17,13 +17,13 @@ template <size_t BoardX, size_t BoardY>
 struct Stage {
     Board<BoardX, BoardY> board;
 
-    Position    empty;
+    Position    empty_pos;
     uint8_t     last_dir, rotate_type;
     uint8_t     reserve;
 
     std::vector<Position> move_path;
 
-    Stage() noexcept : empty(0), last_dir(0), rotate_type(0), reserve(0) {}
+    Stage() noexcept : empty_pos(0), last_dir(0), rotate_type(0), reserve(0) {}
     Stage(const Stage & src) noexcept {
         this->internal_copy(src);
     }
@@ -31,7 +31,7 @@ struct Stage {
         this->internal_swap(src);
     }
     Stage(const Board<BoardX, BoardY> & _board) noexcept : board(_board),
-        empty(0), last_dir(0), rotate_type(0), reserve(0) {
+        empty_pos(0), last_dir(0), rotate_type(0), reserve(0) {
     }
 
     ~Stage() {}
@@ -49,7 +49,7 @@ struct Stage {
     void internal_copy(const Stage & other) noexcept {
         this->board         = other.board;
 
-        this->empty         = other.empty;
+        this->empty_pos         = other.empty_pos;
         this->last_dir      = other.last_dir;
         this->rotate_type   = other.rotate_type;
         this->reserve       = other.reserve;
@@ -66,7 +66,7 @@ struct Stage {
     void internal_swap(Stage & other) noexcept {
         this->board.swap(other.board);
 
-        this->empty.swap(other.empty);
+        this->empty_pos.swap(other.empty_pos);
         std::swap(this->last_dir, other.last_dir);
         std::swap(this->rotate_type, other.rotate_type);
         std::swap(this->reserve, other.reserve);

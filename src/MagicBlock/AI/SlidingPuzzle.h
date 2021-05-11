@@ -23,35 +23,36 @@
 namespace MagicBlock {
 namespace AI {
 
-template <std::size_t BoardX, std::size_t BoardY, bool AllowRotate = true>
-class SlidingColorPuzzle
+template <std::size_t BoardX, std::size_t BoardY>
+class SlidingPuzzle
 {
 public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
     static const size_type kMapBits = size_type(1U) << (BoardX * BoardY * 3);
-    static const size_type kSingelColorNums = 4;
+    static const size_type BoardSize = BoardX * BoardY;
+    static const size_type MaxNumber = BoardX * BoardY;
+    static const size_type kEmptyPosValue = 0;
 
     typedef Stage<BoardX, BoardY> stage_type;
 
 private:
     Board<BoardX, BoardY> player_board_;
-    Board<BoardX, BoardY> target_board_[4];
+    Board<BoardX, BoardY> target_board_;
 
-    size_type target_len_;
     size_type map_used_;
 
-    int player_num_cnt_[Color::Maximum];
-    int target_num_cnt_[Color::Maximum];
+    int player_num_cnt_[MaxNumber + 1];
+    int target_num_cnt_[MaxNumber + 1];
 
-    std::vector<Move> empty_moves_[BoardX * BoardY];
+    std::vector<Move> empty_moves_[BoardSize];
     std::vector<Position> move_path_;
 
     void init() {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->player_num_cnt_[clr] = Color::Empty;
-            this->target_num_cnt_[clr] = Color::Empty;
+        for (size_type num = 0; num <= MaxNumber; num++) {
+            this->player_num_cnt_[num] = 0;
+            this->target_num_cnt_[num] = 0;
         }
 
         for (size_type y = 0; y < BoardY; y++) {
@@ -73,19 +74,14 @@ private:
                 this->empty_moves_[y * BoardY + x] = moves;
             }
         }
-
-        if (AllowRotate)
-            this->target_len_ = MAX_ROTATE_TYPE;
-        else
-            this->target_len_ = 1;
     }
 
 public:
-    SlidingColorPuzzle() : target_len_(0), map_used_(0) {
+    SlidingPuzzle() : map_used_(0) {
         this->init();
     }
 
-    ~SlidingColorPuzzle() {}
+    ~SlidingPuzzle() {}
 
     size_type getMinSteps() const {
         return this->move_path_.size();
@@ -112,12 +108,12 @@ public:
                     ifs.getline(line, 256);
                     if (line_no >= 0 && line_no < BoardY) {
                         for (size_type x = 0; x < BoardX; x++) {
-                            uint8_t color = Color::charToColor(line[x]);
-                            if (color >= Color::Empty && color < Color::Last) {
-                                this->target_board_[0].cells[line_no * BoardY + x] = color;
+                            uint8_t num = Color::charToColor(line[x]);
+                            if (num >= 0 && num <= MaxNumber) {
+                                this->target_board_[0].cells[line_no * BoardY + x] = num;
                             }
                             else {
-                                err_code = ErrorCode::UnknownTargetBoardColor;
+                                err_code = ErrorCode::TargetBoardNumberOverflow;
                                 break;
                             }
                         }
@@ -125,12 +121,12 @@ public:
                     else if (line_no >= (BoardY + 1) && line_no < (BoardY + 1 + BoardY)) {
                         size_type boardY = line_no - (BoardY + 1);
                         for (size_type x = 0; x < BoardX; x++) {
-                            uint8_t color = Color::charToColor(line[x]);
-                            if (color >= Color::Empty && color < Color::Last) {
-                                this->player_board_.cells[boardY * BoardY + x] = color;
+                            uint8_t num = Color::charToColor(line[x]);
+                            if (num >= 0 && num <= MaxNumber) {
+                                this->player_board_.cells[boardY * BoardY + x] = num;
                             }
                             else {
-                                err_code = ErrorCode::UnknownPlayerBoardColor;
+                                err_code = ErrorCode::PlayerBoardNumberOverflow;
                                 break;
                             }
                         }
@@ -155,7 +151,7 @@ public:
             if (ErrorCode::isFailure(err_code)) {
                 char err_info[256] = {0};
                 snprintf(err_info, sizeof(err_info) - 1,
-                         "SlidingColorPuzzle::readConfig() Error code: %d, reason: %s",
+                         "SlidingPuzzle::readConfig() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
                 //throw std::runtime_error(err_info);
                 printf("%s\n\n", err_info);
@@ -173,123 +169,75 @@ public:
         return err_code;
     }
 
-    void count_all_color_nums() {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->player_num_cnt_[clr] = 0;
-            this->target_num_cnt_[clr] = 0;
+    void count_all_num_cnt() {
+        for (size_type num = 0; num <= MaxNumber; num++) {
+            this->player_num_cnt_[num] = 0;
+            this->target_num_cnt_[num] = 0;
         }
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t cell = this->player_board_.cells[y * BoardY + x];
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->player_num_cnt_[cell]++;
+                uint8_t num = this->player_board_.cells[y * BoardY + x];
+                if (num >= 0 && num <= MaxNumber) {
+                    this->player_num_cnt_[num]++;
                 }
             }
         }
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t cell = this->target_board_[0].cells[y * BoardY + x];
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->target_num_cnt_[cell]++;
+                uint8_t num = this->target_board_[0].cells[y * BoardY + x];
+                if (num >= 0 && num <= MaxNumber) {
+                    this->target_num_cnt_[num]++;
                 }
             }
         }
     }
 
-    int check_player_board_colors() {
+    int check_player_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
-        for (size_type clr = 0; clr < Color::Maximum; clr++) {
-            if (this->player_num_cnt_[clr] > (int)kSingelColorNums) {
-                err_code = ErrorCode::PlayerBoardColorOverflowFirst + (int)clr;
+        for (size_type num = 0; num <= MaxNumber; num++) {
+            if (this->player_num_cnt_[num] > 1) {
+                err_code = ErrorCode::PlayerBoardNumberIsDuplicated;
+                duplicated_num = num;
                 return err_code;
             }
         }
         return err_code;
     }
 
-    int check_target_board_colors() {
+    int check_target_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
-        for (size_type clr = 0; clr < Color::Maximum; clr++) {
-            if (this->target_num_cnt_[clr] > (int)kSingelColorNums) {
-                err_code = ErrorCode::TargetBoardColorOverflowFirst + (int)clr;
+        for (size_type num = 0; num <= MaxNumber; num++) {
+            if (this->target_num_cnt_[num] > 1) {
+                err_code = ErrorCode::TargetBoardNumberIsDuplicated;
+                duplicated_num = num;
                 return err_code;
             }
         }
         return err_code;
     }
 
-    int check_all_board_colors() {
-        int err_code = this->check_player_board_colors();
+    int check_all_board_nums(size_type & duplicated_num) {
+        int err_code = this->check_player_board_nums(duplicated_num);
         if (ErrorCode::isSuccess(err_code)) {
-            err_code = this->check_target_board_colors();
+            err_code = this->check_target_board_nums(duplicated_num);
         }
         return err_code;
-    }
-
-    void rotate_target_board() {
-        this->target_board_[0].rotate_90_cw(this->target_board_[1]);
-        this->target_board_[0].rotate_180_cw(this->target_board_[2]);
-        this->target_board_[0].rotate_270_cw(this->target_board_[3]);
-
-        bool is_duplicated[4];
-        for (size_type i = 0; i < 4; i++) {
-            is_duplicated[i] = false;
-        }
-
-        for (size_type i = 1; i < 4; i++) {
-            for (size_type j = 0; j < i; j++) {
-                if (this->target_board_[j] == this->target_board_[i]) {
-                    is_duplicated[i] = true;
-                    break;
-                }
-            }
-        }
-
-        size_type target_len = 4;
-        for (size_type i = 1; i < 4; i++) {
-            if (is_duplicated[i]) {
-                for (size_type j = i + 1; j < 4; j++) {
-                    this->target_board_[j - 1] = this->target_board_[j];
-                }
-                target_len--;
-            }
-        }
-        assert(target_len > 0);
-
-        if (AllowRotate)
-            this->target_len_ = target_len;
-        else
-            this->target_len_ = 1;
     }
 
     int verify_board() {
-        int err_code = ErrorCode::Success;
+        this->count_all_num_cnt();
 
-        this->count_all_color_nums();
-
-        int result = this->check_all_board_colors();
-        if (ErrorCode::isSuccess(result)) {
-            this->rotate_target_board();
-        }
-        else {
-            if (result >= ErrorCode::TargetBoardColorOverflowFirst &&
-                result <= ErrorCode::TargetBoardColorOverflowLast) {
-                err_code = ErrorCode::TargetBoardColorOverflow;
-            }
-            else if (result >= ErrorCode::PlayerBoardColorOverflowFirst &&
-                     result <= ErrorCode::PlayerBoardColorOverflowLast) {
-                err_code = ErrorCode::PlayerBoardColorOverflow;
-            }
-
-            if (ErrorCode::isFailure(err_code)) {
-                char err_info[256] = {0};
-                snprintf(err_info, sizeof(err_info) - 1,
-                         "SlidingColorPuzzle::verify_board() Error code: %d, reason: %s",
-                         err_code, ErrorCode::toString(err_code));
-                printf("%s\n\n", err_info);
-            }
+        size_type duplicated_num;
+        int err_code = this->check_all_board_nums(duplicated_num);
+        if (ErrorCode::isFailure(err_code)) {
+            char err_info[256] = {0};
+            snprintf(err_info, sizeof(err_info) - 1,
+                     "SlidingPuzzle::verify_board() Error code: %d, reason: %s\n
+                     "duplicated num: %d",
+                     err_code, ErrorCode::toString(err_code), (int)duplicated_num);
+            printf("%s\n\n", err_info);
         }
 
         return err_code;
@@ -297,26 +245,24 @@ public:
 
     template <size_type UBoardX, size_type UBoardY>
     void set_puzzle(const Board<UBoardX, UBoardY> & player,
-                    const Board<BoardX, BoardY> target[4],
+                    const Board<BoardX, BoardY> & target,
                     size_type target_len) {
         static const ptrdiff_t startX = (UBoardX - BoardX) / 2;
         static const ptrdiff_t startY = (UBoardY - BoardY) / 2;
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                this->player_board_.cells[y * BoardY + x] = player.cells[(startY + y) * UBoardY + (startX + x)];
+                this->player_board_.cells[y * BoardY + x] =
+                    player.cells[(startY + y) * UBoardY + (startX + x)];
             }
         }
-        for (size_type i = 0; i < 4; i++) {
-            this->target_board_[i] = target[i];
-        }
-        this->target_len_ = target_len;
+        this->target_board_ = target;
     }
 
     bool find_empty(Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                char color = this->player_board_.cells[y * BoardY + x];
-                if (color == Color::Empty) {
+                char num = this->player_board_.cells[y * BoardY + x];
+                if (num == kEmptyPosValue) {
                     empty_pos = (uint8_t)(y * BoardY + x);
                     return true;
                 }
@@ -330,22 +276,8 @@ public:
         return (player == target);
     }
 
-    size_type is_satisfy(const Board<BoardX, BoardY> & player,
-                         const Board<BoardX, BoardY> target[4],
-                         size_type target_len) const {
-        for (size_type index = 0; index < target_len; index++) {
-            if (player == target[index]) {
-                return index;
-            }
-        }
-
-        return size_t(-1);
-    }
-
     bool solve() {
-        if (is_satisfy(this->player_board_,
-                       this->target_board_,
-                       this->target_len_) != size_t(-1)) {
+        if (this->is_satisfy(this->player_board_, this->target_board_)) {
             return true;
         }
 
@@ -353,7 +285,7 @@ public:
         size_type depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(empty);
+        bool found_empty = this->find_empty(empty);
         if (found_empty) {
             jstd::BitSet<kMapBits> visited;
 
@@ -374,7 +306,7 @@ public:
                 for (size_type i = 0; i < cur_stages.size(); i++) {
                     const stage_type & stage = cur_stages[i];
 
-                    uint8_t empty_pos = stage.empty_pos;
+                    uint8_t empty_pos = stage.empty;
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
                     size_type total_moves = empty_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
@@ -431,9 +363,7 @@ public:
     }
 
     bool queue_solve() {
-        if (is_satisfy(this->player_board_,
-                       this->target_board_,
-                       this->target_len_) != size_t(-1)) {
+        if (this->is_satisfy(this->player_board_, this->target_board_)) {
             return true;
         }
 
@@ -441,7 +371,7 @@ public:
         size_type depth = 0;
 
         Position empty;
-        bool found_empty = find_empty(empty);
+        bool found_empty = this->find_empty(empty);
         if (found_empty) {
             jstd::BitSet<kMapBits> visited;
 
@@ -462,7 +392,7 @@ public:
                 do {
                     const stage_type & stage = cur_stages.front();
 
-                    uint8_t empty_pos = stage.empty_pos;
+                    uint8_t empty_pos = stage.empty;
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
                     size_type total_moves = empty_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {

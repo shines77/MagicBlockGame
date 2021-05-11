@@ -78,6 +78,7 @@ protected:
             for (size_type x = 0; x < BoardX; x++) {
                 std::vector<Move> empty_moves;
                 for (size_type dir = Direction::First; dir < Direction::Last; dir++) {
+                    assert(dir >= 0 && dir < 4);
                     int board_x = (int)x + Dir_Offset[dir].x;
                     if (board_x < 0 || board_x >= (int)BoardX)
                         continue;
@@ -191,13 +192,12 @@ public:
                 snprintf(err_info, sizeof(err_info) - 1,
                          "MagicBlockBaseGame::readConfig() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
-                throw std::runtime_error(err_info);
+                //throw std::runtime_error(err_info);
+                printf("%s\n\n", err_info);
             }
         }
         catch (std::exception & ex) {
-            if (ErrorCode::isSuccess(err_code)) {
-                err_code = ErrorCode::StdException;
-            }
+            err_code = ErrorCode::StdException;
             std::cout << "Exception: " << ex.what() << std::endl << std::endl;
         }
 
@@ -232,6 +232,7 @@ public:
                 snprintf(err_info, sizeof(err_info) - 1,
                          "BaseGame::verify_board() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
+                printf("%s\n\n", err_info);
             }
         }
         

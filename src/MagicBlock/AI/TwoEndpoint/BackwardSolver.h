@@ -136,7 +136,7 @@ public:
                     this->player_board_[i].cells[empty_pos] = Color::Empty;
 
                     stage_type start;
-                    start.empty = empty_pos;
+                    start.empty_pos = empty_pos;
                     start.last_dir = uint8_t(-1);
                     start.rotate_type = uint8_t((i & 0x03U) | (size_type(empty_pos) << 2U));
                     start.board = this->player_board_[i];
@@ -160,7 +160,7 @@ public:
                 for (size_type i = 0; i < this->cur_stages_.size(); i++) {
                     const stage_type & stage = this->cur_stages_[i];
 
-                    uint8_t empty_pos = stage.empty.value;
+                    uint8_t empty_pos = stage.empty_pos;
                     const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
                     size_type total_moves = empty_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
@@ -178,7 +178,7 @@ public:
                             continue;
                         }
 
-                        next_stage.empty = move_pos;
+                        next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = stage.rotate_type;
                         next_stage.move_path = stage.move_path;
@@ -231,7 +231,7 @@ public:
                 this->player_board_[i].cells[empty_pos] = Color::Empty;
 
                 stage_type start;
-                start.empty = empty_pos;
+                start.empty_pos = empty_pos;
                 start.last_dir = uint8_t(-1);
                 start.rotate_type = uint8_t((i & 0x03U) | (size_type(empty_pos) << 2U));
                 start.board = this->player_board_[i];
@@ -259,7 +259,7 @@ public:
             for (size_type i = 0; i < this->cur_stages_.size(); i++) {
                 const stage_type & stage = this->cur_stages_[i];
 
-                uint8_t empty_pos = stage.empty.value;
+                uint8_t empty_pos = stage.empty_pos;
                 const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
                 size_type total_moves = empty_moves.size();
                 for (size_type n = 0; n < total_moves; n++) {
@@ -277,7 +277,7 @@ public:
                         continue;
                     }
 
-                    next_stage.empty = move_pos;
+                    next_stage.empty_pos = move_pos;
                     next_stage.last_dir = cur_dir;
                     next_stage.rotate_type = stage.rotate_type;
                     next_stage.move_path = stage.move_path;

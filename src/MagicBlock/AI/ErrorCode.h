@@ -8,10 +8,14 @@ namespace AI {
 struct ErrorCode {
     enum ErrorType {
         ErrorFirst = -10000,
-        TargetBoardColorOverflowFirst = -200,
+        TargetBoardColorOverflowFirst = -100,
         TargetBoardColorOverflowLast = TargetBoardColorOverflowFirst + Color::Maximum - 1,
         PlayerBoardColorOverflowFirst = TargetBoardColorOverflowFirst + Color::Maximum,
         PlayerBoardColorOverflowLast = PlayerBoardColorOverflowFirst + Color::Maximum - 1,
+        TargetBoardNumberOverflow = -50,
+        PlayerBoardNumberOverflow,
+        TargetBoardNumberIsDuplicated,
+        PlayerBoardNumberIsDuplicated,
         TargetBoardColorOverflow = -7,
         PlayerBoardColorOverflow = -6,
         UnknownTargetBoardColor = -5,
@@ -36,6 +40,10 @@ struct ErrorCode {
                 return "Target board color overflow";
             case ErrorType::PlayerBoardColorOverflow:
                 return "Player board color overflow";
+            case ErrorType::TargetBoardNumberOverflow:
+                return "Target board number overflow";
+            case ErrorType::PlayerBoardNumberOverflow:
+                return "Player board number overflow";
             case ErrorType::UnknownTargetBoardColor:
                 return "Unknown target board color";
             case ErrorType::UnknownPlayerBoardColor:
@@ -58,6 +66,10 @@ struct ErrorCode {
             case ErrorType::TargetBoardColorOverflow:
                 return "Error";
             case ErrorType::PlayerBoardColorOverflow:
+                return "Error";
+            case ErrorType::TargetBoardNumberOverflow:
+                return "Error";
+            case ErrorType::PlayerBoardNumberOverflow:
                 return "Error";
             case ErrorType::UnknownTargetBoardColor:
                 return "Error";
