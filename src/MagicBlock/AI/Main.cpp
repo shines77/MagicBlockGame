@@ -27,7 +27,7 @@
 
 #include "MagicBlock/AI/ErrorCode.h"
 #include "MagicBlock/AI/SlidingPuzzle.h"
-#include "MagicBlock/AI/SlidingUnknownPuzzle.h"
+#include "MagicBlock/AI/SlidingUnknownPuzzle3x3.h"
 #include "MagicBlock/AI/SlidingColorPuzzle.h"
 #include "MagicBlock/AI/TwoPhase_v1/Game.h"
 #include "MagicBlock/AI/TwoEndpoint/Game.h"
@@ -133,14 +133,14 @@ void solve_sliding_puzzle()
 }
 
 template <std::size_t N_SolverId, bool SearchAllAnswers = false>
-void solve_sliding_unknown_puzzle()
+void solve_sliding_unknown_puzzle_3x3()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_sliding_unknown_puzzle<%s, SearchAllAnswers = %s>()\n\n",
+    printf("solve_sliding_unknown_puzzle_3x3<%s, SearchAllAnswers = %s>()\n\n",
             get_solver_name<N_SolverId>(),
             (SearchAllAnswers ? "true" : "false"));
 
-    AI::SlidingUnknownPuzzle<3, 3, 8, 3, SearchAllAnswers> slidingPuzzle;
+    AI::SlidingUnknownPuzzle3x3<3, 3, 8, 3, SearchAllAnswers> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig("sliding_puzzle_unknown.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
@@ -348,8 +348,8 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
-    solve_sliding_unknown_puzzle<SolverId::Normal, true>();
-    solve_sliding_unknown_puzzle<SolverId::Queue, true>();
+    solve_sliding_unknown_puzzle_3x3<SolverId::Normal, true>();
+    solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
 
     System::pause();
 #endif

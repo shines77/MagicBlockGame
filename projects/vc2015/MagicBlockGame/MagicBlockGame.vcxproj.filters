@@ -112,10 +112,10 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingColorPuzzle.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingUnknownPuzzle.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingUnknownPuzzle3x3.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

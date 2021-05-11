@@ -26,13 +26,13 @@ namespace AI {
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t MaxValidValue = 8, std::size_t GridBits = 3,
           bool SearchAllAnswers = false>
-class SlidingUnknownPuzzle
+class SlidingUnknownPuzzle3x3
 {
 public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    typedef SlidingUnknownPuzzle<BoardX, BoardY> this_type;
+    typedef SlidingUnknownPuzzle3x3<BoardX, BoardY> this_type;
 
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type kSingelNumMaxCount = 4;
@@ -90,12 +90,12 @@ private:
     }
 
 public:
-    SlidingUnknownPuzzle() : map_used_(0), has_unknown_(false) {
+    SlidingUnknownPuzzle3x3() : map_used_(0), has_unknown_(false) {
         static_assert((MaxValidValue <= MaxNumber), "Error: MaxValidValue must less than or equal MaxNumber.");
         this->init();
     }
 
-    ~SlidingUnknownPuzzle() {}
+    ~SlidingUnknownPuzzle3x3() {}
 
     size_type getMinSteps() const {
         return this->move_path_.size();
@@ -189,7 +189,7 @@ public:
             if (ErrorCode::isFailure(err_code)) {
                 char err_info[256] = {0};
                 snprintf(err_info, sizeof(err_info) - 1,
-                         "SlidingUnknownPuzzle::readConfig() Error code: %d, reason: %s",
+                         "SlidingUnknownPuzzle3x3::readConfig() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
                 printf("%s\n\n", err_info);
             }
@@ -275,7 +275,7 @@ public:
         if (ErrorCode::isFailure(err_code)) {
             char err_info[256] = {0};
             snprintf(err_info, sizeof(err_info) - 1,
-                     "SlidingUnknownPuzzle::verify_board() Error code: %d, reason: %s\n"
+                     "SlidingUnknownPuzzle3x3::verify_board() Error code: %d, reason: %s\n"
                      "duplicated num: %d",
                      err_code, ErrorCode::toString(err_code), (int)duplicated_num);
             printf("%s\n\n", err_info);
@@ -374,10 +374,10 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_type value64 = next_stage.board.template compactValue<kEmptyPosValue>();
-                        if (visited[move_pos].test_and_set(value64))
+                        if (visited[move_pos].test(value64))
                             continue;
 
-                        //visited[move_pos].set(value64);
+                        visited[move_pos].set(value64);
                         
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -475,10 +475,10 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_type value64 = next_stage.board.template compactValue<kEmptyPosValue>();
-                        if (visited[move_pos].test_and_set(value64))
+                        if (visited[move_pos].test(value64))
                             continue;
 
-                        //visited[move_pos].set(value64);
+                        visited[move_pos].set(value64);
                         
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
