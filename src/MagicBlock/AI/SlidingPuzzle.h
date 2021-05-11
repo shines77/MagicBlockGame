@@ -384,11 +384,7 @@ public:
             this->map_used_ = visited_count;
 
             if (solvable) {
-                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
-                if (SearchAllAnswers && this->answer_list_.size() > 1)
-                    Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
-                else
-                    Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Answer Board", this->answer_list_[0]);
+                //
             }
         }
 
@@ -485,15 +481,19 @@ public:
             this->map_used_ = visited_count;
 
             if (solvable) {
-                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
-                if (SearchAllAnswers && this->answer_list_.size() > 1)
-                    Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
-                else
-                    Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Answer Board", this->answer_list_[0]);
+                //
             }
         }
 
         return solvable;
+    }
+
+    void display_answers() {
+        Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
+        if (SearchAllAnswers && this->answer_list_.size() > 1)
+            Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
+        else
+            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Answer Board", this->answer_list_[0]);
     }
 };
 

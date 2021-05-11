@@ -121,6 +121,7 @@ void solve_sliding_puzzle()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
+        slidingPuzzle.display_answers();
         printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)slidingPuzzle.getMinSteps());
         printf("Map Used: %d\n\n", (int)slidingPuzzle.getMapUsed());
@@ -161,6 +162,7 @@ void solve_sliding_unknown_puzzle_3x3()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
+        slidingPuzzle.display_answers();
         printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)slidingPuzzle.getMinSteps());
         printf("Map Used: %d\n\n", (int)slidingPuzzle.getMapUsed());
