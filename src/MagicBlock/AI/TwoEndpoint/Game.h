@@ -383,11 +383,11 @@ public:
                             if (total_steps < this->min_steps_) {
                                 solvable = true;
 
-                                base_type::display_target_board("Target board:", forward_solver.getTargetBoard());
-                                base_type::display_player_board("Player board:", forward_solver.getPlayerBoard());
+                                Board<TargetX, TargetY>::display_board("Target board:", forward_solver.getTargetBoard());
+                                Board<BoardX, BoardY>::display_board("Player board:", forward_solver.getPlayerBoard());
 
-                                base_type::display_player_board("Forward answer:", this->fw_answer_board_);
-                                base_type::display_player_board("Backward answer:", this->bw_answer_board_);
+                                Board<BoardX, BoardY>::display_board("Forward answer:", this->fw_answer_board_);
+                                Board<BoardX, BoardY>::display_board("Backward answer:", this->bw_answer_board_);
 
                                 if (this->translateMovePath(fw_stage)) {
                                     this->displayAnswer();

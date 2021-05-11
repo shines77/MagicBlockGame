@@ -240,35 +240,11 @@ public:
     }
 
     static void display_target_board(const char * title, const Board<TargetX, TargetY> & board) {
-        printf("%s\n\n", title);
-        printf("-------\n");
-        for (size_type y = 0; y < TargetY; y++) {
-            printf(" ");
-            for (size_type x = 0; x < TargetX; x++) {
-                uint8_t color = board.cells[y * TargetY + x];
-                assert(color >= Color::Empty && color < Color::Maximum);
-                printf("%s ", Color::colorToChar(color));
-            }
-            printf("\n");
-        }
-        printf("-------\n");
-        printf("\n");
+        Board<TargetX, TargetY>::display_board(title, board);
     }
 
     static void display_player_board(const char * title, const Board<BoardX, BoardY> & board) {
-        printf("%s\n\n", title);
-        printf("-----------\n");
-        for (size_type y = 0; y < BoardY; y++) {
-            printf(" ");
-            for (size_type x = 0; x < BoardX; x++) {
-                uint8_t color = board.cells[y * BoardY + x];
-                assert(color >= Color::Empty && color < Color::Maximum);
-                printf("%s ", Color::colorToChar(color));
-            }
-            printf("\n");
-        }
-        printf("-----------\n");
-        printf("\n");
+        Board<BoardX, BoardY>::display_board(title, board);
     }
 
     void count_all_color_nums() {

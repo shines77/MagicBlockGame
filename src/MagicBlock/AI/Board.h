@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <cstring>      // For std::memset()
+#include <vector>
 #include <type_traits>  // For std::conditional<bool, T1, T2>
 #include <algorithm>    // For std::fill_n()
 
@@ -208,6 +209,70 @@ union Board
                 size_type dest_pos = dest_y * BoardY + dest_x;
                 dest.cells[dest_pos] = this->cells[src_pos];
             }
+        }
+    }
+
+    static void display_board(const char * title, const this_type & board) {
+        printf("%s\n\n", title);
+        // -------
+        for (size_type x = 0; x < BoardX * 2 + 1; x++) {
+            printf("-");
+        }
+        printf("\n");
+        for (size_type y = 0; y < BoardY; y++) {
+            printf(" ");
+            for (size_type x = 0; x < BoardX; x++) {
+                uint8_t color = board.cells[y * BoardY + x];
+                assert(color >= Color::Empty && color < Color::Maximum);
+                printf("%s ", Color::colorToChar(color));
+            }
+            printf("\n");
+        }
+        // -------
+        for (size_type x = 0; x < BoardX * 2 + 1; x++) {
+            printf("-");
+        }
+        printf("\n\n");
+    }
+
+    static void display_num_board(const char * title, const this_type & board) {
+        printf("%s\n\n", title);
+        // -------
+        printf(" ");
+        for (size_type x = 0; x < BoardX * 2 + 1; x++) {
+            printf("-");
+        }
+        printf("\n");
+        for (size_type y = 0; y < BoardY; y++) {
+            printf("| ");
+            for (size_type x = 0; x < BoardX; x++) {
+                uint8_t num = board.cells[y * BoardY + x];
+                assert(num >= 0 && num < BoardSize);
+                printf("%c ", (num + '0'));
+            }
+            printf("|\n");
+        }
+        // -------
+        printf(" ");
+        for (size_type x = 0; x < BoardX * 2 + 1; x++) {
+            printf("-");
+        }
+        printf("\n\n");
+    }
+
+    static void display_boards(const char * title, const std::vector<this_type> & board_list) {
+        for (size_type n = 0; n < board_list.size(); n++) {
+            char title_no[128];
+            snprintf(title_no, sizeof(title_no), "%s #%u", title, (uint32_t)(n + 1));
+            this_type::display_board(title, board_list[n]);
+        }
+    }
+
+    static void display_num_boards(const char * title, const std::vector<this_type> & board_list) {
+        for (size_type n = 0; n < board_list.size(); n++) {
+            char title_no[128];
+            snprintf(title_no, sizeof(title_no), "%s #%u", title, (uint32_t)(n + 1));
+            this_type::display_num_board(title_no, board_list[n]);
         }
     }
 };

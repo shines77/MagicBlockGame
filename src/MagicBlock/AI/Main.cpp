@@ -97,7 +97,7 @@ void solve_sliding_puzzle()
     printf("-------------------------------------------------------\n\n");
     printf("solve_sliding_puzzle<%s>()\n\n", get_solver_name<N_SolverId>());
 
-    AI::SlidingPuzzle<3, 3> slidingPuzzle;
+    AI::SlidingPuzzle<3, 3, true> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig("sliding_puzzle.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
@@ -314,6 +314,7 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
+    if (0) {
 #ifdef NDEBUG
 
     ////////////////////////////////////////////////////////////////////////
@@ -363,6 +364,7 @@ int main(int argc, char * argv[])
     ////////////////////////////////////////////////////////////////////////
 
 #endif // NDEBUG
+    }
 
     return 0;
 }

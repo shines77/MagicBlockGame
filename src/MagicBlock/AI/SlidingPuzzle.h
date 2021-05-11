@@ -23,7 +23,7 @@
 namespace MagicBlock {
 namespace AI {
 
-template <std::size_t BoardX, std::size_t BoardY>
+template <std::size_t BoardX, std::size_t BoardY, bool SearchAllAnswers = false>
 class SlidingPuzzle
 {
 public:
@@ -42,6 +42,8 @@ public:
 private:
     Board<BoardX, BoardY> player_board_;
     Board<BoardX, BoardY> target_board_;
+
+    std::vector<Board<BoardX, BoardY>> answer_list_;
 
     size_type map_used_;
 
@@ -98,8 +100,12 @@ public:
     }
 
     static uint8_t charToNumber(uint8_t ch) {
-        uint8_t num = (ch >= 'A' && ch <= 'Z') ? (ch - 'A' + 1) : (uint8_t)-1;
-        return ((ch != ' ') ? num : kEmptyPosValue);
+        if (ch >= '0' && ch <= '9')
+            return (ch - '0');
+        else if (ch != ' ')
+            return (ch >= 'A' && ch <= 'Z') ? (ch - 'A' + 1) : (uint8_t)-1;
+        else
+            return kEmptyPosValue;
     }
 
     int readConfig(const char * filename) {
@@ -278,10 +284,17 @@ public:
         return false;
     }
 
+#if 1
     bool is_satisfy(const Board<BoardX, BoardY> & player,
                     const Board<BoardX, BoardY> & target) const {
         return (player == target);
     }
+#else
+    bool is_satisfy(const Board<BoardX, BoardY> & player,
+                    const Board<BoardX, BoardY> & target) const {
+        return (player.cells[0] == 2 && player.cells[1] == 1);
+    }
+#endif
 
     bool solve() {
         if (this->is_satisfy(this->player_board_, this->target_board_)) {
@@ -341,14 +354,18 @@ public:
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
+                            this->answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
-                            break;
+                            if (!SearchAllAnswers)
+                                break;
                         }
                     }
 
-                    if (exit) {
-                        break;
+                    if (!SearchAllAnswers) {
+                        if (exit) {
+                            break;
+                        }
                     }
                 }
 
@@ -361,12 +378,18 @@ public:
                 }
             }
 
+            size_type visited_count = 0;
+            for (size_type i = 0; i < BoardSize; i++) {
+                visited_count += visited[i].count();
+            }
+            this->map_used_ = visited_count;
+
             if (solvable) {
-                size_type visited_count = 0;
-                for (size_type i = 0; i < BoardSize; i++) {
-                    visited_count += visited[i].count();
-                }
-                this->map_used_ = visited_count;
+                Board<BoardX, BoardY>::display_num_board("Player Board", this->player_board_);
+                if (SearchAllAnswers)
+                    Board<BoardX, BoardY>::display_num_boards("Answer Board", this->answer_list_);
+                else
+                    Board<BoardX, BoardY>::display_num_board("Answer Board", this->answer_list_[0]);
             }
         }
 
@@ -431,16 +454,20 @@ public:
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
+                            this->answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
-                            break;
+                            if (!SearchAllAnswers)
+                                break;
                         }
                     }
 
                     cur_stages.pop();
 
-                    if (exit) {
-                        break;
+                    if (!SearchAllAnswers) {
+                        if (exit) {
+                            break;
+                        }
                     }
                 } while (cur_stages.size() > 0);
 
@@ -452,12 +479,18 @@ public:
                 }
             }
 
+            size_type visited_count = 0;
+            for (size_type i = 0; i < BoardSize; i++) {
+                visited_count += visited[i].count();
+            }
+            this->map_used_ = visited_count;
+
             if (solvable) {
-                size_type visited_count = 0;
-                for (size_type i = 0; i < BoardSize; i++) {
-                    visited_count += visited[i].count();
-                }
-                this->map_used_ = visited_count;
+                Board<BoardX, BoardY>::display_num_board("Player Board", this->player_board_);
+                if (SearchAllAnswers)
+                    Board<BoardX, BoardY>::display_num_boards("Answer Board", this->answer_list_);
+                else
+                    Board<BoardX, BoardY>::display_num_board("Answer Board", this->answer_list_[0]);
             }
         }
 
