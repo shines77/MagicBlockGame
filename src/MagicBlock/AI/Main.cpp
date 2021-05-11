@@ -26,6 +26,7 @@
 #include <cstring>
 
 #include "MagicBlock/AI/ErrorCode.h"
+#include "MagicBlock/AI/SlidingColorPuzzle.h"
 #include "MagicBlock/AI/TwoPhase_v1/Game.h"
 #include "MagicBlock/AI/TwoEndpoint/Game.h"
 #include "MagicBlock/AI/Algorithm.h"
@@ -90,17 +91,17 @@ static const char * get_solver_name()
 }
 
 template <std::size_t N_SolverId, bool AllowRotate = true>
-void solve_sliding_puzzle()
+void solve_sliding_color_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_sliding_puzzle<%s, AllowRotate = %s>()\n\n",
+    printf("solve_sliding_color_puzzle<%s, AllowRotate = %s>()\n\n",
             get_solver_name<N_SolverId>(),
             (AllowRotate ? "true" : "false"));
 
-    AI::SlidingPuzzle<3, 3, AllowRotate> slidingPuzzle;
+    AI::SlidingColorPuzzle<3, 3, AllowRotate> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig("sliding_puzzle.txt");
     if (ErrorCode::isFailure(readStatus)) {
-        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toErrorString(readStatus));
+        printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;
     }
 
@@ -142,7 +143,7 @@ void solve_magic_block_two_phase_v1()
 
     int readStatus = game.readConfig("magic_block.txt");
     if (ErrorCode::isFailure(readStatus)) {
-        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toErrorString(readStatus));
+        printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;
     }
 
@@ -192,7 +193,7 @@ void solve_magic_block_two_endpoint()
 
     int readStatus = game.readConfig("magic_block.txt");
     if (ErrorCode::isFailure(readStatus)) {
-        printf("readStatus = %d (%s)\n\n", readStatus, ErrorCode::toErrorString(readStatus));
+        printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;
     }
 
@@ -257,12 +258,12 @@ int main(int argc, char * argv[])
     UnitTest();
 #endif
 
-#if 0
-    solve_sliding_puzzle<SolverId::Normal, true>();
-    solve_sliding_puzzle<SolverId::Queue, true>();
+#if 1
+    solve_sliding_color_puzzle<SolverId::Normal, true>();
+    solve_sliding_color_puzzle<SolverId::Queue, true>();
 
-    solve_sliding_puzzle<SolverId::Normal, false>();
-    solve_sliding_puzzle<SolverId::Queue, false>();
+    solve_sliding_color_puzzle<SolverId::Normal, false>();
+    solve_sliding_color_puzzle<SolverId::Queue, false>();
 
     System::pause();
 #endif

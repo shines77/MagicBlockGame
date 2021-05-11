@@ -31,7 +31,7 @@
 #include "MagicBlock/AI/SharedData.h"
 #include "MagicBlock/AI/ErrorCode.h"
 #include "MagicBlock/AI/TwoPhase_v2/Solver.h"
-#include "MagicBlock/AI/SlidingPuzzle.h"
+#include "MagicBlock/AI/SlidingColorPuzzle.h"
 #include "MagicBlock/AI/Utils.h"
 #include "MagicBlock/AI/StopWatch.h"
 

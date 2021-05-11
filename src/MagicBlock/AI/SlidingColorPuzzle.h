@@ -24,7 +24,7 @@ namespace MagicBlock {
 namespace AI {
 
 template <std::size_t BoardX, std::size_t BoardY, bool AllowRotate = true>
-class SlidingPuzzle
+class SlidingColorPuzzle
 {
 public:
     typedef std::size_t         size_type;
@@ -80,11 +80,11 @@ private:
     }
 
 public:
-    SlidingPuzzle() : target_len_(0), map_used_(0) {
+    SlidingColorPuzzle() : target_len_(0), map_used_(0) {
         this->init();
     }
 
-    ~SlidingPuzzle() {}
+    ~SlidingColorPuzzle() {}
 
     size_type getMinSteps() const {
         return this->move_path_.size();

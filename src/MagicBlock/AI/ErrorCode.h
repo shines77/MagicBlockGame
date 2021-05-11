@@ -40,6 +40,10 @@ struct ErrorCode {
                 return "Unknown target board color";
             case ErrorType::UnknownPlayerBoardColor:
                 return "Unknown player board color";
+            case ErrorCode::ifstream_IsFailed:
+                return "ifstream_IsFailed";
+            case ErrorCode::ifstream_IsBad:
+                return "ifstream_IsBad";
             case ErrorType::StdException:
                 return "It's a std::exception";
             case ErrorType::Success:
@@ -49,22 +53,26 @@ struct ErrorCode {
         }
     }
 
-    static const char * toErrorString(int errCode) {
+    static const char * toErrorTypeStr(int errCode) {
         switch (errCode) {
             case ErrorType::TargetBoardColorOverflow:
-                return "Error: Target board color overflow";
+                return "Error";
             case ErrorType::PlayerBoardColorOverflow:
-                return "Error: Player board color overflow";
+                return "Error";
             case ErrorType::UnknownTargetBoardColor:
-                return "Error: Unknown target board color";
+                return "Error";
             case ErrorType::UnknownPlayerBoardColor:
-                return "Error: Unknown player board color";
+                return "Error";
+            case ErrorCode::ifstream_IsFailed:
+                return "FileError";
+            case ErrorCode::ifstream_IsBad:
+                return "FileError";
             case ErrorType::StdException:
-                return "Error: It's a std::exception";
+                return "Exception";
             case ErrorType::Success:
-                return "Success";
+                return "";
             default:
-                return "Error: Unknown error code";
+                return "UnknownError";
         }
     }
 };

@@ -25,9 +25,6 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Color.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Move.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -111,6 +108,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\TargetBWSolver.h">
       <Filter>src\TwoEndpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingColorPuzzle.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
