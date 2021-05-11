@@ -206,7 +206,7 @@ public:
     }
 
     void count_all_num_cnt() {
-        for (size_type num = 0; num <= MaxNumber; num++) {
+        for (size_type num = 0; num < MaxNumber; num++) {
             this->player_num_cnt_[num] = 0;
             this->target_num_cnt_[num] = 0;
         }
@@ -233,7 +233,7 @@ public:
     int check_player_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
         for (size_type num = 0; num < MaxNumber; num++) {
-            if (this->player_num_cnt_[num] > kSingelNumMaxCount && num != kUnknownPosValue) {
+            if (this->player_num_cnt_[num] > (int)kSingelNumMaxCount && num != kUnknownPosValue) {
                 err_code = ErrorCode::PlayerBoardNumberOverflow;
                 duplicated_num = num;
                 return err_code;
