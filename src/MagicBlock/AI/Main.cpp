@@ -27,6 +27,7 @@
 
 #include "MagicBlock/AI/ErrorCode.h"
 #include "MagicBlock/AI/SlidingPuzzle.h"
+#include "MagicBlock/AI/SlidingUnknownPuzzle.h"
 #include "MagicBlock/AI/SlidingColorPuzzle.h"
 #include "MagicBlock/AI/TwoPhase_v1/Game.h"
 #include "MagicBlock/AI/TwoEndpoint/Game.h"
@@ -91,14 +92,56 @@ static const char * get_solver_name()
     }
 }
 
-template <std::size_t N_SolverId>
+template <std::size_t N_SolverId, bool SearchAllAnswers = false>
 void solve_sliding_puzzle()
 {
     printf("-------------------------------------------------------\n\n");
-    printf("solve_sliding_puzzle<%s>()\n\n", get_solver_name<N_SolverId>());
+    printf("solve_sliding_puzzle<%s, SearchAllAnswers = %s>()\n\n",
+            get_solver_name<N_SolverId>(),
+            (SearchAllAnswers ? "true" : "false"));
 
-    AI::SlidingPuzzle<3, 3, true> slidingPuzzle;
+    AI::SlidingPuzzle<3, 3, SearchAllAnswers> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig("sliding_puzzle.txt");
+    if (ErrorCode::isFailure(readStatus)) {
+        printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
+        return;
+    }
+
+    bool solvable;
+    jtest::StopWatch sw;
+
+    sw.start();
+    if (N_SolverId == SolverId::Queue) {
+        solvable = slidingPuzzle.queue_solve();
+    }
+    else {
+        solvable = slidingPuzzle.solve();
+    }
+    sw.stop();
+    double elapsed_time = sw.getElapsedMillisec();
+
+    if (solvable) {
+        printf("Found a answer!\n\n");
+        printf("MinSteps: %d\n\n", (int)slidingPuzzle.getMinSteps());
+        printf("Map Used: %d\n\n", (int)slidingPuzzle.getMapUsed());
+    }
+    else {
+        printf("Not found a answer!\n\n");
+    }
+
+    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+}
+
+template <std::size_t N_SolverId, bool SearchAllAnswers = false>
+void solve_sliding_unknown_puzzle()
+{
+    printf("-------------------------------------------------------\n\n");
+    printf("solve_sliding_unknown_puzzle<%s, SearchAllAnswers = %s>()\n\n",
+            get_solver_name<N_SolverId>(),
+            (SearchAllAnswers ? "true" : "false"));
+
+    AI::SlidingUnknownPuzzle<3, 3, 6, 3, SearchAllAnswers> slidingPuzzle;
+    int readStatus = slidingPuzzle.readConfig("sliding_puzzle_unknown.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;
@@ -298,8 +341,15 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
-    solve_sliding_puzzle<SolverId::Normal>();
-    solve_sliding_puzzle<SolverId::Queue>();
+    solve_sliding_puzzle<SolverId::Normal, true>();
+    solve_sliding_puzzle<SolverId::Queue, true>();
+
+    System::pause();
+#endif
+
+#if 1
+    solve_sliding_unknown_puzzle<SolverId::Normal, true>();
+    solve_sliding_unknown_puzzle<SolverId::Queue, true>();
 
     System::pause();
 #endif

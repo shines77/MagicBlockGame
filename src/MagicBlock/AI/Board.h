@@ -236,6 +236,7 @@ union Board
         printf("\n\n");
     }
 
+    template <size_type EmptyPosValue>
     static void display_num_board(const char * title, const this_type & board) {
         printf("%s\n\n", title);
         // -------
@@ -249,7 +250,33 @@ union Board
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t num = board.cells[y * BoardY + x];
                 assert(num >= 0 && num < BoardSize);
-                printf("%c ", (num + '0'));
+                printf("%c ", (num != EmptyPosValue) ? (num + '1') : '0');
+            }
+            printf("|\n");
+        }
+        // -------
+        printf(" ");
+        for (size_type x = 0; x < BoardX * 2 + 1; x++) {
+            printf("-");
+        }
+        printf("\n\n");
+    }
+
+    template <size_type EmptyPosValue, size_type UnknownPosValue>
+    static void display_num_board(const char * title, const this_type & board) {
+        printf("%s\n\n", title);
+        // -------
+        printf(" ");
+        for (size_type x = 0; x < BoardX * 2 + 1; x++) {
+            printf("-");
+        }
+        printf("\n");
+        for (size_type y = 0; y < BoardY; y++) {
+            printf("| ");
+            for (size_type x = 0; x < BoardX; x++) {
+                uint8_t num = board.cells[y * BoardY + x];
+                assert(num >= 0 && num < BoardSize);
+                printf("%c ", (num != UnknownPosValue) ? ((num != EmptyPosValue) ? (num + '1') : '0') : '?');
             }
             printf("|\n");
         }
@@ -269,11 +296,21 @@ union Board
         }
     }
 
+    template <size_type EmptyPosValue>
     static void display_num_boards(const char * title, const std::vector<this_type> & board_list) {
         for (size_type n = 0; n < board_list.size(); n++) {
             char title_no[128];
             snprintf(title_no, sizeof(title_no), "%s #%u", title, (uint32_t)(n + 1));
-            this_type::display_num_board(title_no, board_list[n]);
+            this_type::template display_num_board<EmptyPosValue>(title_no, board_list[n]);
+        }
+    }
+
+    template <size_type EmptyPosValue, size_type UnknownPosValue>
+    static void display_num_boards(const char * title, const std::vector<this_type> & board_list) {
+        for (size_type n = 0; n < board_list.size(); n++) {
+            char title_no[128];
+            snprintf(title_no, sizeof(title_no), "%s #%u", title, (uint32_t)(n + 1));
+            this_type::template display_num_board<EmptyPosValue, UnknownPosValue>(title_no, board_list[n]);
         }
     }
 };

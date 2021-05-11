@@ -44,6 +44,10 @@ struct ErrorCode {
                 return "Target board number overflow";
             case ErrorType::PlayerBoardNumberOverflow:
                 return "Player board number overflow";
+            case ErrorType::TargetBoardNumberIsDuplicated:
+                return "Target board number has duplicated";
+            case ErrorType::PlayerBoardNumberIsDuplicated:
+                return "Player board number has duplicated";
             case ErrorType::UnknownTargetBoardColor:
                 return "Unknown target board color";
             case ErrorType::UnknownPlayerBoardColor:
@@ -70,6 +74,10 @@ struct ErrorCode {
             case ErrorType::TargetBoardNumberOverflow:
                 return "Error";
             case ErrorType::PlayerBoardNumberOverflow:
+                return "Error";
+            case ErrorType::TargetBoardNumberIsDuplicated:
+                return "Error";
+            case ErrorType::PlayerBoardNumberIsDuplicated:
                 return "Error";
             case ErrorType::UnknownTargetBoardColor:
                 return "Error";

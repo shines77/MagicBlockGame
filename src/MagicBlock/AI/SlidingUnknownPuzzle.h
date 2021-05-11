@@ -23,19 +23,26 @@
 namespace MagicBlock {
 namespace AI {
 
-template <std::size_t BoardX, std::size_t BoardY, bool SearchAllAnswers = false>
-class SlidingPuzzle
+template <std::size_t BoardX, std::size_t BoardY,
+          std::size_t MaxValidValue = 6, std::size_t GridBits = 3,
+          bool SearchAllAnswers = false>
+class SlidingUnknownPuzzle
 {
 public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    typedef SlidingPuzzle<BoardX, BoardY> this_type;
+    typedef SlidingUnknownPuzzle<BoardX, BoardY> this_type;
 
-    static const size_type kMapBits = size_type(1U) << (BoardX * BoardY * 3);
     static const size_type BoardSize = BoardX * BoardY;
-    static const size_type MaxNumber = BoardX * BoardY;
-    static const size_type kEmptyPosValue = 0;
+    static const size_type kSingelNumMaxCount = 4;
+
+    static const size_type kMapBits = size_type(1U) << (BoardX * BoardY * GridBits);
+    static const size_type kEmptyPosValue = MaxValidValue;
+    static const size_type kUnknownPosValue = kEmptyPosValue + 1;
+    static const size_type kMaxGridValue = kUnknownPosValue + 1;
+
+    static const size_type MaxNumber = size_type(1U) << GridBits;
 
     typedef Stage<BoardX, BoardY> stage_type;
 
@@ -46,15 +53,16 @@ private:
     std::vector<Board<BoardX, BoardY>> answer_list_;
 
     size_type map_used_;
+    bool has_unknown_;
 
-    int player_num_cnt_[MaxNumber + 1];
-    int target_num_cnt_[MaxNumber + 1];
+    int player_num_cnt_[MaxNumber];
+    int target_num_cnt_[MaxNumber];
 
     std::vector<Move> empty_moves_[BoardSize];
     std::vector<Position> move_path_;
 
     void init() {
-        for (size_type num = 0; num <= MaxNumber; num++) {
+        for (size_type num = 0; num < MaxNumber; num++) {
             this->player_num_cnt_[num] = 0;
             this->target_num_cnt_[num] = 0;
         }
@@ -81,11 +89,12 @@ private:
     }
 
 public:
-    SlidingPuzzle() : map_used_(0) {
+    SlidingUnknownPuzzle() : map_used_(0), has_unknown_(false) {
+        static_assert((kMaxGridValue <= MaxNumber), "Error: kMaxGridValue must less than or equal MaxNumber.");
         this->init();
     }
 
-    ~SlidingPuzzle() {}
+    ~SlidingUnknownPuzzle() {}
 
     size_type getMinSteps() const {
         return this->move_path_.size();
@@ -100,12 +109,20 @@ public:
     }
 
     static uint8_t charToNumber(uint8_t ch) {
-        if (ch >= '0' && ch <= '9')
-            return (ch - '0');
-        else if (ch != ' ')
-            return (ch >= 'A' && ch <= 'Z') ? (ch - 'A' + 1) : (uint8_t)-1;
-        else
+        if (ch >= '1' && ch <= '9') {
+            uint8_t num = (ch - '1');
+            return ((num < kEmptyPosValue) ? num : (uint8_t)-1);
+        }
+        else if (ch >= 'A' && ch <= 'Z') {
+            uint8_t num = (ch - 'A');
+            return ((num < kEmptyPosValue) ? num : (uint8_t)-1);
+        }
+        else if (ch == ' ' || ch == '0')
             return kEmptyPosValue;
+        else if (ch == '?')
+            return kUnknownPosValue;
+        else
+            return (uint8_t)-1;
     }
 
     int readConfig(const char * filename) {
@@ -122,7 +139,7 @@ public:
                     if (line_no >= 0 && line_no < BoardY) {
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t num = this_type::charToNumber(line[x]);
-                            if (num >= 0 && num <= MaxNumber) {
+                            if (num >= 0 && num < kMaxGridValue) {
                                 this->target_board_.cells[line_no * BoardY + x] = num;
                             }
                             else {
@@ -135,8 +152,15 @@ public:
                         size_type boardY = line_no - (BoardY + 1);
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t num = this_type::charToNumber(line[x]);
-                            if (num >= 0 && num <= MaxNumber) {
-                                this->player_board_.cells[boardY * BoardY + x] = num;
+                            if (num >= 0 && num < kMaxGridValue) {
+                                if (num != kUnknownPosValue) {
+                                    this->player_board_.cells[boardY * BoardY + x] = num;
+                                }
+                                else {
+                                    // It can't be a unknown pos in player board
+                                    err_code = ErrorCode::PlayerBoardNumberOverflow;
+                                    break;
+                                }
                             }
                             else {
                                 err_code = ErrorCode::PlayerBoardNumberOverflow;
@@ -164,9 +188,8 @@ public:
             if (ErrorCode::isFailure(err_code)) {
                 char err_info[256] = {0};
                 snprintf(err_info, sizeof(err_info) - 1,
-                         "SlidingPuzzle::readConfig() Error code: %d, reason: %s",
+                         "SlidingUnknownPuzzle::readConfig() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
-                //throw std::runtime_error(err_info);
                 printf("%s\n\n", err_info);
             }
         }
@@ -191,7 +214,7 @@ public:
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t num = this->player_board_.cells[y * BoardY + x];
-                if (num >= 0 && num <= MaxNumber) {
+                if (num >= 0 && num < kMaxGridValue) {
                     this->player_num_cnt_[num]++;
                 }
             }
@@ -200,7 +223,7 @@ public:
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t num = this->target_board_.cells[y * BoardY + x];
-                if (num >= 0 && num <= MaxNumber) {
+                if (num >= 0 && num < kMaxGridValue) {
                     this->target_num_cnt_[num]++;
                 }
             }
@@ -209,9 +232,9 @@ public:
 
     int check_player_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
-        for (size_type num = 0; num <= MaxNumber; num++) {
-            if (this->player_num_cnt_[num] > 1) {
-                err_code = ErrorCode::PlayerBoardNumberIsDuplicated;
+        for (size_type num = 0; num < MaxNumber; num++) {
+            if (this->player_num_cnt_[num] > kSingelNumMaxCount && num != kUnknownPosValue) {
+                err_code = ErrorCode::PlayerBoardNumberOverflow;
                 duplicated_num = num;
                 return err_code;
             }
@@ -221,13 +244,17 @@ public:
 
     int check_target_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
-        for (size_type num = 0; num <= MaxNumber; num++) {
-            if (this->target_num_cnt_[num] > 1) {
+        for (size_type num = 0; num < MaxNumber; num++) {
+            if (this->target_num_cnt_[num] > 1 && num != kUnknownPosValue) {
                 err_code = ErrorCode::TargetBoardNumberIsDuplicated;
                 duplicated_num = num;
                 return err_code;
             }
         }
+        if (this->target_num_cnt_[kUnknownPosValue] == 0)
+            this->has_unknown_ = false;
+        else
+            this->has_unknown_ = true;
         return err_code;
     }
 
@@ -247,7 +274,7 @@ public:
         if (ErrorCode::isFailure(err_code)) {
             char err_info[256] = {0};
             snprintf(err_info, sizeof(err_info) - 1,
-                     "SlidingPuzzle::verify_board() Error code: %d, reason: %s\n"
+                     "SlidingUnknownPuzzle::verify_board() Error code: %d, reason: %s\n"
                      "duplicated num: %d",
                      err_code, ErrorCode::toString(err_code), (int)duplicated_num);
             printf("%s\n\n", err_info);
@@ -284,17 +311,25 @@ public:
         return false;
     }
 
-#if 1
-    bool is_satisfy(const Board<BoardX, BoardY> & player,
+    bool is_satisfy(const Board<BoardX, BoardY> & currnet,
                     const Board<BoardX, BoardY> & target) const {
-        return (player == target);
+        if (!this->has_unknown_) {
+            return (currnet == target);
+        }
+        else {
+            for (size_type pos = 0; pos < BoardSize; pos++) {
+                size_type target_num = target.cells[pos];
+                bool is_unknown = (target_num == kUnknownPosValue);
+                if (!is_unknown) {
+                    size_type cur_num = currnet.cells[pos];
+                    if (cur_num != target_num) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
     }
-#else
-    bool is_satisfy(const Board<BoardX, BoardY> & player,
-                    const Board<BoardX, BoardY> & target) const {
-        return (player.cells[0] == 2 && player.cells[1] == 1);
-    }
-#endif
 
     bool solve() {
         if (this->is_satisfy(this->player_board_, this->target_board_)) {
@@ -385,11 +420,12 @@ public:
             this->map_used_ = visited_count;
 
             if (solvable) {
-                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
-                if (SearchAllAnswers)
-                    Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
+                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Player Board", this->player_board_);
+                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
+                if (SearchAllAnswers || this->answer_list_.size() > 1)
+                    Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_);
                 else
-                    Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Answer Board", this->answer_list_[0]);
+                    Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_[0]);
             }
         }
 
@@ -486,11 +522,12 @@ public:
             this->map_used_ = visited_count;
 
             if (solvable) {
-                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
-                if (SearchAllAnswers)
-                    Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
+                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Player Board", this->player_board_);
+                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
+                if (SearchAllAnswers || this->answer_list_.size() > 1)
+                    Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_);
                 else
-                    Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Answer Board", this->answer_list_[0]);
+                    Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_[0]);
             }
         }
 
