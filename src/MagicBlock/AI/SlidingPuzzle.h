@@ -314,7 +314,7 @@ public:
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited[empty.value].set(start.board.compactValue<kEmptyPosValue>());
+            visited[empty.value].set(start.board.template compactValue<kEmptyPosValue>());
 
             std::vector<stage_type> cur_stages;
             std::vector<stage_type> next_stages;
@@ -337,7 +337,7 @@ public:
                         uint8_t move_pos = empty_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type value64 = next_stage.board.compactValue<kEmptyPosValue>();
+                        size_type value64 = next_stage.board.template compactValue<kEmptyPosValue>();
                         if (visited[move_pos].test(value64))
                             continue;
 
@@ -414,7 +414,7 @@ public:
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited[empty.value].set(start.board.compactValue<kEmptyPosValue>());
+            visited[empty.value].set(start.board.template compactValue<kEmptyPosValue>());
 
             std::queue<stage_type> cur_stages;
             std::queue<stage_type> next_stages;
@@ -437,7 +437,7 @@ public:
                         uint8_t move_pos = empty_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type value64 = next_stage.board.compactValue<kEmptyPosValue>();
+                        size_type value64 = next_stage.board.template compactValue<kEmptyPosValue>();
                         if (visited[move_pos].test(value64))
                             continue;
 
