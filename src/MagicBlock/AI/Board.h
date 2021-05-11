@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <assert.h>
 
 #include <cstdint>
 #include <cstddef>
