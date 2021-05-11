@@ -18,7 +18,8 @@ namespace AI {
 template <std::size_t BoardX, std::size_t BoardY>
 union Board
 {
-    typedef std::size_t size_type;
+    typedef std::size_t     size_type;
+    typedef std::ptrdiff_t  ssize_type;
 
     static const size_type X = BoardX;
     static const size_type Y = BoardY;
@@ -123,9 +124,21 @@ union Board
 
     size_type value() const noexcept {
         size_type value64 = 0;
-        for (size_type cell = 0; cell < BoardSize; cell++) {
+        for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
             value64 <<= 3;
-            value64 |= (this->cells[cell] & 0x07U);
+            value64 |= (this->cells[pos] & 0x07U);
+        }
+        return value64;
+    }
+
+    template <size_type kEmptyPosValue = 0>
+    size_type compactValue() const noexcept {
+        size_type value64 = 0;
+        for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
+            if (this->cells[pos] != kEmptyPosValue) {
+                value64 <<= 3;
+                value64 |= (this->cells[pos] & 0x07U);
+            }
         }
         return value64;
     }
@@ -133,24 +146,24 @@ union Board
     Value128 value128() const noexcept {
         std::uint64_t low = 0, high = 0;
         if (BoardSize <= 21) {
-            for (std::ptrdiff_t cell = BoardSize - 1; cell >= 0; cell--) {
+            for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
                 low <<= 3;
-                low |= std::uint64_t(this->cells[cell] & 0x07U);
+                low |= std::uint64_t(this->cells[pos] & 0x07U);
             }
         }
         else {
             // Low: bit 0 ~ 62, 21 * 3 = 63 bits
-            for (std::ptrdiff_t cell = 20; cell >= 0; cell--) {
+            for (ssize_type pos = 20; pos >= 0; pos--) {
                 low <<= 3;
-                low |= std::uint64_t(this->cells[cell] & 0x07U);
+                low |= std::uint64_t(this->cells[pos] & 0x07U);
             }
             // Low: bit 63
             low |= std::uint64_t(this->cells[21] & 0x01U) << 63;
 
             // High: bit 2 ~ 63
-            for (std::ptrdiff_t cell = BoardSize - 1; cell >= 21; cell--) {
+            for (ssize_type pos = BoardSize - 1; pos >= 21; pos--) {
                 high <<= 3;
-                high |= std::uint64_t(this->cells[cell] & 0x07U);
+                high |= std::uint64_t(this->cells[pos] & 0x07U);
             }
 
             // High: bit 0 ~ 1

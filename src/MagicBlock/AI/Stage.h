@@ -49,7 +49,7 @@ struct Stage {
     void internal_copy(const Stage & other) noexcept {
         this->board         = other.board;
 
-        this->empty_pos         = other.empty_pos;
+        this->empty_pos     = other.empty_pos;
         this->last_dir      = other.last_dir;
         this->rotate_type   = other.rotate_type;
         this->reserve       = other.reserve;

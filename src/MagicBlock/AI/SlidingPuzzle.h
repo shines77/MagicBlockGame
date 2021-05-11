@@ -30,6 +30,8 @@ public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
+    typedef SlidingPuzzle<BoardX, BoardY> this_type;
+
     static const size_type kMapBits = size_type(1U) << (BoardX * BoardY * 3);
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type MaxNumber = BoardX * BoardY;
@@ -95,6 +97,11 @@ public:
         return this->map_used_;
     }
 
+    static uint8_t charToNumber(uint8_t ch) {
+        uint8_t num = (ch >= 'A' && ch <= 'Z') ? (ch - 'A' + 1) : (uint8_t)-1;
+        return ((ch != ' ') ? num : kEmptyPosValue);
+    }
+
     int readConfig(const char * filename) {
         int err_code = ErrorCode::Success;
         size_type line_no = 0;
@@ -108,9 +115,9 @@ public:
                     ifs.getline(line, 256);
                     if (line_no >= 0 && line_no < BoardY) {
                         for (size_type x = 0; x < BoardX; x++) {
-                            uint8_t num = Color::charToColor(line[x]);
+                            uint8_t num = this_type::charToNumber(line[x]);
                             if (num >= 0 && num <= MaxNumber) {
-                                this->target_board_[0].cells[line_no * BoardY + x] = num;
+                                this->target_board_.cells[line_no * BoardY + x] = num;
                             }
                             else {
                                 err_code = ErrorCode::TargetBoardNumberOverflow;
@@ -121,7 +128,7 @@ public:
                     else if (line_no >= (BoardY + 1) && line_no < (BoardY + 1 + BoardY)) {
                         size_type boardY = line_no - (BoardY + 1);
                         for (size_type x = 0; x < BoardX; x++) {
-                            uint8_t num = Color::charToColor(line[x]);
+                            uint8_t num = this_type::charToNumber(line[x]);
                             if (num >= 0 && num <= MaxNumber) {
                                 this->player_board_.cells[boardY * BoardY + x] = num;
                             }
@@ -186,7 +193,7 @@ public:
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t num = this->target_board_[0].cells[y * BoardY + x];
+                uint8_t num = this->target_board_.cells[y * BoardY + x];
                 if (num >= 0 && num <= MaxNumber) {
                     this->target_num_cnt_[num]++;
                 }
@@ -234,7 +241,7 @@ public:
         if (ErrorCode::isFailure(err_code)) {
             char err_info[256] = {0};
             snprintf(err_info, sizeof(err_info) - 1,
-                     "SlidingPuzzle::verify_board() Error code: %d, reason: %s\n
+                     "SlidingPuzzle::verify_board() Error code: %d, reason: %s\n"
                      "duplicated num: %d",
                      err_code, ErrorCode::toString(err_code), (int)duplicated_num);
             printf("%s\n\n", err_info);
@@ -287,14 +294,14 @@ public:
         Position empty;
         bool found_empty = this->find_empty(empty);
         if (found_empty) {
-            jstd::BitSet<kMapBits> visited;
+            jstd::BitSet<kMapBits> visited[BoardSize];
 
             stage_type start;
             start.empty_pos = empty;
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited.set(start.board.value());
+            visited[empty.value].set(start.board.compactValue<kEmptyPosValue>());
 
             std::vector<stage_type> cur_stages;
             std::vector<stage_type> next_stages;
@@ -306,7 +313,7 @@ public:
                 for (size_type i = 0; i < cur_stages.size(); i++) {
                     const stage_type & stage = cur_stages[i];
 
-                    uint8_t empty_pos = stage.empty;
+                    uint8_t empty_pos = stage.empty_pos;
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
                     size_type total_moves = empty_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
@@ -317,11 +324,11 @@ public:
                         uint8_t move_pos = empty_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type value64 = next_stage.board.value();
-                        if (visited.test(value64))
+                        size_type value64 = next_stage.board.compactValue<kEmptyPosValue>();
+                        if (visited[move_pos].test(value64))
                             continue;
 
-                        visited.set(value64);
+                        visited[move_pos].set(value64);
                         
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -331,7 +338,7 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        if (this->is_satisfy(next_stage.board, this->target_board_, this->target_len_) != size_t(-1)) {
+                        if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
@@ -355,7 +362,11 @@ public:
             }
 
             if (solvable) {
-                this->map_used_ = visited.count();
+                size_type visited_count = 0;
+                for (size_type i = 0; i < BoardSize; i++) {
+                    visited_count += visited[i].count();
+                }
+                this->map_used_ = visited_count;
             }
         }
 
@@ -373,14 +384,14 @@ public:
         Position empty;
         bool found_empty = this->find_empty(empty);
         if (found_empty) {
-            jstd::BitSet<kMapBits> visited;
+            jstd::BitSet<kMapBits> visited[BoardSize];
 
             stage_type start;
             start.empty_pos = empty;
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited.set(start.board.value());
+            visited[empty.value].set(start.board.compactValue<kEmptyPosValue>());
 
             std::queue<stage_type> cur_stages;
             std::queue<stage_type> next_stages;
@@ -392,7 +403,7 @@ public:
                 do {
                     const stage_type & stage = cur_stages.front();
 
-                    uint8_t empty_pos = stage.empty;
+                    uint8_t empty_pos = stage.empty_pos;
                     const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
                     size_type total_moves = empty_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
@@ -403,11 +414,11 @@ public:
                         uint8_t move_pos = empty_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type value64 = next_stage.board.value();
-                        if (visited.test(value64))
+                        size_type value64 = next_stage.board.compactValue<kEmptyPosValue>();
+                        if (visited[move_pos].test(value64))
                             continue;
 
-                        visited.set(value64);
+                        visited[move_pos].set(value64);
                         
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -417,7 +428,7 @@ public:
 
                         next_stages.push(next_stage);
 
-                        if (this->is_satisfy(next_stage.board, this->target_board_, this->target_len_) != size_t(-1)) {
+                        if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             solvable = true;
@@ -442,7 +453,11 @@ public:
             }
 
             if (solvable) {
-                this->map_used_ = visited.count();
+                size_type visited_count = 0;
+                for (size_type i = 0; i < BoardSize; i++) {
+                    visited_count += visited[i].count();
+                }
+                this->map_used_ = visited_count;
             }
         }
 
