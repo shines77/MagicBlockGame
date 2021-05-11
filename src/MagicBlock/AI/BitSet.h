@@ -27,30 +27,33 @@ namespace jstd {
 
 struct dont_init_t {};
 
-template <size_t Size, size_t Alignment>
+template <std::size_t Size, std::size_t Alignment>
 struct AlignedTo {
-    static const size_t alignment = Alignment;
-    static const size_t size = Size;
-    static const size_t value = (size + alignment - 1) / alignment * alignment;
+    static const std::size_t alignment = Alignment;
+    static const std::size_t size = Size;
+    static const std::size_t value = (size + alignment - 1) / alignment * alignment;
 };
 
-template <size_t Bits>
+template <std::size_t Bits>
 class BitSet {
 public:
+    typedef std::size_t         size_type;
+    typedef std::ptrdiff_t      ssize_type;
+
     typedef typename std::conditional<
-                (Bits <= sizeof(uint32_t) * 8), uint32_t, size_t
+                (Bits <= sizeof(uint32_t) * 8), uint32_t, size_type
             >::type  unit_type;
     typedef BitSet<Bits> this_type;
 
-    static const size_t kUnitBytes = sizeof(unit_type);
-    static const size_t kUnitBits  = 8 * kUnitBytes;
+    static const size_type kUnitBytes = sizeof(unit_type);
+    static const size_type kUnitBits  = 8 * kUnitBytes;
 
-    static const size_t kUnits = (Bits + kUnitBits - 1) / kUnitBits;
-    static const size_t kBits  = kUnits * kUnitBits;
-    static const size_t kBytes = kUnits * kUnitBytes;
-    static const size_t kRestBits = (Bits % kUnitBits);
+    static const size_type kUnits = (Bits + kUnitBits - 1) / kUnitBits;
+    static const size_type kBits  = kUnits * kUnitBits;
+    static const size_type kBytes = kUnits * kUnitBytes;
+    static const size_type kRestBits = (Bits % kUnitBits);
     static const unit_type kFullMask = unit_type(-1);
-    static const unit_type kTrimMask = (kRestBits != 0) ? (unit_type(size_t(1) << kRestBits) - 1) : kFullMask;
+    static const unit_type kTrimMask = (kRestBits != 0) ? (unit_type(size_type(1) << kRestBits) - 1) : kFullMask;
 
 protected:
     unit_type * array_;
@@ -81,18 +84,18 @@ public:
     BitSet(const this_type & src) noexcept : array_(nullptr) {
         static_assert((Bits != 0), "PackedBitSet<Bits>: Bits can not be 0 size.");
         this->allocate_array();
-        for (size_t i = 0; i < kUnits; i++) {
+        for (size_type i = 0; i < kUnits; i++) {
             this->array_[i] = src.array(i);
         }
     }
 
-    template <size_t UBits>
+    template <size_type UBits>
     BitSet(const BitSet<UBits> & src) noexcept : array_(nullptr) {
         static_assert((Bits != 0), "PackedBitSet<Bits>: Bits can not be 0 size.");
         typedef BitSet<UBits> SourceBitMap;
-        static const size_t copyUnits = std::min(kUnits, SourceBitMap::kUnits);
+        static const size_type copyUnits = std::min(kUnits, SourceBitMap::kUnits);
         this->allocate_array();
-        for (size_t i = 0; i < copyUnits; i++) {
+        for (size_type i = 0; i < copyUnits; i++) {
             this->array_[i] = src.array(i);
         }
         if (kRestBits != 0) {
@@ -119,7 +122,7 @@ public:
         static_assert((Bits != 0), "PackedBitSet<Bits>: Bits can not be 0 size.");
         this->allocate_array();
         if (init_list.size() <= kUnits) {
-            size_t i = 0;
+            size_type i = 0;
             for (auto iter : init_list) {
                 this->array_[i++] = *iter;
             }
@@ -128,7 +131,7 @@ public:
             }
         }
         else {
-            size_t i = 0;
+            size_type i = 0;
             for (auto iter : init_list) {
                 this->array_[i++] = *iter;
                 if (i >= kUnits) {
@@ -145,15 +148,15 @@ public:
         this->destory_array();
     }
 
-    size_t size() const        { return Bits; }
+    size_type size() const      { return Bits; }
 
-          char * data()        { return (char *)      this->array_; }
-    const char * data() const  { return (const char *)this->array_; }
+          char * data()         { return (char *)      this->array_; }
+    const char * data() const   { return (const char *)this->array_; }
 
-    size_t total_bytes() const { return kBytes;     }
-    size_t unit_size() const   { return kUnits;     }
-    size_t unit_bits() const   { return kUnitBits;  }
-    size_t unit_bytes() const  { return kUnitBytes; }
+    size_type total_bytes() const { return kBytes;     }
+    size_type unit_size() const   { return kUnits;     }
+    size_type unit_bits() const   { return kUnitBits;  }
+    size_type unit_bytes() const  { return kUnitBytes; }
 
     void swap(this_type & src) noexcept {
         if (this != &src) {
@@ -161,14 +164,14 @@ public:
         }
     }
 
-    unit_type array(size_t index) const {
+    unit_type array(size_type index) const {
         assert(index < kUnits);
         return this->array_[index];
     }
 
     this_type & init(std::initializer_list<unit_type> init_list) noexcept {
         if (init_list.size() <= kUnits) {
-            size_t i = 0;
+            size_type i = 0;
             for (auto iter : init_list) {
                 this->array_[i++] = *iter;
             }
@@ -177,7 +180,7 @@ public:
             }
         }
         else {
-            size_t i = 0;
+            size_type i = 0;
             for (auto iter : init_list) {
                 this->array_[i++] = *iter;
                 if (i >= kUnits) {
@@ -194,7 +197,7 @@ public:
     class reference {
     private:
         this_type * bitset_;    // pointer to the bitmap
-        size_t pos_;            // position of element in bitset
+        size_type   pos_;       // position of element in bitset
 
         // proxy for an element
         friend class BitSet<Bits>;
@@ -243,25 +246,25 @@ public:
             // default construct
         }
 
-        reference(this_type & bitsets, size_t pos) noexcept
+        reference(this_type & bitsets, size_type pos) noexcept
             : bitset_(&bitsets), pos_(pos) {
             // construct from bitmap reference and position
         }
     };
 
     this_type & operator = (const this_type & right) noexcept {
-        for (size_t i = 0; i < kUnits; i++) {
+        for (size_type i = 0; i < kUnits; i++) {
             this->array_[i] = right.array(i);
         }
         return (*this);
     }
 
-    constexpr bool operator [] (size_t pos) const {
+    constexpr bool operator [] (size_type pos) const {
         assert(pos < Bits);
         return this->test(pos);
     }
 
-	reference operator [] (size_t pos) {
+	reference operator [] (size_type pos) {
         assert(pos < Bits);
         return reference(*this, pos);
     }
@@ -315,21 +318,21 @@ public:
     }
 
     this_type & operator &= (const this_type & right) noexcept {
-        for (size_t i = 0; i < kUnits; i++) {
+        for (size_type i = 0; i < kUnits; i++) {
             this->array_[i] &= right.array(i);
         }
         return (*this);
     }
 
     this_type & operator |= (const this_type & right) noexcept {
-        for (size_t i = 0; i < kUnits; i++) {
+        for (size_type i = 0; i < kUnits; i++) {
             this->array_[i] |= right.array(i);
         }
         return (*this);
     }
 
     this_type & operator ^= (const this_type & right) noexcept {
-        for (size_t i = 0; i < kUnits; i++) {
+        for (size_type i = 0; i < kUnits; i++) {
             this->array_[i] ^= right.array(i);
         }
         return (*this);
@@ -346,7 +349,7 @@ public:
     }
 
     bool operator == (const this_type & right) noexcept {
-        for (size_t i = 0; i < kUnits; i++) {
+        for (size_type i = 0; i < kUnits; i++) {
             if (this->array_[i] != right.array(i)) {
                 return false;
             }
@@ -355,7 +358,7 @@ public:
     }
 
     bool operator != (const this_type & right) noexcept {
-        for (size_t i = 0; i < kUnits; i++) {
+        for (size_type i = 0; i < kUnits; i++) {
             if (this->array_[i] != right.array(i)) {
                 return true;
             }
@@ -363,16 +366,16 @@ public:
         return false;
     }
 
-    this_type & fill(size_t value) noexcept {
+    this_type & fill(size_type value) noexcept {
         if (kRestBits != 0) {
-            size_t i = 0;
+            size_type i = 0;
             for (; i < kUnits - 1; i++) {
                 this->array_[i] = (unit_type)value;
             }
             this->array_[i] = (unit_type)value & kTrimMask;
         }
         else {
-            for (size_t i = 0; i < kUnits; i++) {
+            for (size_type i = 0; i < kUnits; i++) {
                 this->array_[i] = (unit_type)value;
             }
         }
@@ -382,7 +385,7 @@ public:
     this_type & set() noexcept {
         if (kRestBits != 0) {
             if (kUnits <= 8) {
-                size_t i = 0;
+                size_type i = 0;
                 for (; i < kUnits - 1; i++) {
                     this->array_[i] = kFullMask;
                 }
@@ -395,7 +398,7 @@ public:
         }
         else {
             if (kUnits <= 8) {
-                for (size_t i = 0; i < kUnits; i++) {
+                for (size_type i = 0; i < kUnits; i++) {
                     this->array_[i] = kFullMask;
                 }
             }
@@ -406,20 +409,20 @@ public:
         return (*this);
     }
 
-    this_type & set(size_t pos) {
+    this_type & set(size_type pos) {
         assert(pos < Bits);
         if (Bits <= kUnitBits) {
-            this->array_[0] |= unit_type(size_t(1) << pos);
+            this->array_[0] |= unit_type(size_type(1) << pos);
         }
         else {
-            size_t index = pos / kUnitBits;
-            size_t shift = pos % kUnitBits;
-            this->array_[index] |= unit_type(size_t(1) << shift);
+            size_type index = pos / kUnitBits;
+            size_type shift = pos % kUnitBits;
+            this->array_[index] |= unit_type(size_type(1) << shift);
         }
         return (*this);
     }
 
-    this_type & set(size_t pos, bool value) {
+    this_type & set(size_type pos, bool value) {
         if (value)
             this->set(pos);
         else
@@ -427,20 +430,20 @@ public:
         return (*this);
     }
 
-    this_type & set(size_t index, size_t pos) {
+    this_type & set(size_type index, size_type pos) {
         assert(index < kUnits);
         assert(pos < kUnitBits);
-        this->array_[index] |= unit_type(size_t(1) << pos);
+        this->array_[index] |= unit_type(size_type(1) << pos);
         return (*this);
     }
 
-    this_type & set_bit(size_t index, size_t bit) {
+    this_type & set_bit(size_type index, size_type bit) {
         assert(index < kUnits);
         this->array_[index] |= unit_type(bit);
         return (*this);
     }
 
-    this_type & set(size_t index, size_t pos, bool value) {
+    this_type & set(size_type index, size_type pos, bool value) {
         if (value)
             this->set(index, pos);
         else
@@ -450,7 +453,7 @@ public:
 
     this_type & reset() noexcept {
         if (kUnits <= 8) {
-            for (size_t i = 0; i < kUnits; i++) {
+            for (size_type i = 0; i < kUnits; i++) {
                 this->array_[i] = 0;
             }
         }
@@ -461,53 +464,53 @@ public:
     }
 
 #if 1
-    this_type & reset(size_t pos) {
+    this_type & reset(size_type pos) {
         assert(pos < Bits);
         if (Bits <= kUnitBits) {
-            this->array_[0] ^= unit_type(size_t(1) << pos);
+            this->array_[0] ^= unit_type(size_type(1) << pos);
         }
         else {
-            size_t index = pos / kUnitBits;
-            size_t shift = pos % kUnitBits;
-            this->array_[index] ^= unit_type(size_t(1) << shift);
+            size_type index = pos / kUnitBits;
+            size_type shift = pos % kUnitBits;
+            this->array_[index] ^= unit_type(size_type(1) << shift);
         }
         return (*this);
     }
 
-    this_type & reset(size_t index, size_t pos) {
+    this_type & reset(size_type index, size_type pos) {
         assert(index < kUnits);
         assert(pos < kUnitBits);
-        this->array_[index] ^= unit_type(size_t(1) << pos);
+        this->array_[index] ^= unit_type(size_type(1) << pos);
         return (*this);
     }
 
-    this_type & reset_bit(size_t index, size_t bit) {
+    this_type & reset_bit(size_type index, size_type bit) {
         assert(index < kUnits);
         this->array_[index] ^= unit_type(bit);
         return (*this);
     }
 #else
-    this_type & reset(size_t pos) {
+    this_type & reset(size_type pos) {
         assert(pos < Bits);
         if (Bits <= kUnitBits) {
-            this->array_[0] &= unit_type(~(size_t(1) << pos));
+            this->array_[0] &= unit_type(~(size_type(1) << pos));
         }
         else {
-            size_t index = pos / kUnitBits;
-            size_t shift = pos % kUnitBits;
-            this->array_[index] &= unit_type(~(size_t(1) << shift));
+            size_type index = pos / kUnitBits;
+            size_type shift = pos % kUnitBits;
+            this->array_[index] &= unit_type(~(size_type(1) << shift));
         }
         return (*this);
     }
 
-    this_type & reset(size_t index, size_t pos) {
+    this_type & reset(size_type index, size_type pos) {
         assert(index < kUnits);
         assert(pos < kUnitBits);
-        this->array_[index] &= unit_type(~(size_t(1) << pos));
+        this->array_[index] &= unit_type(~(size_type(1) << pos));
         return (*this);
     }
 
-    this_type & reset_bit(size_t index, size_t bit) {
+    this_type & reset_bit(size_type index, size_type bit) {
         assert(index < kUnits);
         this->array_[index] &= unit_type(~bit);
         return (*this);
@@ -516,41 +519,41 @@ public:
 
     this_type & flip() noexcept {
         if (kRestBits != 0) {
-            size_t i = 0;
+            size_type i = 0;
             for (; i < kUnits - 1; i++) {
                 this->array_[i] ^= kFullMask;
             }
             this->array_[i] ^= kTrimMask;
         }
         else {
-            for (size_t i = 0; i < kUnits; i++) {
+            for (size_type i = 0; i < kUnits; i++) {
                 this->array_[i] ^= kFullMask;
             }
         }
         return (*this);
     }
 
-    this_type & flip(size_t pos) {
+    this_type & flip(size_type pos) {
         assert(pos < Bits);
         if (Bits <= kUnitBits) {
-            this->array_[0] ^= unit_type(~(size_t(1) << pos));
+            this->array_[0] ^= unit_type(~(size_type(1) << pos));
         }
         else {
-            size_t index = pos / kUnitBits;
-            size_t shift = pos % kUnitBits;
-            this->array_[index] ^= unit_type(~(size_t(1) << shift));
+            size_type index = pos / kUnitBits;
+            size_type shift = pos % kUnitBits;
+            this->array_[index] ^= unit_type(~(size_type(1) << shift));
         }
         return (*this);
     }
 
-    this_type & flip(size_t index, size_t pos) {
+    this_type & flip(size_type index, size_type pos) {
         assert(index < kUnits);
         assert(pos < kUnitBits);
-        this->array_[index] ^= unit_type(~(size_t(1) << pos));
+        this->array_[index] ^= unit_type(~(size_type(1) << pos));
         return (*this);
     }
 
-    this_type & flip_bit(size_t index, size_t bit) {
+    this_type & flip_bit(size_type index, size_type bit) {
         assert(index < kUnits);
         this->array_[index] ^= unit_type(~bit);
         return (*this);
@@ -563,52 +566,96 @@ public:
         return (*this);
     }
 
-    bool test(size_t pos) const {
+    bool test(size_type pos) const {
         assert(pos < Bits);
         if (Bits <= kUnitBits) {
-            return ((this->array_[0] & unit_type(size_t(1) << pos)) != 0);
+            return ((this->array_[0] & unit_type(size_type(1) << pos)) != 0);
         }
         else {
-            size_t index = pos / kUnitBits;
-            size_t shift = pos % kUnitBits;
-            return ((this->array_[index] & unit_type(size_t(1) << shift)) != 0);
+            size_type index = pos / kUnitBits;
+            size_type shift = pos % kUnitBits;
+            return ((this->array_[index] & unit_type(size_type(1) << shift)) != 0);
         }
     }
 
-    bool test(size_t index, size_t pos) const {
-        assert(index < kUnits);
-        assert(pos < kUnitBits);
-        return ((this->array_[index] & unit_type(size_t(1) << pos)) != 0);
+    bool test_and_set(size_type pos) const {
+        assert(pos < Bits);
+        if (Bits <= kUnitBits) {
+            unit_type mask = unit_type(size_type(1) << pos);
+            bool is_set = ((this->array_[0] & mask) != 0);
+            if (!is_set) {
+                this->array_[0] |= mask;
+            }
+            return is_set;
+        }
+        else {
+            size_type index = pos / kUnitBits;
+            size_type shift = pos % kUnitBits;
+            unit_type mask = unit_type(size_type(1) << shift);
+            bool is_set = ((this->array_[index] & mask) != 0);
+            if (!is_set) {
+                this->array_[index] |= mask;
+            }
+            return is_set;
+        }
     }
 
-    bool test_bit(size_t index, size_t bit) const {
+    bool test_and_reset(size_type pos) const {
+        assert(pos < Bits);
+        if (Bits <= kUnitBits) {
+            unit_type mask = unit_type(size_type(1) << pos);
+            bool is_set = ((this->array_[0] & mask) != 0);
+            if (is_set) {
+                this->array_[0] ^= mask;
+            }
+            return is_set;
+        }
+        else {
+            size_type index = pos / kUnitBits;
+            size_type shift = pos % kUnitBits;
+            unit_type mask = unit_type(size_type(1) << shift);
+            bool is_set = ((this->array_[index] & mask) != 0);
+            if (is_set) {
+                this->array_[index] ^= mask;
+            }
+            return is_set;
+        }
+    }
+
+    bool test(size_type index, size_type pos) const {
+        assert(index < kUnits);
+        assert(pos < kUnitBits);
+        return ((this->array_[index] & unit_type(size_type(1) << pos)) != 0);
+    }
+
+    bool test_bit(size_type index, size_type bit) const {
         assert(index < kUnits);
         return ((this->array_[index] & unit_type(bit)) != 0);
     }
 
-    size_t value(size_t pos) const {
+    size_type value(size_type pos) const {
         assert(pos < Bits);
         if (Bits <= kUnitBits) {
-            return size_t(this->array_[0]);
+            return size_type(this->array_[0]);
         }
         else {
-            size_t index = pos / kUnitBits;
-            return size_t(this->array_[index]);
+            size_type index = pos / kUnitBits;
+            return size_type(this->array_[index]);
         }
     }
 
-    unit_type get_uint(size_t index) const {
+    unit_type get_uint(size_type index) const {
         assert(index < kUnits);
         return this->array_[index];
     }
 
-    void set_uint(size_t index, unit_type value) const {
+    void set_uint(size_type index, unit_type value) const {
         assert(index < kUnits);
         return this->array_[index] = value;
     }
 
     bool any() const noexcept {
-        for (size_t i = 0; i < kUnits - 1; i++) {
+        for (size_type i = 0; i < kUnits - 1; i++) {
             unit_type unit = this->array_[i];
             if (unit != 0) {
                 return true;
@@ -621,7 +668,7 @@ public:
 #if 1
         return !(this->any());
 #else
-        for (size_t i = 0; i < kUnits - 1; i++) {
+        for (size_type i = 0; i < kUnits - 1; i++) {
             unit_type unit = this->array_[i];
             if (unit != 0) {
                 return false;
@@ -632,7 +679,7 @@ public:
     }
 
     bool all() const noexcept {
-        for (size_t i = 0; i < kUnits - 1; i++) {
+        for (size_type i = 0; i < kUnits - 1; i++) {
             unit_type unit = this->array_[i];
             if (unit != kFullMask) {
                 return false;
@@ -647,10 +694,10 @@ public:
         }
     }
 
-    size_t count() const noexcept {
-        size_t total_popcnt = 0;
-        for (size_t i = 0; i < kUnits; i++) {
-            size_t unit = this->array_[i];
+    size_type count() const noexcept {
+        size_type total_popcnt = 0;
+        for (size_type i = 0; i < kUnits; i++) {
+            size_type unit = this->array_[i];
             unsigned int popcnt = BitUtils::popcnt<Bits>(unit);
             total_popcnt += popcnt;
         }
@@ -679,9 +726,9 @@ public:
         return this->array_[0];
     }
 
-    size_t value_sz() const {
+    size_type value_sz() const {
         if (Bits <= sizeof(uint32_t) * 8) {
-            return static_cast<size_t>(this->array_[0]);
+            return static_cast<size_type>(this->array_[0]);
         }
         else {
             return this->array_[0];

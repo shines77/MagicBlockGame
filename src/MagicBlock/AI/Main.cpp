@@ -344,7 +344,7 @@ int main(int argc, char * argv[])
     solve_sliding_puzzle<SolverId::Normal, true>();
     solve_sliding_puzzle<SolverId::Queue, true>();
 
-    System::pause();
+    //System::pause();
 #endif
 
 #if 1

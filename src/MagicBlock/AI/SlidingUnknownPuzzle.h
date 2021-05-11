@@ -374,10 +374,10 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_type value64 = next_stage.board.template compactValue<kEmptyPosValue>();
-                        if (visited[move_pos].test(value64))
+                        if (visited[move_pos].test_and_set(value64))
                             continue;
 
-                        visited[move_pos].set(value64);
+                        //visited[move_pos].set(value64);
                         
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -475,10 +475,10 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_type value64 = next_stage.board.template compactValue<kEmptyPosValue>();
-                        if (visited[move_pos].test(value64))
+                        if (visited[move_pos].test_and_set(value64))
                             continue;
 
-                        visited[move_pos].set(value64);
+                        //visited[move_pos].set(value64);
                         
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
