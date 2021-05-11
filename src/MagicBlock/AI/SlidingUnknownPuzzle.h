@@ -24,7 +24,7 @@ namespace MagicBlock {
 namespace AI {
 
 template <std::size_t BoardX, std::size_t BoardY,
-          std::size_t MaxValidValue = 6, std::size_t GridBits = 3,
+          std::size_t MaxValidValue = 8, std::size_t GridBits = 3,
           bool SearchAllAnswers = false>
 class SlidingUnknownPuzzle
 {
@@ -42,7 +42,8 @@ public:
     static const size_type kUnknownPosValue = kEmptyPosValue + 1;
     static const size_type kMaxGridValue = kUnknownPosValue + 1;
 
-    static const size_type MaxNumber = size_type(1U) << GridBits;
+    static const size_type MaxValidNumber = size_type(1U) << GridBits;
+    static const size_type MaxNumber = (kMaxGridValue > MaxValidNumber) ? kMaxGridValue : MaxValidNumber;
 
     typedef Stage<BoardX, BoardY> stage_type;
 
@@ -90,7 +91,7 @@ private:
 
 public:
     SlidingUnknownPuzzle() : map_used_(0), has_unknown_(false) {
-        static_assert((kMaxGridValue <= MaxNumber), "Error: kMaxGridValue must less than or equal MaxNumber.");
+        static_assert((MaxValidValue <= MaxNumber), "Error: MaxValidValue must less than or equal MaxNumber.");
         this->init();
     }
 
@@ -422,7 +423,7 @@ public:
             if (solvable) {
                 Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Player Board", this->player_board_);
                 Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
-                if (SearchAllAnswers || this->answer_list_.size() > 1)
+                if (SearchAllAnswers && this->answer_list_.size() > 1)
                     Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_);
                 else
                     Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_[0]);
@@ -524,7 +525,7 @@ public:
             if (solvable) {
                 Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Player Board", this->player_board_);
                 Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
-                if (SearchAllAnswers || this->answer_list_.size() > 1)
+                if (SearchAllAnswers && this->answer_list_.size() > 1)
                     Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_);
                 else
                     Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_[0]);

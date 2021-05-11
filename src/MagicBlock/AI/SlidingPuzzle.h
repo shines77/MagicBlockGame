@@ -34,8 +34,8 @@ public:
 
     static const size_type kMapBits = size_type(1U) << (BoardX * BoardY * 3);
     static const size_type BoardSize = BoardX * BoardY;
-    static const size_type MaxNumber = BoardX * BoardY;
-    static const size_type kEmptyPosValue = 0;
+    static const size_type MaxNumber = 8;
+    static const size_type kEmptyPosValue = MaxNumber;
 
     typedef Stage<BoardX, BoardY> stage_type;
 
@@ -100,12 +100,18 @@ public:
     }
 
     static uint8_t charToNumber(uint8_t ch) {
-        if (ch >= '0' && ch <= '9')
-            return (ch - '0');
-        else if (ch != ' ')
-            return (ch >= 'A' && ch <= 'Z') ? (ch - 'A' + 1) : (uint8_t)-1;
-        else
+        if (ch >= '1' && ch <= '9') {
+            uint8_t num = (ch - '1');
+            return ((num < kEmptyPosValue) ? num : (uint8_t)-1);
+        }
+        else if (ch >= 'A' && ch <= 'Z') {
+            uint8_t num = (ch - 'A');
+            return ((num < kEmptyPosValue) ? num : (uint8_t)-1);
+        }
+        else if (ch == ' ' || ch == '0')
             return kEmptyPosValue;
+        else
+            return (uint8_t)-1;
     }
 
     int readConfig(const char * filename) {
@@ -284,17 +290,10 @@ public:
         return false;
     }
 
-#if 1
     bool is_satisfy(const Board<BoardX, BoardY> & player,
                     const Board<BoardX, BoardY> & target) const {
         return (player == target);
     }
-#else
-    bool is_satisfy(const Board<BoardX, BoardY> & player,
-                    const Board<BoardX, BoardY> & target) const {
-        return (player.cells[0] == 2 && player.cells[1] == 1);
-    }
-#endif
 
     bool solve() {
         if (this->is_satisfy(this->player_board_, this->target_board_)) {
@@ -386,7 +385,7 @@ public:
 
             if (solvable) {
                 Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
-                if (SearchAllAnswers)
+                if (SearchAllAnswers && this->answer_list_.size() > 1)
                     Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
                 else
                     Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Answer Board", this->answer_list_[0]);
@@ -487,7 +486,7 @@ public:
 
             if (solvable) {
                 Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
-                if (SearchAllAnswers)
+                if (SearchAllAnswers && this->answer_list_.size() > 1)
                     Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
                 else
                     Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Answer Board", this->answer_list_[0]);

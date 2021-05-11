@@ -140,7 +140,7 @@ void solve_sliding_unknown_puzzle()
             get_solver_name<N_SolverId>(),
             (SearchAllAnswers ? "true" : "false"));
 
-    AI::SlidingUnknownPuzzle<3, 3, 6, 3, SearchAllAnswers> slidingPuzzle;
+    AI::SlidingUnknownPuzzle<3, 3, 8, 3, SearchAllAnswers> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig("sliding_puzzle_unknown.txt");
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
