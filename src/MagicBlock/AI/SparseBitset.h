@@ -1088,11 +1088,7 @@ public:
     }
 
     size_type get_layer_value(const board_type & board, size_type layer) const {
-#if 1
         size_type y = this->y_index_[layer];
-#else
-        size_type y = layer;
-#endif
         ssize_type cell_y = y * BoardY;
         size_type layer_value = 0;
         for (ssize_type x = BoardX - 1; x >= 0; x--) {
@@ -1109,7 +1105,7 @@ public:
             size_type base_pos = y * BoardY;
             for (size_type x = 0; x < BoardX; x++) {
                 std::uint32_t color = value & Color::Mask32;
-                assert(color >= Color::Empty && color < Color::Maximum);
+                assert(color >= Color::First && color < Color::Maximum);
                 size_type pos = base_pos + x;
                 assert(pos < (BoardX * BoardY));
                 board.cells[pos] = (std::uint8_t)color;

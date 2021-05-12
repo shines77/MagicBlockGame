@@ -8,16 +8,17 @@ namespace AI {
 
 struct Color {
     enum {
-        First = 0,          // 0
-        Red = 0,            // 0
-        Green = 1,          // 1
-        Blue = 2,           // 2
-        White = 3,          // 3
-        Orange = 4,         // 4
-        Yellow = 5,         // 5
-        Empty = 6,          // 6
+        First   = 0,        // 0
+        Red     = 0,        // 0
+        Green   = 1,        // 1
+        Blue    = 2,        // 2
+        White   = 3,        // 3
+        Orange  = 4,        // 4
+        Yellow  = 5,        // 5
+        Empty   = 6,        // 6
         Unknown = 7,        // 7
-        Last = Unknown,     // 7
+        Mask    = 7,        // 7
+        Last    = Unknown,  // 7
         Illegal = 8,        // 8
         Maximum = Illegal   // 8
     };

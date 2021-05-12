@@ -62,7 +62,6 @@ protected:
     size_type target_len_;
     size_type rotate_type_;
 
-    int player_colors_[Color::Maximum];
     int target_colors_[Color::Maximum];
     int partial_colors_[Color::Maximum];
 

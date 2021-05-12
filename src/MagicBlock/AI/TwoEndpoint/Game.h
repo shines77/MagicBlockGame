@@ -99,29 +99,63 @@ public:
     bool is_coincident(int fw_value, int bw_value) const {
         std::uint32_t fw_value32 = (std::uint32_t)fw_value;
         std::uint32_t bw_value32 = (std::uint32_t)bw_value;
-        if ((bw_value32 & 0x00000007U) == 0x00000007U) {
-            if ((fw_value32 & 0x00000007U) != 0) {
-                fw_value32 |= 0x00000007U;
+        if (std::uint32_t(Color::Unknown) == 0x00000007U) {
+            if ((bw_value32 & 0x00000007U) == std::uint32_t(Color::Unknown)) {
+                if ((fw_value32 & 0x00000007U) != std::uint32_t(Color::Empty)) {
+                    fw_value32 |= 0x00000007U;
+                }
+            }
+            if ((bw_value32 & 0x00000038U) == std::uint32_t(Color::Unknown << 3U)) {
+                if ((fw_value32 & 0x00000038U) != std::uint32_t(Color::Empty << 3U)) {
+                    fw_value32 |= 0x00000038U;
+                }
+            }
+            if ((bw_value32 & 0x000001C0U) == std::uint32_t(Color::Unknown << 6U)) {
+                if ((fw_value32 & 0x000001C0U) != std::uint32_t(Color::Empty << 6U)) {
+                    fw_value32 |= 0x000001C0U;
+                }
+            }
+            if ((bw_value32 & 0x00000E00U) == std::uint32_t(Color::Unknown << 9U)) {
+                if ((fw_value32 & 0x00000E00U) != std::uint32_t(Color::Empty << 9U)) {
+                    fw_value32 |= 0x00000E00U;
+                }
+            }
+            if ((bw_value32 & 0x00007000U) == std::uint32_t(Color::Unknown << 12U)) {
+                if ((fw_value32 & 0x00007000U) != std::uint32_t(Color::Empty << 12U)) {
+                    fw_value32 |= 0x00007000U;
+                }
             }
         }
-        if ((bw_value32 & 0x00000038U) == 0x00000038U) {
-            if ((fw_value32 & 0x00000038U) != 0) {
-                fw_value32 |= 0x00000038U;
+        else {
+            if ((bw_value32 & 0x00000007U) == std::uint32_t(Color::Unknown)) {
+                if ((fw_value32 & 0x00000007U) != std::uint32_t(Color::Empty)) {
+                    fw_value32 ^= 0x00000007U;
+                    fw_value32 |= std::uint32_t(Color::Unknown);
+                }
             }
-        }
-        if ((bw_value32 & 0x000001C0U) == 0x000001C0U) {
-            if ((fw_value32 & 0x000001C0U) != 0) {
-                fw_value32 |= 0x000001C0U;
+            if ((bw_value32 & 0x00000038U) == std::uint32_t(Color::Unknown << 3U)) {
+                if ((fw_value32 & 0x00000038U) != std::uint32_t(Color::Empty << 3U)) {
+                    fw_value32 ^= 0x00000038U;
+                    fw_value32 |= std::uint32_t(Color::Unknown << 3U);
+                }
             }
-        }
-        if ((bw_value32 & 0x00000E00U) == 0x00000E00U) {
-            if ((fw_value32 & 0x00000E00U) != 0) {
-                fw_value32 |= 0x00000E00U;
+            if ((bw_value32 & 0x000001C0U) == std::uint32_t(Color::Unknown << 6U)) {
+                if ((fw_value32 & 0x000001C0U) != std::uint32_t(Color::Empty << 6U)) {
+                    fw_value32 ^= 0x000001C0U;
+                    fw_value32 |= std::uint32_t(Color::Unknown << 6U);
+                }
             }
-        }
-        if ((bw_value32 & 0x00007000U) == 0x00007000U) {
-            if ((fw_value32 & 0x00007000U) != 0) {
-                fw_value32 |= 0x00007000U;
+            if ((bw_value32 & 0x00000E00U) == std::uint32_t(Color::Unknown << 9U)) {
+                if ((fw_value32 & 0x00000E00U) != std::uint32_t(Color::Empty << 9U)) {
+                    fw_value32 ^= 0x00000E00U;
+                    fw_value32 |= std::uint32_t(Color::Unknown << 9U);
+                }
+            }
+            if ((bw_value32 & 0x00007000U) == std::uint32_t(Color::Unknown << 12U)) {
+                if ((fw_value32 & 0x00007000U) != std::uint32_t(Color::Empty << 12U)) {
+                    fw_value32 ^= 0x00007000U;
+                    fw_value32 |= std::uint32_t(Color::Unknown << 12U);
+                }
             }
         }
         return (fw_value32 == bw_value32);
