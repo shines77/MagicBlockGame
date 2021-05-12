@@ -224,7 +224,7 @@ union Board
             printf(" ");
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t color = board.cells[y * BoardY + x];
-                assert(color >= Color::Empty && color < Color::Maximum);
+                assert(color >= Color::First && color < Color::Maximum);
                 printf("%s ", Color::colorToChar(color));
             }
             printf("\n");

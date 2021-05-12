@@ -283,16 +283,16 @@ public:
             printf("-----------------------------------------------\n\n");
 
             sw.start();
-            while (forward_depth < max_forward_depth && backward_depth < max_backward_depth) {
+            while (forward_depth < max_forward_depth || backward_depth < max_backward_depth) {
                 int iterative_type = 0;
 #if 1
                 if (forward_depth > 15) {
                     size_type fw_visited_size = forward_solver.visited().size();
                     size_type bw_visited_size = backward_solver.visited().size();
-                    if (fw_visited_size >= bw_visited_size * 2) {
+                    if (forward_depth >= max_forward_depth || fw_visited_size >= bw_visited_size * 2) {
                         iterative_type = 1;
                     }
-                    else if (bw_visited_size >= fw_visited_size * 2) {
+                    else if (backward_depth >= max_backward_depth || bw_visited_size >= fw_visited_size * 2) {
                         iterative_type = 2;
                     }
                 }
@@ -314,10 +314,8 @@ public:
                     printf("-----------------------------------------------\n\n");
                 }
 
-                if (forward_status == 1 && backward_status == 1) {
-                    solvable = true;
-                    break;
-                }
+                (void)forward_status;
+                (void)backward_status;
 
                 int total = this->find_intersection(forward_solver.visited(), backward_solver.visited());
                 if (this->segment_list_.size() > 0) {
@@ -389,9 +387,7 @@ public:
                                 Board<BoardX, BoardY>::display_board("Forward answer:", this->fw_answer_board_);
                                 Board<BoardX, BoardY>::display_board("Backward answer:", this->bw_answer_board_);
 
-                                if (this->translateMovePath(fw_stage)) {
-                                    this->displayAnswer();
-                                }
+                                this->displayAnswer(fw_stage);
 
                                 size_type n_rotate_type = bw_stage.rotate_type;
                                 size_type empty_pos = n_rotate_type >> 2;
@@ -399,9 +395,7 @@ public:
                                 printf("backward_solver: rotate_type = %u, empty_pos = %u\n\n",
                                        (uint32_t)rotate_type, (uint32_t)empty_pos);
 
-                                if (backward_solver.translateMovePath(bw_stage)) {
-                                    backward_solver.displayAnswer();
-                                }
+                                backward_solver.displayAnswer(bw_stage);
 
                                 printf("-----------------------------------------------\n\n");
                                 printf("Forward moves: %u, Backward moves: %u, Total moves: %u\n\n",
@@ -413,9 +407,7 @@ public:
                                 this->best_move_path_ = this->move_path_;
                                 printf("Total moves: %u\n\n", (uint32_t)this->best_move_path_.size());
 
-                                if (this->translateMovePath(this->best_move_path_)) {
-                                    this->displayAnswer();
-                                }
+                                this->displayAnswer(this->best_move_path_);
                                 //System::pause();
                             }
                         }
@@ -444,9 +436,8 @@ public:
             if (solvable) {
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
-                if (this->translateMovePath(this->best_move_path_)) {
-                    this->displayAnswer();
-                }
+
+                this->displayAnswer(this->best_move_path_);
             }
         }
 

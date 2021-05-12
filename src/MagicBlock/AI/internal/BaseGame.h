@@ -420,11 +420,10 @@ public:
         return 0;
     }
 
-    bool translateMovePath(const std::vector<Position> & move_path) {
+    bool translateMovePath(const std::vector<Position> & move_path, std::vector<MoveInfo> & answer) const {
         bool success = true;
 
-        //printf("translateMovePath() begin ...\n\n");
-        this->answer_.clear();
+        answer.clear();
 
         Board<BoardX, BoardY> board(this->data_.player_board);
         uint8_t from_pos, move_pos;
@@ -453,7 +452,7 @@ public:
                 move_info.move_pos = move_pos;
                 move_info.color = from_clr;
                 move_info.dir = last_dir;
-                this->answer_.push_back(move_info);
+                answer.push_back(move_info);
 
                 std::swap(board.cells[from_pos], board.cells[move_pos]);
             }
@@ -472,12 +471,19 @@ public:
             move_pos = from_pos;
         }
 
-        //printf("translateMovePath() end ...\n\n");
         return success;
+    }
+
+    bool translateMovePath(const std::vector<Position> & move_path) {
+        return this->translateMovePath(move_path, this->answer_);
     }
 
     bool translateMovePath(const stage_type & target_stage) {
         return this->translateMovePath(target_stage.move_path);
+    }
+
+    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & answer) {
+        return this->translateMovePath(target_stage.move_path, answer);
     }
 
     void displayAnswer(const std::vector<MoveInfo> & answer) const {
@@ -503,7 +509,21 @@ public:
     }
 
     void displayAnswer() const {
-        return this->displayAnswer(this->answer_);
+        this->displayAnswer(this->answer_);
+    }
+
+    void displayAnswer(const std::vector<Position> & move_path) const {
+        std::vector<MoveInfo> answer;
+        if (this->translateMovePath(move_path, answer)) {
+            this->displayAnswer(answer);
+        }
+    }
+
+    void displayAnswer(const stage_type & target_stage) {
+        std::vector<MoveInfo> answer;
+        if (this->translateMovePath(target_stage, answer)) {
+            this->displayAnswer(answer);
+        }
     }
 };
 

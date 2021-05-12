@@ -20,10 +20,10 @@ static const std::size_t MAX_PHASE2_DEPTH = 35;
 
 // Two-Endpoint algorithm
 static const std::size_t MAX_FORWARD_DEPTH = 28;
-static const std::size_t MAX_BACKWARD_DEPTH = 24;
+static const std::size_t MAX_BACKWARD_DEPTH = 25;
 
-static const std::size_t MAX_ROTATE_FORWARD_DEPTH = 24;
-static const std::size_t MAX_ROTATE_BACKWARD_DEPTH = 20;
+static const std::size_t MAX_ROTATE_FORWARD_DEPTH = 25;
+static const std::size_t MAX_ROTATE_BACKWARD_DEPTH = 21;
 
 struct SolverType {
     enum {

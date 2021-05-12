@@ -350,14 +350,14 @@ int main(int argc, char * argv[])
     UnitTest();
 #endif
 
-#if 1
+#if 0
     solve_sliding_puzzle<SolverId::Normal, true>();
     solve_sliding_puzzle<SolverId::Queue, true>();
 
-    //System::pause();
+    System::pause();
 #endif
 
-#if 1
+#if 0
     solve_sliding_unknown_puzzle_3x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
 
@@ -374,7 +374,8 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-    if (0) {
+    if (1) {
+
 #ifdef NDEBUG
 
     ////////////////////////////////////////////////////////////////////////
@@ -424,6 +425,7 @@ int main(int argc, char * argv[])
     ////////////////////////////////////////////////////////////////////////
 
 #endif // NDEBUG
+
     }
 
     return 0;

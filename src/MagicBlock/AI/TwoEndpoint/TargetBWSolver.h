@@ -357,11 +357,11 @@ protected:
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (kStartY + y) * BoardY;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
-                uint8_t target_cell = target.cells[targetBaseY + x];
-                uint8_t cell = player.cells[baseY + (kStartX + x)];
-                assert_color(target_cell);
-                assert_color(cell);
-                if (cell != target_cell) {
+                uint8_t target_clr = target.cells[targetBaseY + x];
+                uint8_t player_clr = player.cells[baseY + (kStartX + x)];
+                assert_color(target_clr);
+                assert_color(player_clr);
+                if (player_clr != target_clr) {
                     return false;
                 }
             }
@@ -864,11 +864,11 @@ protected:
 
 public:
     bool translateMovePath(const std::vector<Position> & move_path,
-                           size_type rotate_type, Position empty_pos) {
+                           size_type rotate_type, Position empty_pos,
+                           std::vector<MoveInfo> & answer) const {
         bool success = true;
 
-        //printf("translateMovePath() begin ...\n\n");
-        this->answer_.clear();
+        answer.clear();
 
         Board<BoardX, BoardY> board(this->player_board_[rotate_type]);
         uint8_t from_pos, move_pos;
@@ -898,7 +898,7 @@ public:
                 move_info.move_pos = move_pos;
                 move_info.color = from_clr;
                 move_info.dir = last_dir;
-                this->answer_.push_back(move_info);
+                answer.push_back(move_info);
 
                 std::swap(board.cells[from_pos], board.cells[move_pos]);
             }
@@ -917,7 +917,6 @@ public:
             move_pos = from_pos;
         }
 
-        //printf("translateMovePath() end ...\n\n");
         return success;
     }
 
@@ -925,7 +924,14 @@ public:
         size_type n_rotate_type = target_stage.rotate_type;
         size_type empty_pos = n_rotate_type >> 2U;
         size_type rotate_type = n_rotate_type & 0x03U;
-        return this->translateMovePath(target_stage.move_path, rotate_type, empty_pos);
+        return this->translateMovePath(target_stage.move_path, rotate_type, empty_pos, this->answer_);
+    }
+
+    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & answer) const {
+        size_type n_rotate_type = target_stage.rotate_type;
+        size_type empty_pos = n_rotate_type >> 2U;
+        size_type rotate_type = n_rotate_type & 0x03U;
+        return this->translateMovePath(target_stage.move_path, rotate_type, empty_pos, answer);
     }
 
     void displayAnswer(const std::vector<MoveInfo> & answer) const {
@@ -952,6 +958,21 @@ public:
 
     void displayAnswer() const {
         return this->displayAnswer(this->answer_);
+    }
+
+    void displayAnswer(const std::vector<Position> & move_path,
+                       size_type rotate_type, Position empty_pos) const {
+        std::vector<MoveInfo> answer;
+        if (this->translateMovePath(move_path, rotate_type, empty_pos, answer)) {
+            this->displayAnswer(answer);
+        }
+    }
+
+    void displayAnswer(const stage_type & target_stage) {
+        std::vector<MoveInfo> answer;
+        if (this->translateMovePath(target_stage, answer)) {
+            this->displayAnswer(answer);
+        }
     }
 };
 
