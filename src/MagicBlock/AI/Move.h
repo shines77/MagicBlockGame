@@ -131,11 +131,50 @@ struct Position {
         std::swap(this->value, other.value);
     }
 
-    static const char posToChr(size_t pos) {
+    template <size_t BoardY>
+    char toFirstChar() const {
+        return Position::template toFirstChar<BoardY>(this->value);
+    }
+
+    template <size_t BoardY>
+    char toSecondChar() const {
+        return Position::template toSecondChar<BoardY>(this->value);
+    }
+
+    template <size_t BoardY>
+    std::string toString() const {
+        return Position::template toString<BoardY>(this->value);
+    }
+
+    template <size_t BoardY>
+    static char toFirstChar(uint8_t pos) {
         if (pos != uint8_t(-1))
-            return (char)('A' + (uint8_t)(pos % 256));
+            return (char)('A' + (uint8_t)(pos / BoardY));
         else
             return '?';
+    }
+
+    template <size_t BoardY>
+    static char toSecondChar(uint8_t pos) {
+        if (pos != uint8_t(-1))
+            return (char)('1' + (uint8_t)(pos % BoardY));
+        else
+            return '?';
+    }
+
+    template <size_t BoardY>
+    static std::string toString(uint8_t pos) {
+        std::string str;
+        if (pos != uint8_t(-1)) {
+            char first = (char)('A' + (uint8_t)(pos / BoardY));
+            char second = (char)('1' + (uint8_t)(pos % BoardY));
+            str.push_back(first);
+            str.push_back(second);
+        }
+        else {
+            str = "??";
+        }
+        return str;
     }
 };
 

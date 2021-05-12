@@ -32,7 +32,7 @@ public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    typedef SlidingUnknownPuzzle3x3<BoardX, BoardY> this_type;
+    typedef SlidingUnknownPuzzle3x3<BoardX, BoardY, MaxValidValue, GridBits, SearchAllAnswers> this_type;
 
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type kSingelNumMaxCount = 4;

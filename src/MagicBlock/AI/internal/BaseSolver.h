@@ -143,14 +143,14 @@ public:
 
 protected:
     void assert_color(uint8_t color) const {
-        assert(color >= Color::Empty && color < Color::Last);
+        assert(color >= Color::First && color < Color::Last);
     }
 
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t cell = board.cells[y * BoardY + x];
-                if (cell == Color::Empty) {
+                uint8_t clr = board.cells[y * BoardY + x];
+                if (clr == Color::Empty) {
                     empty_pos = (uint8_t)(y * BoardY + x);
                     return true;
                 }
@@ -161,7 +161,7 @@ protected:
 
     bool check_partial_color_nums() const {
         if (this->is_phase2()) {
-            for (size_type clr = Color::Empty; clr < Color::Last; clr++) {
+            for (size_type clr = Color::First; clr < Color::Last; clr++) {
                 if (this->partial_colors_[clr] < this->target_colors_[clr]) {
                     return false;
                 }
@@ -180,18 +180,16 @@ protected:
     void count_partial_color_nums(const Board<BoardX, BoardY> & board,
                                   size_type firstX, size_type lastX,
                                   size_type firstY, size_type lastY) {
-        for (size_type clr = Color::Empty; clr < Color::Last; clr++) {
+        for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
             this->partial_colors_[clr] = 0;
         }
 
         for (size_type y = firstY; y < lastY; y++) {
             ptrdiff_t baseY = y * BoardY;
             for (size_type x = firstX; x < lastX; x++) {
-                uint8_t cell = board.cells[baseY + x];
-                assert_color(cell);
-                if (cell >= Color::Empty && cell < Color::Last) {
-                    this->partial_colors_[cell]++;
-                }
+                uint8_t clr = board.cells[baseY + x];
+                assert_color(clr);
+                this->partial_colors_[clr]++;
             }
         }
     }
@@ -199,35 +197,31 @@ protected:
     void count_partial_color_nums_reverse(const Board<BoardX, BoardY> & board,
                                           size_type firstX, size_type lastX,
                                           size_type firstY, size_type lastY) {
-        this->partial_colors_[Color::Empty] = 0;
-        for (size_type clr = Color::First; clr < Color::Last; clr++) {
+        for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
             this->partial_colors_[clr] = kSingelColorNums;
         }
+        this->partial_colors_[Color::Empty] = 0;
 
         for (size_type y = firstY; y < lastY; y++) {
             ptrdiff_t baseY = y * BoardY;
             for (size_type x = firstX; x < lastX; x++) {
-                uint8_t cell = board.cells[baseY + x];
-                assert_color(cell);
-                if (cell >= Color::Empty && cell < Color::Last) {
-                    this->partial_colors_[cell]--;
-                }
+                uint8_t clr = board.cells[baseY + x];
+                assert_color(clr);
+                this->partial_colors_[clr]--;
             }
         }
     }
 
     void count_target_color_nums(const Board<TargetX, TargetY> & target) {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
+        for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
             this->target_colors_[clr] = 0;
         }
 
         for (size_type y = 0; y < TargetY; y++) {
             for (size_type x = 0; x < TargetX; x++) {
-                uint8_t cell = target.cells[y * TargetY + x];
-                assert_color(cell);
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->target_colors_[cell]++;
-                }
+                uint8_t clr = target.cells[y * TargetY + x];
+                assert_color(clr);
+                this->target_colors_[clr]++;
             }
         }
     }
@@ -235,17 +229,15 @@ protected:
     void count_partial_target_color_nums(const Board<TargetX, TargetY> & target,
                                          size_type firstTargetX, size_type lastTargetX,
                                          size_type firstTargetY, size_type lastTargetY) {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
+        for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
             this->target_colors_[clr] = 0;
         }
 
         for (size_type y = firstTargetY; y < lastTargetY; y++) {
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
-                uint8_t cell = target.cells[y * TargetY + x];
-                assert_color(cell);
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->target_colors_[cell]++;
-                }
+                uint8_t clr = target.cells[y * TargetY + x];
+                assert_color(clr);
+                this->target_colors_[clr]++;
             }
         }
     }
@@ -259,11 +251,11 @@ protected:
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (kStartY + y) * BoardY;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
-                uint8_t target_cell = target.cells[targetBaseY + x];
-                uint8_t cell = player.cells[baseY + (kStartX + x)];
-                assert_color(target_cell);
-                assert_color(cell);
-                if (cell != target_cell) {
+                uint8_t target_clr = target.cells[targetBaseY + x];
+                uint8_t player_clr = player.cells[baseY + (kStartX + x)];
+                assert_color(target_clr);
+                assert_color(player_clr);
+                if (player_clr != target_clr) {
                     return false;
                 }
             }
@@ -298,11 +290,11 @@ protected:
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (kStartY + y) * BoardY;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
-                uint8_t target_cell = target.cells[targetBaseY + x];
-                uint8_t cell = player.cells[baseY + (kStartX + x)];
-                assert_color(target_cell);
-                assert_color(cell);
-                if (cell != target_cell) {
+                uint8_t target_clr = target.cells[targetBaseY + x];
+                uint8_t player_clr = player.cells[baseY + (kStartX + x)];
+                assert_color(target_clr);
+                assert_color(player_clr);
+                if (player_clr != target_clr) {
                     return false;
                 }
             }
@@ -670,11 +662,11 @@ protected:
             ptrdiff_t targetBaseY = y * TargetY;
             ptrdiff_t baseY = (kStartY + y) * BoardY;
             for (size_type x = 0; x < TargetX; x++) {
-                uint8_t target_cell = target.cells[targetBaseY + x];
-                uint8_t cell = player.cells[baseY + (kStartX + x)];
-                assert_color(target_cell);
-                assert_color(cell);
-                if (cell != target_cell) {
+                uint8_t target_clr = target.cells[targetBaseY + x];
+                uint8_t player_clr = player.cells[baseY + (kStartX + x)];
+                assert_color(target_clr);
+                assert_color(player_clr);
+                if (player_clr != target_clr) {
                     return false;
                 }
             }
@@ -771,7 +763,7 @@ protected:
 
         Board<BoardX, BoardY> board(this->player_board_);
         uint8_t from_pos, move_pos;
-        uint8_t move_cell, from_cell;
+        uint8_t move_clr, from_clr;
         uint8_t last_dir = uint8_t(-1);
         Position empty_pos;
         bool found_empty = this->find_empty(board, empty_pos);
@@ -781,20 +773,20 @@ protected:
         move_pos = empty_pos;
         for (size_type i = 0; i < move_path.size(); i++) {
             if (move_pos != uint8_t(-1))
-                move_cell = board.cells[move_pos];
+                move_clr = board.cells[move_pos];
             else
-                move_cell = Color::Unknown;
-            assert_color(move_cell);
+                move_clr = Color::Unknown;
+            assert_color(move_clr);
             from_pos = move_path[i].value;
-            from_cell = board.cells[from_pos];
-            assert_color(from_cell);
-            if ((move_cell == Color::Empty || move_cell == Color::Unknown) &&
-                (from_cell != Color::Empty)) {
+            from_clr = board.cells[from_pos];
+            assert_color(from_clr);
+            if ((move_clr == Color::Empty || move_clr == Color::Unknown) &&
+                (from_clr != Color::Empty)) {
                 last_dir = Direction::template getDir<BoardX, BoardY>(from_pos, move_pos);
                 MoveInfo move_info;
                 move_info.from_pos = from_pos;
                 move_info.move_pos = move_pos;
-                move_info.color = from_cell;
+                move_info.color = from_clr;
                 move_info.dir = last_dir;
                 answer.push_back(move_info);
 
@@ -803,12 +795,12 @@ protected:
             else {
                 printf("BaseSolver::translateMovePath():\n\n"
                         "Move path have error, [from_pos] is a empty gird.\n"
-                        "index = %u, from_pos = %c%u, color = %s (%u)\n\n",
+                        "index = %u, from_pos = %c%c, color = %s (%u)\n\n",
                         (uint32_t)(i + 1),
-                        (uint32_t)Position::posToChr(from_pos / BoardY),
-                        (uint32_t)(from_pos % BoardY) + 1,
-                        Color::colorToChar(from_cell),
-                        (uint32_t)from_cell);
+                        Position::template toFirstChar<BoardY>(from_pos),
+                        Position::template toSecondChar<BoardY>(from_pos),
+                        Color::colorToChar(from_clr),
+                        (uint32_t)from_clr);
                 success = false;
                 break;
             }
@@ -826,15 +818,17 @@ protected:
         size_type index = 0;
         printf("Answer_Move_Path[%u] = {\n", (uint32_t)answer.size());
         for (auto iter : answer) {
-            size_type from_pos  = iter.from_pos;
-            size_type move_pos  = iter.move_pos;
+            Position from_pos   = iter.from_pos;
+            Position move_pos   = iter.move_pos;
             size_type color     = iter.color;
             size_type dir       = iter.dir;
-            printf("    [%2u]: [%s], %c%u --> %c%u, dir: %-5s (%u)\n",
+            printf("    [%2u]: [%s], %c%c --> %c%c, dir: %-5s (%u)\n",
                    (uint32_t)(index + 1),
                    Color::colorToChar(color),
-                   (uint32_t)Position::posToChr(from_pos / BoardY), (uint32_t)(from_pos % BoardY) + 1,
-                   (uint32_t)Position::posToChr(move_pos / BoardY), (uint32_t)(move_pos % BoardY) + 1,
+                   Position::template toFirstChar<BoardY>(from_pos),
+                   Position::template toSecondChar<BoardY>(from_pos),
+                   Position::template toFirstChar<BoardY>(move_pos),
+                   Position::template toSecondChar<BoardY>(move_pos),
                    Direction::toString(dir),
                    (uint32_t)dir);
             index++;

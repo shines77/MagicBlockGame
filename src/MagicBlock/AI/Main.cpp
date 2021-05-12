@@ -40,6 +40,14 @@
 using namespace MagicBlock;
 using namespace MagicBlock::AI;
 
+#if defined(_MSC_VER)
+#define PUZZLES_BASE_DIR    "..\\..\\..\\puzzles\\"
+#else
+#define PUZZLES_BASE_DIR    "puzzles/"
+#endif
+
+#define PUZZLES_PATH(filename)   PUZZLES_BASE_DIR filename
+
 struct Category {
     enum {
         TwoPhase_v1,
@@ -101,7 +109,7 @@ void solve_sliding_puzzle()
             (SearchAllAnswers ? "true" : "false"));
 
     AI::SlidingPuzzle<3, 3, SearchAllAnswers> slidingPuzzle;
-    int readStatus = slidingPuzzle.readConfig("sliding_puzzle.txt");
+    int readStatus = slidingPuzzle.readConfig(PUZZLES_PATH("sliding_puzzle.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;
@@ -142,7 +150,7 @@ void solve_sliding_unknown_puzzle_3x3()
             (SearchAllAnswers ? "true" : "false"));
 
     AI::SlidingUnknownPuzzle3x3<3, 3, 8, 3, SearchAllAnswers> slidingPuzzle;
-    int readStatus = slidingPuzzle.readConfig("sliding_puzzle_unknown.txt");
+    int readStatus = slidingPuzzle.readConfig(PUZZLES_PATH("sliding_puzzle_unknown3x3.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;
@@ -183,7 +191,7 @@ void solve_sliding_color_puzzle()
             (AllowRotate ? "true" : "false"));
 
     AI::SlidingColorPuzzle<3, 3, AllowRotate> slidingPuzzle;
-    int readStatus = slidingPuzzle.readConfig("sliding_color_puzzle.txt");
+    int readStatus = slidingPuzzle.readConfig(PUZZLES_PATH("sliding_color_puzzle.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;
@@ -225,7 +233,7 @@ void solve_magic_block_two_phase_v1()
 
     AI::TwoPhase_v1::Game<5, 5, 3, 3, AllowRotate> game;
 
-    int readStatus = game.readConfig("magic_block.txt");
+    int readStatus = game.readConfig(PUZZLES_PATH("magic_block.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;
@@ -275,7 +283,7 @@ void solve_magic_block_two_endpoint()
 
     AI::TwoEndpoint::Game<5, 5, 3, 3, AllowRotate> game;
 
-    int readStatus = game.readConfig("magic_block.txt");
+    int readStatus = game.readConfig(PUZZLES_PATH("magic_block.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
         return;

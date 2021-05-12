@@ -249,7 +249,7 @@ union Board
             printf("| ");
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t num = board.cells[y * BoardY + x];
-                assert(num >= 0 && num < BoardSize);
+                assert((num == EmptyPosValue) || (num >= 0 && num < BoardSize));
                 printf("%c ", (num != EmptyPosValue) ? (num + '1') : '0');
             }
             printf("|\n");
@@ -275,7 +275,7 @@ union Board
             printf("| ");
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t num = board.cells[y * BoardY + x];
-                assert(num >= 0 && num < BoardSize);
+                assert((num == UnknownPosValue) || (num == EmptyPosValue) || (num >= 0 && num < BoardSize));
                 printf("%c ", (num != UnknownPosValue) ? ((num != EmptyPosValue) ? (num + '1') : '0') : '?');
             }
             printf("|\n");

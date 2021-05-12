@@ -113,7 +113,7 @@ public:
                     if (line_no >= 0 && line_no < BoardY) {
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
-                            if (color >= Color::Empty && color < Color::Last) {
+                            if (color >= Color::First && color < Color::Last) {
                                 this->target_board_[0].cells[line_no * BoardY + x] = color;
                             }
                             else {
@@ -126,7 +126,7 @@ public:
                         size_type boardY = line_no - (BoardY + 1);
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
-                            if (color >= Color::Empty && color < Color::Last) {
+                            if (color >= Color::First && color < Color::Last) {
                                 this->player_board_.cells[boardY * BoardY + x] = color;
                             }
                             else {
@@ -174,26 +174,22 @@ public:
     }
 
     void count_all_color_nums() {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
+        for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
             this->player_num_cnt_[clr] = 0;
             this->target_num_cnt_[clr] = 0;
         }
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t cell = this->player_board_.cells[y * BoardY + x];
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->player_num_cnt_[cell]++;
-                }
+                uint8_t num = this->player_board_.cells[y * BoardY + x];
+                this->player_num_cnt_[num]++;
             }
         }
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t cell = this->target_board_[0].cells[y * BoardY + x];
-                if (cell >= Color::Empty && cell < Color::Maximum) {
-                    this->target_num_cnt_[cell]++;
-                }
+                uint8_t num = this->target_board_[0].cells[y * BoardY + x];
+                this->target_num_cnt_[num]++;
             }
         }
     }
@@ -299,11 +295,12 @@ public:
     void set_puzzle(const Board<UBoardX, UBoardY> & player,
                     const Board<BoardX, BoardY> target[4],
                     size_type target_len) {
-        static const ptrdiff_t startX = (UBoardX - BoardX) / 2;
-        static const ptrdiff_t startY = (UBoardY - BoardY) / 2;
+        static const ptrdiff_t kStartX = (UBoardX - BoardX) / 2;
+        static const ptrdiff_t kStartY = (UBoardY - BoardY) / 2;
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                this->player_board_.cells[y * BoardY + x] = player.cells[(startY + y) * UBoardY + (startX + x)];
+                this->player_board_.cells[y * BoardY + x] =
+                    player.cells[(kStartY + y) * UBoardY + (kStartX + x)];
             }
         }
         for (size_type i = 0; i < 4; i++) {

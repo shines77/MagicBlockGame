@@ -8,14 +8,14 @@ namespace AI {
 
 struct Color {
     enum {
-        Empty,              // 0
-        First,              // 1
-        Red = First,        // 1
-        Green,              // 2
-        Blue,               // 3
-        White,              // 4
-        Orange,             // 5
-        Yellow,             // 6
+        First,              // 0
+        Red = First,        // 0
+        Green,              // 1
+        Blue,               // 2
+        White,              // 3
+        Orange,             // 4
+        Yellow,             // 5
+        Empty,              // 6
         Unknown,            // 7
         Last = Unknown,     // 7
         Illegal,            // 8
@@ -29,9 +29,6 @@ struct Color {
 
     static uint8_t charToColor(uint8_t value) {
         switch (value) {
-        case ' ':
-        case 'E':
-            return Color::Empty;
         case 'R':
             return Color::Red;
         case 'G':
@@ -44,6 +41,9 @@ struct Color {
             return Color::Orange;
         case 'Y':
             return Color::Yellow;
+        case ' ':
+        case 'E':
+            return Color::Empty;
         case '*':
             return Color::Unknown;
         default:
@@ -53,8 +53,6 @@ struct Color {
 
     static const char * colorToChar(size_t color) {
         switch (color) {
-            case Color::Empty:
-                return "E";
             case Color::Red:
                 return "R";
             case Color::Green:
@@ -67,6 +65,8 @@ struct Color {
                 return "O";
             case Color::Yellow:
                 return "Y";
+            case Color::Empty:
+                return "E";
             case Color::Unknown:
                 return "*";
             default:
@@ -76,8 +76,6 @@ struct Color {
 
     static const char * toString(size_t color) {
         switch (color) {
-            case Color::Empty:
-                return "Empty";
             case Color::Red:
                 return "Red";
             case Color::Green:
@@ -90,6 +88,8 @@ struct Color {
                 return "Orange";
             case Color::Yellow:
                 return "Yellow";
+            case Color::Empty:
+                return "Empty";
             case Color::Unknown:
                 return "Unknown";
             default:
