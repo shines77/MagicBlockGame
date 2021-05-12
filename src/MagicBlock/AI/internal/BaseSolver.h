@@ -159,24 +159,6 @@ protected:
         return false;
     }
 
-    bool check_partial_color_nums() const {
-        if (this->is_phase2()) {
-            for (size_type clr = Color::First; clr < Color::Last; clr++) {
-                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
-                    return false;
-                }
-            }
-        }
-        else {
-            for (size_type clr = Color::First; clr < Color::Last; clr++) {
-                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     void count_partial_color_nums(const Board<BoardX, BoardY> & board,
                                   size_type firstX, size_type lastX,
                                   size_type firstY, size_type lastY) {
@@ -200,7 +182,7 @@ protected:
         for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
             this->partial_colors_[clr] = kSingelColorNums;
         }
-        this->partial_colors_[Color::Empty] = 0;
+        this->partial_colors_[Color::Empty] = 1;
 
         for (size_type y = firstY; y < lastY; y++) {
             ptrdiff_t baseY = y * BoardY;
@@ -240,6 +222,24 @@ protected:
                 this->target_colors_[clr]++;
             }
         }
+    }
+
+    bool check_partial_color_nums() const {
+        if (this->is_phase2()) {
+            for (size_type clr = Color::First; clr < Color::Last; clr++) {
+                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
+                    return false;
+                }
+            }
+        }
+        else {
+            for (size_type clr = Color::First; clr < Color::Last; clr++) {
+                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     // Check order: up to down

@@ -106,9 +106,6 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\BackwardSolver.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\TargetBWSolver.h">
-      <Filter>src\TwoEndpoint</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingColorPuzzle.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -120,6 +117,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingUnknownPuzzle.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\BaseBWSolver.h">
+      <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -36,13 +36,13 @@ template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
           bool AllowRotate, std::size_t N_SolverType,
           typename Phase2CallBack>
-class TargetBWSolver
+class BaseBWSolver
 {
 public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    typedef TargetBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>  this_type;
+    typedef BaseBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>  this_type;
 
     typedef SharedData<BoardX, BoardY, TargetX, TargetY>    shared_data_type;
     typedef typename shared_data_type::stage_type           stage_type;
@@ -63,7 +63,6 @@ protected:
     size_type target_len_;
     size_type rotate_type_;
 
-    int player_colors_[Color::Maximum];
     int target_colors_[Color::Maximum];
     int partial_colors_[Color::Maximum];
 
@@ -90,12 +89,12 @@ protected:
     }
 
 public:
-    TargetBWSolver(shared_data_type * data)
+    BaseBWSolver(shared_data_type * data)
         : data_(data), target_len_(0), rotate_type_(0), map_used_(0) {
         this->init();
     }
 
-    ~TargetBWSolver() {
+    ~BaseBWSolver() {
         this->destory();
     }
 
@@ -255,10 +254,10 @@ protected:
     void count_partial_color_nums_reverse(const Board<BoardX, BoardY> & board,
                                           size_type firstX, size_type lastX,
                                           size_type firstY, size_type lastY) {
-        this->partial_colors_[Color::Empty] = 0;
         for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
             this->partial_colors_[clr] = kSingelColorNums;
         }
+        this->partial_colors_[Color::Empty] = 1;
 
         for (size_type y = firstY; y < lastY; y++) {
             ptrdiff_t baseY = y * BoardY;
@@ -268,24 +267,6 @@ protected:
                 this->partial_colors_[clr]--;
             }
         }
-    }
-
-    bool check_partial_color_nums() const {
-        if (this->is_phase2()) {
-            for (size_type clr = Color::First; clr < Color::Last; clr++) {
-                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
-                    return false;
-                }
-            }
-        }
-        else {
-            for (size_type clr = Color::First; clr < Color::Last; clr++) {
-                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     void count_target_color_nums(const Board<TargetX, TargetY> & target) {
@@ -346,6 +327,24 @@ protected:
                 this->target_colors_[clr]++;
             }
         }
+    }
+
+    bool check_partial_color_nums() const {
+        if (this->is_phase2()) {
+            for (size_type clr = Color::First; clr < Color::Last; clr++) {
+                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
+                    return false;
+                }
+            }
+        }
+        else {
+            for (size_type clr = Color::First; clr < Color::Last; clr++) {
+                if (this->partial_colors_[clr] < this->target_colors_[clr]) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     // Check order: up to down
@@ -903,7 +902,7 @@ public:
                 std::swap(board.cells[from_pos], board.cells[move_pos]);
             }
             else {
-                printf("TargetBWSolver::translateMovePath():\n\n"
+                printf("BaseBWSolver::translateMovePath():\n\n"
                         "Move path have error, [from_pos] is a empty gird.\n"
                         "index = %u, from_pos = %c%c, color = %s (%u)\n\n",
                         (uint32_t)(i + 1),

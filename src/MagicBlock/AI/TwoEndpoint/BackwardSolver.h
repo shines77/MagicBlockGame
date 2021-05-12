@@ -19,7 +19,7 @@
 #include <algorithm>    // For std::swap(), until C++11. std::min()
 #include <utility>      // For std::swap(), since C++11
 
-#include "MagicBlock/AI/TwoEndpoint/TargetBWSolver.h"
+#include "MagicBlock/AI/TwoEndpoint/BaseBWSolver.h"
 
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
@@ -39,10 +39,10 @@ template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
           bool AllowRotate, std::size_t N_SolverType,
           typename Phase2CallBack>
-class BackwardSolver : public TargetBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>
+class BackwardSolver : public BaseBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>
 {
 public:
-    typedef TargetBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack> base_type;
+    typedef BaseBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>   base_type;
     typedef BackwardSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack> this_type;
 
     typedef typename base_type::size_type           size_type;
