@@ -17,7 +17,6 @@ struct Color {
         Yellow  = 5,        // 5
         Empty   = 6,        // 6
         Unknown = 7,        // 7
-        Mask    = 7,        // 7
         Last    = Unknown,  // 7
         Illegal = 8,        // 8
         Maximum = Illegal   // 8

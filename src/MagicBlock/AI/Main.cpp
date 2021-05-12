@@ -374,6 +374,8 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
+    if (0) {
+
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::StandAloneBitSet, true>();
     System::pause();
@@ -389,7 +391,9 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-    if (0) {
+    }
+
+    if (1) {
 
 #ifdef NDEBUG
 
