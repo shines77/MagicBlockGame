@@ -331,14 +331,14 @@ protected:
 
     bool check_partial_color_nums() const {
         if (this->is_phase2()) {
-            for (size_type clr = Color::First; clr < Color::Last; clr++) {
+            for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
                 if (this->partial_colors_[clr] < this->target_colors_[clr]) {
                     return false;
                 }
             }
         }
         else {
-            for (size_type clr = Color::First; clr < Color::Last; clr++) {
+            for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
                 if (this->partial_colors_[clr] < this->target_colors_[clr]) {
                     return false;
                 }
@@ -454,7 +454,7 @@ protected:
         if (player.cells[LeftTopY * BoardY + LeftTopX] ==
             target.cells[0 * TargetY + 0]) {
             count_partial_color_nums_reverse(player, 0, LeftTopX + 1, 0, LeftTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 1;
@@ -468,7 +468,7 @@ protected:
         if (player.cells[RightTopY * BoardY + RightTopX] ==
             target.cells[0 * TargetY + (TargetX - 1)]) {
             count_partial_color_nums_reverse(player, RightTopX, BoardX, 0, RightTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 2;
@@ -482,7 +482,7 @@ protected:
         if (player.cells[LeftBottomY * BoardY + LeftBottomX] ==
             target.cells[(TargetY - 1) * TargetY + 0]) {
             count_partial_color_nums_reverse(player, 0, LeftBottomX + 1, LeftBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 4;
@@ -496,7 +496,7 @@ protected:
         if (player.cells[RightBottomY * BoardY + RightBottomX] ==
             target.cells[(TargetY - 1) * TargetY + (TargetX - 1)]) {
             count_partial_color_nums_reverse(player, RightBottomX, BoardX, RightBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 8;
@@ -531,7 +531,7 @@ protected:
 
         if (partial_target_is_satisfy(player, target, 0, 2, 0, 1)) {
             count_partial_color_nums_reverse(player, 0, LeftTopX + 2, 0, LeftTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 1;
@@ -544,7 +544,7 @@ protected:
 
         if (partial_target_is_satisfy(player, target, TargetX - 2, TargetX, 0, 1)) {
             count_partial_color_nums_reverse(player, RightTopX - 1, BoardX, 0, RightTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 2;
@@ -557,7 +557,7 @@ protected:
 
         if (partial_target_is_satisfy(player, target, 0, 2, TargetY - 1, TargetY)) {
             count_partial_color_nums_reverse(player, 0, LeftBottomX + 2, LeftBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 4;
@@ -570,7 +570,7 @@ protected:
 
         if (partial_target_is_satisfy(player, target, TargetX - 2, TargetX, TargetY - 1, TargetY)) {
             count_partial_color_nums_reverse(player, RightBottomX - 1, BoardX, RightBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 8;
@@ -604,7 +604,7 @@ protected:
 
         if (partial_target_is_satisfy(player, target, 0, TargetX, 0, 1)) {
             count_partial_color_nums_reverse(player, 0, BoardX, 0, TopY + 1);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 1;
@@ -616,7 +616,7 @@ protected:
 
         if (partial_target_is_satisfy(player, target, 0, 1, 0, TargetY)) {
             count_partial_color_nums_reverse(player, 0, LeftX + 1, 0, BoardY);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 2;
@@ -628,7 +628,7 @@ protected:
 
         if (partial_target_is_satisfy(player, target, TargetX - 1, TargetX, 0, TargetY)) {
             count_partial_color_nums_reverse(player, RightX, BoardX, 0, BoardY);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 4;
@@ -640,7 +640,7 @@ protected:
 
         if (partial_target_is_satisfy(player, target, 0, TargetX, TargetY - 1, TargetY)) {
             count_partial_color_nums_reverse(player, 0, BoardX, BottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 0) {
+            if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
                 if (is_valid)
                     mask |= 8;
