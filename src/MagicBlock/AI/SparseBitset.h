@@ -1089,7 +1089,7 @@ public:
 
     size_type get_layer_value(const board_type & board, size_type layer) const {
         size_type y = this->y_index_[layer];
-        ssize_type cell_y = y * BoardY;
+        ssize_type cell_y = y * BoardX;
         size_type layer_value = 0;
         for (ssize_type x = BoardX - 1; x >= 0; x--) {
             layer_value <<= 3;
@@ -1102,12 +1102,12 @@ public:
         for (size_type segment = 0; segment < BoardY; segment++) {
             std::uint32_t value = (std::uint32_t)segment_list[segment];
             size_type y = this->y_index_[segment];
-            size_type base_pos = y * BoardY;
+            size_type base_pos = y * BoardX;
             for (size_type x = 0; x < BoardX; x++) {
                 std::uint32_t color = value & Color::Mask32;
                 assert(color >= Color::First && color < Color::Maximum);
                 size_type pos = base_pos + x;
-                assert(pos < (BoardX * BoardY));
+                assert(pos < BoardSize);
                 board.cells[pos] = (std::uint8_t)color;
                 value >>= Color::Shift32;
             }

@@ -82,12 +82,14 @@ struct Phase1
 template <std::size_t BoardX, std::size_t BoardY>
 struct Phase2
 {
+    static const std::size_t BoardSize = BoardX * BoardY;
+
     std::size_t rotate_type;
     std::size_t phase1_type;
     std::size_t index;
     std::size_t depth_limit;
     int lock_inited[4];
-    int locked[BoardX * BoardY];
+    int locked[BoardSize];
 
     Phase2() : rotate_type(std::size_t(-1)), phase1_type(std::size_t(-1)),
                index(std::size_t(-1)), depth_limit(std::size_t(-1)) {
@@ -116,7 +118,7 @@ struct Phase2
             this->lock_inited[i] = other.lock_inited[i];
         }
 
-        for (std::size_t i = 0; i < BoardX * BoardY; i++) {
+        for (std::size_t i = 0; i < BoardSize; i++) {
             this->locked[i] = other.locked[i];
         }
     }
@@ -132,7 +134,7 @@ struct Phase2
             this->lock_inited[i] = 0;
         }
 
-        for (std::size_t i = 0; i < BoardX * BoardY; i++) {
+        for (std::size_t i = 0; i < BoardSize; i++) {
             this->locked[i] = 0;
         }
     }
@@ -144,6 +146,8 @@ struct SharedData
 {
     typedef typename Phase1<BoardX, BoardY>::stage_type stage_type;
 
+    static const std::size_t BoardSize = BoardX * BoardY;
+
     Board<BoardX, BoardY>   player_board;
     Board<TargetX, TargetY> target_board[4];
 
@@ -152,13 +156,13 @@ struct SharedData
     int player_colors[Color::Maximum];
     int target_colors[Color::Maximum];
 
-    std::vector<Move> empty_moves[BoardX * BoardY];
+    std::vector<Move> empty_moves[BoardSize];
 
     Phase1<BoardX, BoardY> phase1;
     Phase2<BoardX, BoardY> phase2;
 
     SharedData() : target_len(0) {
-        for (std::size_t clr = Color::Empty; clr < Color::Maximum; clr++) {
+        for (std::size_t clr = Color::First; clr < Color::Maximum; clr++) {
             this->player_colors[clr] = Color::Empty;
             this->target_colors[clr] = Color::Empty;
         }
@@ -183,12 +187,12 @@ struct SharedData
 
         this->target_len = other.target_len;
 
-        for (std::size_t clr = Color::Empty; clr < Color::Maximum; clr++) {
+        for (std::size_t clr = Color::First; clr < Color::Maximum; clr++) {
             this->player_colors[clr] = other.player_colors[clr];
             this->target_colors[clr] = other.target_colors[clr];
         }
 
-        for (std::size_t i = 0; i < BoardX * BoardY; i++) {
+        for (std::size_t i = 0; i < BoardSize; i++) {
             this->empty_moves[i] = other.empty_moves[i];
         }
 

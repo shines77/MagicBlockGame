@@ -48,7 +48,8 @@ public:
     typedef typename shared_data_type::stage_type           stage_type;
     typedef Phase2CallBack                                  phase2_callback;
 
-    static const size_type kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
+    static const size_type BoardSize = BoardX * BoardY;
+    static const size_type kSingelColorNums = (BoardSize - 1) / (Color::Last - 1);
 
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
@@ -148,9 +149,9 @@ protected:
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t clr = board.cells[y * BoardY + x];
+                uint8_t clr = board.cells[y * BoardX + x];
                 if (clr == Color::Empty) {
-                    empty_pos = (uint8_t)(y * BoardY + x);
+                    empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
             }
@@ -166,7 +167,7 @@ protected:
         }
 
         for (size_type y = firstY; y < lastY; y++) {
-            ptrdiff_t baseY = y * BoardY;
+            ptrdiff_t baseY = y * BoardX;
             for (size_type x = firstX; x < lastX; x++) {
                 uint8_t clr = board.cells[baseY + x];
                 assert_color(clr);
@@ -184,7 +185,7 @@ protected:
         this->partial_colors_[Color::Empty] = 1;
 
         for (size_type y = firstY; y < lastY; y++) {
-            ptrdiff_t baseY = y * BoardY;
+            ptrdiff_t baseY = y * BoardX;
             for (size_type x = firstX; x < lastX; x++) {
                 uint8_t clr = board.cells[baseY + x];
                 assert_color(clr);
@@ -200,7 +201,7 @@ protected:
 
         for (size_type y = 0; y < TargetY; y++) {
             for (size_type x = 0; x < TargetX; x++) {
-                uint8_t clr = target.cells[y * TargetY + x];
+                uint8_t clr = target.cells[y * TargetX + x];
                 assert_color(clr);
                 this->target_colors_[clr]++;
             }
@@ -216,7 +217,7 @@ protected:
 
         for (size_type y = firstTargetY; y < lastTargetY; y++) {
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
-                uint8_t clr = target.cells[y * TargetY + x];
+                uint8_t clr = target.cells[y * TargetX + x];
                 assert_color(clr);
                 this->target_colors_[clr]++;
             }
@@ -247,8 +248,8 @@ protected:
                                    size_type firstTargetX, size_type lastTargetX,
                                    size_type firstTargetY, size_type lastTargetY) {
         for (size_type y = firstTargetY; y < lastTargetY; y++) {
-            ptrdiff_t targetBaseY = y * TargetY;
-            ptrdiff_t baseY = (kStartY + y) * BoardY;
+            ptrdiff_t targetBaseY = y * TargetX;
+            ptrdiff_t baseY = (kStartY + y) * BoardX;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
                 uint8_t player_clr = player.cells[baseY + (kStartX + x)];
@@ -286,8 +287,8 @@ protected:
                                            size_type firstTargetX, size_type lastTargetX,
                                            size_type firstTargetY, size_type lastTargetY) {
         for (ptrdiff_t y = ptrdiff_t(lastTargetY - 1); y >= ptrdiff_t(firstTargetX); y--) {
-            ptrdiff_t targetBaseY = y * TargetY;
-            ptrdiff_t baseY = (kStartY + y) * BoardY;
+            ptrdiff_t targetBaseY = y * TargetX;
+            ptrdiff_t baseY = (kStartY + y) * BoardX;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
                 uint8_t player_clr = player.cells[baseY + (kStartX + x)];
@@ -319,18 +320,18 @@ protected:
         return 0;
     }
 
-    void locked_partial_board(int locked[BoardX * BoardY],
+    void locked_partial_board(int locked[BoardSize],
                               size_type firstX, size_type lastX,
                               size_type firstY, size_type lastY) {
         for (size_type y = 0; y < BoardY; y++) {
-            ptrdiff_t baseY = y * BoardY;
+            ptrdiff_t baseY = y * BoardX;
             for (size_type x = 0; x < BoardX; x++) {
                 locked[baseY + x] = 0;
             }
         }
 
         for (size_type y = firstY; y < lastY; y++) {
-            ptrdiff_t baseY = y * BoardY;
+            ptrdiff_t baseY = y * BoardX;
             for (size_type x = firstX; x < lastX; x++) {
                 locked[baseY + x] = 1;
             }
@@ -345,8 +346,8 @@ protected:
         static const ptrdiff_t LeftTopX = kStartX;
         static const ptrdiff_t LeftTopY = kStartY;
 
-        if (player.cells[LeftTopY * BoardY + LeftTopX] ==
-            target.cells[0 * TargetY + 0]) {
+        if (player.cells[LeftTopY * BoardX + LeftTopX] ==
+            target.cells[0 * TargetX + 0]) {
             count_partial_color_nums_reverse(player, 0, LeftTopX + 1, 0, LeftTopY + 1);
             if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
@@ -359,8 +360,8 @@ protected:
         static const ptrdiff_t RightTopX = kStartX + TargetX - 1;
         static const ptrdiff_t RightTopY = kStartY;
 
-        if (player.cells[RightTopY * BoardY + RightTopX] ==
-            target.cells[0 * TargetY + (TargetX - 1)]) {
+        if (player.cells[RightTopY * BoardX + RightTopX] ==
+            target.cells[0 * TargetX + (TargetX - 1)]) {
             count_partial_color_nums_reverse(player, RightTopX, BoardX, 0, RightTopY + 1);
             if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
@@ -373,8 +374,8 @@ protected:
         static const ptrdiff_t LeftBottomX = kStartX;
         static const ptrdiff_t LeftBottomY = kStartY + TargetY - 1;
 
-        if (player.cells[LeftBottomY * BoardY + LeftBottomX] ==
-            target.cells[(TargetY - 1) * TargetY + 0]) {
+        if (player.cells[LeftBottomY * BoardX + LeftBottomX] ==
+            target.cells[(TargetY - 1) * TargetX + 0]) {
             count_partial_color_nums_reverse(player, 0, LeftBottomX + 1, LeftBottomY, BoardY);
             if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
@@ -387,8 +388,8 @@ protected:
         static const ptrdiff_t RightBottomX = kStartX + TargetX - 1;
         static const ptrdiff_t RightBottomY = kStartY + TargetY - 1;
 
-        if (player.cells[RightBottomY * BoardY + RightBottomX] ==
-            target.cells[(TargetY - 1) * TargetY + (TargetX - 1)]) {
+        if (player.cells[RightBottomY * BoardX + RightBottomX] ==
+            target.cells[(TargetY - 1) * TargetX + (TargetX - 1)]) {
             count_partial_color_nums_reverse(player, RightBottomX, BoardX, RightBottomY, BoardY);
             if (this->partial_colors_[Color::Empty] == 1) {
                 bool is_valid = check_partial_color_nums();
@@ -658,8 +659,8 @@ protected:
     bool is_satisfy_full(const Board<BoardX, BoardY> & player,
                          const Board<TargetX, TargetY> & target) const {
         for (size_type y = 0; y < TargetY; y++) {
-            ptrdiff_t targetBaseY = y * TargetY;
-            ptrdiff_t baseY = (kStartY + y) * BoardY;
+            ptrdiff_t targetBaseY = y * TargetX;
+            ptrdiff_t baseY = (kStartY + y) * BoardX;
             for (size_type x = 0; x < TargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
                 uint8_t player_clr = player.cells[baseY + (kStartX + x)];

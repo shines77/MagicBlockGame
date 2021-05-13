@@ -38,7 +38,7 @@ union Board
     static const size_type kUnits = (Bytes + kUnitBytes - 1) / kUnitBytes;
     static const size_type kBytes = kUnits * kUnitBytes;
 
-    std::uint8_t    cells[BoardX * BoardY];
+    std::uint8_t    cells[BoardSize];
     unit_type       uints[kUnits];
 
     Board() {
@@ -85,7 +85,7 @@ union Board
         }
     }
 
-    void copy(uint8_t cells[BoardX * BoardY]) noexcept {
+    void copy(uint8_t cells[BoardSize]) noexcept {
         size_type cell;
         for (cell = 0; cell < BoardSize; cell++) {
             this->cells[cell] = cells[cell];
@@ -125,7 +125,16 @@ union Board
     }
 
     size_type value() const noexcept {
-        size_type value64 = 0;
+        size_type value = 0;
+        for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
+            value <<= 3;
+            value |= (this->cells[pos] & 0x07U);
+        }
+        return value;
+    }
+
+    std::uint64_t value64() const noexcept {
+        std::uint64_t value64 = 0;
         for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
             value64 <<= 3;
             value64 |= (this->cells[pos] & 0x07U);
@@ -135,7 +144,19 @@ union Board
 
     template <size_type kEmptyPosValue = 0>
     size_type compactValue() const noexcept {
-        size_type value64 = 0;
+        size_type value = 0;
+        for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
+            if (this->cells[pos] != kEmptyPosValue) {
+                value <<= 3;
+                value |= (this->cells[pos] & 0x07U);
+            }
+        }
+        return value;
+    }
+
+    template <size_type kEmptyPosValue = 0>
+    std::uint64_t compactValue64() const noexcept {
+        std::uint64_t value64 = 0;
         for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
             if (this->cells[pos] != kEmptyPosValue) {
                 value64 <<= 3;
@@ -178,10 +199,10 @@ union Board
     void rotate_90_cw(Board<BoardX, BoardY> & dest) {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                size_type src_pos = y * BoardY + x;
+                size_type src_pos = y * BoardX + x;
                 size_type dest_x = (BoardY - 1) - y;
                 size_type dest_y = x;
-                size_type dest_pos = dest_y * BoardY + dest_x;
+                size_type dest_pos = dest_y * BoardX + dest_x;
                 dest.cells[dest_pos] = this->cells[src_pos];
             }
         }
@@ -191,10 +212,10 @@ union Board
     void rotate_180_cw(Board<BoardX, BoardY> & dest) {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                size_type src_pos = y * BoardY + x;
+                size_type src_pos = y * BoardX + x;
                 size_type dest_x = (BoardX - 1) - x;
                 size_type dest_y = (BoardY - 1) - y;
-                size_type dest_pos = dest_y * BoardY + dest_x;
+                size_type dest_pos = dest_y * BoardX + dest_x;
                 dest.cells[dest_pos] = this->cells[src_pos];
             }
         }
@@ -204,10 +225,10 @@ union Board
     void rotate_270_cw(Board<BoardX, BoardY> & dest) {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                size_type src_pos = y * BoardY + x;
+                size_type src_pos = y * BoardX + x;
                 size_type dest_x = y;
                 size_type dest_y = (BoardX - 1) - x;
-                size_type dest_pos = dest_y * BoardY + dest_x;
+                size_type dest_pos = dest_y * BoardX + dest_x;
                 dest.cells[dest_pos] = this->cells[src_pos];
             }
         }
@@ -223,7 +244,7 @@ union Board
         for (size_type y = 0; y < BoardY; y++) {
             printf(" ");
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t color = board.cells[y * BoardY + x];
+                uint8_t color = board.cells[y * BoardX + x];
                 assert(color >= Color::First && color < Color::Maximum);
                 printf("%s ", Color::colorToChar(color));
             }
@@ -248,7 +269,7 @@ union Board
         for (size_type y = 0; y < BoardY; y++) {
             printf("| ");
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t num = board.cells[y * BoardY + x];
+                uint8_t num = board.cells[y * BoardX + x];
                 assert((num == EmptyPosValue) || (num >= 0 && num < BoardSize));
                 printf("%c ", (num != EmptyPosValue) ? (num + '1') : '0');
             }
@@ -274,7 +295,7 @@ union Board
         for (size_type y = 0; y < BoardY; y++) {
             printf("| ");
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t num = board.cells[y * BoardY + x];
+                uint8_t num = board.cells[y * BoardX + x];
                 assert((num == UnknownPosValue) || (num == EmptyPosValue) || (num >= 0 && num < BoardSize));
                 printf("%c ", (num != UnknownPosValue) ? ((num != EmptyPosValue) ? (num + '1') : '0') : '?');
             }

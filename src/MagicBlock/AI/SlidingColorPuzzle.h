@@ -30,7 +30,8 @@ public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    static const size_type kMapBits = size_type(1U) << (BoardX * BoardY * 3);
+    static const size_type BoardSize = BoardX * BoardY;
+    static const size_type kMapBits = size_type(1U) << (BoardSize * 3);
     static const size_type kSingelColorNums = 4;
 
     typedef Stage<BoardX, BoardY> stage_type;
@@ -45,7 +46,7 @@ private:
     int player_num_cnt_[Color::Maximum];
     int target_num_cnt_[Color::Maximum];
 
-    std::vector<Move> empty_moves_[BoardX * BoardY];
+    std::vector<Move> empty_moves_[BoardSize];
     std::vector<Position> move_path_;
 
     void init() {
@@ -66,11 +67,11 @@ private:
                     if (board_y < 0 || board_y >= (int)BoardY)
                         continue;
                     Move move;
-                    move.pos = Position(board_y * (int)BoardY + board_x);
+                    move.pos = Position(board_y * (int)BoardX + board_x);
                     move.dir = (uint8_t)dir;
                     moves.push_back(move);
                 }
-                this->empty_moves_[y * BoardY + x] = moves;
+                this->empty_moves_[y * BoardX + x] = moves;
             }
         }
 
@@ -114,7 +115,7 @@ public:
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::First && color < Color::Last) {
-                                this->target_board_[0].cells[line_no * BoardY + x] = color;
+                                this->target_board_[0].cells[line_no * BoardX + x] = color;
                             }
                             else {
                                 err_code = ErrorCode::UnknownTargetBoardColor;
@@ -127,7 +128,7 @@ public:
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::First && color < Color::Last) {
-                                this->player_board_.cells[boardY * BoardY + x] = color;
+                                this->player_board_.cells[boardY * BoardX + x] = color;
                             }
                             else {
                                 err_code = ErrorCode::UnknownPlayerBoardColor;
@@ -181,14 +182,14 @@ public:
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t num = this->player_board_.cells[y * BoardY + x];
+                uint8_t num = this->player_board_.cells[y * BoardX + x];
                 this->player_num_cnt_[num]++;
             }
         }
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t num = this->target_board_[0].cells[y * BoardY + x];
+                uint8_t num = this->target_board_[0].cells[y * BoardX + x];
                 this->target_num_cnt_[num]++;
             }
         }
@@ -299,8 +300,8 @@ public:
         static const ptrdiff_t kStartY = (UBoardY - BoardY) / 2;
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                this->player_board_.cells[y * BoardY + x] =
-                    player.cells[(kStartY + y) * UBoardY + (kStartX + x)];
+                this->player_board_.cells[y * BoardX + x] =
+                    player.cells[(kStartY + y) * UBoardX + (kStartX + x)];
             }
         }
         for (size_type i = 0; i < 4; i++) {
@@ -312,9 +313,9 @@ public:
     bool find_empty(Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                char color = this->player_board_.cells[y * BoardY + x];
+                char color = this->player_board_.cells[y * BoardX + x];
                 if (color == Color::Empty) {
-                    empty_pos = (uint8_t)(y * BoardY + x);
+                    empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
             }
@@ -382,11 +383,11 @@ public:
                         uint8_t move_pos = empty_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type value64 = next_stage.board.value();
-                        if (visited.test(value64))
+                        size_type board_value = next_stage.board.value();
+                        if (visited.test(board_value))
                             continue;
 
-                        visited.set(value64);
+                        visited.set(board_value);
                         
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
@@ -470,11 +471,11 @@ public:
                         uint8_t move_pos = empty_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type value64 = next_stage.board.value();
-                        if (visited.test(value64))
+                        size_type board_value = next_stage.board.value();
+                        if (visited.test(board_value))
                             continue;
 
-                        visited.set(value64);
+                        visited.set(board_value);
                         
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;

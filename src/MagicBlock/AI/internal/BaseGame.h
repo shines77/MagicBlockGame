@@ -47,7 +47,8 @@ public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    static const size_type kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
+    static const size_type BoardSize = BoardX * BoardY;
+    static const size_type kSingelColorNums = (BoardSize - 1) / (Color::Last - 1);
 
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
@@ -72,7 +73,7 @@ protected:
         assert(color >= Color::First && color < Color::Last);
     }
 
-    // Initialize empty_moves[BoardX * BoardY]
+    // Initialize empty_moves[BoardSize]
     void init() {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
@@ -86,12 +87,12 @@ protected:
                     if (board_y < 0 || board_y >= (int)BoardY)
                         continue;
                     Move move;
-                    move.pos = Position(board_y * (int)BoardY + board_x);
+                    move.pos = Position(board_y * (int)BoardX + board_x);
                     move.dir = (uint8_t)dir;
                     empty_moves.push_back(move);
                 }
-                assert((y * BoardY + x) < (BoardX * BoardY));
-                this->data_.empty_moves[y * BoardY + x] = empty_moves;
+                assert((y * BoardX + x) < BoardSize);
+                this->data_.empty_moves[y * BoardX + x] = empty_moves;
             }
         }
 
@@ -149,7 +150,7 @@ public:
                         for (size_type x = 0; x < TargetX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::First && color < Color::Last) {
-                                this->data_.target_board[0].cells[line_no * TargetY + x] = color;
+                                this->data_.target_board[0].cells[line_no * TargetX + x] = color;
                             }
                             else {
                                 err_code = ErrorCode::UnknownTargetBoardColor;
@@ -162,7 +163,7 @@ public:
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t color = Color::charToColor(line[x]);
                             if (color >= Color::First && color < Color::Last) {
-                                this->data_.player_board.cells[boardY * BoardY + x] = color;
+                                this->data_.player_board.cells[boardY * BoardX + x] = color;
                             }
                             else {
                                 err_code = ErrorCode::UnknownPlayerBoardColor;
@@ -255,7 +256,7 @@ public:
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t clr = this->data_.player_board.cells[y * BoardY + x];
+                uint8_t clr = this->data_.player_board.cells[y * BoardX + x];
                 assert_color(clr);
                 this->data_.player_colors[clr]++;
             }
@@ -263,7 +264,7 @@ public:
 
         for (size_type y = 0; y < TargetY; y++) {
             for (size_type x = 0; x < TargetX; x++) {
-                uint8_t clr = this->data_.target_board[0].cells[y * TargetY + x];
+                uint8_t clr = this->data_.target_board[0].cells[y * TargetX + x];
                 assert_color(clr);
                 this->data_.target_colors[clr]++;
             }
@@ -339,9 +340,9 @@ public:
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t color = board.cells[y * BoardY + x];
+                uint8_t color = board.cells[y * BoardX + x];
                 if (color == Color::Empty) {
-                    empty_pos = (uint8_t)(y * BoardY + x);
+                    empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
             }
@@ -352,8 +353,8 @@ public:
     bool is_satisfy(const Board<BoardX, BoardY> & player,
                     const Board<TargetX, TargetY> & target) const {
         for (size_type y = 0; y < TargetY; y++) {
-            ptrdiff_t targetBaseY = y * TargetY;
-            ptrdiff_t baseY = (kStartY + y) * BoardY;
+            ptrdiff_t targetBaseY = y * TargetX;
+            ptrdiff_t baseY = (kStartY + y) * BoardX;
             for (size_type x = 0; x < TargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
                 uint8_t player_clr = player.cells[baseY + (kStartX + x)];
@@ -387,8 +388,8 @@ public:
                                    size_type firstTargetX, size_type lastTargetX,
                                    size_type firstTargetY, size_type lastTargetY) {
         for (size_type y = firstTargetY; y < lastTargetY; y++) {
-            ptrdiff_t targetBaseY = y * TargetY;
-            ptrdiff_t baseY = (kStartY + y) * BoardY;
+            ptrdiff_t targetBaseY = y * TargetX;
+            ptrdiff_t baseY = (kStartY + y) * BoardX;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
                 uint8_t player_clr = board.cells[baseY + (kStartX + x)];

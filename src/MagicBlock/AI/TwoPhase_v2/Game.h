@@ -55,7 +55,8 @@ public:
     typedef typename base_type::stage_type          stage_type;
     typedef typename base_type::phase2_callback     phase2_callback;
 
-    static const size_type kSingelColorNums = (BoardX * BoardY - 1) / (Color::Last - 1);
+    static const size_type BoardSize = BoardX * BoardY;
+    static const size_type kSingelColorNums = (BoardSize - 1) / (Color::Last - 1);
 
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;

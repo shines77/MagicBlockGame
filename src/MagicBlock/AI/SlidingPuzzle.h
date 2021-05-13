@@ -32,8 +32,8 @@ public:
 
     typedef SlidingPuzzle<BoardX, BoardY, SearchAllAnswers> this_type;
 
-    static const size_type kMapBits = size_type(1U) << (BoardX * BoardY * 3);
     static const size_type BoardSize = BoardX * BoardY;
+    static const size_type kMapBits = size_type(1U) << (BoardSize * 3);
     static const size_type MaxNumber = 8;
     static const size_type kEmptyPosValue = MaxNumber;
 
@@ -71,11 +71,11 @@ private:
                     if (board_y < 0 || board_y >= (int)BoardY)
                         continue;
                     Move move;
-                    move.pos = Position(board_y * (int)BoardY + board_x);
+                    move.pos = Position(board_y * (int)BoardX + board_x);
                     move.dir = (uint8_t)dir;
                     moves.push_back(move);
                 }
-                this->empty_moves_[y * BoardY + x] = moves;
+                this->empty_moves_[y * BoardX + x] = moves;
             }
         }
     }
@@ -129,7 +129,7 @@ public:
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t num = this_type::charToNumber(line[x]);
                             if (num >= 0 && num <= MaxNumber) {
-                                this->target_board_.cells[line_no * BoardY + x] = num;
+                                this->target_board_.cells[line_no * BoardX + x] = num;
                             }
                             else {
                                 err_code = ErrorCode::TargetBoardNumberOverflow;
@@ -142,7 +142,7 @@ public:
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t num = this_type::charToNumber(line[x]);
                             if (num >= 0 && num <= MaxNumber) {
-                                this->player_board_.cells[boardY * BoardY + x] = num;
+                                this->player_board_.cells[boardY * BoardX + x] = num;
                             }
                             else {
                                 err_code = ErrorCode::PlayerBoardNumberOverflow;
@@ -196,7 +196,7 @@ public:
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t num = this->player_board_.cells[y * BoardY + x];
+                uint8_t num = this->player_board_.cells[y * BoardX + x];
                 if (num >= 0 && num <= MaxNumber) {
                     this->player_num_cnt_[num]++;
                 }
@@ -205,7 +205,7 @@ public:
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t num = this->target_board_.cells[y * BoardY + x];
+                uint8_t num = this->target_board_.cells[y * BoardX + x];
                 if (num >= 0 && num <= MaxNumber) {
                     this->target_num_cnt_[num]++;
                 }
@@ -270,8 +270,8 @@ public:
         static const ptrdiff_t startY = (UBoardY - BoardY) / 2;
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                this->player_board_.cells[y * BoardY + x] =
-                    player.cells[(startY + y) * UBoardY + (startX + x)];
+                this->player_board_.cells[y * BoardX + x] =
+                    player.cells[(startY + y) * UBoardX + (startX + x)];
             }
         }
         this->target_board_ = target;
@@ -280,9 +280,9 @@ public:
     bool find_empty(Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                char num = this->player_board_.cells[y * BoardY + x];
+                char num = this->player_board_.cells[y * BoardX + x];
                 if (num == kEmptyPosValue) {
-                    empty_pos = (uint8_t)(y * BoardY + x);
+                    empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
             }
