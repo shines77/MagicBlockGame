@@ -38,7 +38,7 @@ public:
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type kSingelNumMaxCount = 4;
 
-    static const size_type kOrigMapBits = size_type(1U) << ((BoardSize * GridBits) % 64U);
+    static const size_type kOrigMapBits = size_type(1U) << ((BoardSize * GridBits) % (sizeof(size_type) * 8));
     static const size_type kMapBits = (BoardSize <= 10) ? kOrigMapBits : 10;
     static const size_type kEmptyPosValue = MaxValidValue;
     static const size_type kUnknownPosValue = kEmptyPosValue + 1;
