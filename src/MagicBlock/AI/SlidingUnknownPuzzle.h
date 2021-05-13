@@ -9,6 +9,7 @@
 #include <fstream>
 #include <vector>
 #include <queue>
+#include <set>
 #include <algorithm>    // For std::swap(), until C++11
 #include <utility>      // For std::swap(), since C++11
 
