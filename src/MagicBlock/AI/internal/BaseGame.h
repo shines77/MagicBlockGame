@@ -386,7 +386,7 @@ public:
     }
 
     // Check order: up to down
-    bool partial_target_is_satisfy(const Board<BoardX, BoardY> & board,
+    bool partial_target_is_satisfy(const Board<BoardX, BoardY> & player,
                                    const Board<TargetX, TargetY> & target,
                                    size_type firstTargetX, size_type lastTargetX,
                                    size_type firstTargetY, size_type lastTargetY) {
@@ -395,7 +395,7 @@ public:
             ptrdiff_t playerBaseY = (kStartY + y) * BoardX;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
-                uint8_t player_clr = board.cells[baseY + (kStartX + x)];
+                uint8_t player_clr = player.cells[playerBaseY + (kStartX + x)];
                 assert_color(target_clr);
                 assert_color(player_clr);
                 if (player_clr != target_clr) {

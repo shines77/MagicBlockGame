@@ -245,7 +245,7 @@ protected:
         }
 
         for (size_type y = firstY; y < lastY; y++) {
-            ptrdiff_t playerBaseY = y * BoardX;
+            ptrdiff_t baseY = y * BoardX;
             for (size_type x = firstX; x < lastX; x++) {
                 uint8_t clr = board.cells[baseY + x];
                 assert_color(clr);
@@ -263,7 +263,7 @@ protected:
         this->partial_colors_[Color::Empty] = 1;
 
         for (size_type y = firstY; y < lastY; y++) {
-            ptrdiff_t playerBaseY = y * BoardX;
+            ptrdiff_t baseY = y * BoardX;
             for (size_type x = firstX; x < lastX; x++) {
                 uint8_t clr = board.cells[baseY + x];
                 assert_color(clr);
