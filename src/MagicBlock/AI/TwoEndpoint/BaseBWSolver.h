@@ -69,8 +69,8 @@ protected:
     int target_colors_[Color::Maximum];
     int partial_colors_[Color::Maximum];
 
-    std::vector<Position> move_path_;
-    std::vector<MoveInfo> answer_;
+    std::vector<Position> best_move_path_;
+    std::vector<MoveInfo> best_answer_;
 
     size_type map_used_;
 
@@ -106,15 +106,15 @@ public:
     }
 
     size_type getMinSteps() const {
-        return this->move_path_.size();
+        return this->best_move_path_.size();
     }
 
     const std::vector<Position> & getMovePath() const {
-        return this->move_path_;
+        return this->best_move_path_;
     }
 
     const std::vector<MoveInfo> & getAnswer() const {
-        return this->answer_;
+        return this->best_answer_;
     }
 
     size_type getMapUsed() const {
@@ -876,7 +876,7 @@ public:
         size_type n_rotate_type = target_stage.rotate_type;
         size_type empty_pos = n_rotate_type >> 2U;
         size_type rotate_type = n_rotate_type & 0x03U;
-        return this->translateMovePath(target_stage.move_path, rotate_type, empty_pos, this->answer_);
+        return this->translateMovePath(target_stage.move_path, rotate_type, empty_pos, this->best_answer_);
     }
 
     bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & answer) const {
@@ -886,26 +886,32 @@ public:
         return this->translateMovePath(target_stage.move_path, rotate_type, empty_pos, answer);
     }
 
-    void displayAnswer(const std::vector<MoveInfo> & answer) const {
+    void displayAnswerMoves(const std::vector<MoveInfo> & answer) const {
         player_board_t::template display_answer<BoardX>(answer);
     }
 
-    void displayAnswer() const {
-        return this->displayAnswer(this->answer_);
+    void displayAnswerMovesOnly() const {
+        this->displayAnswerMoves(this->best_answer_);
     }
 
-    void displayAnswer(const std::vector<Position> & move_path,
-                       size_type rotate_type, Position empty_pos) const {
-        std::vector<MoveInfo> answer;
-        if (this->translateMovePath(move_path, rotate_type, empty_pos, answer)) {
-            this->displayAnswer(answer);
+    void displayAnswerMoves() const {
+        if (this->translateMovePath(this->best_move_path_, this->best_answer_)) {
+            this->displayAnswerMoves(this->best_answer_);
         }
     }
 
-    void displayAnswer(const stage_type & target_stage) {
+    void displayAnswerMoves(const std::vector<Position> & move_path,
+                       size_type rotate_type, Position empty_pos) const {
+        std::vector<MoveInfo> answer;
+        if (this->translateMovePath(move_path, rotate_type, empty_pos, answer)) {
+            this->displayAnswerMoves(answer);
+        }
+    }
+
+    void displayAnswerMoves(const stage_type & target_stage) {
         std::vector<MoveInfo> answer;
         if (this->translateMovePath(target_stage, answer)) {
-            this->displayAnswer(answer);
+            this->displayAnswerMoves(answer);
         }
     }
 };

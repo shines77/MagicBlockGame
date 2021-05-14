@@ -766,21 +766,21 @@ protected:
         return this->translateMovePath(target_stage.move_path, answer);
     }
 
-    void displayAnswer(const std::vector<MoveInfo> & answer) const {
+    void displayAnswerMoves(const std::vector<MoveInfo> & answer) const {
         player_board_t::template display_answer<BoardX>(answer);
     }
 
-    void displayAnswer(const std::vector<Position> & move_path) const {
+    void displayAnswerMoves(const std::vector<Position> & move_path) const {
         std::vector<MoveInfo> answer;
         if (this->translateMovePath(move_path, answer)) {
-            this->displayAnswer(answer);
+            this->displayAnswerMoves(answer);
         }
     }
 
-    void displayAnswer(const stage_type & target_stage) {
+    void displayAnswerMoves(const stage_type & target_stage) {
         std::vector<MoveInfo> answer;
         if (this->translateMovePath(target_stage, answer)) {
-            this->displayAnswer(answer);
+            this->displayAnswerMoves(answer);
         }
     }
 };

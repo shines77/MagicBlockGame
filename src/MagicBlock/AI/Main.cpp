@@ -133,7 +133,7 @@ void solve_sliding_puzzle()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
-        slidingPuzzle.display_answers();
+        slidingPuzzle.display_answer_boards();
         printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)slidingPuzzle.getMinSteps());
         printf("Map Used: %d\n\n", (int)slidingPuzzle.getMapUsed());
@@ -176,7 +176,7 @@ void solve_sliding_unknown_puzzle_3x3()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
-        slidingPuzzle.display_answers();
+        slidingPuzzle.display_answer_boards();
         printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)slidingPuzzle.getMinSteps());
         printf("Map Used: %d\n\n", (int)slidingPuzzle.getMapUsed());
@@ -219,7 +219,7 @@ void solve_sliding_unknown_puzzle_5x3()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
-        slidingPuzzle.display_answers();
+        slidingPuzzle.display_answer_boards();
         printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)slidingPuzzle.getMinSteps());
         printf("Map Used: %d\n\n", (int)slidingPuzzle.getMapUsed());
@@ -262,7 +262,7 @@ void solve_sliding_unknown_puzzle_5x5()
     double elapsed_time = sw.getElapsedMillisec();
 
     if (solvable) {
-        slidingPuzzle.display_answers();
+        slidingPuzzle.display_answer_boards();
         printf("Found a answer!\n\n");
         printf("MinSteps: %d\n\n", (int)slidingPuzzle.getMinSteps());
         printf("Map Used: %d\n\n", (int)slidingPuzzle.getMapUsed());
@@ -482,27 +482,27 @@ int main(int argc, char * argv[])
 
     if (1) {
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
     System::pause();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
     System::pause();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
     System::pause();
 #endif
 
-#if 0
+#if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
     System::pause();
 #endif
 
-#if 0
+#if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
     System::pause();
 #endif

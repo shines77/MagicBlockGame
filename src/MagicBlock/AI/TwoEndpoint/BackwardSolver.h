@@ -209,7 +209,7 @@ public:
             if (result == 1) {
                 printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
                 printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
-                printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                printf("move_path.size() = %u\n", (uint32_t)this->best_move_path_.size());
                 printf("\n");
             }
 
@@ -292,7 +292,7 @@ public:
                         exit = true;
                         this->rotate_type_ = next_stage.rotate_type;
                         target_stage = next_stage;
-                        this->move_path_ = next_stage.move_path;
+                        this->best_move_path_ = next_stage.move_path;
                         break;
                     }
 

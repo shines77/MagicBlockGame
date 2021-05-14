@@ -62,7 +62,9 @@ private:
     int target_num_cnt_[MaxNumber];
 
     std::vector<Move> empty_moves_[BoardSize];
-    std::vector<Position> move_path_;
+
+    std::vector<Position> best_move_path_;
+    std::vector<MoveInfo> best_answer_;
 
     void init() {
         for (size_type num = 0; num < MaxNumber; num++) {
@@ -101,11 +103,11 @@ public:
     ~SlidingUnknownPuzzle() {}
 
     size_type getMinSteps() const {
-        return this->move_path_.size();
+        return this->best_move_path_.size();
     }
 
     const std::vector<Position> & getMovePath() const {
-        return this->move_path_;
+        return this->best_move_path_;
     }
 
     size_type getMapUsed() const {
@@ -408,7 +410,7 @@ public:
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
+                            this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             this->answer_list_.push_back(next_stage.board);
                             solvable = true;
@@ -507,7 +509,7 @@ public:
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
+                            this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             this->answer_list_.push_back(next_stage.board);
                             solvable = true;
@@ -607,7 +609,7 @@ public:
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
+                            this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             this->answer_list_.push_back(next_stage.board);
                             solvable = true;
@@ -706,7 +708,7 @@ public:
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
+                            this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             this->answer_list_.push_back(next_stage.board);
                             solvable = true;
@@ -806,7 +808,7 @@ public:
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
+                            this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             this->answer_list_.push_back(next_stage.board);
                             solvable = true;
@@ -905,7 +907,7 @@ public:
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
+                            this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
                             this->answer_list_.push_back(next_stage.board);
                             solvable = true;
@@ -954,12 +956,52 @@ public:
         Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
     }
 
-    void display_answers() {
+    void display_answer_boards() {
         this->display_boards();
         if (SearchAllAnswers && this->answer_list_.size() > 1)
             Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_);
         else
             Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_[0]);
+    }
+
+    bool translateMovePath(const std::vector<Position> & move_path, std::vector<MoveInfo> & answer) const {
+        return this->data_.player_board.translate_move_path(move_path, answer);
+    }
+
+    bool translateMovePath(const std::vector<Position> & move_path) {
+        return this->translateMovePath(move_path, this->best_answer_);
+    }
+
+    bool translateMovePath(const stage_type & target_stage) {
+        return this->translateMovePath(target_stage.move_path);
+    }
+
+    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & answer) {
+        return this->translateMovePath(target_stage.move_path, answer);
+    }
+
+    void displayAnswerMoves(const std::vector<MoveInfo> & answer) const {
+        player_board_t::template display_answer<BoardX>(answer);
+    }
+
+    void displayAnswerMoves() const {
+        if (this->translateMovePath(this->best_move_path_, this->best_answer_)) {
+            this->displayAnswerMoves(this->best_answer_);
+        }
+    }
+
+    void displayAnswerMoves(const std::vector<Position> & move_path) const {
+        std::vector<MoveInfo> answer;
+        if (this->translateMovePath(move_path, answer)) {
+            this->displayAnswerMoves(answer);
+        }
+    }
+
+    void displayAnswerMoves(const stage_type & target_stage) {
+        std::vector<MoveInfo> answer;
+        if (this->translateMovePath(target_stage, answer)) {
+            this->displayAnswerMoves(answer);
+        }
     }
 };
 

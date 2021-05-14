@@ -530,7 +530,7 @@ public:
         Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
     }
 
-    void display_answers() {
+    void display_answer_boards() {
         this->display_boards();
         if (SearchAllAnswers && this->answer_list_.size() > 1)
             Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_);

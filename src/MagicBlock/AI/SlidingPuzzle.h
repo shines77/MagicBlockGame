@@ -488,8 +488,13 @@ public:
         return solvable;
     }
 
-    void display_answers() {
+    void display_boards() {
         Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
+        Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Target Board", this->target_board_);
+    }
+
+    void display_answer_boards() {
+        this->display_boards();
         if (SearchAllAnswers && this->answer_list_.size() > 1)
             Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
         else
