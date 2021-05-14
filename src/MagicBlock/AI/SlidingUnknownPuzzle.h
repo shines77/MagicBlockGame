@@ -35,6 +35,10 @@ public:
 
     typedef SlidingUnknownPuzzle<BoardX, BoardY, MaxValidValue, GridBits, SearchAllAnswers> this_type;
 
+    typedef Stage<BoardX, BoardY>   stage_type;
+    typedef Board<BoardX, BoardY>   player_board_t;
+    typedef Board<BoardX, BoardX>   target_board_t;
+
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type kSingelNumMaxCount = 4;
 
@@ -47,11 +51,9 @@ public:
     static const size_type MaxValidNumber = size_type(1U) << GridBits;
     static const size_type MaxNumber = (kMaxGridValue > MaxValidNumber) ? kMaxGridValue : MaxValidNumber;
 
-    typedef Stage<BoardX, BoardY> stage_type;
-
 private:
-    Board<BoardX, BoardY> player_board_;
-    Board<BoardX, BoardY> target_board_;
+    player_board_t player_board_;
+    target_board_t target_board_;
 
     std::vector<Board<BoardX, BoardY>> answer_list_;
 
