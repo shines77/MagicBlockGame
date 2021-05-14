@@ -46,6 +46,8 @@ public:
 
     typedef SharedData<BoardX, BoardY, TargetX, TargetY>    shared_data_type;
     typedef typename shared_data_type::stage_type           stage_type;
+    typedef typename shared_data_type::player_board_t       player_board_t;
+    typedef typename shared_data_type::target_board_t       target_board_t;
     typedef Phase2CallBack                                  phase2_callback;
 
     static const size_type BoardSize = BoardX * BoardY;
@@ -866,58 +868,8 @@ public:
     bool translateMovePath(const std::vector<Position> & move_path,
                            size_type rotate_type, Position empty_pos,
                            std::vector<MoveInfo> & answer) const {
-        bool success = true;
-
-        answer.clear();
-
-        Board<BoardX, BoardY> board(this->player_board_[rotate_type]);
-        uint8_t from_pos, move_pos;
-        uint8_t move_clr, from_clr;
-        uint8_t last_dir = uint8_t(-1);
-        assert(board.cells[empty_pos] == Color::Unknown);
-        board.cells[empty_pos] = Color::Empty;
-        bool found_empty = this->find_empty(board, empty_pos);
-        if (!found_empty) {
-            empty_pos = uint8_t(-1);
-        }
-        move_pos = empty_pos;
-        for (size_type i = 0; i < move_path.size(); i++) {
-            if (move_pos != uint8_t(-1))
-                move_clr = board.cells[move_pos];
-            else
-                move_clr = Color::Unknown;
-            assert_color(move_clr);
-            from_pos = move_path[i].value;
-            from_clr = board.cells[from_pos];
-            assert_color(from_clr);
-            if ((move_clr == Color::Empty || move_clr == Color::Unknown) &&
-                (from_clr != Color::Empty)) {
-                last_dir = Direction::template getDir<BoardX, BoardY>(from_pos, move_pos);
-                MoveInfo move_info;
-                move_info.from_pos = from_pos;
-                move_info.move_pos = move_pos;
-                move_info.color = from_clr;
-                move_info.dir = last_dir;
-                answer.push_back(move_info);
-
-                std::swap(board.cells[from_pos], board.cells[move_pos]);
-            }
-            else {
-                printf("BaseBWSolver::translateMovePath():\n\n"
-                        "Move path have error, [from_pos] is a empty gird.\n"
-                        "index = %u, from_pos = %c%c, color = %s (%u)\n\n",
-                        (uint32_t)(i + 1),
-                        Position::template toFirstChar<BoardY>(from_pos),
-                        Position::template toSecondChar<BoardY>(from_pos),
-                        Color::colorToChar(from_clr),
-                        (uint32_t)from_clr);
-                success = false;
-                break;
-            }
-            move_pos = from_pos;
-        }
-
-        return success;
+        assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
+        return this->player_board_[rotate_type].translate_move_path(move_path, answer, empty_pos);
     }
 
     bool translateMovePath(const stage_type & target_stage) {
@@ -935,25 +887,7 @@ public:
     }
 
     void displayAnswer(const std::vector<MoveInfo> & answer) const {
-        size_type index = 0;
-        printf("Answer_Move_Path[%u] = {\n", (uint32_t)answer.size());
-        for (auto iter : answer) {
-            Position from_pos   = iter.from_pos;
-            Position move_pos   = iter.move_pos;
-            size_type color     = iter.color;
-            size_type dir       = iter.dir;
-            printf("    [%2u]: [%s], %c%c --> %c%c, dir: %-5s (%u)\n",
-                   (uint32_t)(index + 1),
-                   Color::colorToChar(color),
-                   Position::template toFirstChar<BoardY>(from_pos),
-                   Position::template toSecondChar<BoardY>(from_pos),
-                   Position::template toFirstChar<BoardY>(move_pos),
-                   Position::template toSecondChar<BoardY>(move_pos),
-                   Direction::toString(dir),
-                   (uint32_t)dir);
-            index++;
-        }
-        printf("};\n\n");
+        player_board_t::template display_answer<BoardX>(answer);
     }
 
     void displayAnswer() const {

@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <cstdint>
+#include <cstddef>
+
 namespace MagicBlock {
 namespace AI {
 
@@ -55,44 +58,154 @@ struct Position {
         return *this;
     }
 
-    Position & operator = (int8_t rhs) {
+    Position & operator = (int8_t rhs) noexcept {
         this->value = static_cast<uint8_t>(rhs);
         return *this;
     }
 
-    Position & operator = (uint8_t rhs) {
+    Position & operator = (uint8_t rhs) noexcept {
         this->value = rhs;
         return *this;
     }
 
-    Position & operator = (int16_t rhs) {
+    Position & operator = (int16_t rhs) noexcept {
         this->value = static_cast<uint8_t>(rhs);
         return *this;
     }
 
-    Position & operator = (uint16_t rhs) {
+    Position & operator = (uint16_t rhs) noexcept {
         this->value = static_cast<uint8_t>(rhs);
         return *this;
     }
 
-    Position & operator = (int32_t rhs) {
+    Position & operator = (int32_t rhs) noexcept {
         this->value = static_cast<uint8_t>(rhs);
         return *this;
     }
 
-    Position & operator = (uint32_t rhs) {
+    Position & operator = (uint32_t rhs) noexcept {
         this->value = static_cast<uint8_t>(rhs);
         return *this;
     }
 
-    Position & operator = (int64_t rhs) {
+    Position & operator = (int64_t rhs) noexcept {
         this->value = static_cast<uint8_t>(rhs);
         return *this;
     }
 
-    Position & operator = (uint64_t rhs) {
+    Position & operator = (uint64_t rhs) noexcept {
         this->value = static_cast<uint8_t>(rhs);
         return *this;
+    }
+
+#if 1
+    //
+    // operator ?? (nt8_t value)
+    //
+    bool operator == (int8_t value) noexcept {
+        return (this->value == value);
+    }
+
+    bool operator != (int8_t value) noexcept {
+        return (this->value != value);
+    }
+
+    bool operator > (int8_t value) noexcept {
+        return (this->value > value);
+    }
+
+    bool operator < (int8_t value) noexcept {
+        return (this->value < value);
+    }
+
+    bool operator >= (int8_t value) noexcept {
+        return (this->value >= value);
+    }
+
+    bool operator <= (int8_t value) noexcept {
+        return (this->value <= value);
+    }
+#endif
+
+    //
+    // operator ?? (Position & lhs, Position & rhs)
+    //
+    friend bool operator == (Position & lhs, Position & rhs) noexcept {
+        return (lhs.value == rhs.value);
+    }
+
+    friend bool operator != (Position & lhs, Position & rhs) noexcept {
+        return (lhs.value != rhs.value);
+    }
+
+    friend bool operator > (Position & lhs, Position & rhs) noexcept {
+        return (lhs.value > rhs.value);
+    }
+
+    friend bool operator < (Position & lhs, Position & rhs) noexcept {
+        return (lhs.value < rhs.value);
+    }
+
+    friend bool operator >= (Position & lhs, Position & rhs) noexcept {
+        return (lhs.value >= rhs.value);
+    }
+
+    friend bool operator <= (Position & lhs, Position & rhs) noexcept {
+        return (lhs.value <= rhs.value);
+    }
+
+    //
+    // operator ?? (Position & lhs, int8_t rhs)
+    //
+    friend bool operator == (Position & lhs, int8_t rhs) noexcept {
+        return (lhs.value == rhs);
+    }
+
+    friend bool operator != (Position & lhs, int8_t rhs) noexcept {
+        return (lhs.value != rhs);
+    }
+
+    friend bool operator > (Position & lhs, int8_t rhs) noexcept {
+        return (lhs.value > rhs);
+    }
+
+    friend bool operator < (Position & lhs, int8_t rhs) noexcept {
+        return (lhs.value < rhs);
+    }
+
+    friend bool operator >= (Position & lhs, int8_t rhs) noexcept {
+        return (lhs.value >= rhs);
+    }
+
+    friend bool operator <= (Position & lhs, int8_t rhs) noexcept {
+        return (lhs.value <= rhs);
+    }
+
+    //
+    // operator ?? (int8_t lhs, Position rhs)
+    //
+    friend bool operator == (int8_t lhs, Position & rhs) noexcept {
+        return (lhs == rhs);
+    }
+
+    friend bool operator != (int8_t lhs, Position & rhs) noexcept {
+        return (lhs != rhs);
+    }
+
+    friend bool operator > (int8_t lhs, Position & rhs) noexcept {
+        return (lhs > rhs);
+    }
+
+    friend bool operator < (int8_t lhs, Position & rhs) noexcept {
+        return (lhs < rhs);
+    }
+
+    friend bool operator >= (int8_t lhs, Position & rhs) noexcept {
+        return (lhs >= rhs);
+    }
+
+    friend bool operator <= (int8_t lhs, Position & rhs) noexcept {
+        return (lhs <= rhs);
     }
 
     operator int8_t () const {
@@ -131,43 +244,28 @@ struct Position {
         std::swap(this->value, other.value);
     }
 
-    template <size_t BoardY>
-    char toFirstChar() const {
-        return Position::template toFirstChar<BoardY>(this->value);
-    }
-
-    template <size_t BoardY>
-    char toSecondChar() const {
-        return Position::template toSecondChar<BoardY>(this->value);
-    }
-
-    template <size_t BoardY>
-    std::string toString() const {
-        return Position::template toString<BoardY>(this->value);
-    }
-
-    template <size_t BoardY>
+    template <size_t BoardX>
     static char toFirstChar(uint8_t pos) {
         if (pos != uint8_t(-1))
-            return (char)('A' + (uint8_t)(pos / BoardY));
+            return (char)('A' + (uint8_t)(pos / BoardX));
         else
             return '?';
     }
 
-    template <size_t BoardY>
+    template <size_t BoardX>
     static char toSecondChar(uint8_t pos) {
         if (pos != uint8_t(-1))
-            return (char)('1' + (uint8_t)(pos % BoardY));
+            return (char)('1' + (uint8_t)(pos % BoardX));
         else
             return '?';
     }
 
-    template <size_t BoardY>
+    template <size_t BoardX>
     static std::string toString(uint8_t pos) {
         std::string str;
         if (pos != uint8_t(-1)) {
-            char first = (char)('A' + (uint8_t)(pos / BoardY));
-            char second = (char)('1' + (uint8_t)(pos % BoardY));
+            char first = (char)('A' + (uint8_t)(pos / BoardX));
+            char second = (char)('1' + (uint8_t)(pos % BoardX));
             str.push_back(first);
             str.push_back(second);
         }
@@ -176,7 +274,26 @@ struct Position {
         }
         return str;
     }
+
+    template <size_t BoardX>
+    char toFirstChar() const {
+        return Position::template toFirstChar<BoardX>(this->value);
+    }
+
+    template <size_t BoardX>
+    char toSecondChar() const {
+        return Position::template toSecondChar<BoardX>(this->value);
+    }
+
+    template <size_t BoardX>
+    std::string toString() const {
+        return Position::template toString<BoardX>(this->value);
+    }
 };
+
+inline void swap(Position & lhs, Position & rhs) noexcept {
+    lhs.swap(rhs);
+}
 
 struct Move {
     Position    pos;
@@ -244,21 +361,21 @@ static const Offset Dir_Offset[] = {
 
 struct Direction {
     enum {
-        First,
-        Down = First,
-        Left,
-        Up,
-        Right,
-        Unknown,
-        Last = Unknown
+        First   = 0,
+        Down    = 0,
+        Left    = 1,
+        Up      = 2,
+        Right   = 3,
+        Unknown = 4,
+        Last    = Unknown
     };
 
     template <size_t BoardX, size_t BoardY>
     static uint8_t getDir(Position from, Position to) {
-        int from_x = (int)from.value % (int)BoardY;
-        int from_y = (int)from.value / (int)BoardY;
-        int to_x = (int)to.value % (int)BoardY;
-        int to_y = (int)to.value / (int)BoardY;
+        int from_x = (int)from.value % (int)BoardX;
+        int from_y = (int)from.value / (int)BoardX;
+        int to_x = (int)to.value % (int)BoardX;
+        int to_y = (int)to.value / (int)BoardX;
 
         int offset_x = to_x - from_x;
         int offset_y = to_y - from_y;

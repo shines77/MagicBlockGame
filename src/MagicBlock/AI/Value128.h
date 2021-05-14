@@ -40,6 +40,30 @@ struct Value128 {
     }
     ~Value128() {}
 
+    friend bool operator == (const Value128 & lhs, const Value128 & rhs) noexcept {
+        return lhs.is_equal(rhs);
+    }
+
+    friend bool operator != (const Value128 & lhs, Value128 & rhs) noexcept {
+        return !(lhs.is_equal(rhs));
+    }
+
+    friend bool operator > (const Value128 & lhs, const Value128 & rhs) noexcept {
+        return (lhs.compare(rhs) == 1);
+    }
+
+    friend bool operator < (const Value128 & lhs, const Value128 & rhs) noexcept {
+        return (lhs.compare(rhs) == -1);
+    }
+
+    friend bool operator >= (const Value128 & lhs, const Value128 & rhs) noexcept {
+        return (lhs.compare(rhs) == -1);
+    }
+
+    friend bool operator <= (const Value128 & lhs, const Value128 & rhs) noexcept {
+        return (lhs.compare(rhs) == 1);
+    }
+
     bool is_equal(const Value128 & other) const noexcept {
         return ((this->low == other.low) && (this->high == other.high));
     }
@@ -61,36 +85,6 @@ struct Value128 {
         }
     }
 };
-
-inline
-bool operator == (const Value128 & lhs, const Value128 & rhs) noexcept  {
-    return lhs.is_equal(rhs);
-}
-
-inline
-bool operator != (const Value128 & lhs, Value128 & rhs) noexcept {
-    return !(lhs.is_equal(rhs));
-}
-
-inline
-bool operator > (const Value128 & lhs, const Value128 & rhs) noexcept  {
-    return (lhs.compare(rhs) == 1);
-}
-
-inline
-bool operator < (const Value128 & lhs, const Value128 & rhs) noexcept  {
-    return (lhs.compare(rhs) == -1);
-}
-
-inline
-bool operator >= (const Value128 & lhs, const Value128 & rhs) noexcept  {
-    return (lhs.compare(rhs) == -1);
-}
-
-inline
-bool operator <= (const Value128 & lhs, const Value128 & rhs) noexcept  {
-    return (lhs.compare(rhs) == 1);
-}
 
 } // namespace AI
 } // namespace MagicBlock

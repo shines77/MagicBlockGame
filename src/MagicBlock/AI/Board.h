@@ -12,6 +12,7 @@
 #include <algorithm>    // For std::fill_n()
 
 #include "MagicBlock/AI/Color.h"
+#include "MagicBlock/AI/Move.h"
 #include "MagicBlock/AI/Value128.h"
 
 namespace MagicBlock {
@@ -122,6 +123,19 @@ union Board
         }
 #endif
         return true;
+    }
+
+    bool find_empty(Position & empty_pos) const {
+        for (size_type y = 0; y < BoardY; y++) {
+            for (size_type x = 0; x < BoardX; x++) {
+                uint8_t color = this->cells[y * BoardX + x];
+                if (color == Color::Empty) {
+                    empty_pos = (uint8_t)(y * BoardX + x);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     size_type value() const noexcept {
@@ -333,6 +347,98 @@ union Board
             snprintf(title_no, sizeof(title_no), "%s #%u", title, (uint32_t)(n + 1));
             this_type::template display_num_board<EmptyPosValue, UnknownPosValue>(title_no, board_list[n]);
         }
+    }
+
+    template <size_type UBoardX, size_type UBoardY>
+    static bool translate_move_path(const Board<UBoardX, UBoardY> & in_board,
+                                    const std::vector<Position> & move_path,
+                                    std::vector<MoveInfo> & answer,
+                                    Position in_empty_pos = std::uint8_t(-1)) {
+        bool success = true;
+
+        answer.clear();
+
+        Board<UBoardX, UBoardY> board(in_board);
+        std::uint8_t from_pos, move_pos;
+        std::uint8_t move_clr, from_clr;
+        std::uint8_t last_dir = std::uint8_t(-1);
+        Position empty_pos = in_empty_pos;
+        assert((empty_pos == std::uint8_t(-1)) || (board.cells[empty_pos] == Color::Unknown));
+        if (empty_pos.value != std::uint8_t(-1)) {
+            board.cells[empty_pos] = Color::Empty;
+        }
+        bool found_empty = board.find_empty(empty_pos);
+        if (!found_empty) {
+            empty_pos = std::uint8_t(-1);
+        }
+        move_pos = empty_pos;
+        for (size_type i = 0; i < move_path.size(); i++) {
+            if (move_pos != std::uint8_t(-1))
+                move_clr = board.cells[move_pos];
+            else
+                move_clr = Color::Unknown;
+            from_pos = move_path[i].value;
+            from_clr = board.cells[from_pos];
+            if (from_clr != Color::Empty && move_clr == Color::Empty) {
+                last_dir = Direction::template getDir<UBoardX, UBoardY>(from_pos, move_pos);
+                MoveInfo move_info;
+                move_info.from_pos = from_pos;
+                move_info.move_pos = move_pos;
+                move_info.color = from_clr;
+                move_info.dir = last_dir;
+                answer.push_back(move_info);
+
+                std::swap(board.cells[from_pos], board.cells[move_pos]);
+            }
+            else {
+                printf("Board<X, Y>::translate_move_path():\n\n"
+                        "Move path have error, [from_pos] is a empty gird.\n"
+                        "index = %u, from_pos = %c%c, color = %s (%u)\n\n",
+                        (std::uint32_t)(i + 1),
+                        Position::template toFirstChar<UBoardX>(from_pos),
+                        Position::template toSecondChar<UBoardX>(from_pos),
+                        Color::colorToChar(from_clr),
+                        (std::uint32_t)from_clr);
+                success = false;
+                break;
+            }
+            move_pos = from_pos;
+        }
+
+        return success;
+    }
+
+    bool translate_move_path(const std::vector<Position> & move_path,
+                             std::vector<MoveInfo> & answer,
+                             Position empty_pos = std::uint8_t(-1)) const {
+        return this_type::template translate_move_path<BoardX, BoardY>(*this, move_path, answer, empty_pos);
+    }
+
+    template <size_type UBoardX>
+    static void display_answer(const std::vector<MoveInfo> & answer) {
+        size_type index = 0;
+        printf("Answer_Move_Path[%u] = {\n", (std::uint32_t)answer.size());
+        for (auto iter : answer) {
+            Position from_pos   = iter.from_pos;
+            Position move_pos   = iter.move_pos;
+            size_type color     = iter.color;
+            size_type dir       = iter.dir;
+            printf("    [%2u]: [%s], %c%c --> %c%c, dir: %-5s (%u)\n",
+                   (std::uint32_t)(index + 1),
+                   Color::colorToChar(color),
+                   Position::template toFirstChar<UBoardX>(from_pos),
+                   Position::template toSecondChar<UBoardX>(from_pos),
+                   Position::template toFirstChar<UBoardX>(move_pos),
+                   Position::template toSecondChar<UBoardX>(move_pos),
+                   Direction::toString(dir),
+                   (std::uint32_t)dir);
+            index++;
+        }
+        printf("};\n\n");
+    }
+
+    void display_answer(const std::vector<MoveInfo> & answer) const {
+        this_type::template display_answer<BoardX>(answer);
     }
 };
 

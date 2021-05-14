@@ -52,6 +52,8 @@ public:
 
     typedef typename base_type::shared_data_type    shared_data_type;
     typedef typename base_type::stage_type          stage_type;
+    typedef typename base_type::player_board_t      player_board_t;
+    typedef typename base_type::target_board_t      target_board_t;
     typedef typename base_type::phase2_callback     phase2_callback;
 
     typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, SolverType::Phase1_123, phase2_callback>  Phase1Solver;

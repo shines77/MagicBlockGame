@@ -144,12 +144,14 @@ template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY>
 struct SharedData
 {
+    typedef Board<BoardX, BoardY>                       player_board_t;
+    typedef Board<TargetX, TargetY>                     target_board_t;
     typedef typename Phase1<BoardX, BoardY>::stage_type stage_type;
 
     static const std::size_t BoardSize = BoardX * BoardY;
 
-    Board<BoardX, BoardY>   player_board;
-    Board<TargetX, TargetY> target_board[4];
+    player_board_t  player_board;
+    target_board_t  target_board[4];
 
     std::size_t target_len;
 
