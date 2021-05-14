@@ -99,8 +99,8 @@ struct StageInfo {
     StageInfo() noexcept : rotate_type(rotate_type), phase1_type(0)  {
     }
 
-    StageInfo(std::size_t rotate_type, std::size_t phase1_type) noexcept
-        : rotate_type(rotate_type), phase1_type(phase1_type) {
+    StageInfo(std::size_t _rotate_type, std::size_t _phase1_type) noexcept
+        : rotate_type(_rotate_type), phase1_type(_phase1_type) {
     }
 
     ~StageInfo() {
