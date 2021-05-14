@@ -166,7 +166,7 @@ public:
         return solvable;
     }
 
-    bool stand_alone_bitset_solve() {
+    bool bitset_solve() {
         if (this->is_satisfy(this->data_.player_board,
                              this->data_.target_board,
                              this->data_.target_len) != 0) {
@@ -254,7 +254,7 @@ public:
         return solvable;
     }
 
-    bool bitset_phase2_search(size_type rotate_type, size_type phase1_type, const stage_type & stage) {
+    bool bitset_solve_phase2_search(size_type rotate_type, size_type phase1_type, const stage_type & stage) {
         static size_type phase2_stage_cnt = 0;
         this->data_.phase2.index = phase2_stage_cnt;
         phase2_stage_cnt++;
@@ -278,8 +278,8 @@ public:
         size_type out_rotate_type = 0;
         phase2_callback dummy_phase2_search;
 
-        bool solvable = solver.bitset_solve(out_rotate_type, dummy_phase2_search);
-        //bool solvable = solver.solve(out_rotate_type);
+        bool solvable = solver.solve(out_rotate_type);
+        //bool solvable = solver.bitset_solve(out_rotate_type, dummy_phase2_search);
         if (solvable) {
             this->move_path_ = solver.getMovePath();
             size_type total_steps = stage.move_path.size() + this->move_path_.size();
@@ -302,7 +302,7 @@ public:
         return solvable;
     }
 
-    bool bitset_solve() {
+    bool bitset_solve_immediate() {
         if (this->is_satisfy(this->data_.player_board,
                              this->data_.target_board,
                              this->data_.target_len) != 0) {
@@ -313,7 +313,7 @@ public:
         size_type out_rotate_type = 0;
 
         using namespace std::placeholders;
-        phase2_callback phase_search_cb = std::bind(&Game::bitset_phase2_search, this, _1, _2, _3);
+        phase2_callback phase_search_cb = std::bind(&Game::bitset_solve_phase2_search, this, _1, _2, _3);
 
         Position empty;
         bool found_empty = this->find_empty(this->data_.player_board, empty);

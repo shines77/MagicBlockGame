@@ -166,7 +166,8 @@ public:
         this->init_target_board_locked(rotate_type);
     }
 
-    bool record_phase1_min_info(size_type depth, size_type rotate_type, size_type satisfy_mask, const stage_type & stage) {
+    bool record_phase1_min_info(size_type depth, size_type rotate_type,
+                                size_type satisfy_mask, const stage_type & stage) {
         size_type reached_mask = 0;
         size_type mask = 1;
         size_type phase1_type = 0;
@@ -190,6 +191,48 @@ public:
                     }
                     this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
                     this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
+                }
+            }
+            phase1_type++;
+            if (phase1_type >= MAX_PHASE1_TYPE)
+                break;
+            satisfy_mask &= ~mask;
+            mask <<= 1;
+        }
+
+        return ((reached_mask & 0x0F) == 0x0F);
+    }
+
+    bool call_phase2_search(size_type depth, size_type rotate_type, size_type satisfy_mask,
+                            const stage_type & stage, phase2_callback & phase2_search) {
+        size_type reached_mask = 0;
+        size_type mask = 1;
+        size_type phase1_type = 0;
+        while (satisfy_mask != 0) {
+            if ((satisfy_mask & mask) == mask) {
+                // record min-move phrase1 stage
+                this->data_->phase1.stage_list[rotate_type][phase1_type].push_back(stage);
+
+                if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
+                    assert(this->data_->phase1.max_depth[rotate_type][phase1_type] != -1);
+                    if ((int)depth >= this->data_->phase1.max_depth[rotate_type][phase1_type]) {
+                        reached_mask |= mask;
+                    }
+                }
+                else {
+                    if (this->data_->phase1.has_solution[rotate_type] == 0) {
+                        this->data_->phase1.has_solution[rotate_type] = 1;
+                        // Update the depth limit
+                        this->data_->phase1.depth_limit[rotate_type] = std::min(
+                            std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
+                    }
+                    this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
+                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
+                }
+
+                // call phase2_search()
+                if (phase2_search) {
+                    bool phase2_solvable = phase2_search(rotate_type, phase1_type, stage);
                 }
             }
             phase1_type++;
@@ -635,48 +678,6 @@ public:
         }
 
         return solvable;
-    }
-
-    bool call_phase2_search(size_type depth, size_type rotate_type, size_type satisfy_mask,
-                            const stage_type & stage, phase2_callback & phase2_search) {
-        size_type reached_mask = 0;
-        size_type mask = 1;
-        size_type phase1_type = 0;
-        while (satisfy_mask != 0) {
-            if ((satisfy_mask & mask) == mask) {
-                // record min-move phrase1 stage
-                this->data_->phase1.stage_list[rotate_type][phase1_type].push_back(stage);
-
-                if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
-                    assert(this->data_->phase1.max_depth[rotate_type][phase1_type] != -1);
-                    if ((int)depth >= this->data_->phase1.max_depth[rotate_type][phase1_type]) {
-                        reached_mask |= mask;
-                    }
-                }
-                else {
-                    if (this->data_->phase1.has_solution[rotate_type] == 0) {
-                        this->data_->phase1.has_solution[rotate_type] = 1;
-                        // Update the depth limit
-                        this->data_->phase1.depth_limit[rotate_type] = std::min(
-                            std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
-                    }
-                    this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
-                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
-                }
-
-                // call phase2_search()
-                if (phase2_search) {
-                    bool phase2_solvable = phase2_search(rotate_type, phase1_type, stage);
-                }
-            }
-            phase1_type++;
-            if (phase1_type >= MAX_PHASE1_TYPE)
-                break;
-            satisfy_mask &= ~mask;
-            mask <<= 1;
-        }
-
-        return ((reached_mask & 0x0F) == 0x0F);
     }
 
     bool bitset_solve(size_type & out_rotate_type, phase2_callback & phase2_search) {
