@@ -463,7 +463,7 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-#if 1
+#if 0
     solve_sliding_unknown_puzzle_5x5<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x5<SolverId::Queue, true>();
 
@@ -481,6 +481,16 @@ int main(int argc, char * argv[])
 #endif
 
     if (1) {
+
+#if 1
+    solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
+    System::pause();
+#endif
+
+#if 1
+    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
+    System::pause();
+#endif
 
 #if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();

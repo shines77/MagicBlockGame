@@ -249,10 +249,10 @@ protected:
                                    size_type firstTargetY, size_type lastTargetY) {
         for (size_type y = firstTargetY; y < lastTargetY; y++) {
             ptrdiff_t targetBaseY = y * TargetX;
-            ptrdiff_t baseY = (kStartY + y) * BoardX;
+            ptrdiff_t playerBaseY = (kStartY + y) * BoardX;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
-                uint8_t player_clr = player.cells[baseY + (kStartX + x)];
+                uint8_t player_clr = player.cells[playerBaseY + (kStartX + x)];
                 assert_color(target_clr);
                 assert_color(player_clr);
                 if (player_clr != target_clr) {
@@ -288,10 +288,10 @@ protected:
                                            size_type firstTargetY, size_type lastTargetY) {
         for (ptrdiff_t y = ptrdiff_t(lastTargetY - 1); y >= ptrdiff_t(firstTargetX); y--) {
             ptrdiff_t targetBaseY = y * TargetX;
-            ptrdiff_t baseY = (kStartY + y) * BoardX;
+            ptrdiff_t playerBaseY = (kStartY + y) * BoardX;
             for (size_type x = firstTargetX; x < lastTargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
-                uint8_t player_clr = player.cells[baseY + (kStartX + x)];
+                uint8_t player_clr = player.cells[playerBaseY + (kStartX + x)];
                 assert_color(target_clr);
                 assert_color(player_clr);
                 if (player_clr != target_clr) {
@@ -660,10 +660,10 @@ protected:
                          const Board<TargetX, TargetY> & target) const {
         for (size_type y = 0; y < TargetY; y++) {
             ptrdiff_t targetBaseY = y * TargetX;
-            ptrdiff_t baseY = (kStartY + y) * BoardX;
+            ptrdiff_t playerBaseY = (kStartY + y) * BoardX;
             for (size_type x = 0; x < TargetX; x++) {
                 uint8_t target_clr = target.cells[targetBaseY + x];
-                uint8_t player_clr = player.cells[baseY + (kStartX + x)];
+                uint8_t player_clr = player.cells[playerBaseY + (kStartX + x)];
                 assert_color(target_clr);
                 assert_color(player_clr);
                 if (player_clr != target_clr) {
