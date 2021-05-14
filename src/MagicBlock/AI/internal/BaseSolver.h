@@ -744,11 +744,11 @@ protected:
         return 0;
     }
 
-    size_type is_satisfy_all(const Board<BoardX, BoardY> & board,
+    size_type is_satisfy_all(const Board<BoardX, BoardY> & player,
                              const Board<TargetX, TargetY> target[4],
                              size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
-            size_type mask = this->is_satisfy(board, target[index]);
+            size_type mask = this->is_satisfy(player, target[index]);
             if (mask != 0) {
                 size_u result(mask, index);
                 return result.value;

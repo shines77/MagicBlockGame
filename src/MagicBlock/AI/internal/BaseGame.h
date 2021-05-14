@@ -448,7 +448,7 @@ public:
         this->displayAnswerMoves(this->best_answer_);
     }
 
-    void displayAnswerMoves() const {
+    void displayAnswerMoves() {
         if (this->translateMovePath(this->best_move_path_, this->best_answer_)) {
             this->displayAnswerMoves(this->best_answer_);
         }

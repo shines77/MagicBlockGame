@@ -456,14 +456,14 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-#if 0
+#if 1
     solve_sliding_unknown_puzzle_5x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x3<SolverId::Queue, true>();
 
     System::pause();
 #endif
 
-#if 0
+#if 1
     solve_sliding_unknown_puzzle_5x5<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x5<SolverId::Queue, true>();
 
@@ -480,9 +480,9 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-    if (1) {
+    if (0) {
 
-#if 0
+#if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
     System::pause();
 #endif

@@ -37,7 +37,7 @@ public:
 
     typedef Stage<BoardX, BoardY>   stage_type;
     typedef Board<BoardX, BoardY>   player_board_t;
-    typedef Board<BoardX, BoardX>   target_board_t;
+    typedef Board<BoardX, BoardY>   target_board_t;
 
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type kSingelNumMaxCount = 4;
@@ -55,8 +55,6 @@ private:
     player_board_t player_board_;
     target_board_t target_board_;
 
-    std::vector<Board<BoardX, BoardY>> answer_list_;
-
     size_type map_used_;
     bool has_unknown_;
 
@@ -64,6 +62,8 @@ private:
     int target_num_cnt_[MaxNumber];
 
     std::vector<Move> empty_moves_[BoardSize];
+
+    std::vector<Board<BoardX, BoardY>> best_answer_list_;
 
     std::vector<Position> best_move_path_;
     std::vector<MoveInfo> best_answer_;
@@ -414,7 +414,7 @@ public:
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
-                            this->answer_list_.push_back(next_stage.board);
+                            this->best_answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -513,7 +513,7 @@ public:
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
-                            this->answer_list_.push_back(next_stage.board);
+                            this->best_answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -613,7 +613,7 @@ public:
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
-                            this->answer_list_.push_back(next_stage.board);
+                            this->best_answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -712,7 +712,7 @@ public:
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
-                            this->answer_list_.push_back(next_stage.board);
+                            this->best_answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -812,7 +812,7 @@ public:
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
-                            this->answer_list_.push_back(next_stage.board);
+                            this->best_answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -911,7 +911,7 @@ public:
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             this->best_move_path_ = next_stage.move_path;
                             assert((depth + 1) == next_stage.move_path.size());
-                            this->answer_list_.push_back(next_stage.board);
+                            this->best_answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -960,14 +960,15 @@ public:
 
     void display_answer_boards() {
         this->display_boards();
-        if (SearchAllAnswers && this->answer_list_.size() > 1)
-            Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_);
+        if (SearchAllAnswers && this->best_answer_list_.size() > 1)
+            Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->best_answer_list_);
         else
-            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_[0]);
+            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->best_answer_list_[0]);
+        this->displayAnswerMoves();
     }
 
     bool translateMovePath(const std::vector<Position> & move_path, std::vector<MoveInfo> & answer) const {
-        return this->data_.player_board.translate_move_path(move_path, answer);
+        return this->player_board_.translate_move_path(move_path, answer);
     }
 
     bool translateMovePath(const std::vector<Position> & move_path) {
@@ -986,7 +987,7 @@ public:
         player_board_t::template display_answer<BoardX>(answer);
     }
 
-    void displayAnswerMoves() const {
+    void displayAnswerMoves() {
         if (this->translateMovePath(this->best_move_path_, this->best_answer_)) {
             this->displayAnswerMoves(this->best_answer_);
         }
