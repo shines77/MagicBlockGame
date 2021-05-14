@@ -456,7 +456,7 @@ int main(int argc, char * argv[])
     System::pause();
 #endif
 
-#if 1
+#if 0
     solve_sliding_unknown_puzzle_5x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x3<SolverId::Queue, true>();
 
@@ -488,16 +488,26 @@ int main(int argc, char * argv[])
 #endif
 
 #if 0
+    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
+    System::pause();
+#endif
+
+#if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
     System::pause();
 #endif
 
 #if 0
-    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
+    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, true>();
     System::pause();
 #endif
 
 #if 1
+    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
+    System::pause();
+#endif
+
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
     System::pause();
 #endif
@@ -509,7 +519,7 @@ int main(int argc, char * argv[])
 
     }
 
-    if (0) {
+    if (1) {
 
 #ifdef NDEBUG
 

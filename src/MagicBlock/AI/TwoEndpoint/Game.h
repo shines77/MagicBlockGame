@@ -285,7 +285,7 @@ public:
             for (ssize_type i = bw_answer.size() - 1; i >= 0; i--) {
                 MoveInfo move_info = bw_answer[i];
                 // Opposite the from_pos and move_pos
-                move_path.push_back(move_info.move_pos);
+                move_path.push_back(move_info.to_pos);
             }
         }
 

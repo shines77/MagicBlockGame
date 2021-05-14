@@ -319,30 +319,33 @@ struct Move {
 
 struct MoveInfo {
     Position    from_pos;
-    Position    move_pos;
+    Position    to_pos;
     uint8_t     color;
     uint8_t     dir;
 
-    MoveInfo() noexcept : from_pos(0), move_pos(0), color(Color::Empty), dir(0) {}
+    MoveInfo() noexcept : from_pos(0), to_pos(0), color(Color::Empty), dir(0) {}
+
     MoveInfo(const MoveInfo & src) noexcept {
-        this->from_pos = src.from_pos;
-        this->move_pos = src.move_pos;
-        this->color = src.color;
-        this->dir = src.dir;
+        this->from_pos  = src.from_pos;
+        this->to_pos    = src.to_pos;
+        this->color     = src.color;
+        this->dir       = src.dir;
     }
+
     MoveInfo(MoveInfo && src) noexcept {
         this->from_pos.swap(src.from_pos);
-        this->move_pos.swap(src.move_pos);
+        this->to_pos.swap(src.to_pos);
         std::swap(this->color, src.color);
         std::swap(this->dir, src.dir);
     }
+
     ~MoveInfo() {}
 
     MoveInfo & operator = (const MoveInfo & rhs) noexcept {
-        this->from_pos = rhs.from_pos;
-        this->move_pos = rhs.move_pos;
-        this->color = rhs.color;
-        this->dir = rhs.dir;
+        this->from_pos  = rhs.from_pos;
+        this->to_pos    = rhs.to_pos;
+        this->color     = rhs.color;
+        this->dir       = rhs.dir;
         return *this;
     }
 };

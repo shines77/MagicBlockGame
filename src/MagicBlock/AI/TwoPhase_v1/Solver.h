@@ -50,6 +50,7 @@ public:
 
     typedef typename base_type::shared_data_type    shared_data_type;
     typedef typename base_type::stage_type          stage_type;
+    typedef typename base_type::stage_info_t        stage_info_t;
     typedef typename base_type::player_board_t      player_board_t;
     typedef typename base_type::target_board_t      target_board_t;
     typedef typename base_type::phase2_callback     phase2_callback;
@@ -66,13 +67,13 @@ public:
 
     static const size_type kDefaultSearchDepthLimit = 30;
 
-    static const size_type kSlideDepth = 6;
+    static const size_type kSlideDepth = 7;
     static const size_type kMaxSlideDepth = 10;
 #else
     static const size_type kMinSearchDepth = 15;
     static const size_type kMaxSearchDepth = 21;
 
-    static const size_type kDefaultSearchDepthLimit = 22;
+    static const size_type kDefaultSearchDepthLimit = 21;
 
     static const size_type kSlideDepth = 1;
     static const size_type kMaxSlideDepth = 2;
@@ -92,6 +93,7 @@ private:
                 this->target_len_ = 1;
 
             this->count_target_color_nums(this->target_board_[0]);
+            this->count_all_partial_target_color_nums();
 
             this->data_->phase1.init(kDefaultSearchDepthLimit);
 
@@ -108,13 +110,13 @@ private:
         }
     }
 
-    void init_target_board_locked(size_t rotate_type) {
+    void init_target_board_locked(size_type rotate_index) {
         assert(this->data_ != nullptr);
         if (this->is_phase2()) {
             this->data_->phase2.reset();
 
-            assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
-            this->target_board_[0] = this->data_->target_board[rotate_type];
+            assert(rotate_index >= 0 && rotate_index < MAX_ROTATE_TYPE);
+            this->target_board_[0] = this->data_->target_board[rotate_index];
             this->target_len_ = 1;
 
             size_type phase1_type = this->data_->phase2.phase1_type;
@@ -165,7 +167,13 @@ public:
     void setRotateType(size_type rotate_type) {
         assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
         this->rotate_type_ = rotate_type;
-        this->init_target_board_locked(rotate_type);
+        size_type rotate_index = this->toRotateIndex(rotate_type);
+        if (rotate_index != size_type(-1)) {
+            this->init_target_board_locked(rotate_index);
+        }
+        else {
+            printf("TwoPhase_v1::Solver::setRotateType(%u) failed.\n\n", uint32_t(rotate_type));
+        }
     }
 
     bool record_phase1_min_info(size_type depth, size_type rotate_type,
@@ -175,8 +183,13 @@ public:
         size_type phase1_type = 0;
         while (satisfy_mask != 0) {
             if ((satisfy_mask & mask) == mask) {
-                // record min-move phrase1 stage
-                this->data_->phase1.stage_list[rotate_type][phase1_type].push_back(stage);
+                // record min-move phrase1 stage info
+                stage_info_t stage_info;
+                stage_info.rotate_type = rotate_type;
+                stage_info.phase1_type = phase1_type;
+                stage_info.stage = stage;
+                this->data_->phase1.stage_list.push_back(std::move(stage_info));
+                this->data_->phase1.stage_count[rotate_type][phase1_type]++;
 
                 if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
                     assert(this->data_->phase1.max_depth[rotate_type][phase1_type] != -1);
@@ -189,10 +202,10 @@ public:
                         this->data_->phase1.has_solution[rotate_type] = 1;
                         // Update the depth limit
                         this->data_->phase1.depth_limit[rotate_type] = std::min(
-                            std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
+                            std::max(depth + kMaxSlideDepth + 1, kMinSearchDepth), kMaxSearchDepth);
                     }
                     this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
-                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
+                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth + 1);
                 }
             }
             phase1_type++;
@@ -212,8 +225,13 @@ public:
         size_type phase1_type = 0;
         while (satisfy_mask != 0) {
             if ((satisfy_mask & mask) == mask) {
-                // record min-move phrase1 stage
-                this->data_->phase1.stage_list[rotate_type][phase1_type].push_back(stage);
+                // record min-move phrase1 stage info
+                stage_info_t stage_info;
+                stage_info.rotate_type = rotate_type;
+                stage_info.phase1_type = phase1_type;
+                stage_info.stage = stage;
+                this->data_->phase1.stage_list.push_back(std::move(stage_info));
+                this->data_->phase1.stage_count[rotate_type][phase1_type]++;
 
                 if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
                     assert(this->data_->phase1.max_depth[rotate_type][phase1_type] != -1);
@@ -226,10 +244,10 @@ public:
                         this->data_->phase1.has_solution[rotate_type] = 1;
                         // Update the depth limit
                         this->data_->phase1.depth_limit[rotate_type] = std::min(
-                            std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
+                            std::max(depth + kMaxSlideDepth + 1, kMinSearchDepth), kMaxSearchDepth);
                     }
                     this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
-                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
+                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth + 1);
                 }
 
                 // call phase2_search()
@@ -247,25 +265,46 @@ public:
         return ((reached_mask & 0x0F) == 0x0F);
     }
 
-    bool solve_full(size_type & rotate_type) {
+    bool solve_full(size_type & out_rotate_type) {
         size_u result = this->is_satisfy_full(this->player_board_, this->target_board_, this->target_len_);
         if (result.low != 0) {
-            rotate_type = result.high;
+            out_rotate_type = result.high;
             return true;
         }
 
         bool solvable = false;
         size_type depth = 0;
 
-        Position empty;
-        bool found_empty = this->find_empty(this->player_board_, empty);
+        Position first_empty;
+        bool found_empty = this->find_empty(this->player_board_, first_empty);
         if (found_empty) {
             std::set<Value128> visited;
 
             stage_type start;
-            start.empty_pos = empty;
+            start.empty_pos = first_empty;
             start.last_dir = uint8_t(-1);
-            start.board = this->player_board_;
+
+            if (this->is_phase2()) {
+                start.rotate_type = (uint8_t)this->data_->phase2.rotate_type;
+                size_type rotate_index = this->data_->phase2.rotate_index;
+                size_type first_move_pos = this->adjust_phase2_board(this->player_board_, this->target_board_[rotate_index],
+                                                                     first_empty, rotate_index, this->data_->phase2.phase1_type);
+                if (first_move_pos == size_type(-1)) {
+                    start.board = this->player_board_;
+                }
+                else {
+                    player_board_t player_board(this->player_board_);
+                    std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
+                    start.empty_pos = first_move_pos;
+                    start.push_back(first_move_pos);
+                    start.board = player_board;
+                    depth++;
+                }
+            }
+            else {
+                start.rotate_type = 0;
+                start.board = this->player_board_;
+            }
             visited.insert(start.board.value128());
 
             std::vector<stage_type> cur_stages;
@@ -303,15 +342,20 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        size_u result = this->is_satisfy_full(next_stage.board, this->target_board_, this->target_len_);
-                        if (result.low != 0) {
-                            this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            rotate_type = result.high;
-                            solvable = true;
-                            exit = true;
-                            break;
-                        }  
+                        size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
+                        for (size_type index = 0; index < max_rotate_index; index++) {
+                            size_u result = this->is_satisfy_full(next_stage.board, this->target_board_[index], index);
+                            if (result.low != 0) {
+                                this->move_path_ = next_stage.move_path;
+                                assert((depth + 1) == next_stage.move_path.size());
+                                size_type rotate_type = this->data_->rotate_type[index];
+                                next_stage.rotate_type = std::uint8_t(rotate_type);
+                                out_rotate_type = rotate_type;
+                                solvable = true;
+                                exit = true;
+                                break;
+                            }
+                        }
                     }
 
                     if (exit) {
@@ -352,16 +396,36 @@ public:
         bool solvable = false;
         size_type depth = 0;
 
-        Position empty;
-        bool found_empty = this->find_empty(this->player_board_, empty);
+        Position first_empty;
+        bool found_empty = this->find_empty(this->player_board_, first_empty);
         if (found_empty) {
             std::set<Value128> visited;
 
             stage_type start;
-            start.empty_pos = empty;
+            start.empty_pos = first_empty;
             start.last_dir = uint8_t(-1);
-            start.rotate_type = 0;
-            start.board = this->player_board_;
+
+            if (this->is_phase2()) {
+                start.rotate_type = (uint8_t)this->data_->phase2.rotate_type;
+                size_type rotate_index = this->data_->phase2.rotate_index;
+                size_type first_move_pos = this->adjust_phase2_board(this->player_board_, this->target_board_[rotate_index],
+                                                                     first_empty, rotate_index, this->data_->phase2.phase1_type);
+                if (first_move_pos == size_type(-1)) {
+                    start.board = this->player_board_;
+                }
+                else {
+                    player_board_t player_board(this->player_board_);
+                    std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
+                    start.empty_pos = first_move_pos;
+                    start.move_path.push_back(first_move_pos);
+                    start.board = player_board;
+                    depth++;
+                }
+            }
+            else {
+                start.rotate_type = 0;
+                start.board = this->player_board_;
+            }
             visited.insert(start.board.value128());
 
             std::vector<stage_type> cur_stages;
@@ -405,23 +469,26 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
-                        size_type satisfy_mask = satisfy_result.low;
-                        if (satisfy_mask != 0) {
-                            solvable = true;
-                            if (this->is_phase1()) {
-                                size_type rotate_type = satisfy_result.high;
-                                next_stage.rotate_type = (uint8_t)rotate_type;
-                                bool all_reached = record_phase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
-                                if (all_reached) {
-                                    exit = true;
+                        size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
+                        for (size_type index = 0; index < max_rotate_index; index++) {
+                            size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_[index], index);
+                            size_type satisfy_mask = satisfy_result.low;
+                            if (satisfy_mask != 0) {
+                                solvable = true;
+                                if (this->is_phase1()) {
+                                    size_type rotate_type = this->data_->rotate_type[index];
+                                    next_stage.rotate_type = (uint8_t)rotate_type;
+                                    bool all_reached = record_phase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
+                                    if (all_reached) {
+                                        exit = true;
+                                    }
                                 }
-                            }
-                            else {
-                                this->move_path_ = next_stage.move_path;
-                                assert((depth + 1) == next_stage.move_path.size());
-                                exit = true;
-                                break;
+                                else {
+                                    this->move_path_ = next_stage.move_path;
+                                    assert((depth + 1) == next_stage.move_path.size());
+                                    exit = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -450,7 +517,7 @@ public:
                     size_type rotate_done = 0;
                     for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                         if (this->data_->phase1.depth_limit[rotate_type] != size_t(-1) &&
-                            depth > this->data_->phase1.depth_limit[rotate_type]) {
+                            depth >= this->data_->phase1.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
@@ -478,14 +545,14 @@ public:
 
             if (this->is_phase1()) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                for (size_type rotate_type = 0; rotate_type < 4; rotate_type++) {
-                    for (size_type phase1_type = 0; phase1_type < 4; phase1_type++) {
+                for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
+                    for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
                         printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
                                 (uint32_t)phase1_type,
                                 this->data_->phase1.min_depth[rotate_type][phase1_type],
                                 this->data_->phase1.max_depth[rotate_type][phase1_type],
-                                (uint32_t)this->data_->phase1.stage_list[rotate_type][phase1_type].size());
+                                (uint32_t)this->data_->phase1.stage_count[rotate_type][phase1_type]);
                     }
                     printf("\n");
                 }
@@ -521,16 +588,36 @@ public:
         bool solvable = false;
         size_type depth = 0;
 
-        Position empty;
-        bool found_empty = this->find_empty(this->player_board_, empty);
+        Position first_empty;
+        bool found_empty = this->find_empty(this->player_board_, first_empty);
         if (found_empty) {
             std::set<Value128> visited;
 
             stage_type start;
-            start.empty_pos = empty;
+            start.empty_pos = first_empty;
             start.last_dir = uint8_t(-1);
-            start.rotate_type = 0;
-            start.board = this->player_board_;
+
+            if (this->is_phase2()) {
+                start.rotate_type = (uint8_t)this->data_->phase2.rotate_type;
+                size_type rotate_index = this->data_->phase2.rotate_index;
+                size_type first_move_pos = this->adjust_phase2_board(this->player_board_, this->target_board_[rotate_index],
+                                                                     first_empty, rotate_index, this->data_->phase2.phase1_type);
+                if (first_move_pos == size_type(-1)) {
+                    start.board = this->player_board_;
+                }
+                else {
+                    player_board_t player_board(this->player_board_);
+                    std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
+                    start.empty_pos = first_move_pos;
+                    start.move_path.push_back(first_move_pos);
+                    start.board = player_board;
+                    depth++;
+                }
+            }
+            else {
+                start.rotate_type = 0;
+                start.board = this->player_board_;
+            }
             visited.insert(start.board.value128());
 
             std::queue<stage_type> cur_stages;
@@ -574,23 +661,26 @@ public:
 
                         next_stages.push(next_stage);
 
-                        size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
-                        size_type satisfy_mask = satisfy_result.low;
-                        if (satisfy_mask != 0) {
-                            solvable = true;
-                            if (this->is_phase1()) {
-                                size_type rotate_type = satisfy_result.high;
-                                next_stage.rotate_type = (uint8_t)rotate_type;
-                                bool all_reached = record_phase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
-                                if (all_reached) {
-                                    exit = true;
+                        size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
+                        for (size_type index = 0; index < max_rotate_index; index++) {
+                            size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_[index], index);
+                            size_type satisfy_mask = satisfy_result.low;
+                            if (satisfy_mask != 0) {
+                                solvable = true;
+                                if (this->is_phase1()) {
+                                    size_type rotate_type = this->data_->rotate_type[index];
+                                    next_stage.rotate_type = (uint8_t)rotate_type;
+                                    bool all_reached = record_phase1_min_info(depth, rotate_type, satisfy_mask, next_stage);
+                                    if (all_reached) {
+                                        exit = true;
+                                    }
                                 }
-                            }
-                            else {
-                                this->move_path_ = next_stage.move_path;
-                                assert((depth + 1) == next_stage.move_path.size());
-                                exit = true;
-                                break;
+                                else {
+                                    this->move_path_ = next_stage.move_path;
+                                    assert((depth + 1) == next_stage.move_path.size());
+                                    exit = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -621,7 +711,7 @@ public:
                     size_type rotate_done = 0;
                     for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                         if (this->data_->phase1.depth_limit[rotate_type] != size_t(-1) &&
-                            depth > this->data_->phase1.depth_limit[rotate_type]) {
+                            depth >= this->data_->phase1.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
@@ -649,14 +739,14 @@ public:
 
             if (this->is_phase1()) {
                 printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
-                for (size_type rotate_type = 0; rotate_type < 4; rotate_type++) {
-                    for (size_type phase1_type = 0; phase1_type < 4; phase1_type++) {
+                for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
+                    for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
                         printf("rotate_type = %u, phase1_type = %u, min_depth = %d, max_depth = %d, stage.size() = %u\n",
                                 (uint32_t)rotate_type,
                                 (uint32_t)phase1_type,
                                 this->data_->phase1.min_depth[rotate_type][phase1_type],
                                 this->data_->phase1.max_depth[rotate_type][phase1_type],
-                                (uint32_t)this->data_->phase1.stage_list[rotate_type][phase1_type].size());
+                                (uint32_t)this->data_->phase1.stage_count[rotate_type][phase1_type]);
                     }
                     printf("\n");
                 }
@@ -692,17 +782,37 @@ public:
         bool solvable = false;
         size_type depth = 0;
 
-        Position empty;
-        bool found_empty = this->find_empty(this->player_board_, empty);
+        Position first_empty;
+        bool found_empty = this->find_empty(this->player_board_, first_empty);
         if (found_empty) {
             typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> bitset_type;
             bitset_type visited;
 
             stage_type start;
-            start.empty_pos = empty;
+            start.empty_pos = first_empty;
             start.last_dir = uint8_t(-1);
-            start.rotate_type = 0;
-            start.board = this->player_board_;
+
+            if (this->is_phase2()) {
+                start.rotate_type = (uint8_t)this->data_->phase2.rotate_type;
+                size_type rotate_index = this->data_->phase2.rotate_index;
+                size_type first_move_pos = this->adjust_phase2_board(this->player_board_, this->target_board_[rotate_index],
+                                                                     first_empty, rotate_index, this->data_->phase2.phase1_type);
+                if (first_move_pos == size_type(-1)) {
+                    start.board = this->player_board_;
+                }
+                else {
+                    player_board_t player_board(this->player_board_);
+                    std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
+                    start.empty_pos = first_move_pos;
+                    start.move_path.push_back(first_move_pos);
+                    start.board = player_board;
+                    depth++;
+                }
+            }
+            else {
+                start.rotate_type = 0;
+                start.board = this->player_board_;
+            }
             visited.append(start.board);
 
             std::vector<stage_type> cur_stages;
@@ -745,24 +855,27 @@ public:
 
                         next_stages.push_back(next_stage);
 
-                        size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
-                        size_type satisfy_mask = satisfy_result.low;
-                        if (satisfy_mask != 0) {
-                            solvable = true;
-                            if (this->is_phase1()) {
-                                size_type rotate_type = satisfy_result.high;
-                                next_stage.rotate_type = (uint8_t)rotate_type;
-                                bool all_reached = call_phase2_search(depth, rotate_type, satisfy_mask,
-                                                                      next_stage, phase2_search);
-                                if (all_reached) {
-                                    exit = true;
+                        size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
+                        for (size_type index = 0; index < max_rotate_index; index++) {
+                            size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_[index], index);
+                            size_type satisfy_mask = satisfy_result.low;
+                            if (satisfy_mask != 0) {
+                                solvable = true;
+                                if (this->is_phase1()) {
+                                    size_type rotate_type = this->data_->rotate_type[index];
+                                    next_stage.rotate_type = (uint8_t)rotate_type;
+                                    bool all_reached = call_phase2_search(depth, rotate_type, satisfy_mask,
+                                                                          next_stage, phase2_search);
+                                    if (all_reached) {
+                                        exit = true;
+                                    }
                                 }
-                            }
-                            else {
-                                this->move_path_ = next_stage.move_path;
-                                assert((depth + 1) == next_stage.move_path.size());
-                                exit = true;
-                                break;
+                                else {
+                                    this->move_path_ = next_stage.move_path;
+                                    assert((depth + 1) == next_stage.move_path.size());
+                                    exit = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -791,7 +904,7 @@ public:
                     size_type rotate_done = 0;
                     for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                         if (this->data_->phase1.depth_limit[rotate_type] != size_t(-1) &&
-                            depth > this->data_->phase1.depth_limit[rotate_type]) {
+                            depth >= this->data_->phase1.depth_limit[rotate_type]) {
                             rotate_done++;
                         }
                     }
@@ -826,7 +939,7 @@ public:
                                 (uint32_t)phase1_type,
                                 this->data_->phase1.min_depth[rotate_type][phase1_type],
                                 this->data_->phase1.max_depth[rotate_type][phase1_type],
-                                (uint32_t)this->data_->phase1.stage_list[rotate_type][phase1_type].size());
+                                (uint32_t)this->data_->phase1.stage_count[rotate_type][phase1_type]);
                     }
                     printf("\n");
                 }

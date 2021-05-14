@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <cstdint>
+#include <cstddef>
 #include <vector>
 
 #include "MagicBlock/AI/Move.h"
@@ -13,7 +15,7 @@ namespace AI {
 
 #pragma pack(push, 1)
 
-template <size_t BoardX, size_t BoardY>
+template <std::size_t BoardX, std::size_t BoardY>
 struct Stage {
     Board<BoardX, BoardY> board;
 
@@ -86,6 +88,24 @@ inline
 void swap(Stage<BoardX, BoardY> & lhs, Stage<BoardX, BoardY> & rhs) noexcept {
     lhs.swap(rhs);
 }
+
+template <std::size_t BoardX, std::size_t BoardY>
+struct StageInfo {
+    std::size_t rotate_type;
+    std::size_t phase1_type;
+
+    Stage<BoardX, BoardY> stage;
+
+    StageInfo() noexcept : rotate_type(rotate_type), phase1_type(0)  {
+    }
+
+    StageInfo(std::size_t rotate_type, std::size_t phase1_type) noexcept
+        : rotate_type(rotate_type), phase1_type(phase1_type) {
+    }
+
+    ~StageInfo() {
+    }
+};
 
 #pragma pack(pop)
 

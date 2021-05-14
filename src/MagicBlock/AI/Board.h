@@ -359,11 +359,11 @@ union Board
         answer.clear();
 
         Board<UBoardX, UBoardY> board(in_board);
-        std::uint8_t from_pos, move_pos;
-        std::uint8_t move_clr, from_clr;
+        std::uint8_t from_pos, move_to_pos;
+        std::uint8_t from_clr, move_to_clr;
         std::uint8_t last_dir = std::uint8_t(-1);
         Position empty_pos = in_empty_pos;
-        assert((empty_pos == std::uint8_t(-1)) || (board.cells[empty_pos] == Color::Unknown));
+        assert((empty_pos.value == std::uint8_t(-1)) || (board.cells[empty_pos] == Color::Unknown));
         if (empty_pos.value != std::uint8_t(-1)) {
             board.cells[empty_pos] = Color::Empty;
         }
@@ -371,24 +371,24 @@ union Board
         if (!found_empty) {
             empty_pos = std::uint8_t(-1);
         }
-        move_pos = empty_pos;
+        move_to_pos = empty_pos;
         for (size_type i = 0; i < move_path.size(); i++) {
-            if (move_pos != std::uint8_t(-1))
-                move_clr = board.cells[move_pos];
+            if (move_to_pos != std::uint8_t(-1))
+                move_to_clr = board.cells[move_to_pos];
             else
-                move_clr = Color::Unknown;
+                move_to_clr = Color::Unknown;
             from_pos = move_path[i].value;
             from_clr = board.cells[from_pos];
-            if (from_clr != Color::Empty && move_clr == Color::Empty) {
-                last_dir = Direction::template getDir<UBoardX, UBoardY>(from_pos, move_pos);
+            if (from_clr != Color::Empty && move_to_clr == Color::Empty) {
+                last_dir = Direction::template getDir<UBoardX, UBoardY>(from_pos, move_to_pos);
                 MoveInfo move_info;
                 move_info.from_pos = from_pos;
-                move_info.move_pos = move_pos;
+                move_info.to_pos = move_to_pos;
                 move_info.color = from_clr;
                 move_info.dir = last_dir;
                 answer.push_back(move_info);
 
-                std::swap(board.cells[from_pos], board.cells[move_pos]);
+                std::swap(board.cells[from_pos], board.cells[move_to_pos]);
             }
             else {
                 printf("Board<X, Y>::translate_move_path():\n\n"
@@ -402,7 +402,7 @@ union Board
                 success = false;
                 break;
             }
-            move_pos = from_pos;
+            move_to_pos = from_pos;
         }
 
         return success;
@@ -420,7 +420,7 @@ union Board
         printf("Answer_Move_Path[%u] = {\n", (std::uint32_t)answer.size());
         for (auto iter : answer) {
             Position from_pos   = iter.from_pos;
-            Position move_pos   = iter.move_pos;
+            Position to_pos     = iter.to_pos;
             size_type color     = iter.color;
             size_type dir       = iter.dir;
             printf("    [%2u]: [%s], %c%c --> %c%c, dir: %-5s (%u)\n",
@@ -428,8 +428,8 @@ union Board
                    Color::colorToChar(color),
                    Position::template toFirstChar<UBoardX>(from_pos),
                    Position::template toSecondChar<UBoardX>(from_pos),
-                   Position::template toFirstChar<UBoardX>(move_pos),
-                   Position::template toSecondChar<UBoardX>(move_pos),
+                   Position::template toFirstChar<UBoardX>(to_pos),
+                   Position::template toSecondChar<UBoardX>(to_pos),
                    Direction::toString(dir),
                    (std::uint32_t)dir);
             index++;

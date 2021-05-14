@@ -51,6 +51,7 @@ public:
 
     typedef SharedData<BoardX, BoardY, TargetX, TargetY>            shared_data_type;
     typedef typename shared_data_type::stage_type                   stage_type;
+    typedef typename shared_data_type::stage_info_t                 stage_info_t;
     typedef typename shared_data_type::player_board_t               player_board_t;
     typedef typename shared_data_type::target_board_t               target_board_t;
 
@@ -136,6 +137,14 @@ public:
 
     size_type getMapUsed() const {
         return this->map_used_;
+    }
+
+    size_type toRotateIndex(size_type rotate_type) {
+        for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
+            if (rotate_type == this->data_.rotate_type[i])
+                return i;
+        }
+        return size_type(-1);
     }
 
     int readConfig(const char * filename) {
@@ -309,12 +318,16 @@ public:
         this->data_.target_board[0].rotate_180_cw(this->data_.target_board[2]);
         this->data_.target_board[0].rotate_270_cw(this->data_.target_board[3]);
 
-        bool is_duplicated[4];
-        for (size_type i = 0; i < 4; i++) {
+        for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
+            this->data_.rotate_type[i] = i;
+        }
+
+        bool is_duplicated[MAX_ROTATE_TYPE];
+        for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
             is_duplicated[i] = false;
         }
 
-        for (size_type i = 1; i < 4; i++) {
+        for (size_type i = 1; i < MAX_ROTATE_TYPE; i++) {
             for (size_type j = 0; j < i; j++) {
                 if (this->data_.target_board[j] == this->data_.target_board[i]) {
                     is_duplicated[i] = true;
@@ -323,19 +336,20 @@ public:
             }
         }
 
-        size_type target_len = 4;
-        for (size_type i = 1; i < 4; i++) {
+        size_type max_totate_index = MAX_ROTATE_TYPE;
+        for (size_type i = 1; i < MAX_ROTATE_TYPE; i++) {
             if (is_duplicated[i]) {
-                for (size_type j = i + 1; j < 4; j++) {
+                for (size_type j = i + 1; j < MAX_ROTATE_TYPE; j++) {
                     this->data_.target_board[j - 1] = this->data_.target_board[j];
+                    this->data_.rotate_type[j - 1]  = this->data_.rotate_type[j];
                 }
-                target_len--;
+                max_totate_index--;
             }
         }
-        assert(target_len > 0);
+        assert(max_totate_index > 0);
 
         if (AllowRotate)
-            this->data_.target_len = target_len;
+            this->data_.target_len = max_totate_index;
         else
             this->data_.target_len = 1;
     }
