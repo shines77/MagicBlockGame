@@ -96,7 +96,7 @@ struct StageInfo {
 
     Stage<BoardX, BoardY> stage;
 
-    StageInfo() noexcept : rotate_type(rotate_type), phase1_type(0)  {
+    StageInfo() noexcept : rotate_type(0), phase1_type(0)  {
     }
 
     StageInfo(std::size_t _rotate_type, std::size_t _phase1_type) noexcept
