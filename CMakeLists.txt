@@ -50,6 +50,7 @@ include_directories(src)
 set(SOURCE_FILES
     src/MagicBlock/AI/Main.cpp
     src/MagicBlock/AI/UnitTest.cpp
+    src/MagicBlock/AI/get_char.c
     )
 
 add_custom_target(release

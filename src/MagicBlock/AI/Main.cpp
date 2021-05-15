@@ -35,6 +35,7 @@
 #include "MagicBlock/AI/Algorithm.h"
 #include "MagicBlock/AI/UnitTest.h"
 
+#include "MagicBlock/AI/Console.h"
 #include "MagicBlock/AI/CPUWarmUp.h"
 #include "MagicBlock/AI/StopWatch.h"
 
@@ -436,7 +437,7 @@ void solve_magic_block()
 
 int main(int argc, char * argv[])
 {
-    jtest::CPU::warmup(1000);
+    jtest::cpu::warmUp(1000);
 
 #ifdef NDEBUG
     UnitTest();
@@ -446,28 +447,28 @@ int main(int argc, char * argv[])
     solve_sliding_puzzle<SolverId::Normal, true>();
     solve_sliding_puzzle<SolverId::Queue, true>();
 
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
 #if 0
     solve_sliding_unknown_puzzle_3x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
 
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
 #if 0
     solve_sliding_unknown_puzzle_5x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x3<SolverId::Queue, true>();
 
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
-#if 1
+#if 0
     solve_sliding_unknown_puzzle_5x5<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x5<SolverId::Queue, true>();
 
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
 #if 0
@@ -477,49 +478,49 @@ int main(int argc, char * argv[])
     solve_sliding_color_puzzle<SolverId::Normal, false>();
     solve_sliding_color_puzzle<SolverId::Queue, false>();
 
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
-    if (0) {
+    if (1) {
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, true>();
-    System::pause();
-#endif
-
-#if 1
-    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
-    System::pause();
+    Console::readKeyAndNewLine();
 #endif
 
 #if 0
+    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
+    Console::readKeyAndNewLine();
+#endif
+
+#if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
-    System::pause();
+    Console::readKeyLine();
 #endif
 
 #if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
-    System::pause();
+    Console::readKeyLast();
 #endif
 
     }
 
-    if (1) {
+    if (0) {
 
 #ifdef NDEBUG
 
@@ -527,44 +528,44 @@ int main(int argc, char * argv[])
 
 #if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, true>();
-    System::pause();
+    Console::readKeyLine();
 #endif
 
 #if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
-    System::pause();
+    Console::readKeyLine();
 #endif
 
 #if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, true>();
-    System::pause();
+    Console::readKeyLine();
 #endif
 
 #if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
-    System::pause();
+    Console::readKeyLine();
 #endif
 
     ////////////////////////////////////////////////////////////////////////
 
 #if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
-    System::pause();
+    Console::readKeyLine();
 #endif
 
 #if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
-    System::pause();
+    Console::readKeyLine();
 #endif
 
 #if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
-    System::pause();
+    Console::readKeyLine();
 #endif
 
 #if 1
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
-    System::pause();
+    Console::readKeyLast();
 #endif
 
     ////////////////////////////////////////////////////////////////////////

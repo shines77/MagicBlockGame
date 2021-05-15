@@ -32,8 +32,9 @@
 #include "MagicBlock/AI/ErrorCode.h"
 #include "MagicBlock/AI/TwoPhase_v2/Solver.h"
 #include "MagicBlock/AI/SlidingColorPuzzle.h"
-#include "MagicBlock/AI/Utils.h"
+#include "MagicBlock/AI/Console.h"
 #include "MagicBlock/AI/StopWatch.h"
+#include "MagicBlock/AI/Utils.h"
 
 namespace MagicBlock {
 namespace AI {
@@ -104,7 +105,7 @@ public:
             if (phase1_solvable) {
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
-                System::pause();
+                Console::readKeyLine();
 
                 for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                     for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {
@@ -280,7 +281,7 @@ public:
             if (phase1_solvable) {
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
-                //System::pause();
+                //Console::readKeyAndNewLine();
 
                 for (size_type rotate_type = 0; rotate_type < MAX_ROTATE_TYPE; rotate_type++) {
                     for (size_type phase1_type = 0; phase1_type < MAX_PHASE1_TYPE; phase1_type++) {

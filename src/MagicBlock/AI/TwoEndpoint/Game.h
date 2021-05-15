@@ -32,8 +32,9 @@
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/SharedData.h"
 #include "MagicBlock/AI/ErrorCode.h"
-#include "MagicBlock/AI/Utils.h"
+#include "MagicBlock/AI/Console.h"
 #include "MagicBlock/AI/StopWatch.h"
+#include "MagicBlock/AI/Utils.h"
 
 //
 // Two endpoint / two leg algorithm
@@ -445,12 +446,12 @@ public:
                                 printf("Total moves: %u\n\n", (uint32_t)this->best_move_path_.size());
 
                                 this->displayBestAnswerMoves();
-                                //System::pause();
+                                //Console::readKeyLine();
                             }
                         }
                     }
 
-                    if (this->segment_list_.size() > 1) {
+                    if (this->segment_list_.size() > 0) {
                         forward_solver.clear_prev_depth();
                         backward_solver.clear_prev_depth();
                         break;

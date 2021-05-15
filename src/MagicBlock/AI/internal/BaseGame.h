@@ -28,8 +28,9 @@
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/SharedData.h"
 #include "MagicBlock/AI/ErrorCode.h"
-#include "MagicBlock/AI/Utils.h"
+#include "MagicBlock/AI/Console.h"
 #include "MagicBlock/AI/StopWatch.h"
+#include "MagicBlock/AI/Utils.h"
 
 //
 // Two endpoint / two leg algorithm

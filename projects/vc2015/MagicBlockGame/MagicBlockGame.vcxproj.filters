@@ -121,12 +121,21 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\BaseBWSolver.h">
       <Filter>src\TwoEndpoint</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Console.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\get_char.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlock\AI\UnitTest.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\MagicBlock\AI\Main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\MagicBlock\AI\get_char.c">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

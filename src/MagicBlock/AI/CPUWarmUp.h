@@ -22,11 +22,11 @@
 #endif
 
 namespace jtest {
-namespace CPU {
+namespace cpu {
 
 #if !defined(_MSC_VER) || (_MSC_VER >= 1800)
 
-static void warmup(int delayMillsecs)
+static void warmUp(unsigned int delayMillsecs = 1000)
 {
 #if defined(NDEBUG)
     double delayTimeLimit = (double)delayMillsecs / 1.0;
@@ -58,7 +58,7 @@ static void warmup(int delayMillsecs)
 
 #else
 
-static void warmup(DWORD delayMillsecs)
+static void warmUp(DWORD delayMillsecs = 1000)
 {
 #if defined(NDEBUG)
     volatile int sum = 0;
@@ -87,7 +87,7 @@ static void warmup(DWORD delayMillsecs)
 
 #endif // _MSC_VER
 
-} // namespace CPU
+} // namespace cpu
 } // namespace jtest
 
 #endif // JSTD_TEST_CPU_WARMUP_H

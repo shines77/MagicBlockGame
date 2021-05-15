@@ -4,8 +4,11 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "MagicBlock/AI/CPUWarmUp.h"
+
 namespace MagicBlock {
 namespace AI {
+
 namespace System {
 
 static void pause()
@@ -16,5 +19,6 @@ static void pause()
 }
 
 } // namespace System
+
 } // namespace AI
 } // namespace MagicBlock

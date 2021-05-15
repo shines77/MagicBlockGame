@@ -31,8 +31,9 @@
 #include "MagicBlock/AI/SharedData.h"
 #include "MagicBlock/AI/ErrorCode.h"
 #include "MagicBlock/AI/TwoPhase_v1/Solver.h"
-#include "MagicBlock/AI/Utils.h"
+#include "MagicBlock/AI/Console.h"
 #include "MagicBlock/AI/StopWatch.h"
+#include "MagicBlock/AI/Utils.h"
 
 namespace MagicBlock {
 namespace AI {
@@ -108,7 +109,7 @@ public:
             if (phase1_solvable) {
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
-                //System::pause();
+                //Console::readKeyLine();
 
                 const std::vector<stage_info_t> & stage_list = this->data_.phase1.stage_list;
 
@@ -199,7 +200,7 @@ public:
             if (phase1_solvable) {
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
-                //System::pause();
+                //Console::readKeyLine();
 
                 const std::vector<stage_info_t> & stage_list = this->data_.phase1.stage_list;
 
