@@ -447,28 +447,28 @@ int main(int argc, char * argv[])
     solve_sliding_puzzle<SolverId::Normal, true>();
     solve_sliding_puzzle<SolverId::Queue, true>();
 
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 0
     solve_sliding_unknown_puzzle_3x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
 
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 0
     solve_sliding_unknown_puzzle_5x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x3<SolverId::Queue, true>();
 
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 0
     solve_sliding_unknown_puzzle_5x5<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x5<SolverId::Queue, true>();
 
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 0
@@ -478,34 +478,34 @@ int main(int argc, char * argv[])
     solve_sliding_color_puzzle<SolverId::Normal, false>();
     solve_sliding_color_puzzle<SolverId::Queue, false>();
 
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
     if (1) {
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, true>();
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
-    Console::readKeyAndNewLine();
+    Console::readKeyLine();
 #endif
 
 #if 1
