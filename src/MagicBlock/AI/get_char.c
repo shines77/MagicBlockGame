@@ -30,7 +30,7 @@ int jimi_getche(void)
 
 #elif defined(__linux__)
 
-// <comment>
+//
 //
 // What is equivalent to getch() & getche() in Linux?
 //
@@ -38,7 +38,7 @@ int jimi_getche(void)
 //
 // See: http://blog.sina.com.cn/s/blog_49f9ea930100nyqc.html
 //
-// </comment>
+//
 
 //
 // clear terminator screen: "clear" command or "reset" command or printf("%s",   "\033[1H\033[2J");
