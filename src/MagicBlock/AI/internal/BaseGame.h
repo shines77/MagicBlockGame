@@ -391,7 +391,7 @@ public:
                          size_type target_len) const {
         for (size_type index = 0; index < target_len; index++) {
             if (this->is_satisfy(player, target[index])) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -430,7 +430,7 @@ public:
             if (this->partial_target_is_satisfy(board, target[index],
                                                 firstTargetX, lastTargetX,
                                                 firstTargetY, lastTargetY)) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }

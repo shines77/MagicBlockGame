@@ -57,8 +57,8 @@ public:
     typedef typename base_type::target_board_t      target_board_t;
     typedef typename base_type::phase2_callback     phase2_callback;
 
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, SolverType::Phase1_123, phase2_callback>  Phase1Solver;
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       SolverType::Phase2,     phase2_callback>  Phase2Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, SolverType::Phase1_123,     phase2_callback>  Phase1Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       SolverType::Phase2_456_789, phase2_callback>  Phase2Solver;
 
     typedef Solver<BoardX, BoardY - 2, TargetX, TargetY - 1, false, SolverType::Phase2_Compact, phase2_callback>  CompactPhase2Solver;
 

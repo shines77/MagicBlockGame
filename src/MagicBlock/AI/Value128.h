@@ -13,16 +13,24 @@ union size_u {
                 (sizeof(size_t) == 4), uint16_t, uint32_t
             >::type  half_type;
     struct {
-        half_type low, high;
+        half_type low;
+        half_type high;
     };
 
     size_t value;
 
-    size_u(size_t _value) : value(_value) {}
-    size_u(size_t _low, size_t _high) : low(half_type(_low)), high(half_type(_high)) {}
+    size_u() noexcept : value(0) {}
+    size_u(size_t _value) noexcept : value(_value) {}
+    size_u(size_t _high, size_t _low) noexcept : low(half_type(_low)), high(half_type(_high)) {}
+    size_u(const size_u & src) noexcept : value(src.value) {}
     ~size_u() {}
 
-    size_u & operator = (size_t rhs) {
+    size_u & operator = (const size_u & rhs) noexcept {
+        this->value = rhs.value;
+        return *this;
+    }
+
+    size_u & operator = (size_t rhs) noexcept {
         this->value = rhs;
         return *this;
     }

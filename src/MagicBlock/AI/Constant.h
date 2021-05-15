@@ -45,11 +45,16 @@ struct SolverType {
         Default,
         Full,
         BackwardFull,
-        Phase1_1,
-        Phase1_12,
-        Phase1_123,
         Phase2_456,
-        Phase2,
+
+        // Two-phase v1
+        Phase1_123,
+        Phase2_456_789,
+
+        // Two-phase v2
+        Phase1_123_4,
+        Phase2_56_789,
+
         Phase2_Compact
     };
 };

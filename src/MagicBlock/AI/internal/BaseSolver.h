@@ -93,14 +93,14 @@ public:
     }
 
     bool is_phase1() const {
-        return (N_SolverType == SolverType::Phase1_1 ||
-                N_SolverType == SolverType::Phase1_12 ||
-                N_SolverType == SolverType::Phase1_123);
+        return (N_SolverType == SolverType::Phase1_123 ||
+                N_SolverType == SolverType::Phase1_123_4);
     }
 
     bool is_phase2() const {
         return (N_SolverType == SolverType::Phase2_456 ||
-                N_SolverType == SolverType::Phase2 ||
+                N_SolverType == SolverType::Phase2_456_789 ||
+                N_SolverType == SolverType::Phase2_56_789 ||
                 N_SolverType == SolverType::Phase2_Compact);
     }
 
@@ -317,7 +317,7 @@ protected:
             if (this->partial_target_is_satisfy(player, target[index],
                                                 firstTargetX, lastTargetX,
                                                 firstTargetY, lastTargetY)) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -356,7 +356,7 @@ protected:
             if (this->partial_target_is_satisfy_reverse(player, target[index],
                                                         firstTargetX, lastTargetX,
                                                         firstTargetY, lastTargetY)) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -380,158 +380,6 @@ protected:
                 locked[baseY + x] = 1;
             }
         }
-    }
-
-    size_type is_satisfy_phase1_1(const Board<BoardX, BoardY> & player,
-                                  const Board<TargetX, TargetY> & target) {
-        size_type mask = 0;
-
-        // Left-Top Corner
-        static const ptrdiff_t LeftTopX = kStartX;
-        static const ptrdiff_t LeftTopY = kStartY;
-
-        if (player.cells[LeftTopY * BoardX + LeftTopX] ==
-            target.cells[0 * TargetX + 0]) {
-            count_partial_color_nums_reverse(player, 0, LeftTopX + 1, 0, LeftTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 1;
-            }
-        }
-
-        // Right-Top Corner
-        static const ptrdiff_t RightTopX = kStartX + TargetX - 1;
-        static const ptrdiff_t RightTopY = kStartY;
-
-        if (player.cells[RightTopY * BoardX + RightTopX] ==
-            target.cells[0 * TargetX + (TargetX - 1)]) {
-            count_partial_color_nums_reverse(player, RightTopX, BoardX, 0, RightTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 2;
-            }
-        }
-
-        // Left-Bottom Corner
-        static const ptrdiff_t LeftBottomX = kStartX;
-        static const ptrdiff_t LeftBottomY = kStartY + TargetY - 1;
-
-        if (player.cells[LeftBottomY * BoardX + LeftBottomX] ==
-            target.cells[(TargetY - 1) * TargetX + 0]) {
-            count_partial_color_nums_reverse(player, 0, LeftBottomX + 1, LeftBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 4;
-            }
-        }
-
-        // Right-Bottom Corner
-        static const ptrdiff_t RightBottomX = kStartX + TargetX - 1;
-        static const ptrdiff_t RightBottomY = kStartY + TargetY - 1;
-
-        if (player.cells[RightBottomY * BoardX + RightBottomX] ==
-            target.cells[(TargetY - 1) * TargetX + (TargetX - 1)]) {
-            count_partial_color_nums_reverse(player, RightBottomX, BoardX, RightBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 8;
-            }
-        }
-
-        size_u result(mask, 0);
-        return result.value;
-    }
-
-    size_type is_satisfy_phase1_1(const Board<BoardX, BoardY> & player,
-                                  const Board<TargetX, TargetY> target[4],
-                                  size_type target_len) {
-        for (size_type index = 0; index < target_len; index++) {
-            size_type mask = this->is_satisfy_phase1_1(player, target[index]);
-            if (mask != 0) {
-                size_u result(mask, index);
-                return result.value;
-            }
-        }
-
-        return 0;
-    }
-
-    size_type is_satisfy_phase1_12(const Board<BoardX, BoardY> & player,
-                                   const Board<TargetX, TargetY> & target) {
-        size_type mask = 0;
-
-        // Left-Top Corner
-        static const ptrdiff_t LeftTopX = kStartX;
-        static const ptrdiff_t LeftTopY = kStartY;
-
-        if (partial_target_is_satisfy(player, target, 0, 2, 0, 1)) {
-            count_partial_color_nums_reverse(player, 0, LeftTopX + 2, 0, LeftTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 1;
-            }
-        }
-
-        // Right-Top Corner
-        static const ptrdiff_t RightTopX = kStartX + TargetX - 1;
-        static const ptrdiff_t RightTopY = kStartY;
-
-        if (partial_target_is_satisfy(player, target, TargetX - 2, TargetX, 0, 1)) {
-            count_partial_color_nums_reverse(player, RightTopX - 1, BoardX, 0, RightTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 2;
-            }
-        }
-
-        // Left-Bottom Corner
-        static const ptrdiff_t LeftBottomX = kStartX;
-        static const ptrdiff_t LeftBottomY = kStartY + TargetY - 1;
-
-        if (partial_target_is_satisfy(player, target, 0, 2, TargetY - 1, TargetY)) {
-            count_partial_color_nums_reverse(player, 0, LeftBottomX + 2, LeftBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 4;
-            }
-        }
-
-        // Right-Bottom Corner
-        static const ptrdiff_t RightBottomX = kStartX + TargetX - 1;
-        static const ptrdiff_t RightBottomY = kStartY + TargetY - 1;
-
-        if (partial_target_is_satisfy(player, target, TargetX - 2, TargetX, TargetY - 1, TargetY)) {
-            count_partial_color_nums_reverse(player, RightBottomX - 1, BoardX, RightBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 8;
-            }
-        }
-
-        size_u result(mask, 0);
-        return result.value;
-    }
-
-    size_type is_satisfy_phase1_12(const Board<BoardX, BoardY> & player,
-                                   const Board<TargetX, TargetY> target[4],
-                                   size_type target_len) {
-        for (size_type index = 0; index < target_len; index++) {
-            size_type mask = this->is_satisfy_phase1_12(player, target[index]);
-            if (mask != 0) {
-                size_u result(mask, index);
-                return result.value;
-            }
-        }
-
-        return 0;
     }
 
     size_type adjust_phase2_board(const Board<BoardX, BoardY> & player,
@@ -740,7 +588,7 @@ protected:
             }
         }
 
-        size_u result(mask, 0);
+        size_u result(0, mask);
         return result.value;
     }
 
@@ -750,7 +598,7 @@ protected:
         for (size_type index = 0; index < target_len; index++) {
             size_type mask = this->is_satisfy_phase1_123(player, target[index], index);
             if (mask != 0) {
-                size_u result(mask, index);
+                size_u result(index, mask);
                 return result.value;
             }
         }
@@ -810,7 +658,7 @@ protected:
             assert(false);
         }
 
-        size_u result(mask, 0);
+        size_u result(0, mask);
         return result.value;
     }
 
@@ -819,7 +667,7 @@ protected:
                                     size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
             if (this->is_satisfy_phase2_456(player, target[index]) != 0) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -827,8 +675,8 @@ protected:
         return 0;
     }
 
-    size_type is_satisfy_phase2(const Board<BoardX, BoardY> & player,
-                                const Board<TargetX, TargetY> & target) {
+    size_type is_satisfy_phase2_456_789(const Board<BoardX, BoardY> & player,
+                                        const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
         // Check order: down to up
@@ -836,17 +684,17 @@ protected:
             mask |= 1;
         }
 
-        size_u result(mask, 0);
+        size_u result(0, mask);
         return result.value;
     }
 
-    size_type is_satisfy_phase2(const Board<BoardX, BoardY> & player,
-                                const Board<TargetX, TargetY> target[4],
-                                size_type target_len) {
+    size_type is_satisfy_phase2_456_789(const Board<BoardX, BoardY> & player,
+                                        const Board<TargetX, TargetY> target[4],
+                                        size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
-            size_type mask = this->is_satisfy_phase2(player, target[index]);
+            size_type mask = this->is_satisfy_phase2_456_789(player, target[index]);
             if (mask != 0) {
-                size_u result(mask, index);
+                size_u result(index, mask);
                 return result.value;
             }
         }
@@ -878,7 +726,7 @@ protected:
                               size_type target_len) const {
         for (size_type index = 0; index < target_len; index++) {
             if (this->is_satisfy_full(player, target[index])) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -889,20 +737,14 @@ protected:
     size_type is_satisfy(const Board<BoardX, BoardY> & player,
                          const Board<TargetX, TargetY> & target,
                          size_type rotate_index) {
-        if (N_SolverType == SolverType::Phase1_1) {
-            return this->is_satisfy_phase1_1(player, target);
-        }
-        if (N_SolverType == SolverType::Phase1_12) {
-            return this->is_satisfy_phase1_12(player, target);
-        }
-        else if (N_SolverType == SolverType::Phase1_123) {
+        if (N_SolverType == SolverType::Phase1_123) {
             return this->is_satisfy_phase1_123(player, target, rotate_index);
         }
         else if (N_SolverType == SolverType::Phase2_456) {
             return this->is_satisfy_phase2_456(player, target);
         }
-        else if (N_SolverType == SolverType::Phase2) {
-            return this->is_satisfy_phase2(player, target);
+        else if (N_SolverType == SolverType::Phase2_456_789) {
+            return this->is_satisfy_phase2_456_789(player, target);
         }
         else {
             return (size_type)this->is_satisfy_full(player, target);
@@ -915,20 +757,14 @@ protected:
                          const Board<TargetX, TargetY> target[4],
                          size_type target_len) {
         if (AllowRotate) {
-            if (N_SolverType == SolverType::Phase1_1) {
-                return this->is_satisfy_phase1_1(player, target, target_len);
-            }
-            if (N_SolverType == SolverType::Phase1_12) {
-                return this->is_satisfy_phase1_12(player, target, target_len);
-            }
-            else if (N_SolverType == SolverType::Phase1_123) {
+            if (N_SolverType == SolverType::Phase1_123) {
                 return this->is_satisfy_phase1_123(player, target, target_len);
             }
             else if (N_SolverType == SolverType::Phase2_456) {
                 return this->is_satisfy_phase2_456(player, target, target_len);
             }
-            else if (N_SolverType == SolverType::Phase2) {
-                return this->is_satisfy_phase2(player, target, target_len);
+            else if (N_SolverType == SolverType::Phase2_456_789) {
+                return this->is_satisfy_phase2_456_789(player, target, target_len);
             }
             else {
                 return (size_t)this->is_satisfy_full(player, target, target_len);
@@ -947,7 +783,7 @@ protected:
         for (size_type index = 0; index < target_len; index++) {
             size_type mask = this->is_satisfy(player, target[index]);
             if (mask != 0) {
-                size_u result(mask, index);
+                size_u result(index, mask);
                 return result.value;
             }
         }

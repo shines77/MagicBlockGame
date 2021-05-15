@@ -63,8 +63,8 @@ public:
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, SolverType::Phase1_123, phase2_callback>  Phase1Solver;
-    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       SolverType::Phase2,     phase2_callback>  Phase2Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, SolverType::Phase1_123,     phase2_callback>  Phase1Solver;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, false,       SolverType::Phase2_456_789, phase2_callback>  Phase2Solver;
 
 private:
     //

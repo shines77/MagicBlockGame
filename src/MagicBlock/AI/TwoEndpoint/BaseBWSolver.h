@@ -381,7 +381,7 @@ protected:
             if (this->partial_target_is_satisfy(player, target[index],
                                                 firstTargetX, lastTargetX,
                                                 firstTargetY, lastTargetY)) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -420,7 +420,7 @@ protected:
             if (this->partial_target_is_satisfy_reverse(player, target[index],
                                                         firstTargetX, lastTargetX,
                                                         firstTargetY, lastTargetY)) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -446,160 +446,94 @@ protected:
         }
     }
 
-    size_type is_satisfy_phase1_1(const Board<BoardX, BoardY> & player,
-                                  const Board<TargetX, TargetY> & target) {
-        size_type mask = 0;
+    size_type adjust_phase2_board(const Board<BoardX, BoardY> & player,
+                                  const Board<TargetX, TargetY> & target,
+                                  size_type empty_pos, size_type rotate_index,
+                                  size_type phase1_type) const {
+        size_type move_pos = size_type(-1);
 
-        // Left-Top Corner
-        static const ptrdiff_t LeftTopX = kStartX;
-        static const ptrdiff_t LeftTopY = kStartY;
+        // Top partial
+        if (phase1_type == 0) {
+            // [kStartX - 1, kStartY]
+            static const size_type empty_pos1 = kStartY * BoardX + kStartX - 1;
+            // [kStartX + TargetX, kStartY]
+            static const size_type empty_pos2 = kStartY * BoardX + kStartX + TargetX;
 
-        if (player.cells[LeftTopY * BoardX + LeftTopX] ==
-            target.cells[0 * TargetX + 0]) {
-            count_partial_color_nums_reverse(player, 0, LeftTopX + 1, 0, LeftTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 1;
+            if (empty_pos == empty_pos1) {
+                assert(player.cells[empty_pos1] == Color::Empty);
+                // [kStartX - 1, kStartY + 1]
+                move_pos = (kStartY + 1) * BoardX + kStartX - 1;
+            }
+            else if (empty_pos == empty_pos2) {
+                assert(player.cells[empty_pos2] == Color::Empty);
+                // [kStartX + TargetX, kStartY + 1]
+                move_pos = (kStartY + 1) * BoardX + kStartX + TargetX;
             }
         }
+        // Left partial
+        else if (phase1_type == 1) {
+            // [kStartX, kStartY - 1]
+            static const size_type empty_pos1 = (kStartY - 1) * BoardX + kStartX;
+            // [kStartX, kStartY + TargetY]
+            static const size_type empty_pos2 = (kStartY + TargetY) * BoardX + kStartX;
 
-        // Right-Top Corner
-        static const ptrdiff_t RightTopX = kStartX + TargetX - 1;
-        static const ptrdiff_t RightTopY = kStartY;
-
-        if (player.cells[RightTopY * BoardX + RightTopX] ==
-            target.cells[0 * TargetX + (TargetX - 1)]) {
-            count_partial_color_nums_reverse(player, RightTopX, BoardX, 0, RightTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 2;
+            if (empty_pos == empty_pos1) {
+                assert(player.cells[empty_pos1] == Color::Empty);
+                // [kStartX + 1, kStartY - 1]
+                move_pos = (kStartY - 1) * BoardX + kStartX + 1;
+            }
+            else if (empty_pos == empty_pos2) {
+                assert(player.cells[empty_pos2] == Color::Empty);
+                // [kStartX + 1, kStartY + TargetY]
+                move_pos = (kStartY + TargetY) * BoardX + kStartX + 1;
             }
         }
+        // Right partial
+        else if (phase1_type == 2) {
+            // [kStartX + TargetX - 1, kStartY - 1]
+            static const size_type empty_pos1 = (kStartY - 1) * BoardX + kStartX + TargetX - 1;
+            // [kStartX + TargetX - 1, kStartY + TargetY]
+            static const size_type empty_pos2 = (kStartY + TargetY) * BoardX + kStartX + TargetX - 1;
 
-        // Left-Bottom Corner
-        static const ptrdiff_t LeftBottomX = kStartX;
-        static const ptrdiff_t LeftBottomY = kStartY + TargetY - 1;
-
-        if (player.cells[LeftBottomY * BoardX + LeftBottomX] ==
-            target.cells[(TargetY - 1) * TargetX + 0]) {
-            count_partial_color_nums_reverse(player, 0, LeftBottomX + 1, LeftBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 4;
+            if (empty_pos == empty_pos1) {
+                assert(player.cells[empty_pos1] == Color::Empty);
+                // [kStartX + TargetX - 2, kStartY - 1]
+                move_pos = (kStartY - 1) * BoardX + kStartX + TargetX - 2;
+            }
+            else if (empty_pos == empty_pos2) {
+                assert(player.cells[empty_pos2] == Color::Empty);
+                // [kStartX + TargetX - 2, kStartY + TargetY]
+                move_pos = (kStartY + TargetY) * BoardX + kStartX + TargetX - 2;
             }
         }
+        // Bottom partial
+        else if (phase1_type == 3) {
+            // [kStartX - 1, kStartY + TargetY - 1]
+            static const size_type empty_pos1 = (kStartY + TargetY - 1) * BoardX + kStartX - 1;
+            // [kStartX + TargetX, kStartY + TargetY - 1]
+            static const size_type empty_pos2 = (kStartY + TargetY - 1) * BoardX + kStartX + TargetX;
 
-        // Right-Bottom Corner
-        static const ptrdiff_t RightBottomX = kStartX + TargetX - 1;
-        static const ptrdiff_t RightBottomY = kStartY + TargetY - 1;
-
-        if (player.cells[RightBottomY * BoardX + RightBottomX] ==
-            target.cells[(TargetY - 1) * TargetX + (TargetX - 1)]) {
-            count_partial_color_nums_reverse(player, RightBottomX, BoardX, RightBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 8;
+            if (empty_pos == empty_pos1) {
+                assert(player.cells[empty_pos1] == Color::Empty);
+                // [kStartX - 1, kStartY + TargetY - 2]
+                move_pos = (kStartY + TargetY - 2) * BoardX + kStartX - 1;
+            }
+            else if (empty_pos == empty_pos2) {
+                assert(player.cells[empty_pos2] == Color::Empty);
+                // [kStartX + TargetX, kStartY + TargetY - 2]
+                move_pos = (kStartY + TargetY - 2) * BoardX + kStartX + TargetX;
             }
         }
-
-        size_u result(mask, 0);
-        return result.value;
-    }
-
-    size_type is_satisfy_phase1_1(const Board<BoardX, BoardY> & player,
-                                  const Board<TargetX, TargetY> target[4],
-                                  size_type target_len) {
-        for (size_type index = 0; index < target_len; index++) {
-            size_type mask = this->is_satisfy_phase1_1(player, target[index]);
-            if (mask != 0) {
-                size_u result(mask, index);
-                return result.value;
-            }
+        else {
+            assert(false);
         }
 
-        return 0;
-    }
-
-    size_type is_satisfy_phase1_12(const Board<BoardX, BoardY> & player,
-                                   const Board<TargetX, TargetY> & target) {
-        size_type mask = 0;
-
-        // Left-Top Corner
-        static const ptrdiff_t LeftTopX = kStartX;
-        static const ptrdiff_t LeftTopY = kStartY;
-
-        if (partial_target_is_satisfy(player, target, 0, 2, 0, 1)) {
-            count_partial_color_nums_reverse(player, 0, LeftTopX + 2, 0, LeftTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 1;
-            }
-        }
-
-        // Right-Top Corner
-        static const ptrdiff_t RightTopX = kStartX + TargetX - 1;
-        static const ptrdiff_t RightTopY = kStartY;
-
-        if (partial_target_is_satisfy(player, target, TargetX - 2, TargetX, 0, 1)) {
-            count_partial_color_nums_reverse(player, RightTopX - 1, BoardX, 0, RightTopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 2;
-            }
-        }
-
-        // Left-Bottom Corner
-        static const ptrdiff_t LeftBottomX = kStartX;
-        static const ptrdiff_t LeftBottomY = kStartY + TargetY - 1;
-
-        if (partial_target_is_satisfy(player, target, 0, 2, TargetY - 1, TargetY)) {
-            count_partial_color_nums_reverse(player, 0, LeftBottomX + 2, LeftBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 4;
-            }
-        }
-
-        // Right-Bottom Corner
-        static const ptrdiff_t RightBottomX = kStartX + TargetX - 1;
-        static const ptrdiff_t RightBottomY = kStartY + TargetY - 1;
-
-        if (partial_target_is_satisfy(player, target, TargetX - 2, TargetX, TargetY - 1, TargetY)) {
-            count_partial_color_nums_reverse(player, RightBottomX - 1, BoardX, RightBottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
-                if (is_valid)
-                    mask |= 8;
-            }
-        }
-
-        size_u result(mask, 0);
-        return result.value;
-    }
-
-    size_type is_satisfy_phase1_12(const Board<BoardX, BoardY> & player,
-                                   const Board<TargetX, TargetY> target[4],
-                                   size_type target_len) {
-        for (size_type index = 0; index < target_len; index++) {
-            size_type mask = this->is_satisfy_phase1_12(player, target[index]);
-            if (mask != 0) {
-                size_u result(mask, index);
-                return result.value;
-            }
-        }
-
-        return 0;
+        return move_pos;
     }
 
     size_type is_satisfy_phase1_123(const Board<BoardX, BoardY> & player,
-                                    const Board<TargetX, TargetY> & target) {
+                                    const Board<TargetX, TargetY> & target,
+                                    size_type rotate_index) {
         size_type mask = 0;
 
         // Top partial
@@ -607,8 +541,25 @@ protected:
 
         if (partial_target_is_satisfy(player, target, 0, TargetX, 0, 1)) {
             count_partial_color_nums_reverse(player, 0, BoardX, 0, TopY + 1);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
+            size_type empties = this->partial_colors_[Color::Empty];
+            if (empties == 0) {
+                // [kStartX - 1, kStartY]
+                if (player.cells[kStartY * BoardX + kStartX - 1] == Color::Empty) {
+                    // [kStartX - 1, kStartY + 1]
+                    size_type clr = player.cells[(kStartY + 1) * BoardX + kStartX - 1];
+                    this->partial_colors_[clr]--;
+                    empties++;
+                }
+                // [kStartX + TargetX, kStartY]
+                else if (player.cells[kStartY * BoardX + kStartX + TargetX] == Color::Empty) {
+                    // [kStartX + TargetX, kStartY + 1]
+                    size_type clr = player.cells[(kStartY + 1) * BoardX + kStartX + TargetX];
+                    this->partial_colors_[clr]--;
+                    empties++;
+                }
+            }
+            if (empties == 1) {
+                bool is_valid = this->check_partial_color_nums(rotate_index, 0);
                 if (is_valid)
                     mask |= 1;
             }
@@ -619,8 +570,25 @@ protected:
 
         if (partial_target_is_satisfy(player, target, 0, 1, 0, TargetY)) {
             count_partial_color_nums_reverse(player, 0, LeftX + 1, 0, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
+            size_type empties = this->partial_colors_[Color::Empty];
+            if (empties == 0) {
+                // [kStartX, kStartY - 1]
+                if (player.cells[(kStartY - 1) * BoardX + kStartX] == Color::Empty) {
+                    // [kStartX + 1, kStartY - 1]
+                    size_type clr = player.cells[(kStartY - 1) * BoardX + kStartX + 1];
+                    this->partial_colors_[clr]--;
+                    empties++;
+                }
+                // [kStartX, kStartY + TargetY]
+                else if (player.cells[(kStartY + TargetY) * BoardX + kStartX] == Color::Empty) {
+                    // [kStartX + 1, kStartY + TargetY]
+                    size_type clr = player.cells[(kStartY + TargetY) * BoardX + kStartX + 1];
+                    this->partial_colors_[clr]--;
+                    empties++;
+                }
+            }
+            if (empties == 1) {
+                bool is_valid = this->check_partial_color_nums(rotate_index, 1);
                 if (is_valid)
                     mask |= 2;
             }
@@ -631,8 +599,25 @@ protected:
 
         if (partial_target_is_satisfy(player, target, TargetX - 1, TargetX, 0, TargetY)) {
             count_partial_color_nums_reverse(player, RightX, BoardX, 0, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
+            size_type empties = this->partial_colors_[Color::Empty];
+            if (empties == 0) {
+                // [kStartX + TargetX - 1, kStartY - 1]
+                if (player.cells[(kStartY - 1) * BoardX + kStartX + TargetX - 1] == Color::Empty) {
+                    // [kStartX + TargetX - 2, kStartY - 1]
+                    size_type clr = player.cells[(kStartY - 1) * BoardX + kStartX + TargetX - 2];
+                    this->partial_colors_[clr]--;
+                    empties++;
+                }
+                // [kStartX + TargetX - 1, kStartY + TargetY]
+                else if (player.cells[(kStartY + TargetY) * BoardX + kStartX + TargetX - 1] == Color::Empty) {
+                    // [kStartX + TargetX - 2, kStartY + TargetY]
+                    size_type clr = player.cells[(kStartY + TargetY) * BoardX + kStartX + TargetX - 2];
+                    this->partial_colors_[clr]--;
+                    empties++;
+                }
+            }
+            if (empties == 1) {
+                bool is_valid = this->check_partial_color_nums(rotate_index, 2);
                 if (is_valid)
                     mask |= 4;
             }
@@ -643,14 +628,31 @@ protected:
 
         if (partial_target_is_satisfy(player, target, 0, TargetX, TargetY - 1, TargetY)) {
             count_partial_color_nums_reverse(player, 0, BoardX, BottomY, BoardY);
-            if (this->partial_colors_[Color::Empty] == 1) {
-                bool is_valid = check_partial_color_nums();
+            size_type empties = this->partial_colors_[Color::Empty];
+            if (empties == 0) {
+                // [kStartX - 1, kStartY + TargetY - 1]
+                if (player.cells[(kStartY + TargetY - 1) * BoardX + kStartX - 1] == Color::Empty) {
+                    // [kStartX - 1, kStartY + TargetY - 2]
+                    size_type clr = player.cells[(kStartY + TargetY - 2) * BoardX + kStartX - 1];
+                    this->partial_colors_[clr]--;
+                    empties++;
+                }
+                // [kStartX + TargetX, kStartY + TargetY - 1]
+                else if (player.cells[(kStartY + TargetY - 1) * BoardX + kStartX + TargetX] == Color::Empty) {
+                    // [kStartX + TargetX, kStartY + TargetY - 2]
+                    size_type clr = player.cells[(kStartY + TargetY - 2) * BoardX + kStartX + TargetX];
+                    this->partial_colors_[clr]--;
+                    empties++;
+                }
+            }
+            if (empties == 1) {
+                bool is_valid = this->check_partial_color_nums(rotate_index, 3);
                 if (is_valid)
                     mask |= 8;
             }
         }
 
-        size_u result(mask, 0);
+        size_u result(0, mask);
         return result.value;
     }
 
@@ -658,9 +660,9 @@ protected:
                                     const Board<TargetX, TargetY> target[4],
                                     size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
-            size_type mask = this->is_satisfy_phase1_123(player, target[index]);
+            size_type mask = this->is_satisfy_phase1_123(player, target[index], index);
             if (mask != 0) {
-                size_u result(mask, index);
+                size_u result(index, mask);
                 return result.value;
             }
         }
@@ -720,7 +722,7 @@ protected:
             assert(false);
         }
 
-        size_u result(mask, 0);
+        size_u result(0, mask);
         return result.value;
     }
 
@@ -729,7 +731,7 @@ protected:
                                     size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
             if (this->is_satisfy_phase2_456(player, target[index]) != 0) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -737,8 +739,8 @@ protected:
         return 0;
     }
 
-    size_type is_satisfy_phase2(const Board<BoardX, BoardY> & player,
-                                const Board<TargetX, TargetY> & target) {
+    size_type is_satisfy_phase2_456_789(const Board<BoardX, BoardY> & player,
+                                        const Board<TargetX, TargetY> & target) {
         size_type mask = 0;
 
         // Check order: down to up
@@ -746,17 +748,17 @@ protected:
             mask |= 1;
         }
 
-        size_u result(mask, 0);
+        size_u result(0, mask);
         return result.value;
     }
 
-    size_type is_satisfy_phase2(const Board<BoardX, BoardY> & player,
-                                const Board<TargetX, TargetY> target[4],
-                                size_type target_len) {
+    size_type is_satisfy_phase2_456_789(const Board<BoardX, BoardY> & player,
+                                        const Board<TargetX, TargetY> target[4],
+                                        size_type target_len) {
         for (size_type index = 0; index < target_len; index++) {
             size_type mask = this->is_satisfy_phase2(player, target[index]);
             if (mask != 0) {
-                size_u result(mask, index);
+                size_u result(index, mask);
                 return result.value;
             }
         }
@@ -788,7 +790,7 @@ protected:
                               size_type target_len) const {
         for (size_type index = 0; index < target_len; index++) {
             if (this->is_satisfy_full(player, target[index])) {
-                size_u result(1, index);
+                size_u result(index, 1);
                 return result.value;
             }
         }
@@ -798,20 +800,14 @@ protected:
 
     size_type is_satisfy(const Board<BoardX, BoardY> & player,
                          const Board<TargetX, TargetY> & target) {
-        if (N_SolverType == SolverType::Phase1_1) {
-            return this->is_satisfy_phase1_1(player, target);
-        }
-        if (N_SolverType == SolverType::Phase1_12) {
-            return this->is_satisfy_phase1_12(player, target);
-        }
-        else if (N_SolverType == SolverType::Phase1_123) {
+        if (N_SolverType == SolverType::Phase1_123) {
             return this->is_satisfy_phase1_123(player, target);
         }
         else if (N_SolverType == SolverType::Phase2_456) {
             return this->is_satisfy_phase2_456(player, target);
         }
-        else if (N_SolverType == SolverType::Phase2) {
-            return this->is_satisfy_phase2(player, target);
+        else if (N_SolverType == SolverType::Phase2_456_789) {
+            return this->is_satisfy_phase2_456_789(player, target);
         }
         else {
             return (size_type)this->is_satisfy_full(player, target);
@@ -824,20 +820,14 @@ protected:
                          const Board<TargetX, TargetY> target[4],
                          size_type target_len) {
         if (AllowRotate) {
-            if (N_SolverType == SolverType::Phase1_1) {
-                return this->is_satisfy_phase1_1(player, target, target_len);
-            }
-            if (N_SolverType == SolverType::Phase1_12) {
-                return this->is_satisfy_phase1_12(player, target, target_len);
-            }
-            else if (N_SolverType == SolverType::Phase1_123) {
+            if (N_SolverType == SolverType::Phase1_123) {
                 return this->is_satisfy_phase1_123(player, target, target_len);
             }
             else if (N_SolverType == SolverType::Phase2_456) {
                 return this->is_satisfy_phase2_456(player, target, target_len);
             }
-            else if (N_SolverType == SolverType::Phase2) {
-                return this->is_satisfy_phase2(player, target, target_len);
+            else if (N_SolverType == SolverType::Phase2_456_789) {
+                return this->is_satisfy_phase2_456_789(player, target, target_len);
             }
             else {
                 return (size_t)this->is_satisfy_full(player, target, target_len);
@@ -856,7 +846,7 @@ protected:
         for (size_type index = 0; index < target_len; index++) {
             size_type mask = this->is_satisfy(player, target[index]);
             if (mask != 0) {
-                size_u result(mask, index);
+                size_u result(index, mask);
                 return result.value;
             }
         }
