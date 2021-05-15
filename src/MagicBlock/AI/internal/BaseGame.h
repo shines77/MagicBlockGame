@@ -203,7 +203,7 @@ public:
             if (ErrorCode::isFailure(err_code)) {
                 char err_info[256] = {0};
                 snprintf(err_info, sizeof(err_info) - 1,
-                         "MagicBlockBaseGame::readConfig() Error code: %d, reason: %s",
+                         "internal::BaseGame::readConfig() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
                 //throw std::runtime_error(err_info);
                 printf("%s\n\n", err_info);
@@ -243,7 +243,7 @@ public:
             if (ErrorCode::isFailure(err_code)) {
                 char err_info[256] = {0};
                 snprintf(err_info, sizeof(err_info) - 1,
-                         "BaseGame::verify_board() Error code: %d, reason: %s",
+                         "internal::BaseGame::verify_board() Error code: %d, reason: %s",
                          err_code, ErrorCode::toString(err_code));
                 printf("%s\n\n", err_info);
             }

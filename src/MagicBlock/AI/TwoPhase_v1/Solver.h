@@ -168,12 +168,8 @@ public:
         assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
         this->rotate_type_ = rotate_type;
         size_type rotate_index = this->toRotateIndex(rotate_type);
-        if (rotate_index != size_type(-1)) {
-            this->init_target_board_locked(rotate_index);
-        }
-        else {
-            printf("TwoPhase_v1::Solver::setRotateType(%u) failed.\n\n", uint32_t(rotate_type));
-        }
+        assert(rotate_index != size_type(-1));
+        this->init_target_board_locked(rotate_index);
     }
 
     bool record_phase1_min_info(size_type depth, size_type rotate_type,
