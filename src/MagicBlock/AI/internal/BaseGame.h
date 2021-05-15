@@ -458,16 +458,6 @@ public:
         player_board_t::template display_answer<BoardX>(answer);
     }
 
-    void displayAnswerMovesOnly() const {
-        this->displayAnswerMoves(this->best_answer_);
-    }
-
-    void displayAnswerMoves() {
-        if (this->translateMovePath(this->best_move_path_, this->best_answer_)) {
-            this->displayAnswerMoves(this->best_answer_);
-        }
-    }
-
     void displayAnswerMoves(const std::vector<Position> & move_path) const {
         std::vector<MoveInfo> answer;
         if (this->translateMovePath(move_path, answer)) {
@@ -479,6 +469,16 @@ public:
         std::vector<MoveInfo> answer;
         if (this->translateMovePath(target_stage, answer)) {
             this->displayAnswerMoves(answer);
+        }
+    }
+
+    void displayBestAnswerMovesOnly() const {
+        this->displayAnswerMoves(this->best_answer_);
+    }
+
+    void displayBestAnswerMoves() {
+        if (this->translateMovePath(this->best_move_path_, this->best_answer_)) {
+            this->displayAnswerMoves(this->best_answer_);
         }
     }
 };

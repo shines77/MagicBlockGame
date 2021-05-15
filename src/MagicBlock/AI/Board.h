@@ -256,13 +256,13 @@ union Board
         }
         printf("\n");
         for (size_type y = 0; y < BoardY; y++) {
-            printf(" ");
+            printf("| ");
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t color = board.cells[y * BoardX + x];
                 assert(color >= Color::First && color < Color::Maximum);
                 printf("%s ", Color::colorToChar(color));
             }
-            printf("\n");
+            printf("|\n");
         }
         // -------
         for (size_type x = 0; x < BoardX * 2 + 1; x++) {

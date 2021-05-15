@@ -418,8 +418,8 @@ public:
                             if (total_steps < this->min_steps_) {
                                 solvable = true;
 
-                                Board<TargetX, TargetY>::display_board("Target board:", forward_solver.getTargetBoard());
                                 Board<BoardX, BoardY>::display_board("Player board:", forward_solver.getPlayerBoard());
+                                Board<TargetX, TargetY>::display_board("Target board:", forward_solver.getTargetBoard());
 
                                 Board<BoardX, BoardY>::display_board("Forward answer:", this->fw_answer_board_);
                                 Board<BoardX, BoardY>::display_board("Backward answer:", this->bw_answer_board_);
@@ -444,7 +444,7 @@ public:
                                 this->best_move_path_ = this->move_path_;
                                 printf("Total moves: %u\n\n", (uint32_t)this->best_move_path_.size());
 
-                                this->displayAnswerMoves(this->best_move_path_);
+                                this->displayBestAnswerMoves();
                                 //System::pause();
                             }
                         }
@@ -474,7 +474,7 @@ public:
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 
-                this->displayAnswerMoves(this->best_move_path_);
+                this->displayBestAnswerMoves();
             }
         }
 
