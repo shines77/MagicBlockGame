@@ -30,19 +30,19 @@ int jimi_getche(void)
 
 #elif defined(__linux__)
 
-/// <comment>
-///
-/// What is equivalent to getch() & getche() in Linux?
-///
-/// From: http://stackoverflow.com/questions/7469139/what-is-equivalent-to-getch-getche-in-linux
-///
-/// See: http://blog.sina.com.cn/s/blog_49f9ea930100nyqc.html
-///
-/// </comment>
+// <comment>
+//
+// What is equivalent to getch() & getche() in Linux?
+//
+// From: http://stackoverflow.com/questions/7469139/what-is-equivalent-to-getch-getche-in-linux
+//
+// See: http://blog.sina.com.cn/s/blog_49f9ea930100nyqc.html
+//
+// </comment>
 
-///
-/// clear terminator screen: "clear" command or "reset" command or printf("%s",   "\033[1H\033[2J");
-///
+//
+// clear terminator screen: "clear" command or "reset" command or printf("%s",   "\033[1H\033[2J");
+//
 
 static struct termios s_term_old;
 
