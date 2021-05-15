@@ -251,6 +251,7 @@ union Board
     static void display_board(const char * title, const this_type & board) {
         printf("%s\n\n", title);
         // -------
+        printf(" ");
         for (size_type x = 0; x < BoardX * 2 + 1; x++) {
             printf("-");
         }
@@ -265,6 +266,7 @@ union Board
             printf("|\n");
         }
         // -------
+        printf(" ");
         for (size_type x = 0; x < BoardX * 2 + 1; x++) {
             printf("-");
         }

@@ -323,7 +323,7 @@ struct MoveInfo {
     uint8_t     color;
     uint8_t     dir;
 
-    MoveInfo() noexcept : from_pos(0), to_pos(0), color(Color::Empty), dir(0) {}
+    MoveInfo() noexcept : from_pos(0), to_pos(0), color(Color::First), dir(0) {}
 
     MoveInfo(const MoveInfo & src) noexcept {
         this->from_pos  = src.from_pos;
