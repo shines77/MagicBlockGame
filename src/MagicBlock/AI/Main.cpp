@@ -26,10 +26,10 @@
 #include <cstring>
 
 #include "MagicBlock/AI/ErrorCode.h"
-#include "MagicBlock/AI/SlidingPuzzle.h"
-#include "MagicBlock/AI/SlidingUnknownPuzzle.h"
-#include "MagicBlock/AI/SlidingUnknownPuzzle3x3.h"
-#include "MagicBlock/AI/SlidingColorPuzzle.h"
+#include "MagicBlock/AI/SlidingPuzzle/SlidingPuzzle.h"
+#include "MagicBlock/AI/SlidingPuzzle/SlidingUnknownPuzzle.h"
+#include "MagicBlock/AI/SlidingPuzzle/SlidingUnknownPuzzle3x3.h"
+#include "MagicBlock/AI/SlidingPuzzle/SlidingColorPuzzle.h"
 #include "MagicBlock/AI/TwoPhase_v1/Game.h"
 #include "MagicBlock/AI/TwoEndpoint/Game.h"
 #include "MagicBlock/AI/Algorithm.h"

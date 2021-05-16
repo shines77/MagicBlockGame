@@ -33,10 +33,10 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Move.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SharedData.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingColorPuzzle.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingUnknownPuzzle.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingUnknownPuzzle3x3.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle\SlidingColorPuzzle.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle\SlidingPuzzle.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle\SlidingUnknownPuzzle.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle\SlidingUnknownPuzzle3x3.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SparseBitset.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Stage.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\StopWatch.h" />
