@@ -102,11 +102,11 @@ public:
         : start_board(_start_board), move_path(std::forward<move_path_t>(_move_path)) {}
 
     Answer(board_type * _start_board, const move_path_t & _move_path, const board_type & _final_board) noexcept
-        : start_board(_start_board), move_path(_move_path), final_board(_final_board) {}
+        : start_board(_start_board), final_board(_final_board), move_path(_move_path) {}
 
     Answer(board_type * _start_board, move_path_t && _move_path, board_type && _final_board) noexcept
-        : start_board(_start_board), move_path(std::forward<move_path_t>(_move_path)),
-          final_board(std::forward<board_type>(_final_board)) {}
+        : start_board(_start_board), final_board(std::forward<board_type>(_final_board)),
+          move_path(std::forward<move_path_t>(_move_path)) {}
 
     Answer(const this_type & src)
         : start_board(src.start_board), final_board(src.final_board),
