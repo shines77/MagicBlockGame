@@ -18,6 +18,8 @@
 #define _USE_SSE2_  1
 #define _USE_AVX2_  1
 
+#define DISABLE_CPU_WARM_UP
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdlib>
@@ -164,7 +166,7 @@ void solve_sliding_unknown_puzzle_3x3()
     bool solvable;
     jtest::StopWatch sw;
 
-    slidingPuzzle.display_boards();
+    slidingPuzzle.display_start_boards();
 
     sw.start();
     if (N_SolverId == SolverId::Queue) {
@@ -207,7 +209,7 @@ void solve_sliding_unknown_puzzle_5x3()
     bool solvable;
     jtest::StopWatch sw;
 
-    slidingPuzzle.display_boards();
+    slidingPuzzle.display_start_boards();
 
     sw.start();
     if (N_SolverId == SolverId::Queue) {
@@ -250,7 +252,7 @@ void solve_sliding_unknown_puzzle_5x5()
     bool solvable;
     jtest::StopWatch sw;
 
-    slidingPuzzle.display_boards();
+    slidingPuzzle.display_start_boards();
 
     sw.start();
     if (N_SolverId == SolverId::Queue) {
@@ -450,7 +452,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 0
+#if 1
     solve_sliding_unknown_puzzle_3x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
 
@@ -464,7 +466,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 0
+#if 1
     solve_sliding_unknown_puzzle_5x5<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x5<SolverId::Queue, true>();
 
@@ -481,7 +483,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-    if (1) {
+    if (0) {
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();

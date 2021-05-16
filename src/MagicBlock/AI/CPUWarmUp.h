@@ -28,6 +28,7 @@ namespace cpu {
 
 static void warmUp(unsigned int delayMillsecs = 1000)
 {
+#if !defined(DISABLE_CPU_WARM_UP)
 #if defined(NDEBUG)
     double delayTimeLimit = (double)delayMillsecs / 1.0;
     volatile int sum = 0;
@@ -54,12 +55,14 @@ static void warmUp(unsigned int delayMillsecs = 1000)
     printf("------------------------------------------\n\n");
     ::fflush(stdout);
 #endif // !_DEBUG
+#endif // !DISABLE_CPU_WARM_UP
 }
 
 #else
 
 static void warmUp(DWORD delayMillsecs = 1000)
 {
+#if !defined(DISABLE_CPU_WARM_UP)
 #if defined(NDEBUG)
     volatile int sum = 0;
 
@@ -83,6 +86,7 @@ static void warmUp(DWORD delayMillsecs = 1000)
     printf("CPU warm-up end   ... \n\n");
     ::fflush(stdout);
 #endif // !_DEBUG
+#endif // !DISABLE_CPU_WARM_UP
 }
 
 #endif // _MSC_VER

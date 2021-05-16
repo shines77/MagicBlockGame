@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Algorithm.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\Answer.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\BitUtils.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Board.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Color.h" />

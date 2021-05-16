@@ -18,6 +18,7 @@
 #include "MagicBlock/AI/Move.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
+#include "MagicBlock/AI/Answer.h"
 #include "MagicBlock/AI/ErrorCode.h"
 #include "MagicBlock/AI/BitSet.h"
 
@@ -27,7 +28,7 @@ namespace AI {
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t MaxValidValue = 6, std::size_t GridBits = 3,
           bool SearchAllAnswers = false>
-class SlidingUnknownPuzzle
+class SlidingUnknownPuzzle : public MultiAnswerGame<BoardX, BoardY>
 {
 public:
     typedef std::size_t         size_type;
@@ -55,18 +56,12 @@ private:
     player_board_t player_board_;
     target_board_t target_board_;
 
-    size_type map_used_;
     bool has_unknown_;
 
     int player_num_cnt_[MaxNumber];
     int target_num_cnt_[MaxNumber];
 
     std::vector<Move> empty_moves_[BoardSize];
-
-    std::vector<Board<BoardX, BoardY>> best_answer_list_;
-
-    std::vector<Position> best_move_path_;
-    std::vector<MoveInfo> best_answer_;
 
     void init() {
         for (size_type num = 0; num < MaxNumber; num++) {
@@ -96,25 +91,13 @@ private:
     }
 
 public:
-    SlidingUnknownPuzzle() : map_used_(0), has_unknown_(false) {
+    SlidingUnknownPuzzle() : has_unknown_(false) {
         static_assert((MaxValidValue <= MaxValidNumber), "Error: [MaxValidValue] must less than or equal [MaxValidNumber].");
         static_assert((GridBits <= 3), "Error: [GridBits] must less than or equal 3.");
         this->init();
     }
 
     ~SlidingUnknownPuzzle() {}
-
-    size_type getMinSteps() const {
-        return this->best_move_path_.size();
-    }
-
-    const std::vector<Position> & getMovePath() const {
-        return this->best_move_path_;
-    }
-
-    size_type getMapUsed() const {
-        return this->map_used_;
-    }
 
     static uint8_t charToNumber(uint8_t ch) {
         if (ch >= '1' && ch <= '9') {
@@ -412,9 +395,20 @@ public:
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->best_move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            this->best_answer_list_.push_back(next_stage.board);
+                            size_type total_steps = next_stage.move_path.size();
+                            assert((depth + 1) == total_steps);
+                            if (this->isMinSteps(total_steps)) {
+                                this->setMinSteps(total_steps);
+                                this->clearAllAnswers();
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
+                            else if (this->isEqualMinSteps(total_steps)) {
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -445,7 +439,7 @@ public:
                 }
             }
 
-            this->map_used_ = visited.size();
+            this->setMapUsed(visited.size());
 
             if (solvable) {
                 //
@@ -511,9 +505,20 @@ public:
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->best_move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            this->best_answer_list_.push_back(next_stage.board);
+                            size_type total_steps = next_stage.move_path.size();
+                            assert((depth + 1) == total_steps);
+                            if (this->isMinSteps(total_steps)) {
+                                this->setMinSteps(total_steps);
+                                this->clearAllAnswers();
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
+                            else if (this->isEqualMinSteps(total_steps)) {
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -545,7 +550,7 @@ public:
                 }
             }
 
-            this->map_used_ = visited.size();
+            this->setMapUsed(visited.size());
 
             if (solvable) {
                 //
@@ -611,9 +616,20 @@ public:
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->best_move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            this->best_answer_list_.push_back(next_stage.board);
+                            size_type total_steps = next_stage.move_path.size();
+                            assert((depth + 1) == total_steps);
+                            if (this->isMinSteps(total_steps)) {
+                                this->setMinSteps(total_steps);
+                                this->clearAllAnswers();
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
+                            else if (this->isEqualMinSteps(total_steps)) {
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -644,7 +660,7 @@ public:
                 }
             }
 
-            this->map_used_ = visited.size();
+            this->setMapUsed(visited.size());
 
             if (solvable) {
                 //
@@ -710,9 +726,20 @@ public:
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->best_move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            this->best_answer_list_.push_back(next_stage.board);
+                            size_type total_steps = next_stage.move_path.size();
+                            assert((depth + 1) == total_steps);
+                            if (this->isMinSteps(total_steps)) {
+                                this->setMinSteps(total_steps);
+                                this->clearAllAnswers();
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
+                            else if (this->isEqualMinSteps(total_steps)) {
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -744,7 +771,7 @@ public:
                 }
             }
 
-            this->map_used_ = visited.size();
+            this->setMapUsed(visited.size());
 
             if (solvable) {
                 //
@@ -810,9 +837,20 @@ public:
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->best_move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            this->best_answer_list_.push_back(next_stage.board);
+                            size_type total_steps = next_stage.move_path.size();
+                            assert((depth + 1) == total_steps);
+                            if (this->isMinSteps(total_steps)) {
+                                this->setMinSteps(total_steps);
+                                this->clearAllAnswers();
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
+                            else if (this->isEqualMinSteps(total_steps)) {
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -843,7 +881,7 @@ public:
                 }
             }
 
-            this->map_used_ = visited.size();
+            this->setMapUsed(visited.size());
 
             if (solvable) {
                 //
@@ -909,9 +947,20 @@ public:
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->best_move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            this->best_answer_list_.push_back(next_stage.board);
+                            size_type total_steps = next_stage.move_path.size();
+                            assert((depth + 1) == total_steps);
+                            if (this->isMinSteps(total_steps)) {
+                                this->setMinSteps(total_steps);
+                                this->clearAllAnswers();
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
+                            else if (this->isEqualMinSteps(total_steps)) {
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -943,7 +992,7 @@ public:
                 }
             }
 
-            this->map_used_ = visited.size();
+            this->setMapUsed(visited.size());
 
             if (solvable) {
                 //
@@ -953,57 +1002,26 @@ public:
         return solvable;
     }
 
-    void display_boards() {
+    void display_start_boards() {
         Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Player Board", this->player_board_);
         Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
     }
 
     void display_answer_boards() {
-        this->display_boards();
-        if (SearchAllAnswers && this->best_answer_list_.size() > 1)
-            Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->best_answer_list_);
-        else
-            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->best_answer_list_[0]);
-        this->displayAnswerMoves();
-    }
+        this->display_start_boards();
 
-    bool translateMovePath(const std::vector<Position> & move_path, std::vector<MoveInfo> & answer) const {
-        return this->player_board_.translate_move_path(move_path, answer);
-    }
-
-    bool translateMovePath(const std::vector<Position> & move_path) {
-        return this->translateMovePath(move_path, this->best_answer_);
-    }
-
-    bool translateMovePath(const stage_type & target_stage) {
-        return this->translateMovePath(target_stage.move_path);
-    }
-
-    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & answer) {
-        return this->translateMovePath(target_stage.move_path, answer);
-    }
-
-    void displayAnswerMoves(const std::vector<MoveInfo> & answer) const {
-        player_board_t::template display_answer<BoardX>(answer);
-    }
-
-    void displayAnswerMoves() {
-        if (this->translateMovePath(this->best_move_path_, this->best_answer_)) {
-            this->displayAnswerMoves(this->best_answer_);
+        size_type answer_count = this->getAnswerCount();
+        if (SearchAllAnswers && answer_count > 1) {
+            for (size_type i = 0; i < answer_count; i++) {
+                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
+                    "Answer Board", i, this->best_answer_list_[i].final_board);
+                this->displayAnswerMoves(i);
+            }
         }
-    }
-
-    void displayAnswerMoves(const std::vector<Position> & move_path) const {
-        std::vector<MoveInfo> answer;
-        if (this->translateMovePath(move_path, answer)) {
-            this->displayAnswerMoves(answer);
-        }
-    }
-
-    void displayAnswerMoves(const stage_type & target_stage) {
-        std::vector<MoveInfo> answer;
-        if (this->translateMovePath(target_stage, answer)) {
-            this->displayAnswerMoves(answer);
+        else {
+            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
+                "Answer Board", this->best_answer_list_[0].final_board);
+            this->displayAnswerMoves(0);
         }
     }
 };

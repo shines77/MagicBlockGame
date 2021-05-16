@@ -17,6 +17,7 @@
 #include "MagicBlock/AI/Move.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
+#include "MagicBlock/AI/Answer.h"
 #include "MagicBlock/AI/ErrorCode.h"
 #include "MagicBlock/AI/BitSet.h"
 
@@ -26,7 +27,7 @@ namespace AI {
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t MaxValidValue = 8, std::size_t GridBits = 3,
           bool SearchAllAnswers = false>
-class SlidingUnknownPuzzle3x3
+class SlidingUnknownPuzzle3x3 : public MultiAnswerGame<BoardX, BoardY>
 {
 public:
     typedef std::size_t         size_type;
@@ -51,16 +52,12 @@ private:
     Board<BoardX, BoardY> player_board_;
     Board<BoardX, BoardY> target_board_;
 
-    std::vector<Board<BoardX, BoardY>> answer_list_;
-
-    size_type map_used_;
     bool has_unknown_;
 
     int player_num_cnt_[MaxNumber];
     int target_num_cnt_[MaxNumber];
 
     std::vector<Move> empty_moves_[BoardSize];
-    std::vector<Position> move_path_;
 
     void init() {
         for (size_type num = 0; num < MaxNumber; num++) {
@@ -90,24 +87,12 @@ private:
     }
 
 public:
-    SlidingUnknownPuzzle3x3() : map_used_(0), has_unknown_(false) {
+    SlidingUnknownPuzzle3x3() : has_unknown_(false) {
         static_assert((MaxValidValue <= MaxNumber), "Error: [MaxValidValue] must less than or equal [MaxNumber].");
         this->init();
     }
 
     ~SlidingUnknownPuzzle3x3() {}
-
-    size_type getMinSteps() const {
-        return this->move_path_.size();
-    }
-
-    const std::vector<Position> & getMovePath() const {
-        return this->move_path_;
-    }
-
-    size_type getMapUsed() const {
-        return this->map_used_;
-    }
 
     static uint8_t charToNumber(uint8_t ch) {
         if (ch >= '1' && ch <= '9') {
@@ -388,9 +373,20 @@ public:
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            this->answer_list_.push_back(next_stage.board);
+                            size_type total_steps = next_stage.move_path.size();
+                            assert((depth + 1) == total_steps);
+                            if (this->isMinSteps(total_steps)) {
+                                this->setMinSteps(total_steps);
+                                this->clearAllAnswers();
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
+                            else if (this->isEqualMinSteps(total_steps)) {
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -406,6 +402,17 @@ public:
                 }
 
                 depth++;
+                if (1) {
+                    size_type visited_count = 0;
+                    for (size_type i = 0; i < BoardSize; i++) {
+                        visited_count += visited[i].count();
+                    }
+                    printf("depth = %u\n", (uint32_t)depth);
+                    printf("cur.size() = %u, next.size() = %u\n",
+                           (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
+                    printf("visited.size() = %u\n\n", (uint32_t)(visited_count));
+                }
+
                 std::swap(cur_stages, next_stages);
                 next_stages.clear();
 
@@ -418,7 +425,7 @@ public:
             for (size_type i = 0; i < BoardSize; i++) {
                 visited_count += visited[i].count();
             }
-            this->map_used_ = visited_count;
+            this->setMapUsed(visited_count);
 
             if (solvable) {
                 //
@@ -484,9 +491,20 @@ public:
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
-                            this->answer_list_.push_back(next_stage.board);
+                            size_type total_steps = next_stage.move_path.size();
+                            assert((depth + 1) == total_steps);
+                            if (this->isMinSteps(total_steps)) {
+                                this->setMinSteps(total_steps);
+                                this->clearAllAnswers();
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
+                            else if (this->isEqualMinSteps(total_steps)) {
+                                this->appendAnswer(&this->player_board_,
+                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.board));
+                            }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
@@ -504,6 +522,17 @@ public:
                 } while (cur_stages.size() > 0);
 
                 depth++;
+                if (1) {
+                    size_type visited_count = 0;
+                    for (size_type i = 0; i < BoardSize; i++) {
+                        visited_count += visited[i].count();
+                    }
+                    printf("depth = %u\n", (uint32_t)depth);
+                    printf("cur.size() = %u, next.size() = %u\n",
+                           (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
+                    printf("visited.size() = %u\n\n", (uint32_t)(visited_count));
+                }
+
                 std::swap(cur_stages, next_stages);
 
                 if (exit) {
@@ -515,7 +544,7 @@ public:
             for (size_type i = 0; i < BoardSize; i++) {
                 visited_count += visited[i].count();
             }
-            this->map_used_ = visited_count;
+            this->setMapUsed(visited_count);
 
             if (solvable) {
                 //
@@ -525,17 +554,27 @@ public:
         return solvable;
     }
 
-    void display_boards() {
+    void display_start_boards() {
         Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Player Board", this->player_board_);
         Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
     }
 
     void display_answer_boards() {
-        this->display_boards();
-        if (SearchAllAnswers && this->answer_list_.size() > 1)
-            Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_);
-        else
-            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Answer Board", this->answer_list_[0]);
+        this->display_start_boards();
+
+        size_type answer_count = this->getAnswerCount();
+        if (SearchAllAnswers && answer_count > 1) {
+            for (size_type i = 0; i < answer_count; i++) {
+                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
+                    "Answer Board", i, this->best_answer_list_[i].final_board);
+                this->displayAnswerMoves(i);
+            }
+        }
+        else {
+            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
+                "Answer Board", this->best_answer_list_[0].final_board);
+            this->displayAnswerMoves(0);
+        }
     }
 };
 

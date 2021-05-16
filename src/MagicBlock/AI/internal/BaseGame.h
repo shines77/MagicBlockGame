@@ -456,7 +456,7 @@ public:
     }
 
     void displayAnswerMoves(const std::vector<MoveInfo> & answer) const {
-        player_board_t::template display_answer<BoardX>(answer);
+        player_board_t::display_move_path(answer);
     }
 
     void displayAnswerMoves(const std::vector<Position> & move_path) const {

@@ -32,7 +32,11 @@ union Board
     typedef typename std::conditional<
                 (Bytes <= sizeof(std::uint32_t)), std::uint32_t, size_type
             >::type  unit_type;
-    typedef Board<BoardX, BoardY> this_type;
+
+    typedef Board<BoardX, BoardY>   this_type;
+
+    typedef std::vector<Position>   move_path_t;
+    typedef std::vector<MoveInfo>   move_list_t;
 
     static const size_type kUnitBytes = sizeof(unit_type);
 
@@ -325,6 +329,32 @@ union Board
         printf("\n\n");
     }
 
+    template <size_type EmptyPosValue, size_type UnknownPosValue>
+    static void display_num_board(const char * title, size_type index, const this_type & board) {
+        printf("%s #%d\n\n", title, (int)(index + 1));
+        // -------
+        printf(" ");
+        for (size_type x = 0; x < BoardX * 2 + 1; x++) {
+            printf("-");
+        }
+        printf("\n");
+        for (size_type y = 0; y < BoardY; y++) {
+            printf("| ");
+            for (size_type x = 0; x < BoardX; x++) {
+                uint8_t num = board.cells[y * BoardX + x];
+                assert((num == UnknownPosValue) || (num == EmptyPosValue) || (num >= 0 && num < BoardSize));
+                printf("%c ", (num != UnknownPosValue) ? ((num != EmptyPosValue) ? (num + '1') : '0') : '?');
+            }
+            printf("|\n");
+        }
+        // -------
+        printf(" ");
+        for (size_type x = 0; x < BoardX * 2 + 1; x++) {
+            printf("-");
+        }
+        printf("\n\n");
+    }
+
     static void display_boards(const char * title, const std::vector<this_type> & board_list) {
         for (size_type n = 0; n < board_list.size(); n++) {
             char title_no[128];
@@ -351,16 +381,15 @@ union Board
         }
     }
 
-    template <size_type UBoardX, size_type UBoardY>
-    static bool translate_move_path(const Board<UBoardX, UBoardY> & in_board,
-                                    const std::vector<Position> & move_path,
-                                    std::vector<MoveInfo> & answer,
+    static bool translate_move_path(const this_type & in_board,
+                                    const move_path_t & move_path,
+                                    move_list_t & move_list,
                                     Position in_empty_pos = std::uint8_t(-1)) {
         bool success = true;
 
-        answer.clear();
+        move_list.clear();
 
-        Board<UBoardX, UBoardY> board(in_board);
+        this_type board(in_board);
         std::uint8_t from_pos, move_to_pos;
         std::uint8_t from_clr, move_to_clr;
         std::uint8_t last_dir = std::uint8_t(-1);
@@ -382,13 +411,13 @@ union Board
             from_pos = move_path[i].value;
             from_clr = board.cells[from_pos];
             if (from_clr != Color::Empty && move_to_clr == Color::Empty) {
-                last_dir = Direction::template getDir<UBoardX, UBoardY>(from_pos, move_to_pos);
+                last_dir = Direction::template getDir<BoardX, BoardY>(from_pos, move_to_pos);
                 MoveInfo move_info;
                 move_info.from_pos = from_pos;
                 move_info.to_pos = move_to_pos;
                 move_info.color = from_clr;
                 move_info.dir = last_dir;
-                answer.push_back(move_info);
+                move_list.push_back(move_info);
 
                 std::swap(board.cells[from_pos], board.cells[move_to_pos]);
             }
@@ -397,8 +426,8 @@ union Board
                         "Move path have error, [from_pos] is a empty gird.\n"
                         "index = %u, from_pos = %c%c, color = %s (%u)\n\n",
                         (std::uint32_t)(i + 1),
-                        Position::template toFirstChar<UBoardX>(from_pos),
-                        Position::template toSecondChar<UBoardX>(from_pos),
+                        Position::template toFirstChar<BoardX>(from_pos),
+                        Position::template toSecondChar<BoardX>(from_pos),
                         Color::colorToChar(from_clr),
                         (std::uint32_t)from_clr);
                 success = false;
@@ -410,17 +439,16 @@ union Board
         return success;
     }
 
-    bool translate_move_path(const std::vector<Position> & move_path,
-                             std::vector<MoveInfo> & answer,
+    bool translate_move_path(const move_path_t & move_path,
+                             move_list_t & move_list,
                              Position empty_pos = std::uint8_t(-1)) const {
-        return this_type::template translate_move_path<BoardX, BoardY>(*this, move_path, answer, empty_pos);
+        return this_type::translate_move_path(*this, move_path, move_list, empty_pos);
     }
 
-    template <size_type UBoardX>
-    static void display_answer(const std::vector<MoveInfo> & answer) {
+    static void display_move_path(const move_list_t & move_list) {
         size_type index = 0;
-        printf("Answer_Move_Path[%u] = {\n", (std::uint32_t)answer.size());
-        for (auto iter : answer) {
+        printf("Answer_Move_Path[ %u ] = {\n", (std::uint32_t)move_list.size());
+        for (auto iter : move_list) {
             Position from_pos   = iter.from_pos;
             Position to_pos     = iter.to_pos;
             size_type color     = iter.color;
@@ -428,19 +456,15 @@ union Board
             printf("    [%2u]: [%s], %c%c --> %c%c, dir: %-5s (%u)\n",
                    (std::uint32_t)(index + 1),
                    Color::colorToChar(color),
-                   Position::template toFirstChar<UBoardX>(from_pos),
-                   Position::template toSecondChar<UBoardX>(from_pos),
-                   Position::template toFirstChar<UBoardX>(to_pos),
-                   Position::template toSecondChar<UBoardX>(to_pos),
+                   Position::template toFirstChar<BoardX>(from_pos),
+                   Position::template toSecondChar<BoardX>(from_pos),
+                   Position::template toFirstChar<BoardX>(to_pos),
+                   Position::template toSecondChar<BoardX>(to_pos),
                    Direction::toString(dir),
                    (std::uint32_t)dir);
             index++;
         }
         printf("};\n\n");
-    }
-
-    void display_answer(const std::vector<MoveInfo> & answer) const {
-        this_type::template display_answer<BoardX>(answer);
     }
 };
 
