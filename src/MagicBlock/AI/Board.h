@@ -53,7 +53,7 @@ union Board
         this->internal_copy(src);
     }
     Board(Board && src) noexcept {
-        this->internal_swap(src);
+        this->internal_copy(src);
     }
 
     ~Board() {}
@@ -64,7 +64,7 @@ union Board
     }
 
     Board & operator = (Board && rhs) noexcept {
-        this->swap(rhs);
+        this->copy(rhs);
         return *this;
     }
 
