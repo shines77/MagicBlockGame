@@ -30,7 +30,7 @@ union Board
     static const size_type Bytes = BoardX * BoardY;
 
     typedef typename std::conditional<
-                (Bytes <= sizeof(std::uint32_t)), std::uint32_t, std::size_type
+                (Bytes <= sizeof(std::uint32_t)), std::uint32_t, size_type
             >::type  unit_type;
 
     typedef Board<BoardX, BoardY>   this_type;
