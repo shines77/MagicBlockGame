@@ -27,7 +27,7 @@ namespace AI {
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t MaxValidValue = 8, std::size_t GridBits = 3,
           bool SearchAllAnswers = false>
-class SlidingUnknownPuzzle3x3 : public MultiAnswerGame<BoardX, BoardY>
+class SlidingUnknownPuzzle3x3 : public MultiAnswerGame<BoardX, BoardY, MaxValidValue, MaxValidValue + 1>
 {
 public:
     typedef std::size_t         size_type;
@@ -566,13 +566,13 @@ public:
         if (SearchAllAnswers && answer_count > 1) {
             for (size_type i = 0; i < answer_count; i++) {
                 Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
-                    "Answer Board", i, this->best_answer_list_[i].final_board);
+                    "Answer Board", i, *(this->best_answer_list_[i].start_board));
                 this->displayAnswerMoves(i);
             }
         }
         else {
             Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
-                "Answer Board", this->best_answer_list_[0].final_board);
+                "Answer Board", *(this->best_answer_list_[0].start_board));
             this->displayAnswerMoves(0);
         }
     }

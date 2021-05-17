@@ -142,6 +142,20 @@ union Board
         return false;
     }
 
+    template <size_type EmptyPosValue = Color::Empty>
+    bool find_empty(Position & empty_pos) const {
+        for (size_type y = 0; y < BoardY; y++) {
+            for (size_type x = 0; x < BoardX; x++) {
+                uint8_t color = this->cells[y * BoardX + x];
+                if (color == EmptyPosValue) {
+                    empty_pos = (uint8_t)(y * BoardX + x);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     size_type value() const noexcept {
         size_type value = 0;
         for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
@@ -381,6 +395,7 @@ union Board
         }
     }
 
+    template <size_type EmptyPosValue = Color::Empty, size_type UnknownPosValue = Color::Unknown>
     static bool translate_move_path(const this_type & in_board,
                                     const move_path_t & move_path,
                                     move_list_t & move_list,
@@ -394,11 +409,11 @@ union Board
         std::uint8_t from_clr, move_to_clr;
         std::uint8_t last_dir = std::uint8_t(-1);
         Position empty_pos = in_empty_pos;
-        assert((empty_pos.value == std::uint8_t(-1)) || (board.cells[empty_pos] == Color::Unknown));
+        assert((empty_pos.value == std::uint8_t(-1)) || (board.cells[empty_pos] == UnknownPosValue));
         if (empty_pos.value != std::uint8_t(-1)) {
-            board.cells[empty_pos] = Color::Empty;
+            board.cells[empty_pos] = EmptyPosValue;
         }
-        bool found_empty = board.find_empty(empty_pos);
+        bool found_empty = board.find_empty<EmptyPosValue>(empty_pos);
         if (!found_empty) {
             empty_pos = std::uint8_t(-1);
         }
@@ -407,10 +422,10 @@ union Board
             if (move_to_pos != std::uint8_t(-1))
                 move_to_clr = board.cells[move_to_pos];
             else
-                move_to_clr = Color::Unknown;
+                move_to_clr = UnknownPosValue;
             from_pos = move_path[i].value;
             from_clr = board.cells[from_pos];
-            if (from_clr != Color::Empty && move_to_clr == Color::Empty) {
+            if (from_clr != EmptyPosValue && move_to_clr == EmptyPosValue) {
                 last_dir = Direction::template getDir<BoardX, BoardY>(from_pos, move_to_pos);
                 MoveInfo move_info;
                 move_info.from_pos = from_pos;
@@ -439,10 +454,11 @@ union Board
         return success;
     }
 
+    template <size_type EmptyPosValue = Color::Empty, size_type UnknownPosValue = Color::Unknown>
     bool translate_move_path(const move_path_t & move_path,
                              move_list_t & move_list,
                              Position empty_pos = std::uint8_t(-1)) const {
-        return this_type::translate_move_path(*this, move_path, move_list, empty_pos);
+        return this_type::translate_move_path<EmptyPosValue, UnknownPosValue>(*this, move_path, move_list, empty_pos);
     }
 
     static void display_move_path(const move_list_t & move_list) {
