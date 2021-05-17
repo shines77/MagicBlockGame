@@ -566,13 +566,13 @@ public:
         if (SearchAllAnswers && answer_count > 1) {
             for (size_type i = 0; i < answer_count; i++) {
                 Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
-                    "Answer Board", i, *(this->best_answer_list_[i].start_board));
+                    "Answer Board", i, this->best_answer_list_[i].final_board);
                 this->displayAnswerMoves(i);
             }
         }
         else {
             Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
-                "Answer Board", *(this->best_answer_list_[0].start_board));
+                "Answer Board", this->best_answer_list_[0].final_board);
             this->displayAnswerMoves(0);
         }
     }
