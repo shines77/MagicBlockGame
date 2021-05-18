@@ -63,7 +63,8 @@ public:
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t EmptyPosValue = Color::Empty,
-          std::size_t UnknownPosValue = Color::Unknown>
+          std::size_t UnknownPosValue = Color::Unknown,
+          bool IsNumberBoard = false>
 class Answer {
 public:
     typedef Board<BoardX, BoardY>               board_type;
@@ -72,7 +73,7 @@ public:
     typedef typename board_type::move_path_t    move_path_t;
     typedef typename board_type::move_list_t    move_list_t;
 
-    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue> this_type;
+    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue, IsNumberBoard> this_type;
 
     board_type *    start_board;
     board_type      final_board;
@@ -81,10 +82,10 @@ public:
 
 private:
     void internal_copy(const this_type & other) {
-        this->start_board   = other.start_board;
-        this->final_board   = other.final_board;
-        this->move_path     = other.move_path;
-        this->move_list     = other.move_list;
+        this->start_board = other.start_board;
+        this->final_board = other.final_board;
+        this->move_path   = other.move_path;
+        this->move_list   = other.move_list;
     }
 
     void internal_swap(this_type & other) noexcept {
@@ -178,14 +179,20 @@ public:
     }
 
     static void displayMovePath(const move_list_t & move_list) {
-        board_type::display_move_path(move_list);
+        if (IsNumberBoard)
+            board_type::template display_num_move_path<EmptyPosValue, UnknownPosValue>(move_list);
+        else
+            board_type::display_move_path(move_list);
     }
 
     static void displayMovePath(const board_type & board, const move_path_t & move_path,
                                 Position empty_pos = std::uint8_t(-1)) {
         move_list_t move_list;
         if (board_type::translate_move_path<EmptyPosValue, UnknownPosValue>(board, move_path, move_list, empty_pos)) {
-            board_type::display_move_path(move_list);
+            if (IsNumberBoard)
+                board_type::template display_num_move_path<EmptyPosValue, UnknownPosValue>(move_list);
+            else
+                board_type::display_move_path(move_list);
         }
     }
 
@@ -196,32 +203,33 @@ public:
 
     void displayMovePath(const move_path_t & move_path, Position empty_pos = std::uint8_t(-1)) {
         if (this->translateMovePath(move_path, this->move_list, empty_pos)) {
-            this->displayMovePath(this->move_list);
+            this_type::displayMovePath(this->move_list);
         }
     }
 
     void displayMovePath(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
-        this->displayMovePath(target_stage.move_path);
+        this->displayMovePath(target_stage.move_path, empty_pos);
     }
 
     void displayMovePath(Position empty_pos = std::uint8_t(-1)) {
         if (this->translateMovePath(this->move_path, this->move_list, empty_pos)) {
-            this->displayMovePath(this->move_list);
+            this_type::displayMovePath(this->move_list);
         }
     }
 
-    void displayMovePathOnly(Position empty_pos = std::uint8_t(-1)) {
-        this->displayMovePath(this->move_list, empty_pos);
+    void displayMovePathOnly() {
+        this_type::displayMovePath(this->move_list);
     }
 };
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t EmptyPosValue = Color::Empty,
-          std::size_t UnknownPosValue = Color::Unknown>
+          std::size_t UnknownPosValue = Color::Unknown,
+          bool IsNumberBoard = false>
 class SingleAnswerGame : public BaseAnswerGame
 {
 public:
-    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue> answer_type;
+    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue, IsNumberBoard> answer_type;
 
     typedef typename answer_type::size_type     size_type;
     typedef typename answer_type::board_type    board_type;
@@ -322,18 +330,19 @@ public:
         this->best_answer_.displayMovePath(empty_pos);
     }
 
-    void displayAnswerMovesOnly(Position empty_pos = std::uint8_t(-1)) {
-        this->best_answer_.displayMovePathOnly(empty_pos);
+    void displayAnswerMovesOnly() {
+        this->best_answer_.displayMovePathOnly();
     }
 };
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t EmptyPosValue = Color::Empty,
-          std::size_t UnknownPosValue = Color::Unknown>
+          std::size_t UnknownPosValue = Color::Unknown,
+          bool IsNumberBoard = false>
 class MultiAnswerGame : public BaseAnswerGame
 {
 public:
-    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue> answer_type;
+    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue, IsNumberBoard> answer_type;
 
     typedef typename answer_type::size_type     size_type;
     typedef typename answer_type::board_type    board_type;
@@ -427,9 +436,9 @@ public:
         this->best_answer_list_[index].displayMovePath(empty_pos);
     }
 
-    void displayAnswerMovesOnly(size_type index, Position empty_pos = std::uint8_t(-1)) {
+    void displayAnswerMovesOnly(size_type index) {
         assert(index >= 0 && index < best_answer_list_.size());
-        this->best_answer_list_[index].displayMovePathOnly(empty_pos);
+        this->best_answer_list_[index].displayMovePathOnly();
     }
 
     void translateAllMovePath(std::vector<Position> empty_pos_list) {
@@ -454,14 +463,10 @@ public:
         }
     }
 
-    void displayAllAnswerMovesOnly(std::vector<Position> empty_pos_list) {
-        size_type empty_size = empty_pos_list.size();
+    void displayAllAnswerMovesOnly() {
         size_type list_size = this->best_answer_list_.size();
         for (size_type i = 0; i < list_size; i++) {
-            if (i >= empty_size)
-                this->best_answer_list_[i].displayMovePathOnly(std::uint8_t(-1));
-            else
-                this->best_answer_list_[i].displayMovePathOnly(empty_pos_list[i]);
+            this->best_answer_list_[i].displayMovePathOnly();
         }
     }
 };

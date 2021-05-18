@@ -14,6 +14,7 @@
 
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
+#include "MagicBlock/AI/Number.h"
 #include "MagicBlock/AI/Move.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
@@ -38,6 +39,7 @@ public:
     static const size_type kEmptyPosValue = MaxNumber;
 
     typedef Stage<BoardX, BoardY> stage_type;
+    typedef Number<kEmptyPosValue, kEmptyPosValue + 1> number_t;
 
 private:
     Board<BoardX, BoardY> player_board_;

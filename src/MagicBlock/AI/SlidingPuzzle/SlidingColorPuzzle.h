@@ -14,6 +14,7 @@
 
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
+#include "MagicBlock/AI/Number.h"
 #include "MagicBlock/AI/Move.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
@@ -113,7 +114,7 @@ public:
                     ifs.getline(line, 256);
                     if (line_no >= 0 && line_no < BoardY) {
                         for (size_type x = 0; x < BoardX; x++) {
-                            uint8_t color = Color::charToColor(line[x]);
+                            uint8_t color = Color::toColor(line[x]);
                             if (color >= Color::First && color < Color::Last) {
                                 this->target_board_[0].cells[line_no * BoardX + x] = color;
                             }
@@ -126,7 +127,7 @@ public:
                     else if (line_no >= (BoardY + 1) && line_no < (BoardY + 1 + BoardY)) {
                         size_type boardY = line_no - (BoardY + 1);
                         for (size_type x = 0; x < BoardX; x++) {
-                            uint8_t color = Color::charToColor(line[x]);
+                            uint8_t color = Color::toColor(line[x]);
                             if (color >= Color::First && color < Color::Last) {
                                 this->player_board_.cells[boardY * BoardX + x] = color;
                             }

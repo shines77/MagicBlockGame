@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <cstdint>
+#include <cstddef>
+
 namespace MagicBlock {
 namespace AI {
 
@@ -27,54 +30,54 @@ struct Color {
     static const std::uint32_t Mask32  = 0x00000007UL;
     static const std::uint32_t Shift32 = 3;
 
-    static uint8_t charToColor(uint8_t value) {
-        switch (value) {
+    static std::uint8_t toColor(std::uint8_t ascii) {
+        switch (ascii) {
         case 'R':
-            return Color::Red;
+            return (std::uint8_t)Color::Red;
         case 'G':
-            return Color::Green;
+            return (std::uint8_t)Color::Green;
         case 'B':
-            return Color::Blue;
+            return (std::uint8_t)Color::Blue;
         case 'W':
-            return Color::White;
+            return (std::uint8_t)Color::White;
         case 'O':
-            return Color::Orange;
+            return (std::uint8_t)Color::Orange;
         case 'Y':
-            return Color::Yellow;
+            return (std::uint8_t)Color::Yellow;
         case ' ':
         case 'E':
-            return Color::Empty;
-        case '*':
-            return Color::Unknown;
+            return (std::uint8_t)Color::Empty;
+        case '?':
+            return (std::uint8_t)Color::Unknown;
         default:
-            return Color::Illegal;
+            return (std::uint8_t)Color::Illegal;
         }
     }
 
-    static const char * colorToChar(size_t color) {
+    static char toChar(std::size_t color) {
         switch (color) {
             case Color::Red:
-                return "R";
+                return 'R';
             case Color::Green:
-                return "G";
+                return 'G';
             case Color::Blue:
-                return "B";
+                return 'B';
             case Color::White:
-                return "W";
+                return 'W';
             case Color::Orange:
-                return "O";
+                return 'O';
             case Color::Yellow:
-                return "Y";
+                return 'Y';
             case Color::Empty:
-                return "E";
+                return 'E';
             case Color::Unknown:
-                return "*";
+                return '?';
             default:
-                return "?";
+                return '*';
         }
     }
 
-    static const char * toString(size_t color) {
+    static const char * toString(std::size_t color) {
         switch (color) {
             case Color::Red:
                 return "Red";

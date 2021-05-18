@@ -12,6 +12,7 @@
 #include <algorithm>    // For std::fill_n()
 
 #include "MagicBlock/AI/Color.h"
+#include "MagicBlock/AI/Number.h"
 #include "MagicBlock/AI/Move.h"
 #include "MagicBlock/AI/Value128.h"
 
@@ -27,10 +28,10 @@ union Board
     static const size_type X = BoardX;
     static const size_type Y = BoardY;
     static const size_type BoardSize = BoardX * BoardY;
-    static const size_type Bytes = BoardX * BoardY;
+    static const size_type TotalBytes = BoardX * BoardY;
 
     typedef typename std::conditional<
-                (Bytes <= sizeof(std::uint32_t)), std::uint32_t, size_type
+                (TotalBytes <= sizeof(std::uint32_t)), std::uint32_t, size_type
             >::type  unit_type;
 
     typedef Board<BoardX, BoardY>   this_type;
@@ -40,11 +41,11 @@ union Board
 
     static const size_type kUnitBytes = sizeof(unit_type);
 
-    static const size_type kUnits = (Bytes + kUnitBytes - 1) / kUnitBytes;
-    static const size_type kBytes = kUnits * kUnitBytes;
+    static const size_type kTotalUnits = (TotalBytes + kUnitBytes - 1) / kUnitBytes;
+    static const size_type kTotalBytes = kTotalUnits * kUnitBytes;
 
     std::uint8_t    cells[BoardSize];
-    unit_type       uints[kUnits];
+    unit_type       uints[kTotalUnits];
 
     Board() {
         this->clear();
@@ -69,17 +70,17 @@ union Board
     }
 
     void clear() noexcept {
-#if 0
-        std::fill_n(this->cells, sizeof(cells), Color::Empty);
+#if 1
+        std::fill_n(this->uints, kTotalUnits, unit_type(0));
 #else
-        for (size_type n = 0; n < kUnits; n++) {
+        for (size_type n = 0; n < kTotalUnits; n++) {
             this->uints[n] = 0;
         }
 #endif
     }
 
     void internal_copy(const Board & other) noexcept {
-        for (size_type n = 0; n < kUnits; n++) {
+        for (size_type n = 0; n < kTotalUnits; n++) {
             this->uints[n] = other.uints[n];
         }
     }
@@ -95,13 +96,13 @@ union Board
         for (cell = 0; cell < BoardSize; cell++) {
             this->cells[cell] = cells[cell];
         }
-        for (; cell < kBytes; cell++) {
+        for (; cell < kTotalBytes; cell++) {
             this->cells[cell] = 0;
         }
     }
 
     void internal_swap(Board & other) noexcept {
-        for (size_type n = 0; n < kUnits; n++) {
+        for (size_type n = 0; n < kTotalUnits; n++) {
             unit_type temp = this->uints[n];
             this->uints[n] = other.uints[n];
             other.uints[n] = temp;
@@ -115,17 +116,10 @@ union Board
     }
 
     bool is_equal(const Board & other) const noexcept {
-#if 1
-        for (size_type n = 0; n < kUnits; n++) {
+        for (size_type n = 0; n < kTotalUnits; n++) {
             if (this->uints[n] != other.uints[n])
                 return false;
         }
-#else
-        for (size_type cell = 0; cell < BoardSize; cell++) {
-            if (this->cells[cell] != other.cells[cell])
-                return false;
-        }
-#endif
         return true;
     }
 
@@ -279,7 +273,7 @@ union Board
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t color = board.cells[y * BoardX + x];
                 assert(color >= Color::First && color < Color::Maximum);
-                printf("%s ", Color::colorToChar(color));
+                printf("%c ", Color::toChar(color));
             }
             printf("|\n");
         }
@@ -439,11 +433,11 @@ union Board
             else {
                 printf("Board<X, Y>::translate_move_path():\n\n"
                         "Move path have error, [from_pos] is a empty gird.\n"
-                        "index = %u, from_pos = %c%c, color = %s (%u)\n\n",
+                        "index = %u, from_pos = %c%c, color = %c (%u)\n\n",
                         (std::uint32_t)(i + 1),
                         Position::template toFirstChar<BoardX>(from_pos),
                         Position::template toSecondChar<BoardX>(from_pos),
-                        Color::colorToChar(from_clr),
+                        Color::toChar(from_clr),
                         (std::uint32_t)from_clr);
                 success = false;
                 break;
@@ -469,9 +463,32 @@ union Board
             Position to_pos     = iter.to_pos;
             size_type color     = iter.color;
             size_type dir       = iter.dir;
-            printf("    [%2u]: [%s], %c%c --> %c%c, dir: %-5s (%u)\n",
+            printf("    [%2u]: [%c], %c%c --> %c%c, dir: %-5s (%u)\n",
                    (std::uint32_t)(index + 1),
-                   Color::colorToChar(color),
+                   Color::toChar(color),
+                   Position::template toFirstChar<BoardX>(from_pos),
+                   Position::template toSecondChar<BoardX>(from_pos),
+                   Position::template toFirstChar<BoardX>(to_pos),
+                   Position::template toSecondChar<BoardX>(to_pos),
+                   Direction::toString(dir),
+                   (std::uint32_t)dir);
+            index++;
+        }
+        printf("};\n\n");
+    }
+
+    template <size_type EmptyPosValue = Color::Empty, size_type UnknownPosValue = Color::Unknown>
+    static void display_num_move_path(const move_list_t & move_list) {
+        size_type index = 0;
+        printf("Answer_Move_Path[ %u ] = {\n", (std::uint32_t)move_list.size());
+        for (auto iter : move_list) {
+            Position from_pos   = iter.from_pos;
+            Position to_pos     = iter.to_pos;
+            size_type num       = iter.color;
+            size_type dir       = iter.dir;
+            printf("    [%2u]: [%c], %c%c --> %c%c, dir: %-5s (%u)\n",
+                   (std::uint32_t)(index + 1),
+                   Number<EmptyPosValue, UnknownPosValue>::toChar(num),
                    Position::template toFirstChar<BoardX>(from_pos),
                    Position::template toSecondChar<BoardX>(from_pos),
                    Position::template toFirstChar<BoardX>(to_pos),

@@ -15,6 +15,7 @@
 
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
+#include "MagicBlock/AI/Number.h"
 #include "MagicBlock/AI/Move.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
@@ -28,7 +29,7 @@ namespace AI {
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t MaxValidValue = 6, std::size_t GridBits = 3,
           bool SearchAllAnswers = false>
-class SlidingUnknownPuzzle : public MultiAnswerGame<BoardX, BoardY, MaxValidValue, MaxValidValue + 1>
+class SlidingUnknownPuzzle : public MultiAnswerGame<BoardX, BoardY, MaxValidValue, MaxValidValue + 1, true>
 {
 public:
     typedef std::size_t         size_type;
@@ -51,6 +52,8 @@ public:
 
     static const size_type MaxValidNumber = size_type(1U) << GridBits;
     static const size_type MaxNumber = (kMaxGridValue > MaxValidNumber) ? kMaxGridValue : MaxValidNumber;
+
+    typedef Number<kEmptyPosValue, kUnknownPosValue> number_t;
 
 private:
     player_board_t player_board_;
@@ -99,23 +102,6 @@ public:
 
     ~SlidingUnknownPuzzle() {}
 
-    static uint8_t charToNumber(uint8_t ch) {
-        if (ch >= '1' && ch <= '9') {
-            uint8_t num = (ch - '1');
-            return ((num < kEmptyPosValue) ? num : (uint8_t)-1);
-        }
-        else if (ch >= 'A' && ch <= 'Z') {
-            uint8_t num = (ch - 'A');
-            return ((num < kEmptyPosValue) ? num : (uint8_t)-1);
-        }
-        else if (ch == ' ' || ch == '0')
-            return kEmptyPosValue;
-        else if (ch == '?')
-            return kUnknownPosValue;
-        else
-            return (uint8_t)-1;
-    }
-
     int readConfig(const char * filename) {
         int err_code = ErrorCode::Success;
         size_type line_no = 0;
@@ -129,8 +115,8 @@ public:
                     ifs.getline(line, 256);
                     if (line_no >= 0 && line_no < BoardY) {
                         for (size_type x = 0; x < BoardX; x++) {
-                            uint8_t num = this_type::charToNumber(line[x]);
-                            if (num >= 0 && num < kMaxGridValue) {
+                            uint8_t num = number_t::toNumber(line[x]);
+                            if (num >= 0 && num < (uint8_t)kMaxGridValue) {
                                 this->target_board_.cells[line_no * BoardX + x] = num;
                             }
                             else {
@@ -142,8 +128,8 @@ public:
                     else if (line_no >= (BoardY + 1) && line_no < (BoardY + 1 + BoardY)) {
                         size_type boardY = line_no - (BoardY + 1);
                         for (size_type x = 0; x < BoardX; x++) {
-                            uint8_t num = this_type::charToNumber(line[x]);
-                            if (num >= 0 && num < kMaxGridValue) {
+                            uint8_t num = number_t::toNumber(line[x]);
+                            if (num >= 0 && num < (uint8_t)kMaxGridValue) {
                                 this->player_board_.cells[boardY * BoardX + x] = num;
                             }
                             else {
