@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -62,8 +63,8 @@ struct Number {
         }
         else if (num < EmptyPosValue) {
 #if 1
-            static char num_buf[32] = { 0 };
-            ::itoa(num + 1, num_buf, 10);
+            static char num_buf[32];
+            snprintf(num_buf, sizeof(num_buf), "%u", (std::uint32_t)num);
             return num_buf;
 #else
             static std::string strNum;       
