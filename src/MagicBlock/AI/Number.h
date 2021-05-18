@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include <cstdint>
 #include <cstddef>
@@ -62,7 +63,7 @@ struct Number {
         else if (num < EmptyPosValue) {
 #if 1
             static char num_buf[32] = { 0 };
-            std::itoa(num + 1, num_buf, 10);
+            ::itoa(num + 1, num_buf, 10);
             return num_buf;
 #else
             static std::string strNum;       
