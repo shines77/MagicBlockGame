@@ -51,15 +51,15 @@ private:
     std::vector<Position> move_path_;
 
     void init() {
-        for (size_type clr = Color::Empty; clr < Color::Maximum; clr++) {
-            this->player_num_cnt_[clr] = Color::Empty;
-            this->target_num_cnt_[clr] = Color::Empty;
+        for (size_type clr = Color::First; clr < Color::Maximum; clr++) {
+            this->player_num_cnt_[clr] = 0;
+            this->target_num_cnt_[clr] = 0;
         }
 
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                std::vector<Move> moves;
-                for (size_type dir = Direction::First; dir < Direction::Last; dir++) {
+                std::vector<Move> can_moves;
+                for (size_type dir = 0; dir < Direction::Maximum; dir++) {
                     assert(dir >= 0 && dir < 4);
                     int board_x = (int)x + Dir_Offset[dir].x;
                     if (board_x < 0 || board_x >= (int)BoardX)
@@ -70,9 +70,9 @@ private:
                     Move move;
                     move.pos = Position(board_y * (int)BoardX + board_x);
                     move.dir = (uint8_t)dir;
-                    moves.push_back(move);
+                    can_moves.push_back(move);
                 }
-                this->can_moves_[y * BoardX + x] = moves;
+                this->can_moves_[y * BoardX + x] = std::move(can_moves);
             }
         }
 
