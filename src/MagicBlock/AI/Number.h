@@ -64,7 +64,7 @@ struct Number {
         else if (num < EmptyPosValue) {
 #if 1
             static char num_buf[32];
-            snprintf(num_buf, sizeof(num_buf), "%u", (std::uint32_t)num);
+            snprintf(num_buf, sizeof(num_buf), "%u", (std::uint32_t)(num + 1));
             return num_buf;
 #else
             static std::string strNum;       
