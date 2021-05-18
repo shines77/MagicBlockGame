@@ -41,7 +41,6 @@
 #include "MagicBlock/AI/CPUWarmUp.h"
 #include "MagicBlock/AI/StopWatch.h"
 
-using namespace MagicBlock;
 using namespace MagicBlock::AI;
 
 #if defined(_MSC_VER)
@@ -115,7 +114,7 @@ void solve_sliding_puzzle()
             get_solver_name<N_SolverId>(),
             (SearchAllAnswers ? "true" : "false"));
 
-    AI::SlidingPuzzle<3, 3, SearchAllAnswers> slidingPuzzle;
+    SlidingPuzzle<3, 3, SearchAllAnswers> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig(PUZZLES_PATH("sliding_puzzle.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
@@ -156,7 +155,7 @@ void solve_sliding_unknown_puzzle_3x3()
             get_solver_name<N_SolverId>(),
             (SearchAllAnswers ? "true" : "false"));
 
-    AI::SlidingUnknownPuzzle3x3<3, 3, 8, 3, SearchAllAnswers> slidingPuzzle;
+    SlidingUnknownPuzzle3x3<3, 3, 8, 3, SearchAllAnswers> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig(PUZZLES_PATH("sliding_puzzle_unknown-3x3.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
@@ -199,7 +198,7 @@ void solve_sliding_unknown_puzzle_5x3()
             get_solver_name<N_SolverId>(),
             (SearchAllAnswers ? "true" : "false"));
 
-    AI::SlidingUnknownPuzzle<5, 3, 6, 3, SearchAllAnswers> slidingPuzzle;
+    SlidingUnknownPuzzle<5, 3, 6, 3, SearchAllAnswers> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig(PUZZLES_PATH("sliding_puzzle_unknown-5x3.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
@@ -242,7 +241,7 @@ void solve_sliding_unknown_puzzle_5x5()
             get_solver_name<N_SolverId>(),
             (SearchAllAnswers ? "true" : "false"));
 
-    AI::SlidingUnknownPuzzle<5, 5, 6, 3, SearchAllAnswers> slidingPuzzle;
+    SlidingUnknownPuzzle<5, 5, 6, 3, SearchAllAnswers> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig(PUZZLES_PATH("sliding_puzzle_unknown-5x5.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
@@ -285,7 +284,7 @@ void solve_sliding_color_puzzle()
             get_solver_name<N_SolverId>(),
             (AllowRotate ? "true" : "false"));
 
-    AI::SlidingColorPuzzle<3, 3, AllowRotate> slidingPuzzle;
+    SlidingColorPuzzle<3, 3, AllowRotate> slidingPuzzle;
     int readStatus = slidingPuzzle.readConfig(PUZZLES_PATH("sliding_color_puzzle.txt"));
     if (ErrorCode::isFailure(readStatus)) {
         printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
@@ -326,7 +325,7 @@ void solve_magic_block_two_phase_v1()
             get_solver_name<N_SolverId>(),
             (AllowRotate ? "true" : "false"));
 
-    AI::TwoPhase_v1::Game<5, 5, 3, 3, AllowRotate> game;
+    TwoPhase_v1::Game<5, 5, 3, 3, AllowRotate> game;
 
     int readStatus = game.readConfig(PUZZLES_PATH("magic_block.txt"));
     if (ErrorCode::isFailure(readStatus)) {
@@ -376,7 +375,7 @@ void solve_magic_block_two_endpoint()
             get_solver_name<N_SolverId>(),
             (AllowRotate ? "true" : "false"));
 
-    AI::TwoEndpoint::Game<5, 5, 3, 3, AllowRotate> game;
+    TwoEndpoint::Game<5, 5, 3, 3, AllowRotate> game;
 
     int readStatus = game.readConfig(PUZZLES_PATH("magic_block.txt"));
     if (ErrorCode::isFailure(readStatus)) {

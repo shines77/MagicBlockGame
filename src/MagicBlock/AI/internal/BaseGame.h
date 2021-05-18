@@ -78,12 +78,12 @@ protected:
         assert(color >= Color::First && color < Color::Last);
     }
 
-    // Initialize empty_moves[BoardSize]
+    // Initialize can_moves[BoardSize]
     void init() {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                std::vector<Move> empty_moves;
-                for (size_type dir = Direction::First; dir < Direction::Last; dir++) {
+                std::vector<Move> can_moves;
+                for (size_type dir = 0; dir < Direction::Maximum; dir++) {
                     assert(dir >= 0 && dir < 4);
                     int board_x = (int)x + Dir_Offset[dir].x;
                     if (board_x < 0 || board_x >= (int)BoardX)
@@ -94,10 +94,10 @@ protected:
                     Move move;
                     move.pos = Position(board_y * (int)BoardX + board_x);
                     move.dir = (uint8_t)dir;
-                    empty_moves.push_back(move);
+                    can_moves.push_back(move);
                 }
                 assert((y * BoardX + x) < BoardSize);
-                this->data_.empty_moves[y * BoardX + x] = empty_moves;
+                this->data_.can_moves[y * BoardX + x] = std::move(can_moves);
             }
         }
 

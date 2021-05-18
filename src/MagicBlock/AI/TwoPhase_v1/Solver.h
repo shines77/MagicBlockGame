@@ -314,15 +314,15 @@ public:
                     const stage_type & stage = cur_stages[i];
 
                     uint8_t empty_pos = stage.empty;
-                    const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_type total_moves = empty_moves.size();
+                    const std::vector<Move> & can_moves = this->data_->can_moves[empty_pos];
+                    size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
-                        uint8_t cur_dir = empty_moves[n].dir;
+                        uint8_t cur_dir = can_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
 
                         stage_type next_stage(stage.board);
-                        uint8_t move_pos = empty_moves[n].pos;
+                        uint8_t move_pos = can_moves[n].pos;
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         Value128 board_value = next_stage.board.value128();
                         if (visited.count(board_value) > 0)
@@ -435,14 +435,14 @@ public:
                     const stage_type & stage = cur_stages[i];
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_type total_moves = empty_moves.size();
+                    const std::vector<Move> & can_moves = this->data_->can_moves[empty_pos];
+                    size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
-                        uint8_t cur_dir = empty_moves[n].dir;
+                        uint8_t cur_dir = can_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        uint8_t move_pos = empty_moves[n].pos;
+                        uint8_t move_pos = can_moves[n].pos;
                         if (this->is_phase2()) {
                             if (this->data_->phase2.locked[move_pos] != 0)
                                 continue;
@@ -627,14 +627,14 @@ public:
                     const stage_type & stage = cur_stages.front();
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_type total_moves = empty_moves.size();
+                    const std::vector<Move> & can_moves = this->data_->can_moves[empty_pos];
+                    size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
-                        uint8_t cur_dir = empty_moves[n].dir;
+                        uint8_t cur_dir = can_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        uint8_t move_pos = empty_moves[n].pos;
+                        uint8_t move_pos = can_moves[n].pos;
                         if (this->is_phase2()) {
                             if (this->data_->phase2.locked[move_pos] != 0)
                                 continue;
@@ -822,14 +822,14 @@ public:
                     const stage_type & stage = cur_stages[i];
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & empty_moves = this->data_->empty_moves[empty_pos];
-                    size_type total_moves = empty_moves.size();
+                    const std::vector<Move> & can_moves = this->data_->can_moves[empty_pos];
+                    size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
-                        uint8_t cur_dir = empty_moves[n].dir;
+                        uint8_t cur_dir = can_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        uint8_t move_pos = empty_moves[n].pos;
+                        uint8_t move_pos = can_moves[n].pos;
                         if (this->is_phase2()) {
                             if (this->data_->phase2.locked[move_pos] != 0)
                                 continue;

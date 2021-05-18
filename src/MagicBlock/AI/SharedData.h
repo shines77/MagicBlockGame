@@ -175,7 +175,7 @@ struct SharedData
     int player_colors[Color::Maximum];
     int target_colors[Color::Maximum];
 
-    std::vector<Move> empty_moves[BoardSize];
+    std::vector<Move> can_moves[BoardSize];
 
     Phase1<BoardX, BoardY> phase1;
     Phase2<BoardX, BoardY> phase2;
@@ -216,7 +216,7 @@ struct SharedData
         }
 
         for (std::size_t i = 0; i < BoardSize; i++) {
-            this->empty_moves[i] = other.empty_moves[i];
+            this->can_moves[i] = other.can_moves[i];
         }
 
         this->phase1 = other.phase1;

@@ -47,7 +47,7 @@ private:
     int player_num_cnt_[Color::Maximum];
     int target_num_cnt_[Color::Maximum];
 
-    std::vector<Move> empty_moves_[BoardSize];
+    std::vector<Move> can_moves_[BoardSize];
     std::vector<Position> move_path_;
 
     void init() {
@@ -72,7 +72,7 @@ private:
                     move.dir = (uint8_t)dir;
                     moves.push_back(move);
                 }
-                this->empty_moves_[y * BoardX + x] = moves;
+                this->can_moves_[y * BoardX + x] = moves;
             }
         }
 
@@ -374,14 +374,14 @@ public:
                     const stage_type & stage = cur_stages[i];
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
-                    size_type total_moves = empty_moves.size();
+                    const std::vector<Move> & can_moves = this->can_moves_[empty_pos];
+                    size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
-                        uint8_t cur_dir = empty_moves[n].dir;
+                        uint8_t cur_dir = can_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        uint8_t move_pos = empty_moves[n].pos;
+                        uint8_t move_pos = can_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_type board_value = next_stage.board.value();
@@ -462,14 +462,14 @@ public:
                     const stage_type & stage = cur_stages.front();
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & empty_moves = this->empty_moves_[empty_pos];
-                    size_type total_moves = empty_moves.size();
+                    const std::vector<Move> & can_moves = this->can_moves_[empty_pos];
+                    size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
-                        uint8_t cur_dir = empty_moves[n].dir;
+                        uint8_t cur_dir = can_moves[n].dir;
                         if (cur_dir == stage.last_dir)
                             continue;
 
-                        uint8_t move_pos = empty_moves[n].pos;
+                        uint8_t move_pos = can_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
                         size_type board_value = next_stage.board.value();

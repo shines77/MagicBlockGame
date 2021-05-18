@@ -364,13 +364,12 @@ static const Offset Dir_Offset[] = {
 
 struct Direction {
     enum {
-        First   = 0,
         Down    = 0,
         Left    = 1,
         Up      = 2,
         Right   = 3,
         Unknown = 4,
-        Last    = Unknown
+        Maximum = Unknown
     };
 
     template <size_t BoardX, size_t BoardY>
@@ -383,7 +382,7 @@ struct Direction {
         int offset_x = to_x - from_x;
         int offset_y = to_y - from_y;
 
-        for (size_t dir = Direction::First; dir < Direction::Last; dir++) {
+        for (size_t dir = 0; dir < Direction::Maximum; dir++) {
             if ((offset_x == Dir_Offset[dir].x) &&
                 (offset_y == Dir_Offset[dir].y)) {
                 return (uint8_t)dir;
