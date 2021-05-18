@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <string>
 #include <cstring>
 
 #include "MagicBlock/AI/Color.h"
@@ -59,9 +60,15 @@ struct Number {
             return "0";
         }
         else if (num < EmptyPosValue) {
-            static char buf[32] = { 0 };
-            std::itoa(num + 1, buf, 10);
-            return buf;
+#if 1
+            static char num_buf[32] = { 0 };
+            std::itoa(num + 1, num_buf, 10);
+            return num_buf;
+#else
+            static std::string strNum;       
+            strNum = std::to_string(num + 1);
+            return strNum.c_str();
+#endif
         }
         else {
             return "*";
