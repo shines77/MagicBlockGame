@@ -342,6 +342,17 @@ public:
 
             cur_stages.push_back(start);
 
+            if (1) {
+                size_type visited_count = 0;
+                for (size_type i = 0; i < BoardSize; i++) {
+                    visited_count += visited[i].count();
+                }
+
+                printf("depth = %u\n", (uint32_t)depth);
+                printf("current.size() = %u\n", (uint32_t)(cur_stages.size()));
+                printf("visited.size() = %u\n\n", (uint32_t)(visited_count));
+            }
+
             bool exit = false;
             while (cur_stages.size() > 0) {
                 for (size_type i = 0; i < cur_stages.size(); i++) {
@@ -408,8 +419,7 @@ public:
                         visited_count += visited[i].count();
                     }
                     printf("depth = %u\n", (uint32_t)depth);
-                    printf("cur.size() = %u, next.size() = %u\n",
-                           (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
+                    printf("current.size() = %u\n", (uint32_t)(next_stages.size()));
                     printf("visited.size() = %u\n\n", (uint32_t)(visited_count));
                 }
 
@@ -459,6 +469,17 @@ public:
             std::queue<stage_type> next_stages;
 
             cur_stages.push(start);
+
+            if (1) {
+                size_type visited_count = 0;
+                for (size_type i = 0; i < BoardSize; i++) {
+                    visited_count += visited[i].count();
+                }
+
+                printf("depth = %u\n", (uint32_t)depth);
+                printf("current.size() = %u\n", (uint32_t)(cur_stages.size()));
+                printf("visited.size() = %u\n\n", (uint32_t)(visited_count));
+            }
 
             bool exit = false;
             while (cur_stages.size() > 0) {
@@ -528,8 +549,7 @@ public:
                         visited_count += visited[i].count();
                     }
                     printf("depth = %u\n", (uint32_t)depth);
-                    printf("cur.size() = %u, next.size() = %u\n",
-                           (uint32_t)(cur_stages.size()), (uint32_t)(next_stages.size()));
+                    printf("current.size() = %u\n", (uint32_t)(next_stages.size()));
                     printf("visited.size() = %u\n\n", (uint32_t)(visited_count));
                 }
 

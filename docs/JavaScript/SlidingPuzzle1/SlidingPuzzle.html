@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华容道</title>
+    <script src="http://lib.sinaapp.com/js/jquery/3.1.0/jquery-3.1.0.min.js"></script>
+</head>
+<style>
+    .board {
+        width: 300px;
+        height: 300px;
+        border: 1px solid #ccc;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .board .grid {
+        width: 90px;
+        height: 90px;
+        background: #ecc;
+        border: 2px #cec solid;
+        position: absolute;
+        font-size: 40px;
+        line-height: 90px;
+        text-align: center;
+    }
+
+    .board .grid.empty {
+        border: 2px transparent solid;
+        background: transparent
+    }
+
+    .btnbox {
+        text-align: center;
+        padding-top: 20px;
+    }
+
+    .btnbox .time {
+        color: teal
+    }
+
+    .btnbox .result {
+        color: red
+    }
+    #btn {
+        text-align: center;
+        margin: 0 auto;
+    }
+</style>
+<body>    
+    <div class="board">
+    </div><!--游戏容器-->
+    <div class="btnbox">
+        <div class="time">0</div><!--计时展示区-->
+        <div class="result"></div><!--结果展示区-->
+        <button id="btn"></button><!--开始结束按钮-->
+    </div>
+</body>
+</html>
+
+<script>
+//
+// 一步步教你用html+div+css+js基于Jquery实现一套数字华容道游戏
+//
+// See: https://blog.csdn.net/weixin_52308504/article/details/113615797
+//
+$(function (k) {
+	let M = 3;				// 初始化棋盘宽度，默认为3
+	let N = 3;				// 初始化棋盘高度，默认为3
+    let Palaces = M * N;    // 初始化棋盘宫格数量，默认为九宫格
+
+    let state = false;      // 初始化游戏状态true为在游戏，false为已结束或未开始
+
+    var timer = null;		// 初始化游戏计时器
+    let second = 0;         // 初始化游戏用时
+
+    let itemWidth = 100;    // 初始化元素宽度
+    let itemHeight = 100;   // 初始化元素高度
+    let offset = 3;         // 元素偏移，用于界面展示
+
+    var board = [];         // 棋盘数据数组
+
+    // 每次移动后的界面绘制
+    function DrawUI(m, n) {
+        let colCount = m;
+        let rowCount = n;
+
+        for (let y = 0; y < rowCount; y++) {
+            for (let x = 0; x < colCount; x++) {
+                var pos = board[y][x][2] - 1;
+                $('.board .grid').eq(pos).css("top",  board[y][x][0] + offset);
+                $('.board .grid').eq(pos).css("left", board[y][x][1] + offset);
+            }
+        }
+    }
+
+    // 初始化界面
+    function InitUI(m, n) {
+        let colCount = m;
+        let rowCount = n;
+
+        $("#btn").text("开始");
+        $(".board").width(colCount * itemWidth);
+        $(".board").height(rowCount * itemHeight);
+
+        DrawUI(m, n);
+    }
+
+    // 初始化棋盘
+    function InitBoard(m, n) {
+        M = m;
+        N = n;
+        Palaces = m * n;
+
+        let colCount = m;
+        let rowCount = n;
+
+        for (var y = 0; y < rowCount; y++) {
+            board[y] = [];
+            for (var x = 0; x < colCount; x++) {
+                var pos = y * m + x;  // 计算出当前UI元素的索引值
+                if (pos < Palaces - 1) {
+                    $('.board').append('<div class="grid">' + (pos + 1) + '</div>');
+                }
+                else {
+                    $('.board').append('<div class="grid empty">' + '</div>');
+                }
+                // 初始化地图记录每个数字的坐标当前数值，正确数值 board[y][x]=[0,0,3,1],表示x=0,y=0,当前显示为3,正确数值为1
+                board[y][x] = [y * itemWidth, x * itemHeight, pos + 1, pos + 1];
+                // 元素UI定位展示
+                $('.board .gryd').eq(pos).css("top",  board[y][x][0] + offset);
+                $('.board .gryd').eq(pos).css("left", board[y][x][1] + offset);
+
+            }
+        }
+
+        InitUI(m, n);
+    }
+
+    function Move(m, n) {
+        let colCount = m;
+        let rowCount = n;
+
+        let currnum = 0;
+        let winnum = 0;
+        let index = 0;
+        if (state) {
+            $(".board .grid").click(function (e) {
+                currnum = parseInt($(this).text() == '' ? Palaces : $(this).text());
+                if (currnum == Palaces) return;
+                Spance = FindNum(m, n, Palaces);    // 找到空位的地图信息
+                curr = FindNum(m, n, currnum);      // 找到当前数字的地图信息
+                // 判断当前数字是否可以移动到空位如果满足条件点击移动
+                if (Spance[0] == curr[0] &&
+                	Math.abs(Spance[1] - curr[1]) == itemWidth ||
+                	Spance[1] == curr[1] &&
+                	Math.abs(Spance[0] - curr[0]) == itemWidth) {
+                    let tmp = Spance[2];
+                    Spance[2] = curr[2];
+                    curr[2] = tmp;
+                    DrawUI(m, n);
+                    CheckWin(m, n);
+                }
+            })
+        }
+    }
+
+    // 查找某数字的地图信息
+    function FindNum(m, n, currnum) {
+        let colCount = m;
+        let rowCount = n;
+        for (let y = 0; y < rowCount; y++) {
+            for (let x = 0; x < colCount; x++) {
+                if (board[y][x][2] == currnum) {
+                    return board[y][x];
+                }
+            }
+        }
+    }
+
+    // 判断是否完成游戏
+    function CheckWin(m, n) {
+        let colCount = m;
+        let rowCount = n;
+        let total = m * n;
+
+        let winCount = 0;
+        for (let y = 0; y < rowCount; y++) {
+            for (let x = 0; x < colCount; x++) {
+                if (board[y][x][2] == board[y][x][3]) {
+                    winCount++;
+                }
+            }
+        }
+
+        // 完成游戏条件，每个地图里的当前数字等于正确数字
+        if (winCount == total) {
+            Stop(true);
+        }
+    }
+
+    // 乱序数字顺序开始游戏时触发
+    function DoRandom(m, n) {
+        let colCount = m;
+        let rowCount = n;
+        let total = m * n;
+
+        let i = 0;
+        while (i < total) {
+            let x  = Math.floor(Math.random() * colCount);
+            let y  = Math.floor(Math.random() * rowCount);
+            let x1 = Math.floor(Math.random() * colCount);
+            let y1 = Math.floor(Math.random() * rowCount);
+            let tmp = board[y][x][2];
+            board[y][x][2] = board[y1][x1][2];
+            board[y1][x1][2] = tmp;
+            i++;
+        }
+    }
+
+    // 开始游戏的一些设置
+    function Start(m, n) {
+        DoRandom(m, n);
+
+        DrawUI(m, n);
+        state = true;
+        Move(m, n);
+
+        $("#btn").text("结束");
+        $(".btnbox .result").text("");
+
+        if (timer != null) {
+        	clearInterval(timer);
+        }
+        timer = setInterval(function () {
+            if (state) {
+                second++;
+            }
+            $(".btnbox .time").text(second + 'S');
+        }, 1000);
+
+        CheckWin(m, n);
+    }
+
+    // 游戏结束时的一些设置
+    function Stop(win) {
+        if (win) {
+            $(".btnbox .result").text("恭喜过关！用时：" + second + "S");
+        }
+        else {
+            $(".btnbox .result").text("很遗憾，没有完成！用时：" + second + "S");
+        }
+        $("#btn").text("开始");
+        $(".board .grid").off('click');
+        state = false;
+        if (timer != null) {
+        	clearInterval(timer);
+        }
+        second = 0;
+        $(".btnbox .time").text(second);
+        timer = null;
+    }
+
+    $("#btn").click(function () {
+        if (state) {
+            Stop();
+        }
+        else {
+            Start(M, N);
+        }
+    })
+
+    // 这里的数字用于切换宫格数量，以修改程序让界面上点击或输入难易重构界面
+    InitBoard(3, 3);
+})
+</script>

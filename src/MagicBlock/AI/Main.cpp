@@ -466,7 +466,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_sliding_unknown_puzzle_5x5<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_5x5<SolverId::Queue, true>();
 

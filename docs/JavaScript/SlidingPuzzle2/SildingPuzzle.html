@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>5x5数字华容道</title>
+    <style type="text/css">
+        #main {
+            position: absolute;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            width: 800px;
+            height: 90%;
+            /*border: solid;*/
+            border-color: #000000;
+            text-align: center;
+        }
+
+        #content {
+            position: absolute;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            width: 500px;
+            height: 100%;
+            /*border: solid;*/
+            border-color: #000000;
+            text-align: center;
+        }
+
+        .content {
+            margin-top: 20px;
+            width: 320px;
+            height2: 85px;
+            /*border: solid;*/
+            border-color: #000000;
+            text-align: center;
+        }
+
+        .userBoard_2x2 {
+            width: 210px;
+            height: 210px;
+            background-color: #6C6C6C;
+        }
+
+        .userBoard_3x3 {
+            width: 312px;
+            height: 312px;
+            background-color: #6C6C6C;
+        }
+
+        .userBoard_4x4 {
+            width: 414px;
+            height: 414px;
+            background-color: #6C6C6C;
+        }
+
+        .userBoard_5x5 {
+            width: 516px;
+            height: 516px;
+            background-color: #6C6C6C;
+        }
+
+        .userBoard_6x6 {
+            width: 618px;
+            height: 618px;
+            background-color: #6C6C6C;
+        }
+
+        .grid {
+            width: 100px;
+            height: 100px;
+            float: left;
+            margin-left: 3px;
+            margin-top: 3px;
+            background-color: #FFA042;
+            text-align: center;
+            font-size: 80px;
+            color: #842B00;
+        }
+
+        .buttonStyle {
+            width: 150px;
+            height: 50px;
+            font-size: 30px;
+            margin-top: 15px;
+            border-radius: 5%;
+            background-color: #97CBFF;
+        }
+
+        .timeText {
+            margin-left: 20px;
+            font-size: 30px;
+        }
+
+        .inputStyle {
+            float: auto;
+            width: 100px;
+            height: 30px;
+            font-size: 30px;
+        }
+    </style>
+    <script type="text/javascript">
+        //
+        // JS自制简易版数字华容道小游戏
+        //
+        // See: https://blog.csdn.net/HHX19945656/article/details/115104275
+        //
+
+        /**
+         * 5x5数字华容道，一共有25个格子，我们可以为每一个格子标记下标，通过下标来找到对应的div元素对象
+         * 格子下标从0开始，每个格子的下标如下所示：
+         *  0,  1,  2,  3,  4,
+         *  5,  6,  7,  8,  9,
+         * 10, 11, 12, 13, 14,
+         * 15, 16, 17, 18, 19,
+         * 20, 21, 22, 23, 24
+         */
+        window.onload = function() {
+            // 获取浏览器窗口
+            var windowScreen = document.documentElement;
+
+            // 获取main的div元素
+            var main_div = document.getElementById("main");
+            // 通过窗口宽高和div宽高计算位置
+            var main_left = (windowScreen.clientWidth - main_div.clientWidth) / 2 + "px";
+            var main_top  = (windowScreen.clientHeight - main_div.clientHeight) / 2 + "px";
+            // 位置赋值
+            main_div.style.left = main_left;
+            main_div.style.top  = main_top;
+
+            // 获取mcontent的div元素
+            var content_div  = document.getElementById("content");
+            var content_left = (main_div.clientWidth - content_div.clientWidth) / 2 + "px";
+            var content_top  = (main_div.clientHeight - content_div.clientHeight) / 2 + "px";
+            content_div.style.left = content_left;
+            content_div.style.top  = content_top;
+
+            var M = 3;
+            var N = 3;
+            var Palaces = M * N;
+
+            var OffsetX = [  0,  1,  0, -1 ];
+            var OffsetY = [ -1,  0,  1,  0 ];
+
+            var numArray = new Array(Palaces);
+            var divObjArray = new Array(Palaces);
+
+            /**
+             * 使用25代表空白格，通过变量emptyIndex存储该值所在格子的下标
+             * 并声明更新25空白格位置的函数updateEmptyFun
+             */
+            var emptyIndex = Palaces - 1;
+
+            /**
+             * 定义“开始游戏”按钮的元素节点对象startButton
+             *      开始游戏按钮绑定单击响应函数，当玩家点击按钮后，更改按钮显示字样，更改按钮颜色；
+             *      游戏顺利通关后，复位按钮；
+             * 定义计时器timer
+             *      定时器设置计时函数timing，
+             *      当玩家点击开始按钮进入游戏后，定时器开始计时；
+             *      游戏顺利通关后，复位计时器；
+             * 定义计时器所示时间文本的元素节点对象timeText
+             *      游戏快开始后，每秒显示当前所用时间；
+             *      游戏结束后，时间文本复位置空
+             * 定义提示文字“目标图案”的元素节点对象promptText
+             *      当玩家进入游戏后，将该提示文字隐藏起来；
+             *      游戏结束后，提示文字再显示
+             */
+            var startButton = document.getElementById("startButton");
+            var timer = null;
+            var curTime = 0;
+            var timeText = document.getElementById("outputTime");
+            var promptText = document.getElementById("promptText");
+
+            function removeAllChild(parent) { 
+                while(parent.hasChildNodes()) {
+                    parent.removeChild(parent.firstChild);
+                }
+            }
+
+            function removeAllChildById(id) { 
+                var parent = document.getElementById(id);
+                removeAllChild(parent);
+            }
+
+            function initBoard(m, n) {
+                M = m;
+                N = n;
+                Palaces = M * N;
+                var userBoard = document.getElementById("userBoard");
+                if (userBoard != undefined && userBoard != null) {
+                    if (M > N)
+                        userBoard.setAttribute("class", "userBoard_" + M + "x" + M);
+                    else
+                        userBoard.setAttribute("class", "userBoard_" + N + "x" + N);
+                    removeAllChild(userBoard);
+                    for (var i = 0; i < Palaces; i++) {
+                        var grid = document.createElement("div"); 
+                        grid.setAttribute("id", "index_" + i);
+                        grid.setAttribute("class", "grid");
+                        grid.innerHTML = (i + 1);
+                        if (i >= Palaces - 1) {
+                            grid.style = "background-color: #6C6C6C;";
+                        }
+                        var object = userBoard.appendChild(grid);
+                    }
+                }
+            }
+
+            function initUI() {
+                /**
+                 * 定义数字数组numArray，值为0~25，该数组中的元素则为每个格子中显示的数字
+                 * 同时定义div元素节点对象的数组divObjArray，每一个数组元素均为div元素节点对象
+                 * 		通过遍历方式，依次对每个数组元素赋值
+                 * 
+                 * 为何div元素节点对象通过getElementsByClassName()方法一次性获取到一个对象数组呢？这样明显是更简洁啊
+                 * 		因为IE浏览器8.x及以下均不支持getElementsByClassName()方法，为了兼容IE 8.x以下，就放弃了该方式
+                 */
+                emptyIndex = Palaces - 1;
+                numArray = new Array(Palaces);
+                divObjArray = new Array(Palaces);
+                for (var i = 0; i < divObjArray.length; i++) {
+                    numArray[i] = i + 1;
+                    divObjArray[i] = document.getElementById("index_" + i);
+                }
+
+                startButton.onclick = function() {
+                    if (promptText.innerHTML != "游戏中...") {
+                        // 更改按钮显示字样，更改按钮颜色
+                        startButton.innerHTML = "重新开始";
+                        startButton.style.backgroundColor = "#FF7575";
+                    }
+
+                    restartGame();
+                }
+
+                settingGrids_OnClickFunc();
+            }
+
+            function restartGame() {
+                // 随机分布1~Palaces数字所在位置
+                numArray.sort(function() {
+                    return Math.random() > 0.5 ? -1 : 1;
+                });
+                for (var i = 0; i < divObjArray.length; i++) {
+                    if (numArray[i] == Palaces) {
+                        divObjArray[i].innerHTML = "";
+                        divObjArray[i].style.backgroundColor = "#6C6C6C";
+                        continue;
+                    }
+                    divObjArray[i].innerHTML = numArray[i];
+                    divObjArray[i].style.backgroundColor = "#FFA042";
+                }
+
+                // 定时器开始计时
+                if (timer != null) {
+                    clearTimeout(timer);
+                }
+
+                // 同步显示时间文本
+                curTime = 0;
+                timeText.value = curTime;
+
+                setTimeout(updateTime, 1000);
+
+                // 将顶部的“目标图案”字样隐藏
+                //promptText.style.display = "none";
+                //promptText.style.visibility = "hidden";
+
+                // 显示游戏中
+                promptText.innerHTML = "游戏中...";
+            }
+
+            // 计时器
+            function updateTime() {
+                curTime++;
+                timeText.value = curTime;
+                timer = setTimeout(updateTime, 1000);
+            }
+
+            // 获取空白格所在下标
+            function updateEmptyFunc() {
+                emptyIndex = numArray.indexOf(Palaces);
+            }
+
+            /**
+             * 为每一个格子绑定单击响应函数
+             * 		这些格子按照点击移动时，是否有规律、规律是否一致，可以分为6组
+             * 		第1组，没有统一规律的一组，下标分别为0,4,20,24的格子
+             * 		第2组，移动规律为可以移动左、下、右，下标分别为1,2,3的格子
+             * 		第3组，移动规律为可以移动左、上、右，下标分别为21，22，23的格子
+             * 		第4组，移动规律为可以移动上、下、右，下标分别为5,10,15的格子
+             * 		第5组，移动规律为可以移动上、下、左，下标分别为9,14,19的格子
+             * 		第6组，移动规律为可以移动上、下、左、右，下标分别为6,7,8,11,12,13,16,17,18的格子
+             * 
+             * 将绑定单击响应函数公共部分抽取出来，作为公共函数updatePositionFun，减少冗余代码
+             * 		公共函数部分包含更新25(即空白格子)在数组numArray中的位置，同时更新格子交换后的颜色、数值
+             * 
+             * 在每次位置更新结束之后，需要判断是否已经完成数字排序；方法为isGameOver
+             * 		若当前空白格未在最后一位，则可直接认为游戏为通关
+             * 		若当前空白格已经在最后一位，则判断前面的所有数字均按照升序排序
+             */
+            function updatePositionFunc(divIndex) {
+                if (startButton.innerHTML == "开始游戏") {
+                    return;
+                }
+                numArray[emptyIndex] = divObjArray[divIndex].innerHTML;
+                numArray[divIndex] = Palaces;
+                divObjArray[emptyIndex].innerHTML = divObjArray[divIndex].innerHTML;
+                divObjArray[emptyIndex].style.backgroundColor = "#FFA042";
+                divObjArray[divIndex].innerHTML = "";
+                divObjArray[divIndex].style.backgroundColor = "#6C6C6C";
+                if (divIndex == Palaces - 1) {
+                    isGameOver();
+                }
+            }
+
+            // 判断游戏是否通关
+            function isGameOver() {
+                for (var i = 0; i < numArray.length; i++) {
+                    if (numArray[i] != i + 1) {
+                        return;
+                    }
+                }
+
+                // 将计时器复位
+                if (timer != null) {
+                    clearTimeout(timer);
+                }
+
+                // 游戏通关，弹框告知玩家游戏顺利通关，以及所用时间
+                alert("通关啦！ 用时：" + timeText.value + "s");
+
+                // 将“开始游戏”按钮复位
+                startButton.innerHTML = "开始游戏";
+                startButton.style.backgroundColor = "#97CBFF";
+
+                // 同步显示时间文本
+                curTime = 0;
+                timeText.value = curTime;
+
+                // 将顶部的“目标图案”字样设置为显示
+                //promptText.style.display = "block";
+                //promptText.style.visibility = "visible";
+
+                promptText.innerHTML = "目标图案";
+            }
+
+            // 其他下标的格子的单击响应函数
+            function settingGrids_OnClickFunc() {
+                for (var i = 0; i < divObjArray.length; i++) {
+                    divObjArray[i].onclick = function() {
+                        updateEmptyFunc();
+                        var curIndex = divObjArray.indexOf(this);
+                        for (var dir = 0; dir < OffsetX.length; dir++) {
+                            var x = Math.floor(curIndex % M) + OffsetX[dir];
+                            if (x < 0 || x >= M) continue;
+                            var y = Math.floor(curIndex / M) + OffsetY[dir];
+                            if (y < 0 || y >= N) continue;
+                            var moveToIndex = y * M + x;
+                            if (emptyIndex == moveToIndex) {
+                                updatePositionFunc(curIndex);
+                            }
+                        }
+                    }
+                }
+            }
+
+            initBoard(3, 2);
+            initUI();
+        }
+    </script>
+</head>
+
+<body>
+    <div id="main">
+        <div id="content">
+            <div class="content">
+                <span style="font-size: 50px;color: #D94600;" id="promptText">目标图案</span>
+                <br>&nbsp;<br/>
+            </div>
+            <div class="userBoard_5x5" id="userBoard">
+                <div class="grid" id="index_0">1</div>
+                <div class="grid" id="index_1">2</div>
+                <div class="grid" id="index_2">3</div>
+                <div class="grid" id="index_3">4</div>
+                <div class="grid" id="index_4">5</div>
+                <div class="grid" id="index_5">6</div>
+                <div class="grid" id="index_6">7</div>
+                <div class="grid" id="index_7">8</div>
+                <div class="grid" id="index_8">9</div>
+                <div class="grid" id="index_9">10</div>
+                <div class="grid" id="index_10">11</div>
+                <div class="grid" id="index_11">12</div>
+                <div class="grid" id="index_12">13</div>
+                <div class="grid" id="index_13">14</div>
+                <div class="grid" id="index_14">15</div>
+                <div class="grid" id="index_15">16</div>
+                <div class="grid" id="index_16">17</div>
+                <div class="grid" id="index_17">18</div>
+                <div class="grid" id="index_18">19</div>
+                <div class="grid" id="index_19">20</div>
+                <div class="grid" id="index_20">21</div>
+                <div class="grid" id="index_21">22</div>
+                <div class="grid" id="index_22">23</div>
+                <div class="grid" id="index_23">24</div>
+                <div class="grid" style="background-color: #6C6C6C;" id="index_24"></div>
+            </div>
+            <div class="content">
+                <button class="buttonStyle" id="startButton" name="button" value="StartButton">开始游戏</button>
+            </div>
+            <div class="content">
+                <span class="timeText">时间：</span>
+                <input class="inputStyle" type="text" name="outputTime" id="outputTime" value="" readonly="readonly" />
+                <span class="timeText" style="margin-left: 0px;">s</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
