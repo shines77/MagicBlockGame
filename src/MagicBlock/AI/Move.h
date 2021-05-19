@@ -42,18 +42,10 @@ struct Position {
     Position(const Position & src) noexcept {
         this->value = src.value;
     }
-    Position(Position && src) noexcept {
-        std::swap(this->value, src.value);
-    }
 
     ~Position() {}
 
     Position & operator = (const Position & rhs) noexcept {
-        this->value = rhs.value;
-        return *this;
-    }
-
-    Position & operator = (Position && rhs) noexcept {
         this->value = rhs.value;
         return *this;
     }
@@ -304,10 +296,6 @@ struct Move {
         this->pos = src.pos;
         this->dir = src.dir;
     }
-    Move(Move && src) noexcept {
-        this->pos.swap(src.pos);
-        std::swap(this->dir, src.dir);
-    }
     ~Move() {}
 
     Move & operator = (const Move & rhs) noexcept {
@@ -323,20 +311,13 @@ struct MoveInfo {
     uint8_t     color;
     uint8_t     dir;
 
-    MoveInfo() noexcept : from_pos(0), to_pos(0), color(Color::First), dir(0) {}
+    MoveInfo() noexcept : from_pos(0), to_pos(0), color(0), dir(0) {}
 
     MoveInfo(const MoveInfo & src) noexcept {
         this->from_pos  = src.from_pos;
         this->to_pos    = src.to_pos;
         this->color     = src.color;
         this->dir       = src.dir;
-    }
-
-    MoveInfo(MoveInfo && src) noexcept {
-        this->from_pos.swap(src.from_pos);
-        this->to_pos.swap(src.to_pos);
-        std::swap(this->color, src.color);
-        std::swap(this->dir, src.dir);
     }
 
     ~MoveInfo() {}
@@ -405,6 +386,21 @@ struct Direction {
                 return (uint8_t)Direction::Left;
             default:
                 return (uint8_t)Direction::Unknown;
+        }
+    }
+
+    static char toChar(size_t dir) {
+        switch (dir) {
+            case Direction::Down:
+                return 'D';
+            case Direction::Left:
+                return 'L';
+            case Direction::Up:
+                return 'U';
+            case Direction::Right:
+                return 'R';
+            default:
+                return '?';
         }
     }
 

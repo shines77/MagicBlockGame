@@ -34,6 +34,8 @@ protected:
 
 public:
     BaseAnswerGame() : min_steps_(std::numeric_limits<size_type>::max()), map_used_(0) {}
+    BaseAnswerGame(const BaseAnswerGame & src)
+        : min_steps_(src.min_steps_), map_used_(src.map_used_) {}
     ~BaseAnswerGame() {}
 
     size_type getMinSteps() const {
@@ -88,6 +90,13 @@ private:
         this->move_list   = other.move_list;
     }
 
+    void internal_move(this_type && other) noexcept {
+        this->start_board = other.start_board;
+        this->final_board = other.final_board;
+        this->move_path   = std::move(other.move_path);
+        this->move_list   = std::move(other.move_list);
+    }
+
     void internal_swap(this_type & other) noexcept {
         std::swap(this->start_board, other.start_board);
         this->final_board.swap(other.final_board);
@@ -117,7 +126,7 @@ public:
     }
 
     Answer(this_type && src) noexcept : start_board(nullptr) {
-        this->internal_swap(src);
+        this->internal_move(std::forward<this_type>(src));
     }
 
     ~Answer() = default;
@@ -128,13 +137,19 @@ public:
     }
 
     this_type & operator = (this_type && rhs) noexcept {
-        this->swap(rhs);
+        this->move(std::forward<this_type>(rhs));
         return *this;
     }
 
     void copy(const this_type & other) noexcept {
         if (&other != this) {
             this->internal_copy(other);
+        }
+    }
+
+    void move(this_type && other) noexcept {
+        if (&other != this) {
+            this->internal_move(std::forward<this_type>(other));
         }
     }
 

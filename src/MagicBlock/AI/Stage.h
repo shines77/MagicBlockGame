@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <vector>
+#include <type_traits>
 
 #include "MagicBlock/AI/Move.h"
 #include "MagicBlock/AI/Board.h"
@@ -30,7 +31,7 @@ struct Stage {
         this->internal_copy(src);
     }
     Stage(Stage && src) noexcept {
-        this->internal_swap(src);
+        this->internal_move(std::forward<Stage>(src));
     }
     Stage(const Board<BoardX, BoardY> & _board) noexcept : board(_board),
         empty_pos(0), last_dir(0), rotate_type(0), reserve(0) {
@@ -44,7 +45,7 @@ struct Stage {
     }
 
     Stage & operator = (Stage && rhs) noexcept {
-        this->swap(rhs);
+        this->move(std::forward<Stage>(rhs));
         return *this;
     }
 
@@ -59,10 +60,15 @@ struct Stage {
         this->move_path     = other.move_path;
     }
 
-    void copy(const Stage & other) noexcept {
-        if (&other != this) {
-            this->internal_copy(other);
-        }
+    void internal_move(Stage && other) noexcept {
+        this->board         = other.board;
+
+        this->empty_pos     = other.empty_pos;
+        this->last_dir      = other.last_dir;
+        this->rotate_type   = other.rotate_type;
+        this->reserve       = other.reserve;
+
+        this->move_path     = std::move(other.move_path);
     }
 
     void internal_swap(Stage & other) noexcept {
@@ -74,6 +80,18 @@ struct Stage {
         std::swap(this->reserve, other.reserve);
 
         std::swap(this->move_path, other.move_path);
+    }
+
+    void copy(const Stage & other) noexcept {
+        if (&other != this) {
+            this->internal_copy(other);
+        }
+    }
+
+    void move(Stage && other) noexcept {
+        if (&other != this) {
+            this->internal_move(std::forward<Stage>(other));
+        }
     }
 
     void swap(Stage & other) noexcept {

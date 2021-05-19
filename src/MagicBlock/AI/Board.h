@@ -53,18 +53,10 @@ union Board
     Board(const Board & src) noexcept {
         this->internal_copy(src);
     }
-    Board(Board && src) noexcept {
-        this->internal_copy(src);
-    }
 
     ~Board() {}
 
     Board & operator = (const Board & rhs) noexcept {
-        this->copy(rhs);
-        return *this;
-    }
-
-    Board & operator = (Board && rhs) noexcept {
         this->copy(rhs);
         return *this;
     }
@@ -85,6 +77,14 @@ union Board
         }
     }
 
+    void internal_swap(Board & other) noexcept {
+        for (size_type n = 0; n < kTotalUnits; n++) {
+            unit_type temp = this->uints[n];
+            this->uints[n] = other.uints[n];
+            other.uints[n] = temp;
+        }
+    }
+
     void copy(const Board & other) noexcept {
         if (&other != this) {
             this->internal_copy(other);
@@ -98,14 +98,6 @@ union Board
         }
         for (; cell < kTotalBytes; cell++) {
             this->cells[cell] = 0;
-        }
-    }
-
-    void internal_swap(Board & other) noexcept {
-        for (size_type n = 0; n < kTotalUnits; n++) {
-            unit_type temp = this->uints[n];
-            this->uints[n] = other.uints[n];
-            other.uints[n] = temp;
         }
     }
 
