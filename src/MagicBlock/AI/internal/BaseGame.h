@@ -25,6 +25,7 @@
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
 #include "MagicBlock/AI/Move.h"
+#include "MagicBlock/AI/CanMoves.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/SharedData.h"
 #include "MagicBlock/AI/ErrorCode.h"
@@ -50,11 +51,13 @@ public:
 
     typedef BaseGame<BoardX, BoardY, TargetX, TargetY, AllowRotate> this_type;
 
-    typedef SharedData<BoardX, BoardY, TargetX, TargetY>            shared_data_type;
-    typedef typename shared_data_type::stage_type                   stage_type;
-    typedef typename shared_data_type::stage_info_t                 stage_info_t;
-    typedef typename shared_data_type::player_board_t               player_board_t;
-    typedef typename shared_data_type::target_board_t               target_board_t;
+    typedef SharedData<BoardX, BoardY, TargetX, TargetY>    shared_data_type;
+    typedef typename shared_data_type::stage_type           stage_type;
+    typedef typename shared_data_type::stage_info_t         stage_info_t;
+    typedef typename shared_data_type::can_moves_t          can_moves_t;
+    typedef typename shared_data_type::can_move_list_t      can_move_list_t;
+    typedef typename shared_data_type::player_board_t       player_board_t;
+    typedef typename shared_data_type::target_board_t       target_board_t;
 
     typedef std::function<bool(size_type, size_type, const stage_type & stage)> phase2_callback;
 
@@ -80,26 +83,7 @@ protected:
 
     // Initialize can_moves[BoardSize]
     void init() {
-        for (size_type y = 0; y < BoardY; y++) {
-            for (size_type x = 0; x < BoardX; x++) {
-                std::vector<Move> can_moves;
-                for (size_type dir = 0; dir < Direction::Maximum; dir++) {
-                    assert(dir >= 0 && dir < 4);
-                    int board_x = (int)x + Dir_Offset[dir].x;
-                    if (board_x < 0 || board_x >= (int)BoardX)
-                        continue;
-                    int board_y = (int)y + Dir_Offset[dir].y;
-                    if (board_y < 0 || board_y >= (int)BoardY)
-                        continue;
-                    Move move;
-                    move.pos = Position(board_y * (int)BoardX + board_x);
-                    move.dir = (uint8_t)dir;
-                    can_moves.push_back(move);
-                }
-                assert((y * BoardX + x) < BoardSize);
-                this->data_.can_moves[y * BoardX + x] = std::move(can_moves);
-            }
-        }
+        can_moves_t::copyTo(this->data_.can_moves);
 
         if (AllowRotate)
             this->data_.target_len = MAX_ROTATE_TYPE;

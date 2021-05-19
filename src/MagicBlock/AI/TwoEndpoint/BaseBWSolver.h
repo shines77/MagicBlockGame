@@ -22,6 +22,7 @@
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
 #include "MagicBlock/AI/Move.h"
+#include "MagicBlock/AI/CanMoves.h"
 #include "MagicBlock/AI/Value128.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
@@ -46,6 +47,9 @@ public:
 
     typedef SharedData<BoardX, BoardY, TargetX, TargetY>    shared_data_type;
     typedef typename shared_data_type::stage_type           stage_type;
+    typedef typename shared_data_type::stage_info_t         stage_info_t;
+    typedef typename shared_data_type::can_moves_t          can_moves_t;
+    typedef typename shared_data_type::can_move_list_t      can_move_list_t;
     typedef typename shared_data_type::player_board_t       player_board_t;
     typedef typename shared_data_type::target_board_t       target_board_t;
     typedef Phase2CallBack                                  phase2_callback;

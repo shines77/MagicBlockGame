@@ -23,6 +23,7 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Answer.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\BitUtils.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Board.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\CanMoves.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Color.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\BitSet.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Console.h" />

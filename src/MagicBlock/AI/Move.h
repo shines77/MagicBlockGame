@@ -369,7 +369,7 @@ struct Direction {
         Up      = 2,
         Right   = 3,
         Unknown = 4,
-        Maximum = Unknown
+        Maximum = 4
     };
 
     template <size_t BoardX, size_t BoardY>

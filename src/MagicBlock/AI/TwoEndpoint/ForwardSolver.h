@@ -24,6 +24,7 @@
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
 #include "MagicBlock/AI/Move.h"
+#include "MagicBlock/AI/CanMoves.h"
 #include "MagicBlock/AI/Value128.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
@@ -50,6 +51,9 @@ public:
 
     typedef typename base_type::shared_data_type    shared_data_type;
     typedef typename base_type::stage_type          stage_type;
+    typedef typename base_type::stage_info_t        stage_info_t;
+    typedef typename base_type::can_moves_t         can_moves_t;
+    typedef typename base_type::can_move_list_t     can_move_list_t;
     typedef typename base_type::player_board_t      player_board_t;
     typedef typename base_type::target_board_t      target_board_t;
     typedef typename base_type::phase2_callback     phase2_callback;
@@ -172,7 +176,7 @@ public:
                     const stage_type & stage = this->cur_stages_[i];
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & can_moves = this->data_->can_moves[empty_pos];
+                    const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
@@ -256,7 +260,7 @@ public:
                     const stage_type & stage = this->cur_stages_[i];
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & can_moves = this->data_->can_moves[empty_pos];
+                    const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;

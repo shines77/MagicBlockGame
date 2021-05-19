@@ -16,6 +16,7 @@
 #include "MagicBlock/AI/Color.h"
 #include "MagicBlock/AI/Number.h"
 #include "MagicBlock/AI/Move.h"
+#include "MagicBlock/AI/CanMoves.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
 #include "MagicBlock/AI/ErrorCode.h"
@@ -35,7 +36,11 @@ public:
     static const size_type kMapBits = size_type(1U) << (BoardSize * 3);
     static const size_type kSingelColorNums = 4;
 
-    typedef Stage<BoardX, BoardY> stage_type;
+    typedef Stage<BoardX, BoardY>                   stage_type;
+    typedef Board<BoardX, BoardY>                   player_board_t;
+    typedef Board<BoardX, BoardY>                   target_board_t;
+    typedef CanMoves<BoardX, BoardY>                can_moves_t;
+    typedef typename can_moves_t::can_move_list_t   can_move_list_t;
 
 private:
     Board<BoardX, BoardY> player_board_;
@@ -47,7 +52,8 @@ private:
     int player_num_cnt_[Color::Maximum];
     int target_num_cnt_[Color::Maximum];
 
-    std::vector<Move> can_moves_[BoardSize];
+    can_moves_t can_moves_;
+
     std::vector<Position> move_path_;
 
     void init() {
@@ -56,25 +62,7 @@ private:
             this->target_num_cnt_[clr] = 0;
         }
 
-        for (size_type y = 0; y < BoardY; y++) {
-            for (size_type x = 0; x < BoardX; x++) {
-                std::vector<Move> can_moves;
-                for (size_type dir = 0; dir < Direction::Maximum; dir++) {
-                    assert(dir >= 0 && dir < 4);
-                    int board_x = (int)x + Dir_Offset[dir].x;
-                    if (board_x < 0 || board_x >= (int)BoardX)
-                        continue;
-                    int board_y = (int)y + Dir_Offset[dir].y;
-                    if (board_y < 0 || board_y >= (int)BoardY)
-                        continue;
-                    Move move;
-                    move.pos = Position(board_y * (int)BoardX + board_x);
-                    move.dir = (uint8_t)dir;
-                    can_moves.push_back(move);
-                }
-                this->can_moves_[y * BoardX + x] = std::move(can_moves);
-            }
-        }
+        can_moves_t::copyTo(this->can_moves_);
 
         if (AllowRotate)
             this->target_len_ = MAX_ROTATE_TYPE;
@@ -374,7 +362,7 @@ public:
                     const stage_type & stage = cur_stages[i];
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & can_moves = this->can_moves_[empty_pos];
+                    const can_move_list_t & can_moves = this->can_moves_[empty_pos];
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
@@ -462,7 +450,7 @@ public:
                     const stage_type & stage = cur_stages.front();
 
                     uint8_t empty_pos = stage.empty_pos;
-                    const std::vector<Move> & can_moves = this->can_moves_[empty_pos];
+                    const can_move_list_t & can_moves = this->can_moves_[empty_pos];
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;

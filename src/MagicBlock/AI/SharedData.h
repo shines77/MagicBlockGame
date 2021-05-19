@@ -12,6 +12,8 @@
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
 #include "MagicBlock/AI/Move.h"
+#include "MagicBlock/AI/CanMoves.h"
+#include "MagicBlock/AI/CanMoves.h"
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Stage.h"
 
@@ -163,6 +165,8 @@ struct SharedData
 
     typedef typename Phase1<BoardX, BoardY>::stage_type     stage_type;
     typedef typename Phase1<BoardX, BoardY>::stage_info_t   stage_info_t;
+    typedef CanMoves<BoardX, BoardY>                        can_moves_t;
+    typedef typename can_moves_t::can_move_list_t           can_move_list_t;
 
     static const std::size_t BoardSize = BoardX * BoardY;
 
@@ -175,7 +179,7 @@ struct SharedData
     int player_colors[Color::Maximum];
     int target_colors[Color::Maximum];
 
-    std::vector<Move> can_moves[BoardSize];
+    can_moves_t can_moves;
 
     Phase1<BoardX, BoardY> phase1;
     Phase2<BoardX, BoardY> phase2;
@@ -215,9 +219,7 @@ struct SharedData
             this->target_colors[clr] = other.target_colors[clr];
         }
 
-        for (std::size_t i = 0; i < BoardSize; i++) {
-            this->can_moves[i] = other.can_moves[i];
-        }
+        can_moves_t::copyTo(can_moves, other.can_moves);
 
         this->phase1 = other.phase1;
         this->phase2 = other.phase2;
