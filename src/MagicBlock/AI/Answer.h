@@ -113,10 +113,10 @@ public:
     Answer(board_type * _start_board, move_seq_t && _move_seq) noexcept
         : start_board(_start_board), move_seq(std::forward<move_seq_t>(_move_seq)) {}
 
-    Answer(board_type * _start_board, const move_seq_t & _move_seq, const board_type & _final_board) noexcept
+    Answer(board_type * _start_board, const board_type & _final_board, const move_seq_t & _move_seq) noexcept
         : start_board(_start_board), final_board(_final_board), move_seq(_move_seq) {}
 
-    Answer(board_type * _start_board, move_seq_t && _move_seq, const board_type & _final_board) noexcept
+    Answer(board_type * _start_board, const board_type & _final_board, move_seq_t && _move_seq) noexcept
         : start_board(_start_board), final_board(_final_board),
           move_seq(std::forward<move_seq_t>(_move_seq)) {}
 
@@ -129,7 +129,7 @@ public:
         this->internal_move(std::forward<this_type>(src));
     }
 
-    ~Answer() = default;
+    ~Answer() {}
 
     this_type & operator = (const this_type & rhs) {
         this->copy(rhs);
@@ -167,40 +167,40 @@ public:
         this->start_board = start_board;
     }
 
-    static bool translateMovePath(const board_type & board, const move_seq_t & move_seq,
+    static bool translateMoveSeq(const board_type & board, const move_seq_t & move_seq,
                                   move_list_t & move_list, Position empty_pos = std::uint8_t(-1)) {
         return board_type::template translate_move_seq<EmptyPosValue, UnknownPosValue>(board, move_seq, move_list, empty_pos);
     }
 
-    bool translateMovePath(const move_seq_t & move_seq, move_list_t & move_list, Position empty_pos = std::uint8_t(-1)) const {
+    bool translateMoveSeq(const move_seq_t & move_seq, move_list_t & move_list, Position empty_pos = std::uint8_t(-1)) const {
         assert(this->start_board != nullptr);
         return this->start_board->template translate_move_seq<EmptyPosValue, UnknownPosValue>(move_seq, move_list, empty_pos);
     }
 
-    bool translateMovePath(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
-        return this->translateMovePath(move_seq, this->move_list, empty_pos);
+    bool translateMoveSeq(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
+        return this->translateMoveSeq(move_seq, this->move_list, empty_pos);
     }
 
-    bool translateMovePath(const stage_type & target_stage, move_list_t & move_list, Position empty_pos = std::uint8_t(-1)) {
-        return this->translateMovePath(target_stage.move_seq, move_list, empty_pos);
+    bool translateMoveSeq(const stage_type & target_stage, move_list_t & move_list, Position empty_pos = std::uint8_t(-1)) {
+        return this->translateMoveSeq(target_stage.move_seq, move_list, empty_pos);
     }
 
-    bool translateMovePath(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
-        return this->translateMovePath(target_stage.move_seq, empty_pos);
+    bool translateMoveSeq(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
+        return this->translateMoveSeq(target_stage.move_seq, empty_pos);
     }
 
-    bool translateMovePath(Position empty_pos = std::uint8_t(-1)) const {
-        return this->translateMovePath(this->move_seq, this->move_list, empty_pos);
+    bool translateMoveSeq(Position empty_pos = std::uint8_t(-1)) const {
+        return this->translateMoveSeq(this->move_seq, this->move_list, empty_pos);
     }
 
-    static void displayMovePath(const move_list_t & move_list) {
+    static void displayMoveSeq(const move_list_t & move_list) {
         if (IsNumberBoard)
             board_type::template display_num_move_seq<EmptyPosValue, UnknownPosValue>(move_list);
         else
             board_type::display_move_seq(move_list);
     }
 
-    static void displayMovePath(const board_type & board, const move_seq_t & move_seq,
+    static void displayMoveSeq(const board_type & board, const move_seq_t & move_seq,
                                 Position empty_pos = std::uint8_t(-1)) {
         move_list_t move_list;
         if (board_type::translate_move_seq<EmptyPosValue, UnknownPosValue>(board, move_seq, move_list, empty_pos)) {
@@ -211,29 +211,29 @@ public:
         }
     }
 
-    static void displayMovePath(const board_type & board, const stage_type & target_stage,
+    static void displayMoveSeq(const board_type & board, const stage_type & target_stage,
                                 Position empty_pos = std::uint8_t(-1)) {
-        this_type::displayMovePath(board, target_stage.move_seq, empty_pos);
+        this_type::displayMoveSeq(board, target_stage.move_seq, empty_pos);
     }
 
-    void displayMovePath(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
-        if (this->translateMovePath(move_seq, this->move_list, empty_pos)) {
-            this_type::displayMovePath(this->move_list);
+    void displayMoveSeq(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
+        if (this->translateMoveSeq(move_seq, this->move_list, empty_pos)) {
+            this_type::displayMoveSeq(this->move_list);
         }
     }
 
-    void displayMovePath(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
-        this->displayMovePath(target_stage.move_seq, empty_pos);
+    void displayMoveSeq(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
+        this->displayMoveSeq(target_stage.move_seq, empty_pos);
     }
 
-    void displayMovePath(Position empty_pos = std::uint8_t(-1)) {
-        if (this->translateMovePath(this->move_seq, this->move_list, empty_pos)) {
-            this_type::displayMovePath(this->move_list);
+    void displayMoveSeq(Position empty_pos = std::uint8_t(-1)) {
+        if (this->translateMoveSeq(this->move_seq, this->move_list, empty_pos)) {
+            this_type::displayMoveSeq(this->move_list);
         }
     }
 
-    void displayMovePathOnly() {
-        this_type::displayMovePath(this->move_list);
+    void displayMoveSeqOnly() {
+        this_type::displayMoveSeq(this->move_list);
     }
 };
 
@@ -283,7 +283,7 @@ public:
         return this->best_answer_.start_board;
     }
 
-    const move_seq_t & getAnswerMovePath() const {
+    const move_seq_t & getAnswerMoveSeq() const {
         return this->best_answer_.move_seq;
     }
 
@@ -291,11 +291,11 @@ public:
         this->best_answer_.start_board = start_board;
     }
 
-    void setAnswerMovePath(const move_seq_t & move_seq) {
+    void setAnswerMoveSeq(const move_seq_t & move_seq) {
         this->best_answer_.move_seq = move_seq;
     }
 
-    void setAnswerMovePath(move_seq_t && move_seq) {
+    void setAnswerMoveSeq(move_seq_t && move_seq) {
         this->best_answer_.move_seq = std::forward<move_seq_t>(move_seq);
     }
 
@@ -311,42 +311,42 @@ public:
         this->best_answer_.move_list = std::forward<move_list_t>(move_list);
     }
 
-    bool translateMovePath(const move_seq_t & move_seq, move_list_t & move_list,
-                           Position empty_pos = std::uint8_t(-1)) const {
-        return this->best_answer_.translateMovePath(move_seq, move_list, empty_pos);
+    bool translateMoveSeq(const move_seq_t & move_seq, move_list_t & move_list,
+                          Position empty_pos = std::uint8_t(-1)) const {
+        return this->best_answer_.translateMoveSeq(move_seq, move_list, empty_pos);
     }
 
-    bool translateMovePath(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
-        return this->best_answer_.translateMovePath(move_seq, empty_pos);
+    bool translateMoveSeq(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
+        return this->best_answer_.translateMoveSeq(move_seq, empty_pos);
     }
 
-    bool translateMovePath(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
-        return this->best_answer_.translateMovePath(target_stage, empty_pos);
+    bool translateMoveSeq(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
+        return this->best_answer_.translateMoveSeq(target_stage, empty_pos);
     }
 
-    bool translateMovePath(const stage_type & target_stage, move_list_t & move_list,
-                           Position empty_pos = std::uint8_t(-1)) const {
-        return this->best_answer_.translateMovePath(target_stage, move_list, empty_pos);
+    bool translateMoveSeq(const stage_type & target_stage, move_list_t & move_list,
+                          Position empty_pos = std::uint8_t(-1)) const {
+        return this->best_answer_.translateMoveSeq(target_stage, move_list, empty_pos);
     }
 
-    bool translateMovePath(Position empty_pos = std::uint8_t(-1)) const {
-        return this->best_answer_.translateMovePath(empty_pos);
+    bool translateMoveSeq(Position empty_pos = std::uint8_t(-1)) const {
+        return this->best_answer_.translateMoveSeq(empty_pos);
     }
 
     void displayAnswerMoves(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
-        this->best_answer_.displayMovePath(move_seq, empty_pos);
+        this->best_answer_.displayMoveSeq(move_seq, empty_pos);
     }
 
     void displayAnswerMoves(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
-        this->best_answer_.displayMovePath(target_stage, empty_pos);
+        this->best_answer_.displayMoveSeq(target_stage, empty_pos);
     }
 
     void displayAnswerMoves(Position empty_pos = std::uint8_t(-1)) {
-        this->best_answer_.displayMovePath(empty_pos);
+        this->best_answer_.displayMoveSeq(empty_pos);
     }
 
     void displayAnswerMovesOnly() {
-        this->best_answer_.displayMovePathOnly();
+        this->best_answer_.displayMoveSeqOnly();
     }
 };
 
@@ -399,7 +399,7 @@ public:
         return this->best_answer_[index].start_board;
     }
 
-    const move_seq_t & getAnswerMovePath(size_type index) const {
+    const move_seq_t & getAnswerMoveSeq(size_type index) const {
         assert(index >= 0 && index < best_answer_list_.size());
         return this->best_answer_list_[index].move_seq;
     }
@@ -409,12 +409,12 @@ public:
         this->best_answer_list_[index].start_board = start_board;
     }
 
-    void setAnswerMovePath(size_type index, const move_seq_t & move_seq) {
+    void setAnswerMoveSeq(size_type index, const move_seq_t & move_seq) {
         assert(index >= 0 && index < best_answer_list_.size());
         this->best_answer_list_[index].move_seq = move_seq;
     }
 
-    void setAnswerMovePath(size_type index, move_seq_t && move_seq) {
+    void setAnswerMoveSeq(size_type index, move_seq_t && move_seq) {
         assert(index >= 0 && index < best_answer_list_.size());
         this->best_answer_list_[index].move_seq = std::forward<move_seq_t>(move_seq);
     }
@@ -427,13 +427,13 @@ public:
         this->best_answer_list_.push_back(std::forward<answer_type>(answer));
     }
 
-    void appendAnswer(board_type * start_board, const move_seq_t & move_seq, const board_type & final_board) {
-        answer_type answer(start_board, move_seq, final_board);
+    void appendAnswer(board_type * start_board, const board_type & final_board, const move_seq_t & move_seq) {
+        answer_type answer(start_board, final_board, move_seq);
         this->best_answer_list_.push_back(std::move(answer));
     }
 
-    void appendAnswer(board_type * start_board, move_seq_t && move_seq, board_type && final_board) {
-        answer_type answer(start_board, std::forward<move_seq_t>(move_seq), std::forward<board_type>(final_board));
+    void appendAnswer(board_type * start_board, const board_type & final_board, move_seq_t && move_seq) {
+        answer_type answer(start_board, final_board, std::forward<move_seq_t>(move_seq));
         this->best_answer_list_.push_back(std::move(answer));
     }
 
@@ -441,29 +441,29 @@ public:
         this->best_answer_list_.clear();
     }
 
-    bool translateMovePath(size_type index, Position empty_pos = std::uint8_t(-1)) {
+    bool translateMoveSeq(size_type index, Position empty_pos = std::uint8_t(-1)) {
         assert(index >= 0 && index < best_answer_list_.size());
-        return this->best_answer_list_[index].translateMovePath(empty_pos);
+        return this->best_answer_list_[index].translateMoveSeq(empty_pos);
     }
 
     void displayAnswerMoves(size_type index, Position empty_pos = std::uint8_t(-1)) {
         assert(index >= 0 && index < best_answer_list_.size());
-        this->best_answer_list_[index].displayMovePath(empty_pos);
+        this->best_answer_list_[index].displayMoveSeq(empty_pos);
     }
 
     void displayAnswerMovesOnly(size_type index) {
         assert(index >= 0 && index < best_answer_list_.size());
-        this->best_answer_list_[index].displayMovePathOnly();
+        this->best_answer_list_[index].displayMoveSeqOnly();
     }
 
-    void translateAllMovePath(std::vector<Position> empty_pos_list) {
+    void translateAllMoveSeq(std::vector<Position> empty_pos_list) {
         size_type empty_size = empty_pos_list.size();
         size_type list_size = this->best_answer_list_.size();
         for (size_type i = 0; i < list_size; i++) {
             if (i >= empty_size)
-                this->best_answer_list_[i].translateMovePath(std::uint8_t(-1));
+                this->best_answer_list_[i].translateMoveSeq(std::uint8_t(-1));
             else
-                this->best_answer_list_[i].translateMovePath(empty_pos_list[i]);
+                this->best_answer_list_[i].translateMoveSeq(empty_pos_list[i]);
         }
     }
 
@@ -472,16 +472,16 @@ public:
         size_type list_size = this->best_answer_list_.size();
         for (size_type i = 0; i < list_size; i++) {
             if (i >= empty_size)
-                this->best_answer_list_[i].displayMovePath(std::uint8_t(-1));
+                this->best_answer_list_[i].displayMoveSeq(std::uint8_t(-1));
             else
-                this->best_answer_list_[i].displayMovePath(empty_pos_list[i]);
+                this->best_answer_list_[i].displayMoveSeq(empty_pos_list[i]);
         }
     }
 
     void displayAllAnswerMovesOnly() {
         size_type list_size = this->best_answer_list_.size();
         for (size_type i = 0; i < list_size; i++) {
-            this->best_answer_list_[i].displayMovePathOnly();
+            this->best_answer_list_[i].displayMoveSeqOnly();
         }
     }
 };

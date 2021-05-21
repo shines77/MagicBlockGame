@@ -795,12 +795,12 @@ protected:
         return 0;
     }
 
-    bool translateMovePath(const MoveSeq & move_seq, std::vector<MoveInfo> & move_list) const {
+    bool translateMoveSeq(const MoveSeq & move_seq, std::vector<MoveInfo> & move_list) const {
         return this->player_board_.translate_move_seq(move_seq, move_list);
     }
 
-    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & move_list) {
-        return this->translateMovePath(target_stage.move_seq, move_list);
+    bool translateMoveSeq(const stage_type & target_stage, std::vector<MoveInfo> & move_list) {
+        return this->translateMoveSeq(target_stage.move_seq, move_list);
     }
 
     void displayAnswerMoves(const std::vector<MoveInfo> & move_list) const {
@@ -809,14 +809,14 @@ protected:
 
     void displayAnswerMoves(const MoveSeq & move_seq) const {
         std::vector<MoveInfo> move_list;
-        if (this->translateMovePath(move_seq, move_list)) {
+        if (this->translateMoveSeq(move_seq, move_list)) {
             this->displayAnswerMoves(move_list);
         }
     }
 
     void displayAnswerMoves(const stage_type & target_stage) {
         std::vector<MoveInfo> move_list;
-        if (this->translateMovePath(target_stage, move_list)) {
+        if (this->translateMoveSeq(target_stage, move_list)) {
             this->displayAnswerMoves(move_list);
         }
     }

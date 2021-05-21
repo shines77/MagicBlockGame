@@ -296,7 +296,7 @@ public:
         }
 #else
         // Translate backward stage move path to move info
-        if (backward_solver.translateMovePath(bw_stage)) {
+        if (backward_solver.translateMoveSeq(bw_stage)) {
             const std::vector<MoveInfo> & bw_answer = backward_solver.getAnswer();
             for (ssize_type i = bw_answer.size() - 1; i >= 0; i--) {
                 MoveInfo move_info = bw_answer[i];
