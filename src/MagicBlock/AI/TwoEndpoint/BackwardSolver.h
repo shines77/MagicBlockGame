@@ -191,7 +191,7 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        this->next_stages_.push_back(next_stage);
+                        this->next_stages_.push_back(std::move(next_stage));
                     }
                 }
 
@@ -300,7 +300,7 @@ public:
                         break;
                     }
 
-                    this->next_stages_.push_back(next_stage);
+                    this->next_stages_.push_back(std::move(next_stage));
                 }
 
                 if (exit) {

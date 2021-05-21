@@ -420,12 +420,12 @@ union Board
                 move_info.dir       = move_dir;
                 move_list.push_back(move_info);
 
-                std::swap(board.cells[move_pos], board.cells[move_pos]);
+                std::swap(board.cells[move_pos], board.cells[empty_pos]);
             }
             else {
                 printf("Board<X, Y>::translate_move_seq():\n\n"
-                        "Move sequence have error, [move_pos] is a empty gird.\n"
-                        "index = %u, from_pos = %c%c, color = %c (%u)\n\n",
+                        "Move sequence have error, [move_pos] is a empty grid.\n"
+                        "index = %u, move_pos = %c%c, color = %c (%u)\n\n",
                         (std::uint32_t)(i + 1),
                         Position::template toFirstChar<BoardX>(move_pos),
                         Position::template toSecondChar<BoardX>(move_pos),

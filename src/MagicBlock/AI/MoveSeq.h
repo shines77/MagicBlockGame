@@ -52,9 +52,11 @@ private:
             this->seq_ = (size_type)new_units;
         }
         else {
+#if 0
             if (unit_size <= 1) {
                 throw std::runtime_error("Exception: MoveSeq::alloc_outer_data(): unit_size <= 1;");
             }
+#endif
             // Copy old outer buffer to new buffer
             const unit_type * old_units = this->data();
             size_type i = 0;
@@ -73,7 +75,6 @@ private:
         size_type unit_size = other.unit_capacity();
         assert(unit_size > 1);
         unit_type * new_units = new unit_type[unit_size];
-        std::memcpy(new_units, other.data(), unit_size);
         for (size_type i = 0; i < unit_size; i++) {
             new_units[i] = other.units(i);
         }
@@ -87,33 +88,33 @@ private:
             this->copy_outer_data(other);
     }
 
-    void internal_copy(const MoveSeq & other) {
+    void internal_copy(const MoveSeq & other) noexcept {
         this->size_ = other.size_;
         this->copy_data(other);
     }
 
-    void internal_shadow_copy(const MoveSeq & other) {
+    void internal_shadow_copy(const MoveSeq & other) noexcept {
         this->size_ = other.size_;
         this->seq_  = other.seq_;
     }
 
-    void internal_move(MoveSeq && other) {
+    void internal_move(MoveSeq && other) noexcept {
         this->internal_shadow_copy(other);
         other.reset();
     }
 
-    void internal_swap(MoveSeq & other) {
+    void internal_swap(MoveSeq & other) noexcept {
         std::swap(this->size_, other.size_);
         std::swap(this->seq_,  other.seq_);
     }
 
 public:
-    MoveSeq() : size_(0), seq_(0) {}
-    MoveSeq(const MoveSeq & src) {
+    MoveSeq() noexcept : size_(0), seq_(0) {}
+    MoveSeq(const MoveSeq & src) noexcept {
         this->internal_copy(src);
     }
-    MoveSeq(MoveSeq && src) : size_(src.size_), seq_(src.seq_) {
-        this->reset();
+    MoveSeq(MoveSeq && src) noexcept : size_(src.size_), seq_(src.seq_) {
+        src.reset();
     }
     ~MoveSeq() {
         this->destroy();
@@ -214,19 +215,19 @@ public:
         this->size_ = 0;
     }
 
-    void copy(const MoveSeq & other) {
+    void copy(const MoveSeq & other) noexcept {
         if (&other != this) {
             this->internal_copy(other);
         }
     }
 
-    void move(MoveSeq && other) {
+    void move(MoveSeq && other) noexcept {
         if (&other != this) {
             this->internal_move(std::forward<MoveSeq>(other));
         }
     }
 
-    void swap(MoveSeq & other) {
+    void swap(MoveSeq & other) noexcept {
         if (&other != this) {
             this->internal_swap(other);
         }

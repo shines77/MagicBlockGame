@@ -391,8 +391,13 @@ struct Dir {
 
     // Get the opposite direction
     static uint8_t opp_dir(uint8_t dir) {
-        assert(dir >= 0 && dir < Dir::Maximum);
-        return (uint8_t(3) - dir);
+        assert((dir == uint8_t(-1)) || (dir >= 0 && dir < Dir::Maximum));
+        return (uint8_t(Maximum - 1) - dir);
+    }
+
+    // Get the opposite direction
+    static uint8_t opp_dir(size_t dir) {
+        return Dir::opp_dir(uint8_t(dir));
     }
 
     // Get the opposite direction

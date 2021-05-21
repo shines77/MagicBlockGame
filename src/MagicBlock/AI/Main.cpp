@@ -440,22 +440,24 @@ int main(int argc, char * argv[])
 {
     jtest::cpu::warmUp(1000);
 
-#if 1
+#if 0
     UnitTest();
     //Console::readKeyLast();
     //return 0;
 #endif
 
-#if 0
+    if (0) {
+
+#if 1
     solve_sliding_puzzle<SolverId::Normal, true>();
     solve_sliding_puzzle<SolverId::Queue, true>();
 
     Console::readKeyLine();
 #endif
 
-#if 0
+#if 1
     solve_sliding_unknown_puzzle_3x3<SolverId::Normal, true>();
-    solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
+    //solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
 
     Console::readKeyLine();
 #endif
@@ -483,6 +485,8 @@ int main(int argc, char * argv[])
 
     Console::readKeyLine();
 #endif
+
+    }
 
     if (0) {
 
@@ -523,7 +527,7 @@ int main(int argc, char * argv[])
 
     }
 
-    if (0) {
+    if (1) {
 
 #ifdef NDEBUG
 

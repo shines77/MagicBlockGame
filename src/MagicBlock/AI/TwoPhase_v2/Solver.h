@@ -255,7 +255,7 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(next_stage);
+                        next_stages.push_back(std::move(next_stage));
 
                         size_u result = this->is_satisfy_full(next_stage.board, this->target_board_, this->target_len_);
                         if (result.low != 0) {
@@ -356,7 +356,7 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(next_stage);
+                        next_stages.push_back(std::move(next_stage));
 
                         size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
                         size_type satisfy_mask = satisfy_result.low;
@@ -752,7 +752,7 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(next_stage);
+                        next_stages.push_back(std::move(next_stage));
 
                         size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_, this->target_len_);
                         size_type satisfy_mask = satisfy_result.low;

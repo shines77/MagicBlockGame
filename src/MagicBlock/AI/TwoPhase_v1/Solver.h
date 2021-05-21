@@ -64,21 +64,25 @@ public:
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
 #ifdef NDEBUG
-    static const size_type kMinSearchDepth = 15;
-    static const size_type kMaxSearchDepth = 27;
+    static const size_type kMinSearchDepth = 12;
+    static const size_type kMaxSearchDepth = 22;
 
-    static const size_type kDefaultSearchDepthLimit = 30;
+    static const size_type kDefaultSearchDepthLimit = 25;
 
-    static const size_type kSlideDepth = 7;
-    static const size_type kMaxSlideDepth = 10;
+    static const size_type kSlideDepth = 6;
+    static const size_type kMaxSlideDepth = 8;
+
+    static const size_type kMaxStages = 10000;
 #else
-    static const size_type kMinSearchDepth = 15;
-    static const size_type kMaxSearchDepth = 21;
+    static const size_type kMinSearchDepth = 8;
+    static const size_type kMaxSearchDepth = 10;
 
-    static const size_type kDefaultSearchDepthLimit = 21;
+    static const size_type kDefaultSearchDepthLimit = 11;
 
     static const size_type kSlideDepth = 1;
     static const size_type kMaxSlideDepth = 2;
+
+    static const size_type kMaxStages = 10;
 #endif
 
 private:
@@ -181,17 +185,21 @@ public:
         size_type phase1_type = 0;
         while (satisfy_mask != 0) {
             if ((satisfy_mask & mask) == mask) {
-                // record min-move phrase1 stage info
-                stage_info_t stage_info;
-                stage_info.rotate_type = rotate_type;
-                stage_info.phase1_type = phase1_type;
-                stage_info.stage = stage;
-                this->data_->phase1.stage_list.push_back(std::move(stage_info));
+                size_type stage_count = this->data_->phase1.stage_count[rotate_type][phase1_type];
+                bool is_overflow = (stage_count >= kMaxStages);
+                if (!is_overflow) {
+                    // record min-move phrase1 stage info
+                    stage_info_t stage_info;
+                    stage_info.rotate_type = rotate_type;
+                    stage_info.phase1_type = phase1_type;
+                    stage_info.stage = stage;
+                    this->data_->phase1.stage_list.push_back(std::move(stage_info));
+                }
                 this->data_->phase1.stage_count[rotate_type][phase1_type]++;
 
                 if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
                     assert(this->data_->phase1.max_depth[rotate_type][phase1_type] != -1);
-                    if ((int)depth >= this->data_->phase1.max_depth[rotate_type][phase1_type]) {
+                    if (is_overflow || ((int)depth >= this->data_->phase1.max_depth[rotate_type][phase1_type])) {
                         reached_mask |= mask;
                     }
                 }
@@ -223,17 +231,23 @@ public:
         size_type phase1_type = 0;
         while (satisfy_mask != 0) {
             if ((satisfy_mask & mask) == mask) {
-                // record min-move phrase1 stage info
-                stage_info_t stage_info;
-                stage_info.rotate_type = rotate_type;
-                stage_info.phase1_type = phase1_type;
-                stage_info.stage = stage;
-                this->data_->phase1.stage_list.push_back(std::move(stage_info));
+                size_type stage_count = this->data_->phase1.stage_count[rotate_type][phase1_type];
+                bool is_overflow = (stage_count >= kMaxStages);
+                /*
+                if (!is_overflow) {
+                    // record min-move phrase1 stage info
+                    stage_info_t stage_info;
+                    stage_info.rotate_type = rotate_type;
+                    stage_info.phase1_type = phase1_type;
+                    stage_info.stage = stage;
+                    this->data_->phase1.stage_list.push_back(std::move(stage_info));
+                }
+                //*/
                 this->data_->phase1.stage_count[rotate_type][phase1_type]++;
 
                 if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
                     assert(this->data_->phase1.max_depth[rotate_type][phase1_type] != -1);
-                    if ((int)depth >= this->data_->phase1.max_depth[rotate_type][phase1_type]) {
+                    if (is_overflow || ((int)depth >= this->data_->phase1.max_depth[rotate_type][phase1_type])) {
                         reached_mask |= mask;
                     }
                 }
@@ -339,7 +353,7 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(next_stage);
+                        next_stages.push_back(std::move(next_stage));
 
                         size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
                         for (size_type index = 0; index < max_rotate_index; index++) {
@@ -467,7 +481,7 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(next_stage);
+                        next_stages.push_back(std::move(next_stage));
 
                         size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
                         for (size_type index = 0; index < max_rotate_index; index++) {
@@ -855,7 +869,7 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(next_stage);
+                        next_stages.push_back(std::move(next_stage));
 
                         size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
                         for (size_type index = 0; index < max_rotate_index; index++) {

@@ -225,7 +225,7 @@ public:
                         continue;
                     Move move;
                     move.pos = Position(board_y * (int)BoardX + board_x);
-                    move.dir = (uint8_t)dir;
+                    move.dir = Dir::opp_dir(dir);
                     can_moves[pos][dir_count] = move;
                     dir_count++;
                 }

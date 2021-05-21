@@ -26,14 +26,15 @@ struct Stage {
     uint8_t     rotate_type;
     MoveSeq     move_seq;
 
-    Stage() noexcept : empty_pos(0), last_dir(0), rotate_type(0), move_seq() {}
+    Stage() noexcept : board(), empty_pos(0), last_dir(0), rotate_type(0), move_seq() {}
 
-    Stage(const Stage & src) noexcept {
-        this->internal_copy(src);
+    Stage(const Stage & src) noexcept
+        : board(src.board), empty_pos(src.empty_pos), last_dir(src.last_dir),
+          rotate_type(src.rotate_type), move_seq(src.move_seq) {
     }
 
     Stage(Stage && src) noexcept
-        : empty_pos(src.empty_pos), last_dir(src.last_dir),
+        : board(src.board), empty_pos(src.empty_pos), last_dir(src.last_dir),
           rotate_type(src.rotate_type), move_seq(std::move(src.move_seq)) {
     }
 
