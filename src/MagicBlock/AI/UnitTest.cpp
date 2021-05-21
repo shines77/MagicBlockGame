@@ -100,9 +100,11 @@ void MoveSeq_test()
     moveSeq.push_back(6);
     moveSeq.push_back(7);
 
+#if !defined(USE_SIMPLE_MOVE_SEQ) || (USE_SIMPLE_MOVE_SEQ == 0)
     printf("moveSeq.size() = %u\n", (std::uint32_t)moveSeq.size());
     printf("moveSeq.inner_seq() = 0x%p\n", (std::size_t *)moveSeq.inner_seq());
     printf("\n");
+#endif
 
     moveSeq.push_back(0);
     moveSeq.push_back(1);
@@ -140,12 +142,14 @@ void MoveSeq_test()
     moveSeq.push_back(6);
     moveSeq.push_back(7);
 
+#if !defined(USE_SIMPLE_MOVE_SEQ) || (USE_SIMPLE_MOVE_SEQ == 0)
     printf("moveSeq.size() = %u\n", (std::uint32_t)moveSeq.size());
     printf("moveSeq.inner_seq() = 0x%p\n", (std::size_t *)moveSeq.inner_seq());
     for (std::size_t i = 0; i < moveSeq.unit_capacity(); i++) {
         printf("moveSeq.unit[%u] = 0x%p\n", (std::uint32_t)i, (std::size_t *)moveSeq.units(i));
     }
     printf("\n");
+#endif
 }
 
 void find_uint16_test()

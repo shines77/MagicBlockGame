@@ -8,13 +8,123 @@
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
+#include <vector>
 #include <stdexcept>
 #include <type_traits>  // For std::forward<T>
+
+#define USE_SIMPLE_MOVE_SEQ     0
 
 namespace MagicBlock {
 namespace AI {
 
 #pragma pack(push, 1)
+
+#if defined(USE_SIMPLE_MOVE_SEQ) && (USE_SIMPLE_MOVE_SEQ != 0)
+
+//
+// Move sequense for direction [Up, Down, Left, Right]
+//
+class MoveSeq {
+public:
+    typedef std::size_t     size_type;
+    typedef std::ptrdiff_t  ssize_type;
+
+    typedef std::vector<std::uint8_t>   move_list_t;
+    typedef MoveSeq                     this_type;
+
+private:
+    std::uint8_t    reserve_;
+    move_list_t     seq_;
+
+    void internal_copy(const MoveSeq & other) noexcept {
+        this->seq_ = other.seq_;
+    }
+
+
+    void internal_move(MoveSeq && other) noexcept {
+        this->seq_ = std::move(other.seq_);
+    }
+
+    void internal_swap(MoveSeq & other) noexcept {
+        std::swap(this->seq_, other.seq_);
+    }
+
+public:
+    MoveSeq() noexcept : reserve_(0), seq_() {}
+    MoveSeq(const MoveSeq & src) noexcept : reserve_(0), seq_(src.seq_) {
+    }
+    MoveSeq(MoveSeq && src) noexcept : reserve_(0),
+        seq_(std::forward<move_list_t>(src.seq_)) {
+    }
+    ~MoveSeq() {
+    }
+
+    size_type size() const {
+        return this->seq_.size();
+    }
+
+    size_type capacity() const {
+        return this->seq_.capacity();
+    }
+
+    bool empty() const {
+        return this->seq_.empty();
+    }
+
+    MoveSeq & operator = (const MoveSeq & rhs) {
+        this->copy(rhs);
+        return *this;
+    }
+
+    MoveSeq & operator = (MoveSeq && rhs) {
+        this->move(std::forward<MoveSeq>(rhs));
+        return *this;
+    }
+
+    std::uint8_t operator [] (size_type pos) const {
+        return this->seq_[pos];
+    }
+
+    void clear() {
+        this->seq_.clear();
+    }
+
+    void copy(const MoveSeq & other) noexcept {
+        if (&other != this) {
+            this->internal_copy(other);
+        }
+    }
+
+    void move(MoveSeq && other) noexcept {
+        if (&other != this) {
+            this->internal_move(std::forward<MoveSeq>(other));
+        }
+    }
+
+    void swap(MoveSeq & other) noexcept {
+        if (&other != this) {
+            this->internal_swap(other);
+        }
+    }
+
+    size_type front() {
+        return this->seq_.front();
+    }
+
+    size_type back() {
+        return this->seq_.back();
+    }
+
+    void push_back(size_type move) {
+        this->seq_.push_back(std::uint8_t(move));
+    }
+
+    void pop_back() {
+        this->seq_.pop_back();
+    }
+};
+
+#else // USE_SIMPLE_MOVE_SEQ != 0
 
 //
 // Move sequense for direction [Up, Down, Left, Right]
@@ -277,6 +387,13 @@ public:
             return this_type::EmptyMove;
     }
 
+    size_type back() const {
+        if (this->size() > 0)
+            return this->get_move(this->size() - 1);
+        else
+            return this_type::EmptyMove;
+    }
+
     void push_back(size_type move) {
         size_type mv = move & kMoveMask;
         if (this->size() < kInnerThresholdSize) {
@@ -305,13 +422,6 @@ public:
         }
     }
 
-    size_type back() const {
-        if (this->size() > 0)
-            return this->get_move(this->size() - 1);
-        else
-            return this_type::EmptyMove;
-    }
-
     void pop_back() {
         assert(this->size() >= 0);
         size_type new_size = this->grow_up(-1);
@@ -324,6 +434,8 @@ public:
         this->size_ = std::uint8_t(new_size);
     }
 };
+
+#endif // USE_SIMPLE_MOVE_SEQ
 
 #pragma pack(pop)
 

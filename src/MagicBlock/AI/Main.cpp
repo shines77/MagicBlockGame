@@ -507,7 +507,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 0
+#if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, true>();
     Console::readKeyLine();
 #endif
@@ -534,7 +534,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 0
+#if 1
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
     Console::readKeyLine();
 #endif
