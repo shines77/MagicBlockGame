@@ -7,11 +7,13 @@
 #include <cstring>
 
 #include "MagicBlock/AI/UnitTest.h"
+#include <MagicBlock/AI/MoveSeq.h>
 #include "MagicBlock/AI/Board.h"
 #include "MagicBlock/AI/Algorithm.h"
 #include "MagicBlock/AI/jm_malloc.h"
 #include "MagicBlock/AI/SparseBitset.h"
 
+#include "MagicBlock/AI/Console.h"
 #include "MagicBlock/AI/CPUWarmUp.h"
 #include "MagicBlock/AI/StopWatch.h"
 
@@ -56,6 +58,94 @@ void SparseTrieBitset_test()
     visited.append(board);
 
     visited.shutdown();
+}
+
+void MoveSeq_test()
+{
+    MoveSeq moveSeq;
+
+    moveSeq.push_back(0);
+    moveSeq.push_back(1);
+    moveSeq.push_back(2);
+    moveSeq.push_back(3);
+    moveSeq.push_back(4);
+    moveSeq.push_back(5);
+    moveSeq.push_back(6);
+    moveSeq.push_back(7);
+
+    moveSeq.push_back(0);
+    moveSeq.push_back(1);
+    moveSeq.push_back(2);
+    moveSeq.push_back(3);
+    moveSeq.push_back(4);
+    moveSeq.push_back(5);
+    moveSeq.push_back(6);
+    moveSeq.push_back(7);
+
+    moveSeq.push_back(0);
+    moveSeq.push_back(1);
+    moveSeq.push_back(2);
+    moveSeq.push_back(3);
+    moveSeq.push_back(4);
+    moveSeq.push_back(5);
+    moveSeq.push_back(6);
+    moveSeq.push_back(7);
+
+    moveSeq.push_back(0);
+    moveSeq.push_back(1);
+    moveSeq.push_back(2);
+    moveSeq.push_back(3);
+    moveSeq.push_back(4);
+    moveSeq.push_back(5);
+    moveSeq.push_back(6);
+    moveSeq.push_back(7);
+
+    printf("moveSeq.size() = %u\n", (std::uint32_t)moveSeq.size());
+    printf("moveSeq.inner_seq() = 0x%p\n", (std::size_t *)moveSeq.inner_seq());
+    printf("\n");
+
+    moveSeq.push_back(0);
+    moveSeq.push_back(1);
+    moveSeq.push_back(2);
+    moveSeq.push_back(3);
+    moveSeq.push_back(4);
+    moveSeq.push_back(5);
+    moveSeq.push_back(6);
+    moveSeq.push_back(7);
+
+    moveSeq.push_back(0);
+    moveSeq.push_back(1);
+    moveSeq.push_back(2);
+    moveSeq.push_back(3);
+    moveSeq.push_back(4);
+    moveSeq.push_back(5);
+    moveSeq.push_back(6);
+    moveSeq.push_back(7);
+
+    moveSeq.push_back(0);
+    moveSeq.push_back(1);
+    moveSeq.push_back(2);
+    moveSeq.push_back(3);
+    moveSeq.push_back(4);
+    moveSeq.push_back(5);
+    moveSeq.push_back(6);
+    moveSeq.push_back(7);
+
+    moveSeq.push_back(0);
+    moveSeq.push_back(1);
+    moveSeq.push_back(2);
+    moveSeq.push_back(3);
+    moveSeq.push_back(4);
+    moveSeq.push_back(5);
+    moveSeq.push_back(6);
+    moveSeq.push_back(7);
+
+    printf("moveSeq.size() = %u\n", (std::uint32_t)moveSeq.size());
+    printf("moveSeq.inner_seq() = 0x%p\n", (std::size_t *)moveSeq.inner_seq());
+    for (std::size_t i = 0; i < moveSeq.unit_capacity(); i++) {
+        printf("moveSeq.unit[%u] = 0x%p\n", (std::uint32_t)i, (std::size_t *)moveSeq.units(i));
+    }
+    printf("\n");
 }
 
 void find_uint16_test()
@@ -110,6 +200,9 @@ void jm_mallc_test()
 void UnitTest()
 {
     SparseTrieBitset_test();
+    MoveSeq_test();
     find_uint16_test();
     jm_mallc_test();
+
+    Console::readKeyLast();
 }

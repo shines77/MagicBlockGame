@@ -34,6 +34,7 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseGame.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Move.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\MoveSeq.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Number.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SharedData.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle\SlidingColorPuzzle.h" />

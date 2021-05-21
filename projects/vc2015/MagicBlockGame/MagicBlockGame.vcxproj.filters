@@ -20,6 +20,9 @@
     <Filter Include="src\TwoPhase_v2">
       <UniqueIdentifier>{28337b17-e245-406c-901e-9d7db178f621}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\TwoPhase_IDA">
+      <UniqueIdentifier>{5f1c5d86-d9ac-4b35-a2f1-221e4ec9f9b7}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\SlidingPuzzle">
       <UniqueIdentifier>{aa2948dc-0d3a-4777-970e-dc29fc6d9001}</UniqueIdentifier>
     </Filter>
@@ -137,6 +140,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\MagicBlock\AI\CanMoves.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\MoveSeq.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

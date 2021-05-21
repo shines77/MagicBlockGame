@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #include "MagicBlock/AI/Move.h"
+#include "MagicBlock/AI/MoveSeq.h"
 #include "MagicBlock/AI/Board.h"
 
 namespace MagicBlock {
