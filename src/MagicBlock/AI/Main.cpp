@@ -446,9 +446,9 @@ int main(int argc, char * argv[])
     //return 0;
 #endif
 
-    if (0) {
+    if (1) {
 
-#if 1
+#if 0
     solve_sliding_puzzle<SolverId::Normal, true>();
     solve_sliding_puzzle<SolverId::Queue, true>();
 
@@ -457,21 +457,21 @@ int main(int argc, char * argv[])
 
 #if 1
     solve_sliding_unknown_puzzle_3x3<SolverId::Normal, true>();
-    //solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
+    solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
 
     Console::readKeyLine();
 #endif
 
 #if 1
     solve_sliding_unknown_puzzle_5x3<SolverId::Normal, true>();
-    //solve_sliding_unknown_puzzle_5x3<SolverId::Queue, true>();
+    solve_sliding_unknown_puzzle_5x3<SolverId::Queue, true>();
 
     Console::readKeyLine();
 #endif
 
 #if 1
     solve_sliding_unknown_puzzle_5x5<SolverId::Normal, true>();
-    //solve_sliding_unknown_puzzle_5x5<SolverId::Queue, true>();
+    solve_sliding_unknown_puzzle_5x5<SolverId::Queue, true>();
 
     Console::readKeyLine();
 #endif
@@ -488,62 +488,26 @@ int main(int argc, char * argv[])
 
     }
 
-    if (0) {
-
-#if 0
-    solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
-    Console::readKeyLine();
-#endif
-
-#if 0
-    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
-    Console::readKeyLine();
-#endif
-
-#if 0
-    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
-    Console::readKeyLine();
-#endif
-
-#if 0
-    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, true>();
-    Console::readKeyLine();
-#endif
-
-#if 0
-    solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
-    Console::readKeyLine();
-#endif
-
-#if 1
-    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
-    Console::readKeyLine();
-#endif
-
-#if 1
-    solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
-    Console::readKeyLast();
-#endif
-
-    }
-
     if (1) {
-
-#ifdef NDEBUG
 
     ////////////////////////////////////////////////////////////////////////
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, true>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
+    solve_magic_block<Category::TwoPhase_v1, SolverId::Queue, true>();
+    Console::readKeyLine();
+#endif
+
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, true>();
     Console::readKeyLine();
 #endif
@@ -555,17 +519,22 @@ int main(int argc, char * argv[])
 
     ////////////////////////////////////////////////////////////////////////
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
+    solve_magic_block<Category::TwoPhase_v1, SolverId::Queue, false>();
+    Console::readKeyLine();
+#endif
+
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
     Console::readKeyLine();
 #endif
@@ -576,8 +545,6 @@ int main(int argc, char * argv[])
 #endif
 
     ////////////////////////////////////////////////////////////////////////
-
-#endif // NDEBUG
 
     }
 

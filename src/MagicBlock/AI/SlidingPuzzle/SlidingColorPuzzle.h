@@ -384,8 +384,6 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(std::move(next_stage));
-
                         if (this->is_satisfy(next_stage.board, this->target_board_, this->target_len_) != size_t(-1)) {
                             this->move_seq_ = next_stage.move_seq;
                             assert((depth + 1) == next_stage.move_seq.size());
@@ -393,6 +391,8 @@ public:
                             exit = true;
                             break;
                         }
+
+                        next_stages.push_back(std::move(next_stage));
                     }
 
                     if (exit) {
@@ -472,8 +472,6 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push(next_stage);
-
                         if (this->is_satisfy(next_stage.board, this->target_board_, this->target_len_) != size_t(-1)) {
                             this->move_seq_ = next_stage.move_seq;
                             assert((depth + 1) == next_stage.move_seq.size());
@@ -481,6 +479,8 @@ public:
                             exit = true;
                             break;
                         }
+
+                        next_stages.push(std::move(next_stage));
                     }
 
                     cur_stages.pop();

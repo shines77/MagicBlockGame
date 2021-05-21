@@ -354,8 +354,6 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(std::move(next_stage));
-
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             size_type total_steps = next_stage.move_seq.size();
                             assert((depth + 1) == total_steps);
@@ -363,17 +361,19 @@ public:
                                 this->setMinSteps(total_steps);
                                 this->clearAllAnswers();
                                 this->appendAnswer(&this->player_board_, next_stage.board,
-                                    std::move(next_stage.move_seq));
+                                    next_stage.move_seq);
                             }
                             else if (this->isEqualMinSteps(total_steps)) {
                                 this->appendAnswer(&this->player_board_, next_stage.board,
-                                    std::move(next_stage.move_seq));
+                                    next_stage.move_seq);
                             }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
                                 break;
                         }
+
+                        next_stages.push_back(std::move(next_stage));
                     }
 
                     if (!SearchAllAnswers) {
@@ -480,8 +480,6 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push(next_stage);
-
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
                             size_type total_steps = next_stage.move_seq.size();
                             assert((depth + 1) == total_steps);
@@ -489,17 +487,19 @@ public:
                                 this->setMinSteps(total_steps);
                                 this->clearAllAnswers();
                                 this->appendAnswer(&this->player_board_, next_stage.board,
-                                    std::move(next_stage.move_seq));
+                                    next_stage.move_seq);
                             }
                             else if (this->isEqualMinSteps(total_steps)) {
                                 this->appendAnswer(&this->player_board_, next_stage.board,
-                                    std::move(next_stage.move_seq));
+                                    next_stage.move_seq);
                             }
                             solvable = true;
                             exit = true;
                             if (!SearchAllAnswers)
                                 break;
                         }
+
+                        next_stages.push(std::move(next_stage));
                     }
 
                     cur_stages.pop();

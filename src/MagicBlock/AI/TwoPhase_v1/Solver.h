@@ -64,7 +64,7 @@ public:
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
 #ifdef NDEBUG
-    static const size_type kMinSearchDepth = 12;
+    static const size_type kMinSearchDepth = 10;
     static const size_type kMaxSearchDepth = 22;
 
     static const size_type kDefaultSearchDepthLimit = 25;
@@ -74,7 +74,7 @@ public:
 
     static const size_type kMaxStages = 10000;
 #else
-    static const size_type kMinSearchDepth = 8;
+    static const size_type kMinSearchDepth = 6;
     static const size_type kMaxSearchDepth = 10;
 
     static const size_type kDefaultSearchDepthLimit = 11;
@@ -233,8 +233,7 @@ public:
             if ((satisfy_mask & mask) == mask) {
                 size_type stage_count = this->data_->phase1.stage_count[rotate_type][phase1_type];
                 bool is_overflow = (stage_count >= kMaxStages);
-                /*
-                if (!is_overflow) {
+                if (!is_overflow && !phase2_search) {
                     // record min-move phrase1 stage info
                     stage_info_t stage_info;
                     stage_info.rotate_type = rotate_type;
@@ -242,7 +241,6 @@ public:
                     stage_info.stage = stage;
                     this->data_->phase1.stage_list.push_back(std::move(stage_info));
                 }
-                //*/
                 this->data_->phase1.stage_count[rotate_type][phase1_type]++;
 
                 if (this->data_->phase1.min_depth[rotate_type][phase1_type] != -1) {
@@ -263,7 +261,7 @@ public:
                 }
 
                 // call phase2_search()
-                if (phase2_search) {
+                if (phase2_search && !is_overflow) {
                     bool phase2_solvable = phase2_search(rotate_type, phase1_type, stage);
                 }
             }
@@ -353,8 +351,6 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(std::move(next_stage));
-
                         size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
                         for (size_type index = 0; index < max_rotate_index; index++) {
                             size_u result = this->is_satisfy_full(next_stage.board, this->target_board_[index], index);
@@ -369,6 +365,8 @@ public:
                                 break;
                             }
                         }
+
+                        next_stages.push_back(std::move(next_stage));
                     }
 
                     if (exit) {
@@ -481,8 +479,6 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push_back(std::move(next_stage));
-
                         size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
                         for (size_type index = 0; index < max_rotate_index; index++) {
                             size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_[index], index);
@@ -505,6 +501,8 @@ public:
                                 }
                             }
                         }
+
+                        next_stages.push_back(std::move(next_stage));
                     }
                     if (!(this->is_phase1())) {
                         if (exit) {
@@ -674,8 +672,6 @@ public:
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
-                        next_stages.push(next_stage);
-
                         size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
                         for (size_type index = 0; index < max_rotate_index; index++) {
                             size_u satisfy_result = this->is_satisfy(next_stage.board, this->target_board_[index], index);
@@ -698,6 +694,8 @@ public:
                                 }
                             }
                         }
+
+                        next_stages.push(std::move(next_stage));
                     }
 
                     cur_stages.pop();
@@ -846,8 +844,9 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == Dir::opp_dir(stage.last_dir))
+                        if (cur_dir == Dir::opp_dir(stage.last_dir)) {
                             continue;
+                        }
 
                         uint8_t move_pos = can_moves[n].pos;
                         if (this->is_phase2()) {
@@ -868,8 +867,6 @@ public:
                         next_stage.rotate_type = 0;
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
-
-                        next_stages.push_back(std::move(next_stage));
 
                         size_type max_rotate_index = (AllowRotate ? this->target_len_ : 1);
                         for (size_type index = 0; index < max_rotate_index; index++) {
@@ -894,6 +891,8 @@ public:
                                 }
                             }
                         }
+
+                        next_stages.push_back(std::move(next_stage));
                     }
                     if (!(this->is_phase1())) {
                         if (exit) {
