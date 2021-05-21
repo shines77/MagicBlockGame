@@ -442,17 +442,18 @@ int main(int argc, char * argv[])
 
 #if 1
     UnitTest();
-    return 0;
+    //Console::readKeyLast();
+    //return 0;
 #endif
 
-#if 0
+#if 1
     solve_sliding_puzzle<SolverId::Normal, true>();
     solve_sliding_puzzle<SolverId::Queue, true>();
 
     Console::readKeyLine();
 #endif
 
-#if 0
+#if 1
     solve_sliding_unknown_puzzle_3x3<SolverId::Normal, true>();
     solve_sliding_unknown_puzzle_3x3<SolverId::Queue, true>();
 
@@ -473,7 +474,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 0
+#if 1
     solve_sliding_color_puzzle<SolverId::Normal, true>();
     solve_sliding_color_puzzle<SolverId::Queue, true>();
 

@@ -22,20 +22,23 @@ struct Stage {
     Board<BoardX, BoardY> board;
 
     Position    empty_pos;
-    uint8_t     last_dir, rotate_type;
-    uint8_t     reserve;
+    uint8_t     last_dir;
+    uint8_t     rotate_type;
+    MoveSeq     move_seq;
 
-    std::vector<Position> move_path;
+    Stage() noexcept : empty_pos(0), last_dir(0), rotate_type(0), move_seq() {}
 
-    Stage() noexcept : empty_pos(0), last_dir(0), rotate_type(0), reserve(0) {}
     Stage(const Stage & src) noexcept {
         this->internal_copy(src);
     }
-    Stage(Stage && src) noexcept {
-        this->internal_move(std::forward<Stage>(src));
+
+    Stage(Stage && src) noexcept
+        : empty_pos(src.empty_pos), last_dir(src.last_dir),
+          rotate_type(src.rotate_type), move_seq(std::move(src.move_seq)) {
     }
-    Stage(const Board<BoardX, BoardY> & _board) noexcept : board(_board),
-        empty_pos(0), last_dir(0), rotate_type(0), reserve(0) {
+
+    Stage(const Board<BoardX, BoardY> & _board) noexcept
+        : board(_board), empty_pos(0), last_dir(0), rotate_type(0), move_seq() {
     }
 
     ~Stage() {}
@@ -56,9 +59,8 @@ struct Stage {
         this->empty_pos     = other.empty_pos;
         this->last_dir      = other.last_dir;
         this->rotate_type   = other.rotate_type;
-        this->reserve       = other.reserve;
 
-        this->move_path     = other.move_path;
+        this->move_seq      = other.move_seq;
     }
 
     void internal_move(Stage && other) noexcept {
@@ -67,9 +69,8 @@ struct Stage {
         this->empty_pos     = other.empty_pos;
         this->last_dir      = other.last_dir;
         this->rotate_type   = other.rotate_type;
-        this->reserve       = other.reserve;
 
-        this->move_path     = std::move(other.move_path);
+        this->move_seq      = std::move(other.move_seq);
     }
 
     void internal_swap(Stage & other) noexcept {
@@ -80,7 +81,7 @@ struct Stage {
         std::swap(this->rotate_type, other.rotate_type);
         std::swap(this->reserve, other.reserve);
 
-        std::swap(this->move_path, other.move_path);
+        this->move_seq.swap(other.move_seq);
     }
 
     void copy(const Stage & other) noexcept {

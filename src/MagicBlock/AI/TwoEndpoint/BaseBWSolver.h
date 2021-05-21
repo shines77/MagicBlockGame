@@ -22,6 +22,7 @@
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
 #include "MagicBlock/AI/Move.h"
+#include "MagicBlock/AI/MoveSeq.h"
 #include "MagicBlock/AI/CanMoves.h"
 #include "MagicBlock/AI/Value128.h"
 #include "MagicBlock/AI/Board.h"
@@ -73,7 +74,7 @@ protected:
     int target_colors_[Color::Maximum];
     int partial_colors_[Color::Maximum];
 
-    std::vector<Position> best_move_path_;
+    MoveSeq               best_move_seq_;
     std::vector<MoveInfo> best_answer_;
 
     size_type map_used_;
@@ -110,11 +111,11 @@ public:
     }
 
     size_type getMinSteps() const {
-        return this->best_move_path_.size();
+        return this->best_move_seq_.size();
     }
 
-    const std::vector<Position> & getMovePath() const {
-        return this->best_move_path_;
+    const MoveSeq & getMoveSeq() const {
+        return this->best_move_seq_;
     }
 
     const std::vector<MoveInfo> & getAnswer() const {
@@ -859,43 +860,43 @@ protected:
     }
 
 public:
-    bool translateMovePath(const std::vector<Position> & move_path,
+    bool translateMovePath(const MoveSeq & move_seq,
                            size_type rotate_type, Position empty_pos,
-                           std::vector<MoveInfo> & answer) const {
+                           std::vector<MoveInfo> & move_list) const {
         assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
-        return this->player_board_[rotate_type].translate_move_path(move_path, answer, empty_pos);
+        return this->player_board_[rotate_type].translate_move_seq(move_seq, move_list, empty_pos);
     }
 
     bool translateMovePath(const stage_type & target_stage) {
         size_type n_rotate_type = target_stage.rotate_type;
         size_type empty_pos = n_rotate_type >> 2U;
         size_type rotate_type = n_rotate_type & 0x03U;
-        return this->translateMovePath(target_stage.move_path, rotate_type, empty_pos, this->best_answer_);
+        return this->translateMovePath(target_stage.move_seq, rotate_type, empty_pos, this->best_answer_);
     }
 
-    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & answer) const {
+    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & move_list) const {
         size_type n_rotate_type = target_stage.rotate_type;
         size_type empty_pos = n_rotate_type >> 2U;
         size_type rotate_type = n_rotate_type & 0x03U;
-        return this->translateMovePath(target_stage.move_path, rotate_type, empty_pos, answer);
+        return this->translateMovePath(target_stage.move_seq, rotate_type, empty_pos, move_list);
     }
 
-    void displayAnswerMoves(const std::vector<MoveInfo> & answer) const {
-        player_board_t::display_move_path(answer);
+    void displayAnswerMoves(const std::vector<MoveInfo> & move_list) const {
+        player_board_t::display_move_seq(move_list);
     }
 
-    void displayAnswerMoves(const std::vector<Position> & move_path,
+    void displayAnswerMoves(const MoveSeq & move_seq,
                             size_type rotate_type, Position empty_pos) const {
-        std::vector<MoveInfo> answer;
-        if (this->translateMovePath(move_path, rotate_type, empty_pos, answer)) {
-            this->displayAnswerMoves(answer);
+        std::vector<MoveInfo> move_list;
+        if (this->translateMovePath(move_seq, rotate_type, empty_pos, move_list)) {
+            this->displayAnswerMoves(move_list);
         }
     }
 
     void displayAnswerMoves(const stage_type & target_stage) {
-        std::vector<MoveInfo> answer;
-        if (this->translateMovePath(target_stage, answer)) {
-            this->displayAnswerMoves(answer);
+        std::vector<MoveInfo> move_list;
+        if (this->translateMovePath(target_stage, move_list)) {
+            this->displayAnswerMoves(move_list);
         }
     }
 
@@ -904,7 +905,7 @@ public:
     }
 
     void displayBestAnswerMoves() {
-        if (this->translateMovePath(this->best_move_path_, this->best_answer_)) {
+        if (this->translateMovePath(this->best_move_seq_, this->best_answer_)) {
             this->displayAnswerMoves(this->best_answer_);
         }
     }

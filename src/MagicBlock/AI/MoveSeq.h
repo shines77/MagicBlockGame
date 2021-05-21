@@ -193,8 +193,8 @@ public:
         return *this;
     }
 
-    size_type operator [] (size_type pos) const {
-        return this->get_move(pos);
+    std::uint8_t operator [] (size_type pos) const {
+        return (std::uint8_t)this->get_move(pos);
     }
 
     // Dangerous: This function only used to move assignment constructor / operator.

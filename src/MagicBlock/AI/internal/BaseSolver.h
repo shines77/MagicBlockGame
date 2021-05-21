@@ -22,6 +22,7 @@
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
 #include "MagicBlock/AI/Move.h"
+#include "MagicBlock/AI/MoveSeq.h"
 #include "MagicBlock/AI/CanMoves.h"
 #include "MagicBlock/AI/Value128.h"
 #include "MagicBlock/AI/Board.h"
@@ -73,7 +74,7 @@ protected:
     int partial_colors_[Color::Maximum];
     int partial_target_colors_[MAX_ROTATE_TYPE][MAX_PHASE1_TYPE][Color::Maximum];
 
-    std::vector<Position> move_path_;
+    MoveSeq move_seq_;
 
     size_type map_used_;
 
@@ -108,11 +109,11 @@ public:
     }
 
     size_type getMinSteps() const {
-        return this->move_path_.size();
+        return this->move_seq_.size();
     }
 
-    const std::vector<Position> & getMovePath() const {
-        return this->move_path_;
+    const MoveSeq & getMoveSeq() const {
+        return this->move_seq_;
     }
 
     size_type getMapUsed() const {
@@ -794,29 +795,29 @@ protected:
         return 0;
     }
 
-    bool translateMovePath(const std::vector<Position> & move_path, std::vector<MoveInfo> & answer) const {
-        return this->player_board_.translate_move_path(move_path, answer);
+    bool translateMovePath(const MoveSeq & move_seq, std::vector<MoveInfo> & move_list) const {
+        return this->player_board_.translate_move_seq(move_seq, move_list);
     }
 
-    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & answer) {
-        return this->translateMovePath(target_stage.move_path, answer);
+    bool translateMovePath(const stage_type & target_stage, std::vector<MoveInfo> & move_list) {
+        return this->translateMovePath(target_stage.move_seq, move_list);
     }
 
-    void displayAnswerMoves(const std::vector<MoveInfo> & answer) const {
-        player_board_t::template display_answer<BoardX>(answer);
+    void displayAnswerMoves(const std::vector<MoveInfo> & move_list) const {
+        player_board_t::template display_move_seq<BoardX>(move_list);
     }
 
-    void displayAnswerMoves(const std::vector<Position> & move_path) const {
-        std::vector<MoveInfo> answer;
-        if (this->translateMovePath(move_path, answer)) {
-            this->displayAnswerMoves(answer);
+    void displayAnswerMoves(const MoveSeq & move_seq) const {
+        std::vector<MoveInfo> move_list;
+        if (this->translateMovePath(move_seq, move_list)) {
+            this->displayAnswerMoves(move_list);
         }
     }
 
     void displayAnswerMoves(const stage_type & target_stage) {
-        std::vector<MoveInfo> answer;
-        if (this->translateMovePath(target_stage, answer)) {
-            this->displayAnswerMoves(answer);
+        std::vector<MoveInfo> move_list;
+        if (this->translateMovePath(target_stage, move_list)) {
+            this->displayAnswerMoves(move_list);
         }
     }
 };

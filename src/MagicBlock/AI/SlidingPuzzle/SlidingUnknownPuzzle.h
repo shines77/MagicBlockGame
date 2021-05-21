@@ -360,24 +360,24 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         //next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            size_type total_steps = next_stage.move_path.size();
+                            size_type total_steps = next_stage.move_seq.size();
                             assert((depth + 1) == total_steps);
                             if (this->isMinSteps(total_steps)) {
                                 this->setMinSteps(total_steps);
                                 this->clearAllAnswers();
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             else if (this->isEqualMinSteps(total_steps)) {
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             solvable = true;
@@ -470,24 +470,24 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         //next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            size_type total_steps = next_stage.move_path.size();
+                            size_type total_steps = next_stage.move_seq.size();
                             assert((depth + 1) == total_steps);
                             if (this->isMinSteps(total_steps)) {
                                 this->setMinSteps(total_steps);
                                 this->clearAllAnswers();
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             else if (this->isEqualMinSteps(total_steps)) {
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             solvable = true;
@@ -581,24 +581,24 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         //next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            size_type total_steps = next_stage.move_path.size();
+                            size_type total_steps = next_stage.move_seq.size();
                             assert((depth + 1) == total_steps);
                             if (this->isMinSteps(total_steps)) {
                                 this->setMinSteps(total_steps);
                                 this->clearAllAnswers();
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             else if (this->isEqualMinSteps(total_steps)) {
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             solvable = true;
@@ -691,24 +691,24 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         //next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            size_type total_steps = next_stage.move_path.size();
+                            size_type total_steps = next_stage.move_seq.size();
                             assert((depth + 1) == total_steps);
                             if (this->isMinSteps(total_steps)) {
                                 this->setMinSteps(total_steps);
                                 this->clearAllAnswers();
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             else if (this->isEqualMinSteps(total_steps)) {
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             solvable = true;
@@ -802,24 +802,24 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         //next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            size_type total_steps = next_stage.move_path.size();
+                            size_type total_steps = next_stage.move_seq.size();
                             assert((depth + 1) == total_steps);
                             if (this->isMinSteps(total_steps)) {
                                 this->setMinSteps(total_steps);
                                 this->clearAllAnswers();
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             else if (this->isEqualMinSteps(total_steps)) {
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
+                                    std::move(next_stage.move_seq),
                                     std::move(next_stage.board));
                             }
                             solvable = true;
@@ -912,25 +912,25 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         //next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            size_type total_steps = next_stage.move_path.size();
+                            size_type total_steps = next_stage.move_seq.size();
                             assert((depth + 1) == total_steps);
                             if (this->isMinSteps(total_steps)) {
                                 this->setMinSteps(total_steps);
                                 this->clearAllAnswers();
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
-                                    std::move(next_stage.board));
+                                    std::move(next_stage.move_seq),
+                                    next_stage.board);
                             }
                             else if (this->isEqualMinSteps(total_steps)) {
                                 this->appendAnswer(&this->player_board_,
-                                    std::move(next_stage.move_path),
-                                    std::move(next_stage.board));
+                                    std::move(next_stage.move_seq),
+                                    next_stage.board);
                             }
                             solvable = true;
                             exit = true;

@@ -373,6 +373,22 @@ struct Direction {
         return uint8_t(-1);
     }
 
+    template <size_t BoardX, size_t BoardY>
+    static uint8_t getMovePos(uint8_t move_dir, Position empty_pos) {
+        uint8_t opp_dir = Direction::getOppDir(move_dir);
+
+        int move_x = (int)empty_pos.value % (int)BoardX;
+        move_x += Dir_Offset[opp_dir].x;
+        if (move_x < 0 || move_x >= BoardX)
+            return uint8_t(-1);
+        int move_y = (int)empty_pos.value / (int)BoardX;
+        move_y += Dir_Offset[opp_dir].y;
+        if (move_y < 0 || move_y >= BoardY)
+            return uint8_t(-1);
+
+        return uint8_t(move_y * (int)BoardX + move_x);
+    }
+
     // Get the opposite direction
     static uint8_t getOppDir(uint8_t dir) {
         switch (dir) {

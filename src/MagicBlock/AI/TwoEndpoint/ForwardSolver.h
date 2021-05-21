@@ -196,8 +196,8 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         this->next_stages_.push_back(next_stage);
                     }
@@ -221,7 +221,7 @@ public:
             if (result == 1) {
                 printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
                 printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
-                printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
                 printf("\n");
             }
 
@@ -280,15 +280,15 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         Value128 board_value = next_stage.board.value128();
                         if (board_value == target_value) {
                             result = 1;
                             exit = true;
                             target_stage = next_stage;
-                            this->move_path_ = next_stage.move_path;
+                            this->move_seq_ = next_stage.move_seq;
                             break;
                         }
 
@@ -326,7 +326,7 @@ public:
 #if 0
                 printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
                 printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
-                printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
                 printf("\n");
 #endif
             }

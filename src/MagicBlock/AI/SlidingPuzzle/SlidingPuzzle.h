@@ -60,7 +60,7 @@ private:
 
     can_moves_t can_moves_;
 
-    std::vector<Position> move_path_;
+    MoveSeq move_seq_;
 
     void init() {
         for (size_type num = 0; num <= MaxNumber; num++) {
@@ -79,11 +79,11 @@ public:
     ~SlidingPuzzle() {}
 
     size_type getMinSteps() const {
-        return this->move_path_.size();
+        return this->move_seq_.size();
     }
 
-    const std::vector<Position> & getMovePath() const {
-        return this->move_path_;
+    const MoveSeq & getMoveSeq() const {
+        return this->move_seq_;
     }
 
     size_type getMapUsed() const {
@@ -336,14 +336,14 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         //next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
+                            this->move_seq_ = next_stage.move_seq;
+                            assert((depth + 1) == next_stage.move_seq.size());
                             this->answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;
@@ -432,14 +432,14 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         //next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push(next_stage);
 
                         if (this->is_satisfy(next_stage.board, this->target_board_)) {
-                            this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
+                            this->move_seq_ = next_stage.move_seq;
+                            assert((depth + 1) == next_stage.move_seq.size());
                             this->answer_list_.push_back(next_stage.board);
                             solvable = true;
                             exit = true;

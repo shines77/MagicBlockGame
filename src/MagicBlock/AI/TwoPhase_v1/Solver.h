@@ -294,7 +294,8 @@ public:
                     player_board_t player_board(this->player_board_);
                     std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
                     start.empty_pos = first_move_pos;
-                    start.push_back(first_move_pos);
+                    std::uint8_t move_dir = Direction::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
+                    start.move_seq.push_back(move_dir);
                     start.board = player_board;
                     depth++;
                 }
@@ -335,8 +336,8 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
@@ -344,8 +345,8 @@ public:
                         for (size_type index = 0; index < max_rotate_index; index++) {
                             size_u result = this->is_satisfy_full(next_stage.board, this->target_board_[index], index);
                             if (result.low != 0) {
-                                this->move_path_ = next_stage.move_path;
-                                assert((depth + 1) == next_stage.move_path.size());
+                                this->move_seq_ = next_stage.move_seq;
+                                assert((depth + 1) == next_stage.move_seq.size());
                                 size_type rotate_type = this->data_->rotate_type[index];
                                 next_stage.rotate_type = std::uint8_t(rotate_type);
                                 out_rotate_type = rotate_type;
@@ -415,7 +416,8 @@ public:
                     player_board_t player_board(this->player_board_);
                     std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
                     start.empty_pos = first_move_pos;
-                    start.move_path.push_back(first_move_pos);
+                    std::uint8_t move_dir = Direction::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
+                    start.move_seq.push_back(move_dir);
                     start.board = player_board;
                     depth++;
                 }
@@ -462,8 +464,8 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
@@ -482,8 +484,8 @@ public:
                                     }
                                 }
                                 else {
-                                    this->move_path_ = next_stage.move_path;
-                                    assert((depth + 1) == next_stage.move_path.size());
+                                    this->move_seq_ = next_stage.move_seq;
+                                    assert((depth + 1) == next_stage.move_seq.size());
                                     exit = true;
                                     break;
                                 }
@@ -566,7 +568,7 @@ public:
                     printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                     printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                     if (solvable) {
-                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                        printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
                     }
                     printf("\n");
                 }
@@ -607,7 +609,8 @@ public:
                     player_board_t player_board(this->player_board_);
                     std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
                     start.empty_pos = first_move_pos;
-                    start.move_path.push_back(first_move_pos);
+                    std::uint8_t move_dir = Direction::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
+                    start.move_seq.push_back(move_dir);
                     start.board = player_board;
                     depth++;
                 }
@@ -654,8 +657,8 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push(next_stage);
 
@@ -674,8 +677,8 @@ public:
                                     }
                                 }
                                 else {
-                                    this->move_path_ = next_stage.move_path;
-                                    assert((depth + 1) == next_stage.move_path.size());
+                                    this->move_seq_ = next_stage.move_seq;
+                                    assert((depth + 1) == next_stage.move_seq.size());
                                     exit = true;
                                     break;
                                 }
@@ -760,7 +763,7 @@ public:
                     printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                     printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                     if (solvable) {
-                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                        printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
                     }
                     printf("\n");
                 }
@@ -802,7 +805,8 @@ public:
                     player_board_t player_board(this->player_board_);
                     std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
                     start.empty_pos = first_move_pos;
-                    start.move_path.push_back(first_move_pos);
+                    std::uint8_t move_dir = Direction::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
+                    start.move_seq.push_back(move_dir);
                     start.board = player_board;
                     depth++;
                 }
@@ -848,8 +852,8 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
@@ -869,8 +873,8 @@ public:
                                     }
                                 }
                                 else {
-                                    this->move_path_ = next_stage.move_path;
-                                    assert((depth + 1) == next_stage.move_path.size());
+                                    this->move_seq_ = next_stage.move_seq;
+                                    assert((depth + 1) == next_stage.move_seq.size());
                                     exit = true;
                                     break;
                                 }
@@ -953,7 +957,7 @@ public:
                     printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                     printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                     if (solvable) {
-                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                        printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
                     }
                     printf("\n");
                 }

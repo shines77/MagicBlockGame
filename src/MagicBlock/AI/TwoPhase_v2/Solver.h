@@ -252,15 +252,15 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
                         size_u result = this->is_satisfy_full(next_stage.board, this->target_board_, this->target_len_);
                         if (result.low != 0) {
-                            this->move_path_ = next_stage.move_path;
-                            assert((depth + 1) == next_stage.move_path.size());
+                            this->move_path_ = next_stage.move_seq;
+                            assert((depth + 1) == next_stage.move_seq.size());
                             rotate_type = result.high;
                             solvable = true;
                             exit = true;
@@ -353,8 +353,8 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
@@ -371,8 +371,8 @@ public:
                                 }
                             }
                             else {
-                                this->move_path_ = next_stage.move_path;
-                                assert((depth + 1) == next_stage.move_path.size());
+                                this->move_path_ = next_stage.move_seq;
+                                assert((depth + 1) == next_stage.move_seq.size());
                                 exit = true;
                                 break;
                             }
@@ -454,7 +454,7 @@ public:
                     printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                     printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                     if (solvable) {
-                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                        printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
                     }
                     printf("\n");
                 }
@@ -521,8 +521,8 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push(next_stage);
 
@@ -539,8 +539,8 @@ public:
                                 }
                             }
                             else {
-                                this->move_path_ = next_stage.move_path;
-                                assert((depth + 1) == next_stage.move_path.size());
+                                this->move_path_ = next_stage.move_seq;
+                                assert((depth + 1) == next_stage.move_seq.size());
                                 exit = true;
                                 break;
                             }
@@ -624,7 +624,7 @@ public:
                     printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                     printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                     if (solvable) {
-                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                        printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
                     }
                     printf("\n");
                 }
@@ -749,8 +749,8 @@ public:
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = cur_dir;
                         next_stage.rotate_type = 0;
-                        next_stage.move_path = stage.move_path;
-                        next_stage.move_path.push_back(move_pos);
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
 
                         next_stages.push_back(next_stage);
 
@@ -768,8 +768,8 @@ public:
                                 }
                             }
                             else {
-                                this->move_path_ = next_stage.move_path;
-                                assert((depth + 1) == next_stage.move_path.size());
+                                this->move_path_ = next_stage.move_seq;
+                                assert((depth + 1) == next_stage.move_seq.size());
                                 exit = true;
                                 break;
                             }
@@ -851,7 +851,7 @@ public:
                     printf("index = %u\n", (uint32_t)(this->data_->phase2.index + 1));
                     printf("next.size() = %u\n", (uint32_t)cur_stages.size());
                     if (solvable) {
-                        printf("move_path.size() = %u\n", (uint32_t)this->move_path_.size());
+                        printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
                     }
                     printf("\n");
                 }

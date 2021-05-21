@@ -200,9 +200,7 @@ void jm_mallc_test()
 void UnitTest()
 {
     SparseTrieBitset_test();
-    MoveSeq_test();
+    //MoveSeq_test();
     find_uint16_test();
     jm_mallc_test();
-
-    Console::readKeyLast();
 }
