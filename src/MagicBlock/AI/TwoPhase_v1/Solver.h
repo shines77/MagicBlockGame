@@ -294,7 +294,7 @@ public:
                     player_board_t player_board(this->player_board_);
                     std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
                     start.empty_pos = first_move_pos;
-                    std::uint8_t move_dir = Direction::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
+                    std::uint8_t move_dir = Dir::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
                     start.move_seq.push_back(move_dir);
                     start.board = player_board;
                     depth++;
@@ -321,7 +321,7 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
+                        if (cur_dir == Dir::opp_dir(stage.last_dir))
                             continue;
 
                         stage_type next_stage(stage.board);
@@ -416,7 +416,7 @@ public:
                     player_board_t player_board(this->player_board_);
                     std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
                     start.empty_pos = first_move_pos;
-                    std::uint8_t move_dir = Direction::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
+                    std::uint8_t move_dir = Dir::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
                     start.move_seq.push_back(move_dir);
                     start.board = player_board;
                     depth++;
@@ -443,7 +443,7 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
+                        if (cur_dir == Dir::opp_dir(stage.last_dir))
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;
@@ -609,7 +609,7 @@ public:
                     player_board_t player_board(this->player_board_);
                     std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
                     start.empty_pos = first_move_pos;
-                    std::uint8_t move_dir = Direction::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
+                    std::uint8_t move_dir = Dir::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
                     start.move_seq.push_back(move_dir);
                     start.board = player_board;
                     depth++;
@@ -636,7 +636,7 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
+                        if (cur_dir == Dir::opp_dir(stage.last_dir))
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;
@@ -805,7 +805,7 @@ public:
                     player_board_t player_board(this->player_board_);
                     std::swap(player_board.cells[first_empty], player_board.cells[first_move_pos]);
                     start.empty_pos = first_move_pos;
-                    std::uint8_t move_dir = Direction::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
+                    std::uint8_t move_dir = Dir::template getDir<BoardX, BoardY>(first_move_pos, first_empty);
                     start.move_seq.push_back(move_dir);
                     start.board = player_board;
                     depth++;
@@ -832,7 +832,7 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
+                        if (cur_dir == Dir::opp_dir(stage.last_dir))
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;

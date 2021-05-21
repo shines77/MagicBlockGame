@@ -26,7 +26,7 @@ public:
     class CanMoveList {
     private:
         size_type size_;
-        std::array<Move, Direction::Maximum> list_;
+        std::array<Move, Dir::Maximum> list_;
 
         void internal_copy(const CanMoveList & other) noexcept {
             this->size_ = other.size_;
@@ -67,7 +67,7 @@ public:
         }
 
         size_type capacity() const noexcept {
-            return Direction::Maximum;
+            return Dir::Maximum;
         }
 
         bool empty() const noexcept {
@@ -215,7 +215,7 @@ public:
                 size_type pos = y * BoardX + x;
                 assert(pos < BoardSize);
                 size_type dir_count = 0;
-                for (size_type dir = 0; dir < Direction::Maximum; dir++) {
+                for (size_type dir = 0; dir < Dir::Maximum; dir++) {
                     assert(dir >= 0 && dir < 4);
                     int board_x = (int)x + Dir_Offset[dir].x;
                     if (board_x < 0 || board_x >= (int)BoardX)

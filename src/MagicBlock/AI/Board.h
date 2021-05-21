@@ -410,7 +410,7 @@ union Board
             else
                 empty_clr = UnknownPosValue;
             move_dir = move_seq[i];
-            move_pos = Direction::template getMovePos<BoardX, BoardY>(move_dir, empty_pos);
+            move_pos = Dir::template getMovePos<BoardX, BoardY>(move_dir, empty_pos);
             move_clr = board.cells[move_pos];
             if (move_clr != EmptyPosValue && empty_clr == EmptyPosValue) {
                 MoveInfo move_info;
@@ -462,7 +462,7 @@ union Board
                    Position::template toSecondChar<BoardX>(from_pos),
                    Position::template toFirstChar<BoardX>(to_pos),
                    Position::template toSecondChar<BoardX>(to_pos),
-                   Direction::toString(dir),
+                   Dir::toString(dir),
                    (std::uint32_t)dir);
             index++;
         }
@@ -485,7 +485,7 @@ union Board
                    Position::template toSecondChar<BoardX>(from_pos),
                    Position::template toFirstChar<BoardX>(to_pos),
                    Position::template toSecondChar<BoardX>(to_pos),
-                   Direction::toString(dir),
+                   Dir::toString(dir),
                    (std::uint32_t)dir);
             index++;
         }

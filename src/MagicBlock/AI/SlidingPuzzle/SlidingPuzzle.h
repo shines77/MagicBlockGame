@@ -321,7 +321,7 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
+                        if (cur_dir == Dir::opp_dir(stage.last_dir))
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;
@@ -417,7 +417,7 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
+                        if (cur_dir == Dir::opp_dir(stage.last_dir))
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;

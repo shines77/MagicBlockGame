@@ -337,18 +337,18 @@ struct Offset {
 };
     
 static const Offset Dir_Offset[] = {
-    {  0,  1 },
-    { -1,  0 },
-    {  0, -1 },
-    {  1,  0 }
+    {  0,  1 },     // Down
+    { -1,  0 },     // Left
+    {  1,  0 },     // Right
+    {  0, -1 }      // Up
 };
 
-struct Direction {
+struct Dir {
     enum {
         Down    = 0,
         Left    = 1,
-        Up      = 2,
-        Right   = 3,
+        Right   = 2,
+        Up      = 3,
         Unknown = 4,
         Maximum = 4
     };
@@ -363,7 +363,7 @@ struct Direction {
         int offset_x = to_x - from_x;
         int offset_y = to_y - from_y;
 
-        for (size_t dir = 0; dir < Direction::Maximum; dir++) {
+        for (size_t dir = 0; dir < Dir::Maximum; dir++) {
             if ((offset_x == Dir_Offset[dir].x) &&
                 (offset_y == Dir_Offset[dir].y)) {
                 return (uint8_t)dir;
@@ -375,45 +375,51 @@ struct Direction {
 
     template <size_t BoardX, size_t BoardY>
     static uint8_t getMovePos(uint8_t move_dir, Position empty_pos) {
-        uint8_t opp_dir = Direction::getOppDir(move_dir);
+        uint8_t opp_dir = Dir::getOppDir(move_dir);
 
         int move_x = (int)empty_pos.value % (int)BoardX;
         move_x += Dir_Offset[opp_dir].x;
-        if (move_x < 0 || move_x >= BoardX)
+        if (move_x < 0 || move_x >= (int)BoardX)
             return uint8_t(-1);
         int move_y = (int)empty_pos.value / (int)BoardX;
         move_y += Dir_Offset[opp_dir].y;
-        if (move_y < 0 || move_y >= BoardY)
+        if (move_y < 0 || move_y >= (int)BoardY)
             return uint8_t(-1);
 
         return uint8_t(move_y * (int)BoardX + move_x);
     }
 
     // Get the opposite direction
+    static uint8_t opp_dir(uint8_t dir) {
+        assert(dir >= 0 && dir < Dir::Maximum);
+        return (uint8_t(3) - dir);
+    }
+
+    // Get the opposite direction
     static uint8_t getOppDir(uint8_t dir) {
         switch (dir) {
-            case Direction::Down:
-                return (uint8_t)Direction::Up;
-            case Direction::Left:
-                return (uint8_t)Direction::Right;
-            case Direction::Up:
-                return (uint8_t)Direction::Down;
-            case Direction::Right:
-                return (uint8_t)Direction::Left;
+            case Dir::Down:
+                return (uint8_t)Dir::Up;
+            case Dir::Left:
+                return (uint8_t)Dir::Right;
+            case Dir::Up:
+                return (uint8_t)Dir::Down;
+            case Dir::Right:
+                return (uint8_t)Dir::Left;
             default:
-                return (uint8_t)Direction::Unknown;
+                return (uint8_t)Dir::Unknown;
         }
     }
 
     static char toChar(size_t dir) {
         switch (dir) {
-            case Direction::Down:
+            case Dir::Down:
                 return 'D';
-            case Direction::Left:
+            case Dir::Left:
                 return 'L';
-            case Direction::Up:
+            case Dir::Up:
                 return 'U';
-            case Direction::Right:
+            case Dir::Right:
                 return 'R';
             default:
                 return '?';
@@ -422,13 +428,13 @@ struct Direction {
 
     static const char * toString(size_t dir) {
         switch (dir) {
-            case Direction::Down:
+            case Dir::Down:
                 return "Down";
-            case Direction::Left:
+            case Dir::Left:
                 return "Left";
-            case Direction::Up:
+            case Dir::Up:
                 return "Up";
-            case Direction::Right:
+            case Dir::Right:
                 return "Right";
             default:
                 return "Unknown";

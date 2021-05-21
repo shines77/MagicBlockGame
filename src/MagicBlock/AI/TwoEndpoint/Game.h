@@ -290,7 +290,7 @@ public:
         const MoveSeq & bw_move_seq = bw_stage.move_seq;
         for (ssize_type i = bw_move_seq.size() - 1; i >= 0; i--) {
             std::uint8_t move_dir = (std::uint8_t)bw_move_seq[i];
-            std::uint8_t opp_dir = Direction::getOppDir(move_dir);
+            std::uint8_t opp_dir = Dir::getOppDir(move_dir);
             // Opposite the move dir
             move_seq.push_back(opp_dir);
         }
