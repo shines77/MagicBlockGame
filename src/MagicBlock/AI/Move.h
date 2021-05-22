@@ -389,14 +389,20 @@ struct Dir {
         return uint8_t(move_y * (int)BoardX + move_x);
     }
 
-    // Get the opposite direction
     static uint8_t opp_dir_old(uint8_t dir) {
         assert((dir == uint8_t(-1)) || (dir >= 0 && dir < Dir::Maximum));
         return (uint8_t(Maximum - 1) - dir);
     }
-    
+
     // Get the opposite direction
     static uint8_t opp_dir(uint8_t dir) {
+        static const uint32_t opp_dir_32 = (Left << 24) | (Down << 16) | (Right << 8) | Up;
+        assert((dir == uint8_t(-1)) || (dir >= 0 && dir < Dir::Maximum));
+        return uint8_t(opp_dir_32 >> (dir * 8));
+    }
+
+    // Get the opposite direction
+    static uint8_t opp_dir_2(uint8_t dir) {
         static const uint8_t OppDir_Table[] = {
             Up,         // Down = 0
             Right,      // Left = 1
@@ -406,7 +412,6 @@ struct Dir {
         assert((dir == uint8_t(-1)) || (dir >= 0 && dir < Dir::Maximum));
         return OppDir_Table[dir];
     }
-
 
     // Get the opposite direction
     static uint8_t opp_dir(size_t dir) {
