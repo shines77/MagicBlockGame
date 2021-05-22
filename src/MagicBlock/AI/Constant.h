@@ -18,25 +18,25 @@ static const std::size_t MAX_PHASE1_TYPE = 4;
 
 #ifdef NDEBUG
 
-static const std::size_t MAX_PHASE2_DEPTH = 35;
+static const std::size_t MAX_PHASE2_DEPTH = 26;
 
 // Two-Endpoint algorithm
-static const std::size_t MAX_FORWARD_DEPTH = 28;
-static const std::size_t MAX_BACKWARD_DEPTH = 25;
+static const std::size_t MAX_FORWARD_DEPTH = 26;
+static const std::size_t MAX_BACKWARD_DEPTH = 24;
 
-static const std::size_t MAX_ROTATE_FORWARD_DEPTH = 25;
+static const std::size_t MAX_ROTATE_FORWARD_DEPTH = 24;
 static const std::size_t MAX_ROTATE_BACKWARD_DEPTH = 21;
 
 #else
 
-static const std::size_t MAX_PHASE2_DEPTH = 26;
+static const std::size_t MAX_PHASE2_DEPTH = 16;
 
 // Two-Endpoint algorithm
-static const std::size_t MAX_FORWARD_DEPTH = 24;
-static const std::size_t MAX_BACKWARD_DEPTH = 21;
+static const std::size_t MAX_FORWARD_DEPTH = 16;
+static const std::size_t MAX_BACKWARD_DEPTH = 18;
 
-static const std::size_t MAX_ROTATE_FORWARD_DEPTH = 21;
-static const std::size_t MAX_ROTATE_BACKWARD_DEPTH = 18;
+static const std::size_t MAX_ROTATE_FORWARD_DEPTH = 14;
+static const std::size_t MAX_ROTATE_BACKWARD_DEPTH = 16;
 
 #endif // NDEBUG
 

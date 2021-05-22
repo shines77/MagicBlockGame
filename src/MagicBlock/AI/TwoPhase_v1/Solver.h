@@ -70,7 +70,7 @@ public:
     static const size_type kDefaultSearchDepthLimit = 25;
 
     static const size_type kSlideDepth = 6;
-    static const size_type kMaxSlideDepth = 8;
+    static const size_type kMaxSlideDepth = 9;
 
     static const size_type kMaxStages = 10000;
 #else
@@ -208,10 +208,10 @@ public:
                         this->data_->phase1.has_solution[rotate_type] = 1;
                         // Update the depth limit
                         this->data_->phase1.depth_limit[rotate_type] = std::min(
-                            std::max(depth + kMaxSlideDepth + 1, kMinSearchDepth), kMaxSearchDepth);
+                            std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
                     }
                     this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
-                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth + 1);
+                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
                 }
             }
             phase1_type++;
@@ -254,10 +254,10 @@ public:
                         this->data_->phase1.has_solution[rotate_type] = 1;
                         // Update the depth limit
                         this->data_->phase1.depth_limit[rotate_type] = std::min(
-                            std::max(depth + kMaxSlideDepth + 1, kMinSearchDepth), kMaxSearchDepth);
+                            std::max(depth + kMaxSlideDepth, kMinSearchDepth), kMaxSearchDepth);
                     }
                     this->data_->phase1.min_depth[rotate_type][phase1_type] = (int)depth;
-                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth + 1);
+                    this->data_->phase1.max_depth[rotate_type][phase1_type] = (int)(depth + kSlideDepth);
                 }
 
                 // call phase2_search()
