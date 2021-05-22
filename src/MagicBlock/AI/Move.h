@@ -339,16 +339,16 @@ struct Offset {
 static const Offset Dir_Offset[] = {
     {  0,  1 },     // Down
     { -1,  0 },     // Left
+    {  0, -1 },     // Up
     {  1,  0 },     // Right
-    {  0, -1 }      // Up
 };
 
 struct Dir {
     enum {
         Down    = 0,
         Left    = 1,
-        Right   = 2,
-        Up      = 3,
+        Up      = 2,
+        Right   = 3,
         Unknown = 4,
         Maximum = 4
     };
@@ -390,10 +390,23 @@ struct Dir {
     }
 
     // Get the opposite direction
-    static uint8_t opp_dir(uint8_t dir) {
+    static uint8_t opp_dir_old(uint8_t dir) {
         assert((dir == uint8_t(-1)) || (dir >= 0 && dir < Dir::Maximum));
         return (uint8_t(Maximum - 1) - dir);
     }
+    
+    // Get the opposite direction
+    static uint8_t opp_dir(uint8_t dir) {
+        static const uint8_t OppDir_Table[] = {
+            Up,         // Down = 0
+            Right,      // Left = 1
+            Down,       // Up = 2
+            Left,       // Right = 3
+        };
+        assert((dir == uint8_t(-1)) || (dir >= 0 && dir < Dir::Maximum));
+        return OppDir_Table[dir];
+    }
+
 
     // Get the opposite direction
     static uint8_t opp_dir(size_t dir) {

@@ -76,7 +76,7 @@ private:
     stdset_type     visited_set_;
     std_hashset_t   visited_hashset_;
 
-    std::vector<stage_type> cur_stages_;
+    std::vector<stage_type> curr_stages_;
     std::vector<stage_type> next_stages_;
 
 public:
@@ -115,18 +115,33 @@ public:
 
     void clear() {
         this->visited_.destroy();
-        this->cur_stages_.clear();
+        this->curr_stages_.clear();
         this->next_stages_.clear();
+    }
+
+    size_type calc_next_capacity() const {
+        size_type curr_size = this->curr_stages_.size();
+        size_type next_size = this->next_stages_.size();
+        double growth_rate;
+        if (curr_size != 0)
+            growth_rate = (double)next_size / curr_size;
+        else
+            growth_rate = 0.0;
+        growth_rate += 0.6;
+        size_type next_capacity = (size_type)std::floor(growth_rate * next_size);
+        return next_capacity;
     }
 
     void clear_prev_depth() {
-        std::swap(this->cur_stages_, this->next_stages_);
+        size_type next_capacity = calc_next_capacity();
+        std::swap(this->curr_stages_, this->next_stages_);
         this->next_stages_.clear();
+        this->next_stages_.reserve(next_capacity);
     }
 
     bool find_stage_in_list(const Value128 & target_value, stage_type & target_stage) {
-        for (size_type i = 0; i < this->cur_stages_.size(); i++) {
-            const stage_type & stage = this->cur_stages_[i];
+        for (size_type i = 0; i < this->curr_stages_.size(); i++) {
+            const stage_type & stage = this->curr_stages_[i];
             const Value128 & value = stage.board.value128();
             if (value == target_value) {
                 target_stage = stage;
@@ -171,7 +186,7 @@ public:
                         continue;
 
                     this->visited_set_.insert(board_value);
-                    this->cur_stages_.push_back(start);
+                    this->curr_stages_.push_back(start);
                 }
             }
         }
@@ -179,9 +194,9 @@ public:
         // Search one depth only
         {
             bool exit = false;
-            if (this->cur_stages_.size() > 0) {
-                for (size_type i = 0; i < this->cur_stages_.size(); i++) {
-                    const stage_type & stage = this->cur_stages_[i];
+            if (this->curr_stages_.size() > 0) {
+                for (size_type i = 0; i < this->curr_stages_.size(); i++) {
+                    const stage_type & stage = this->curr_stages_[i];
 
                     uint8_t empty_pos = stage.empty_pos;
                     const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
@@ -215,7 +230,7 @@ public:
                 depth++;
                 printf("BackwardSolver:: depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n",
-                        (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
+                        (uint32_t)(this->curr_stages_.size()), (uint32_t)(this->next_stages_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_set_.size()));
 
                 if (depth >= max_depth) {
@@ -229,7 +244,7 @@ public:
 
             if (result == 1) {
                 printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
-                printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
+                printf("next.size() = %u\n", (uint32_t)this->curr_stages_.size());
                 printf("move_seq.size() = %u\n", (uint32_t)this->best_move_seq_.size());
                 printf("\n");
             }
@@ -264,7 +279,7 @@ public:
                     if (!insert_new) {
                         continue;
                     }
-                    this->cur_stages_.push_back(start);
+                    this->curr_stages_.push_back(start);
                 }
             }
         }
@@ -272,9 +287,9 @@ public:
         // Search one depth only
         {
             bool exit = false;
-            if (this->cur_stages_.size() > 0) {
-                for (size_type i = 0; i < this->cur_stages_.size(); i++) {
-                    const stage_type & stage = this->cur_stages_[i];
+            if (this->curr_stages_.size() > 0) {
+                for (size_type i = 0; i < this->curr_stages_.size(); i++) {
+                    const stage_type & stage = this->curr_stages_[i];
 
                     uint8_t empty_pos = stage.empty_pos;
                     const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
@@ -307,7 +322,7 @@ public:
                 depth++;
                 printf("BackwardSolver:: depth = %u\n", (uint32_t)depth);
                 printf("cur.size() = %u, next.size() = %u\n",
-                        (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
+                        (uint32_t)(this->curr_stages_.size()), (uint32_t)(this->next_stages_.size()));
                 printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 
                 if (depth >= max_depth) {
@@ -321,7 +336,7 @@ public:
 
             if (result == 1) {
                 printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
-                printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
+                printf("next.size() = %u\n", (uint32_t)this->curr_stages_.size());
                 printf("move_seq.size() = %u\n", (uint32_t)this->best_move_seq_.size());
                 printf("\n");
             }
@@ -366,14 +381,14 @@ public:
                     return 1;
                 }
 
-                this->cur_stages_.push_back(start);
+                this->curr_stages_.push_back(start);
             }
         }
 
         bool exit = false;
-        while (this->cur_stages_.size() > 0) {
-            for (size_type i = 0; i < this->cur_stages_.size(); i++) {
-                const stage_type & stage = this->cur_stages_[i];
+        while (this->curr_stages_.size() > 0) {
+            for (size_type i = 0; i < this->curr_stages_.size(); i++) {
+                const stage_type & stage = this->curr_stages_[i];
 
                 uint8_t empty_pos = stage.empty_pos;
                 const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
@@ -421,13 +436,13 @@ public:
 #if 0
             printf("BackwardSolver:: depth = %u\n", (uint32_t)depth);
             printf("cur.size() = %u, next.size() = %u\n",
-                    (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
+                    (uint32_t)(this->curr_stages_.size()), (uint32_t)(this->next_stages_.size()));
             printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 #endif
-            std::swap(this->cur_stages_, this->next_stages_);
+            std::swap(this->curr_stages_, this->next_stages_);
             this->next_stages_.clear();
 
-            if (result != 1 && (depth >= max_depth || this->cur_stages_.size() == 0)) {
+            if (result != 1 && (depth >= max_depth || this->curr_stages_.size() == 0)) {
                 result = -1;
                 exit = true;
             }
@@ -442,7 +457,7 @@ public:
         if (result == 1) {
 #if 0
             printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
-            printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
+            printf("next.size() = %u\n", (uint32_t)this->curr_stages_.size());
             printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
             printf("\n");
 #endif

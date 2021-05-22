@@ -522,7 +522,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::StdSet, true>();
     Console::readKeyLine();
 #endif
@@ -554,7 +554,7 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::StdSet, false>();
     Console::readKeyLine();
 #endif

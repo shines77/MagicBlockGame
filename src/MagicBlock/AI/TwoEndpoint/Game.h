@@ -502,8 +502,9 @@ public:
         if (next_set.size() == 0)
             return 0;
 
-        curr_set.clear();
         std::swap(curr_set, next_set);
+        next_set.clear();
+        next_set.shrink_to_fit();
 
         for (auto const & val_pair : curr_set) {
             if (this->template is_coincident_low<15, 20>(val_pair.first.low, val_pair.second.low)) {
@@ -514,8 +515,9 @@ public:
         if (next_set.size() == 0)
             return 0;
 
-        curr_set.clear();
         std::swap(curr_set, next_set);
+        next_set.clear();
+        next_set.shrink_to_fit();
 
         for (auto const & val_pair : curr_set) {
             if (this->template is_coincident_low<0, 5>(val_pair.first.low, val_pair.second.low)) {
@@ -526,8 +528,8 @@ public:
         if (next_set.size() == 0)
             return 0;
 
-        curr_set.clear();
         std::swap(curr_set, next_set);
+        next_set.clear();
 
         int total = 0;
         for (auto const & val_pair : curr_set) {
