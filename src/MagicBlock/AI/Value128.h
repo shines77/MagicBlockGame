@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <unordered_map>
 #include <type_traits>
 
 namespace MagicBlock {
@@ -91,6 +92,23 @@ struct Value128 {
         else {
             return -1;
         }
+    }
+};
+
+struct Value128_Hash
+{
+    std::size_t operator () (const Value128 & value) const
+    {
+        std::hash<std::uint64_t> hasher;
+        return hasher(value.low) ^ hasher(value.high);
+    }
+};
+
+struct Value128_EqualTo
+{
+    std::size_t operator () (const Value128 & lhs, const Value128 & rhs) const
+    {
+        return lhs.is_equal(rhs);
     }
 };
 

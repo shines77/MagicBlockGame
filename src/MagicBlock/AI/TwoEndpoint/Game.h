@@ -93,6 +93,8 @@ private:
     segment_pair_t              segment_pair_;
     std::vector<segment_pair_t> segment_list_;
 
+    std::vector<std::pair<Value128, Value128>> board_value_list_;
+
 public:
     Game() : base_type() {
     }
@@ -278,6 +280,265 @@ public:
         return total;
     }
 
+    bool is_coincident(Value128 fw_value, Value128 bw_value) const {
+        static const size_type colorMask = 0x07;
+        static const size_type colorShift = 3;
+
+        size_type fw_color, bw_color;
+        if (BoardSize <= 21) {
+            // Low bit 0~62
+            for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
+                fw_color = fw_value.low & colorMask;
+                bw_color = bw_value.low & colorMask;
+                if (bw_color == Color::Unknown) {
+                    if (fw_color == Color::Empty) {
+                        return false;
+                    }
+                }
+                else if (fw_color != bw_color) {
+                    return false;
+                }
+                fw_value.low >>= colorShift;
+                bw_value.low >>= colorShift;
+            }
+        }
+        else {
+            // Low bit 0~62
+            for (ssize_type pos = 20; pos >= 0; pos--) {
+                fw_color = fw_value.low & colorMask;
+                bw_color = bw_value.low & colorMask;
+                if (bw_color == Color::Unknown) {
+                    if (fw_color == Color::Empty)
+                        return false;
+                }
+                else if (fw_color != bw_color) {
+                    return false;
+                }
+                fw_value.low >>= colorShift;
+                bw_value.low >>= colorShift;
+            }
+
+            // Low bit 63 and High bit 0~1
+            fw_color = fw_value.low | ((fw_value.high << 1) | colorMask);
+            bw_color = bw_value.low | ((bw_value.high << 1) | colorMask);
+
+            fw_value.high >>= (colorShift - 1);
+            bw_value.high >>= (colorShift - 1);
+
+            // High bit 2~63
+            for (ssize_type pos = BoardSize - 1; pos >= 21; pos--) {
+                fw_color = fw_value.high & colorMask;
+                bw_color = bw_value.high & colorMask;
+                fw_value.high >>= colorShift;
+                bw_value.high >>= colorShift;
+                if (bw_color == Color::Unknown) {
+                    if (fw_color == Color::Empty)
+                        return false;
+                }
+                else if (fw_color != bw_color) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    template <size_type First, size_type Last>
+    bool is_coincident_low(std::uint64_t fw_value, std::uint64_t bw_value) const {
+        static const size_type colorMask = 0x07;
+        static const size_type colorShift = 3;
+        static const size_type first = First;
+        static const size_type last = (Last < 21) ? Last : 21;
+
+        size_type fw_color, bw_color;
+        fw_value >>= (first * colorShift);
+        bw_value >>= (first * colorShift);
+        // Low bit 0~62
+        for (size_type pos = first; pos < last; pos++) {
+            fw_color = fw_value & colorMask;
+            bw_color = bw_value & colorMask;
+            if (bw_color == Color::Unknown) {
+                if (fw_color == Color::Empty) {
+                    return false;
+                }
+            }
+            else if (fw_color != bw_color) {
+                return false;
+            }
+            fw_value >>= colorShift;
+            bw_value >>= colorShift;
+        }
+        return true;
+    }
+
+    template <size_type First, size_type Last>
+    bool is_coincident(Value128 fw_value, Value128 bw_value) const {
+        static const size_type colorMask = 0x07;
+        static const size_type colorShift = 3;
+        static const size_type first = First;
+        static const size_type last = (Last < BoardSize) ? Last : BoardSize;
+
+        size_type fw_color, bw_color;
+        if (BoardSize <= 21) {
+            fw_value.low >>= (first * colorShift);
+            bw_value.low >>= (first * colorShift);
+            // Low bit 0~62
+            for (size_type pos = first; pos < last; pos++) {
+                fw_color = fw_value.low & colorMask;
+                bw_color = bw_value.low & colorMask;
+                if (bw_color == Color::Unknown) {
+                    if (fw_color == Color::Empty) {
+                        return false;
+                    }
+                }
+                else if (fw_color != bw_color) {
+                    return false;
+                }
+                fw_value.low >>= colorShift;
+                bw_value.low >>= colorShift;
+            }
+        }
+        else {
+            if (Last <= 20) {
+                fw_value.low >>= (first * colorShift);
+                bw_value.low >>= (first * colorShift);
+                // Low bit 0~62
+                for (size_type pos = first; pos < last; pos++) {
+                    fw_color = fw_value.low & colorMask;
+                    bw_color = bw_value.low & colorMask;
+                    if (bw_color == Color::Unknown) {
+                        if (fw_color == Color::Empty)
+                            return false;
+                    }
+                    else if (fw_color != bw_color) {
+                        return false;
+                    }
+                    fw_value.low >>= colorShift;
+                    bw_value.low >>= colorShift;
+                }
+            }
+            else {
+                if ((First <= 21 && Last >= 21)) {
+                    fw_value.low >>= (first * colorShift);
+                    bw_value.low >>= (first * colorShift);
+                    // Low bit 0~62
+                    for (size_type pos = first; pos < 21; pos++) {
+                        fw_color = fw_value.low & colorMask;
+                        bw_color = bw_value.low & colorMask;
+                        if (bw_color == Color::Unknown) {
+                            if (fw_color == Color::Empty)
+                                return false;
+                        }
+                        else if (fw_color != bw_color) {
+                            return false;
+                        }
+                        fw_value.low >>= colorShift;
+                        bw_value.low >>= colorShift;
+                    }
+
+                    // Low bit 63 and High bit 0~1
+                    fw_color = (fw_value.low & colorMask) | ((fw_value.high << 1) & colorMask);
+                    bw_color = (bw_value.low & colorMask) | ((bw_value.high << 1) & colorMask);
+
+                    if (bw_color == Color::Unknown) {
+                        if (fw_color == Color::Empty)
+                            return false;
+                    }
+                    else if (fw_color != bw_color) {
+                        return false;
+                    }
+                }
+
+                if (Last > 21) {
+                    static const size_type kHighSkipUnits = (First <= 21) ? 0 : (First - 21);
+                    fw_value.high >>= (colorShift - 1) + kHighSkipUnits * colorShift;
+                    bw_value.high >>= (colorShift - 1) + kHighSkipUnits * colorShift;
+
+                    // High bit 2~63
+                    size_type pos = ((First <= 21 && Last >= 21)) ? (first + 2) : first;
+                    for (; pos < last; pos++) {
+                        fw_color = fw_value.high & colorMask;
+                        bw_color = bw_value.high & colorMask;
+                        if (bw_color == Color::Unknown) {
+                            if (fw_color == Color::Empty)
+                                return false;
+                        }
+                        else if (fw_color != bw_color) {
+                            return false;
+                        }
+                        fw_value.high >>= colorShift;
+                        bw_value.high >>= colorShift;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    int find_intersection(typename TForwardSolver::stdset_type & forward_visited,
+                          typename TBackwardSolver::stdset_type & backward_visited) {
+        this->board_value_list_.clear();
+
+        std::vector<std::pair<Value128, Value128>> curr_set;
+        std::vector<std::pair<Value128, Value128>> next_set;
+
+        for (auto const & fw_value128 : forward_visited) {
+            for (auto const & bw_value128 : backward_visited) {
+                if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                    curr_set.push_back(std::make_pair(fw_value128, bw_value128));
+                }
+            }
+        }
+
+        if (curr_set.size() == 0)
+            return 0;
+
+        for (auto const & val_pair : curr_set) {
+            if (this->template is_coincident_low<5, 10>(val_pair.first.low, val_pair.second.low)) {
+                next_set.push_back(val_pair);
+            }
+        }
+
+        if (next_set.size() == 0)
+            return 0;
+
+        curr_set.clear();
+        std::swap(curr_set, next_set);
+
+        for (auto const & val_pair : curr_set) {
+            if (this->template is_coincident_low<15, 20>(val_pair.first.low, val_pair.second.low)) {
+                next_set.push_back(val_pair);
+            }
+        }
+
+        if (next_set.size() == 0)
+            return 0;
+
+        curr_set.clear();
+        std::swap(curr_set, next_set);
+
+        for (auto const & val_pair : curr_set) {
+            if (this->template is_coincident_low<0, 5>(val_pair.first.low, val_pair.second.low)) {
+                next_set.push_back(val_pair);
+            }
+        }
+
+        if (next_set.size() == 0)
+            return 0;
+
+        curr_set.clear();
+        std::swap(curr_set, next_set);
+
+        int total = 0;
+        for (auto const & val_pair : curr_set) {
+            if (this->template is_coincident<20, 25>(val_pair.first, val_pair.second)) {
+                this->board_value_list_.push_back(val_pair);
+                total++;
+            }
+        }
+        return total;
+    }
+
     size_type merge_move_seq(MoveSeq & move_seq,
                              TBackwardSolver & backward_solver,
                              const stage_type & fw_stage,
@@ -307,8 +568,166 @@ public:
         return move_seq.size();
     }
 
-    bool solve(size_type max_forward_depth, size_type max_backward_depth) {
-        return false;
+    bool stdset_solve(size_type max_forward_depth, size_type max_backward_depth) {
+        if (this->is_satisfy(this->data_.player_board,
+                             this->data_.target_board,
+                             this->data_.target_len) != 0) {
+            return true;
+        }
+
+        bool solvable = false;
+
+        Position empty;
+        bool found_empty = this->find_empty(this->data_.player_board, empty);
+        if (found_empty) {
+            jtest::StopWatch sw;
+
+            TForwardSolver forward_solver(&this->data_);
+            TBackwardSolver backward_solver(&this->data_);
+
+            int forward_status, backward_status;
+            size_type forward_depth = 0;
+            size_type backward_depth = 0;
+
+            printf("-----------------------------------------------\n\n");
+
+            sw.start();
+            while (forward_depth < max_forward_depth || backward_depth < max_backward_depth) {
+                int iterative_type = 0;
+#if 1
+                if (forward_depth > 13) {
+                    size_type fw_visited_size = forward_solver.visited().size();
+                    size_type bw_visited_size = backward_solver.visited().size();
+                    if (forward_depth >= max_forward_depth || fw_visited_size >= bw_visited_size * 2) {
+                        iterative_type = 1;
+                    }
+                    else if (backward_depth >= max_backward_depth || bw_visited_size >= fw_visited_size * 2) {
+                        iterative_type = 2;
+                    }
+                }
+#endif
+                if (iterative_type == 1) {
+                    forward_status  = 0;
+                    backward_status = backward_solver.stdset_solve(backward_depth++, max_backward_depth);
+                    printf("-----------------------------------------------\n\n");
+                }
+                else if (iterative_type == 2) {
+                    forward_status  = forward_solver.stdset_solve(forward_depth++, max_forward_depth);
+                    backward_status = 0;
+                    printf("-----------------------------------------------\n\n");
+                }
+                else {
+                    forward_status  = forward_solver.stdset_solve(forward_depth++, max_forward_depth);
+                    printf("----------------------------------\n\n");
+                    backward_status = backward_solver.stdset_solve(backward_depth++, max_backward_depth);
+                    printf("-----------------------------------------------\n\n");
+                }
+
+                (void)forward_status;
+                (void)backward_status;
+
+                int total = this->find_intersection(forward_solver.visited_set(), backward_solver.visited_set());
+                if (this->board_value_list_.size() > 0) {
+                    // Got some answers
+                    assert(total == (int)this->board_value_list_.size());
+                    printf("Got some answers: %d\n\n", total);
+
+                    stage_type fw_stage;
+                    stage_type bw_stage;
+
+                    for (size_type i = 0; i < this->board_value_list_.size(); i++) {
+                        fw_stage.move_seq.clear();
+
+                        Value128 fw_board_value = this->board_value_list_[i].first;
+                        bool fw_found = forward_solver.find_stage_in_list(fw_board_value, fw_stage);
+                        if (fw_found) {
+                            printf("-----------------------------------------------\n\n");
+                            printf("ForwardSolver: found target value in last depth.\n\n");
+                            printf("Move path size: %u\n\n", (std::uint32_t)fw_stage.move_seq.size());
+                        }
+
+                        bw_stage.move_seq.clear();
+
+                        Value128 bw_board_value = this->board_value_list_[i].second;
+                        bool bw_found = backward_solver.find_stage_in_list(bw_board_value, bw_stage);
+                        if (bw_found) {
+                            printf("-----------------------------------------------\n\n");
+                            printf("BackwardSolver: found target value in last depth.\n\n");
+                            printf("Move path size: %u\n\n", (std::uint32_t)bw_stage.move_seq.size());
+                        }
+
+                        if (fw_found && bw_found) {
+                            MoveSeq & fw_move_seq = fw_stage.move_seq;
+                            MoveSeq & bw_move_seq = bw_stage.move_seq;
+
+                            size_type total_steps = this->merge_move_seq(this->move_seq_, backward_solver, fw_stage, bw_stage);
+                            size_type total_size = fw_move_seq.size() + bw_move_seq.size();
+                            (void)total_size;
+                            assert(total_steps == total_size);
+                            if (total_steps < this->min_steps_) {
+                                solvable = true;
+
+                                Board<BoardX, BoardY>::display_board("Player board:", forward_solver.getPlayerBoard());
+                                Board<TargetX, TargetY>::display_board("Target board:", forward_solver.getTargetBoard());
+
+                                Board<BoardX, BoardY>::display_board("Forward answer:", this->fw_answer_board_);
+                                Board<BoardX, BoardY>::display_board("Backward answer:", this->bw_answer_board_);
+
+                                this->displayAnswerMoves(fw_stage);
+
+                                size_type n_rotate_type = bw_stage.rotate_type;
+                                size_type empty_pos = n_rotate_type >> 2;
+                                size_type rotate_type = n_rotate_type & 0x03;
+                                printf("backward_solver: rotate_type = %u, empty_pos = %u\n\n",
+                                       (uint32_t)rotate_type, (uint32_t)empty_pos);
+
+                                backward_solver.displayAnswerMoves(bw_stage);
+
+                                printf("-----------------------------------------------\n\n");
+                                printf("Forward moves: %u, Backward moves: %u, Total moves: %u\n\n",
+                                        (uint32_t)fw_move_seq.size(),
+                                        (uint32_t)bw_move_seq.size(),
+                                        (uint32_t)total_steps);
+                                this->map_used_ = forward_solver.getMapUsed() + backward_solver.getMapUsed();
+                                this->min_steps_ = total_steps;
+                                this->best_move_seq_ = this->move_seq_;
+                                printf("Total moves: %u\n\n", (uint32_t)this->best_move_seq_.size());
+
+                                this->displayBestAnswerMoves();
+                                //Console::readKeyLine();
+                            }
+                        }
+                    }
+
+                    if (this->board_value_list_.size() > 0) {
+                        forward_solver.clear_prev_depth();
+                        backward_solver.clear_prev_depth();
+                        break;
+                    }
+                }
+
+                if (iterative_type == 1) {
+                    backward_solver.clear_prev_depth();
+                }
+                else if (iterative_type == 2) {
+                    forward_solver.clear_prev_depth();
+                }
+                else {
+                    forward_solver.clear_prev_depth();
+                    backward_solver.clear_prev_depth();
+                }
+            }
+            sw.stop();
+
+            if (solvable) {
+                double elapsed_time = sw.getElapsedMillisec();
+                printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+
+                this->displayBestAnswerMoves();
+            }
+        }
+
+        return solvable;
     }
 
     bool bitset_solve(size_type max_forward_depth, size_type max_backward_depth) {

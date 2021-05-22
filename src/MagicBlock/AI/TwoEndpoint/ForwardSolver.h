@@ -14,6 +14,8 @@
 #include <vector>
 #include <queue>
 #include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <exception>
 #include <stdexcept>
 #include <algorithm>    // For std::swap(), until C++11. std::min()
@@ -64,10 +66,15 @@ public:
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
-    typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 1> bitset_type;
+    typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 1>  bitset_type;
+    typedef std::set<Value128>                                          stdset_type;
+    typedef std::unordered_set<Value128, Value128_Hash>                 std_hashset_t;
 
 private:
-    bitset_type visited_;
+    bitset_type     visited_;
+
+    stdset_type     visited_set_;
+    std_hashset_t   visited_hashset_;
 
     std::vector<stage_type> cur_stages_;
     std::vector<stage_type> next_stages_;
@@ -108,6 +115,14 @@ public:
         return this->visited_;
     }
 
+    stdset_type & visited_set() {
+        return this->visited_set_;
+    }
+
+    const stdset_type & visited_set() const {
+        return this->visited_set_;
+    }
+
     void respawn() {
         this->clear();
         this->visited_.create_root();
@@ -142,6 +157,93 @@ public:
             }
         }
         return false;
+    }
+
+    int stdset_solve(size_type depth, size_type max_depth) {
+        int result = 0;
+        if (depth == 0) {
+            size_u satisfy_result = this->is_satisfy(this->player_board_,
+                                                     this->target_board_,
+                                                     this->target_len_);
+            if (satisfy_result.low != 0) {
+                return 1;
+            }
+
+            Position empty;
+            bool found_empty = this->find_empty(this->player_board_, empty);
+            if (found_empty) {
+                stage_type start;
+                start.empty_pos = empty;
+                start.last_dir = uint8_t(-1);
+                start.rotate_type = 0;
+                start.board = this->player_board_;
+
+                Value128 board_value = start.board.value128();
+                this->visited_set_.insert(board_value);
+                this->cur_stages_.push_back(start);
+            }
+        }
+
+        // Search one depth only
+        {
+            bool exit = false;
+            if (this->cur_stages_.size() > 0) {
+                for (size_type i = 0; i < this->cur_stages_.size(); i++) {
+                    const stage_type & stage = this->cur_stages_[i];
+
+                    uint8_t empty_pos = stage.empty_pos;
+                    const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
+                    size_type total_moves = can_moves.size();
+                    for (size_type n = 0; n < total_moves; n++) {
+                        uint8_t cur_dir = can_moves[n].dir;
+                        if (cur_dir == stage.last_dir)
+                            continue;
+
+                        uint8_t move_pos = can_moves[n].pos;
+
+                        stage_type next_stage(stage.board);
+                        std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
+
+                        Value128 board_value = next_stage.board.value128();
+                        if (this->visited_set_.count(board_value) > 0)
+                            continue;
+
+                        this->visited_set_.insert(board_value);
+
+                        next_stage.empty_pos = move_pos;
+                        next_stage.last_dir = Dir::opp_dir(cur_dir);
+                        next_stage.rotate_type = 0;
+                        next_stage.move_seq = stage.move_seq;
+                        next_stage.move_seq.push_back(cur_dir);
+
+                        this->next_stages_.push_back(std::move(next_stage));
+                    }
+                }
+
+                depth++;
+                printf("ForwardSolver::  depth = %u\n", (uint32_t)depth);
+                printf("cur.size() = %u, next.size() = %u\n",
+                        (uint32_t)(this->cur_stages_.size()), (uint32_t)(this->next_stages_.size()));
+                printf("visited.size() = %u\n\n", (uint32_t)(this->visited_set_.size()));
+
+                if (depth >= max_depth) {
+                    exit = true;
+                    result = -1;
+                }
+                (void)exit;
+            }
+
+            this->map_used_ = this->visited_set_.size();
+
+            if (result == 1) {
+                printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
+                printf("next.size() = %u\n", (uint32_t)this->cur_stages_.size());
+                printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
+                printf("\n");
+            }
+        }
+
+        return result;
     }
 
     int bitset_solve(size_type depth, size_type max_depth) {

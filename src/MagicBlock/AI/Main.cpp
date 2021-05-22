@@ -69,6 +69,10 @@ struct SolverId {
         BitSet,
         // Immediate mode
         BitSetImmediate,
+        // std::set<T>
+        StdSet,
+        // std::unordered_set<T>
+        StdHashSet
     };
 };
 
@@ -100,6 +104,12 @@ static const char * get_solver_name()
     }
     else if (N_SolverId == SolverId::BitSetImmediate) {
         return "SolverId::BitSetImmediate";
+    }
+    else if (N_SolverId == SolverId::StdSet) {
+        return "SolverId::StdSet";
+    }
+    else if (N_SolverId == SolverId::StdHashSet) {
+        return "SolverId::StdHashSet";
     }
     else {
         return "SolverId::Normal";
@@ -395,9 +405,9 @@ void solve_magic_block_two_endpoint()
     }
     else {
         if (AllowRotate)
-            solvable = game.solve(MAX_ROTATE_FORWARD_DEPTH, MAX_ROTATE_BACKWARD_DEPTH);
+            solvable = game.stdset_solve(MAX_ROTATE_FORWARD_DEPTH, MAX_ROTATE_BACKWARD_DEPTH);
         else
-            solvable = game.solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
+            solvable = game.stdset_solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
     }
     sw.stop();
     double elapsed_time = sw.getElapsedMillisec();
@@ -446,7 +456,7 @@ int main(int argc, char * argv[])
     //return 0;
 #endif
 
-    if (1) {
+    if (0) {
 
 #if 0
     solve_sliding_puzzle<SolverId::Normal, true>();
@@ -507,8 +517,13 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, true>();
+    Console::readKeyLine();
+#endif
+
+#if 1
+    solve_magic_block<Category::TwoEndpoint, SolverId::StdSet, true>();
     Console::readKeyLine();
 #endif
 
@@ -536,6 +551,11 @@ int main(int argc, char * argv[])
 
 #if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSetImmediate, false>();
+    Console::readKeyLine();
+#endif
+
+#if 1
+    solve_magic_block<Category::TwoEndpoint, SolverId::StdSet, false>();
     Console::readKeyLine();
 #endif
 

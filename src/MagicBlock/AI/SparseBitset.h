@@ -24,7 +24,7 @@
 #include "MagicBlock/AI/Value128.h"
 #include "MagicBlock/AI/Algorithm.h"
 
-#define SPARSEBITSET_USE_INDEX_SORT     0
+#define SPARSEBITSET_USE_INDEX_SORT     1
 #define SPARSEBITSET_USE_TRIE_INFO      0
 
 namespace MagicBlock {
