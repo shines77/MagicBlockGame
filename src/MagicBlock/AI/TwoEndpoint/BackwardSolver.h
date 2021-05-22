@@ -172,7 +172,7 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == Dir::opp_dir(stage.last_dir))
+                        if (cur_dir == stage.last_dir)
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;
@@ -186,7 +186,7 @@ public:
                         }
 
                         next_stage.empty_pos = move_pos;
-                        next_stage.last_dir = cur_dir;
+                        next_stage.last_dir = Dir::opp_dir(cur_dir);
                         next_stage.rotate_type = stage.rotate_type;
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
@@ -271,7 +271,7 @@ public:
                 size_type total_moves = can_moves.size();
                 for (size_type n = 0; n < total_moves; n++) {
                     uint8_t cur_dir = can_moves[n].dir;
-                    if (cur_dir == Dir::opp_dir(stage.last_dir))
+                    if (cur_dir == stage.last_dir)
                         continue;
 
                     uint8_t move_pos = can_moves[n].pos;
@@ -285,7 +285,7 @@ public:
                     }
 
                     next_stage.empty_pos = move_pos;
-                    next_stage.last_dir = cur_dir;
+                    next_stage.last_dir = Dir::opp_dir(cur_dir);
                     next_stage.rotate_type = stage.rotate_type;
                     next_stage.move_seq = stage.move_seq;
                     next_stage.move_seq.push_back(cur_dir);
