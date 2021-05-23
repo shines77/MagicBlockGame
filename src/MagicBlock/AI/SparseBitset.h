@@ -77,8 +77,8 @@ public:
         std::vector<std::uint16_t> array_;
 
     public:
-        IndexVector() = default;
-        ~IndexVector() = default;
+        IndexVector() noexcept {}
+        ~IndexVector() {}
 
         size_type size() const {
             return this->array_.size();
@@ -120,8 +120,8 @@ public:
         std::vector<Container *> array_;
 
     public:
-        ValueVector() = default;
-        ~ValueVector() = default;
+        ValueVector() noexcept {}
+        ~ValueVector() {}
 
         size_type size() const {
             return this->array_.size();
@@ -153,8 +153,8 @@ public:
 
     class IndexArray {
     public:
-        IndexArray() = default;
-        ~IndexArray() = default;
+        IndexArray() noexcept {}
+        ~IndexArray() {}
 
         size_type size() const {
             return 0;
@@ -234,8 +234,8 @@ public:
 
     class ValueArray {
     public:
-        ValueArray() = default;
-        ~ValueArray() = default;
+        ValueArray() noexcept {}
+        ~ValueArray() {}
 
         size_type size() const {
             return 0;
@@ -299,13 +299,13 @@ public:
         }
 
     public:
-        Container() : type_(NodeType::ArrayContainer), size_(0), capacity_(0), sorted_(0), ptr_(nullptr) {
+        Container() noexcept : type_(NodeType::ArrayContainer), size_(0), capacity_(0), sorted_(0), ptr_(nullptr) {
             this->init();
         }
-        Container(std::uint16_t type) : type_(type), size_(0), capacity_(0), sorted_(0), ptr_(nullptr) {
+        Container(std::uint16_t type) noexcept : type_(type), size_(0), capacity_(0), sorted_(0), ptr_(nullptr) {
             this->init();
         }
-        Container(size_type type, size_type size, size_type capacity, std::uintptr_t * ptr)
+        Container(size_type type, size_type size, size_type capacity, std::uintptr_t * ptr) noexcept
             : type_(static_cast<std::uint16_t>(type)),
               size_(static_cast<std::uint16_t>(size)),
               capacity_(static_cast<std::uint16_t>(capacity)), sorted_(0),
@@ -528,7 +528,7 @@ public:
         }
 
     public:
-        ArrayContainer() : Container(NodeType::ArrayContainer) {
+        ArrayContainer() noexcept : Container(NodeType::ArrayContainer) {
             this->init();
         }
         ArrayContainer(const ArrayContainer & src) = delete;
@@ -674,7 +674,7 @@ public:
         }
 
     public:
-        LeafArrayContainer() : Container(NodeType::LeafArrayContainer) {
+        LeafArrayContainer() noexcept : Container(NodeType::LeafArrayContainer) {
             this->init();
         }
         LeafArrayContainer(const LeafArrayContainer & src) = delete;
@@ -769,7 +769,7 @@ public:
         }
 
     public:
-        BitmapContainer() : Container(NodeType::BitmapContainer, 0, 0, nullptr) {
+        BitmapContainer() noexcept : Container(NodeType::BitmapContainer, 0, 0, nullptr) {
             this->init();
         }
         BitmapContainer(const BitmapContainer & src) = delete;
@@ -868,7 +868,7 @@ public:
         }
 
     public:
-        LeafBitmapContainer() : Container(NodeType::LeafBitmapContainer, 0, kMaxArraySize, nullptr) {
+        LeafBitmapContainer() noexcept : Container(NodeType::LeafBitmapContainer, 0, kMaxArraySize, nullptr) {
             this->init();
         }
         LeafBitmapContainer(const LeafBitmapContainer & src) = delete;
@@ -1053,7 +1053,7 @@ public:
             assert(child != nullptr);
             if (child->type() != NodeType::LeafArrayContainer &&
                 child->type() != NodeType::LeafBitmapContainer) {
-                destroy_trie_impl(child, layer + 1);
+                this->destroy_trie_impl(child, layer + 1);
             }
             delete child;
         }
@@ -1068,7 +1068,7 @@ public:
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
             if (child != nullptr) {
-                destroy_trie_impl(child, 1);
+                this->destroy_trie_impl(child, 1);
                 delete child;
             }
         }
@@ -1120,7 +1120,7 @@ public:
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             assert(container->type() == NodeType::ArrayContainer ||
                    container->type() == NodeType::BitmapContainer);
             Container * child;
@@ -1137,7 +1137,7 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             bool is_exists = container->hasLeaf(layer_value);
@@ -1170,7 +1170,7 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             bool is_exists = container->hasLeaf(layer_value);
@@ -1192,7 +1192,7 @@ public:
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             if (!insert_new) {
                 assert(container->type() == NodeType::ArrayContainer ||
                        container->type() == NodeType::BitmapContainer);
@@ -1215,7 +1215,7 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             if (!insert_new) {
@@ -1239,7 +1239,7 @@ public:
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             if (!insert_new) {
                 assert(container->type() == NodeType::ArrayContainer ||
                        container->type() == NodeType::BitmapContainer);
@@ -1262,7 +1262,7 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             if (!insert_new) {
@@ -1284,7 +1284,7 @@ public:
         // Normal container
         size_type layer;
         for (layer = last_layer; layer < BoardY - 1; layer++) {
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             if (layer < (BoardY - 2))
                 container = container->append(layer_value);
             else
@@ -1294,7 +1294,7 @@ public:
         // Leaf container
         {
             assert(container != nullptr);
-            size_type layer_value = get_layer_value(board, layer);
+            size_type layer_value = this->get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
             container->appendLeaf(layer_value);
@@ -1325,7 +1325,7 @@ public:
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
             assert(child != nullptr);
-            count_trie_info_impl(child, layer + 1);
+            this->count_trie_info_impl(child, layer + 1);
         }
 #endif
     }
@@ -1349,7 +1349,7 @@ public:
         for (size_type i = container->begin(); i < container->end(); container->next(i)) {
             Container * child = container->valueOf(i);
             if (child != nullptr) {
-                count_trie_info_impl(child, 1);
+                this->count_trie_info_impl(child, 1);
             }
         }
 #endif
