@@ -33,8 +33,8 @@ protected:
     size_type map_used_;
 
 public:
-    BaseAnswerGame() : min_steps_(std::numeric_limits<size_type>::max()), map_used_(0) {}
-    BaseAnswerGame(const BaseAnswerGame & src)
+    BaseAnswerGame() noexcept : min_steps_(std::numeric_limits<size_type>::max()), map_used_(0) {}
+    BaseAnswerGame(const BaseAnswerGame & src) noexcept
         : min_steps_(src.min_steps_), map_used_(src.map_used_) {}
     ~BaseAnswerGame() {}
 
@@ -253,7 +253,7 @@ public:
     typedef typename answer_type::size_type     size_type;
     typedef typename answer_type::board_type    board_type;
     typedef typename answer_type::stage_type    stage_type;
-    typedef typename answer_type::move_seq_t   move_seq_t;
+    typedef typename answer_type::move_seq_t    move_seq_t;
     typedef typename answer_type::move_list_t   move_list_t;
 
 protected:
