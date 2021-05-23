@@ -267,10 +267,10 @@ public:
                     this->player_board_[i].cells[empty_pos] = Color::Empty;
 
                     stage_type start;
+                    start.board = this->player_board_[i];
                     start.empty_pos = empty_pos;
                     start.last_dir = uint8_t(-1);
                     start.rotate_type = uint8_t((i & 0x03U) | (size_type(empty_pos) << 2U));
-                    start.board = this->player_board_[i];
 
                     // Restore unknown color
                     this->player_board_[i].cells[empty_pos] = Color::Unknown;

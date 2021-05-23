@@ -597,7 +597,7 @@ public:
             while (forward_depth < max_forward_depth || backward_depth < max_backward_depth) {
                 int iterative_type = 0;
 #if 1
-                if (forward_depth > 13) {
+                if (forward_depth > 15) {
                     size_type fw_visited_size = forward_solver.visited().size();
                     size_type bw_visited_size = backward_solver.visited().size();
                     if (forward_depth >= max_forward_depth || fw_visited_size >= bw_visited_size * 2) {
@@ -759,7 +759,7 @@ public:
             while (forward_depth < max_forward_depth || backward_depth < max_backward_depth) {
                 int iterative_type = 0;
 #if 1
-                if (forward_depth > 13) {
+                if (forward_depth > 15) {
                     size_type fw_visited_size = forward_solver.visited().size();
                     size_type bw_visited_size = backward_solver.visited().size();
                     if (forward_depth >= max_forward_depth || fw_visited_size >= bw_visited_size * 2) {

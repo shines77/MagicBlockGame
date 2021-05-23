@@ -228,7 +228,7 @@ public:
 
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = Dir::opp_dir(cur_dir);
-                        next_stage.rotate_type = 0;
+                        //next_stage.rotate_type = 0;
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 
@@ -313,7 +313,7 @@ public:
 
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = Dir::opp_dir(cur_dir);
-                        next_stage.rotate_type = 0;
+                        //next_stage.rotate_type = 0;
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
 

@@ -20,6 +20,8 @@
 namespace MagicBlock {
 namespace AI {
 
+#pragma pack(push, 1)
+
 template <std::size_t BoardX, std::size_t BoardY>
 union Board
 {
@@ -31,9 +33,19 @@ union Board
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type TotalBytes = BoardX * BoardY;
 
+#if 1
+    typedef std::uint32_t unit_type;
+
+    typedef typename std::conditional<
+                (TotalBytes <= sizeof(std::uint32_t)), std::uint32_t, size_type
+            >::type  auto_type;
+#else
     typedef typename std::conditional<
                 (TotalBytes <= sizeof(std::uint32_t)), std::uint32_t, size_type
             >::type  unit_type;
+
+    typedef unit_type auto_type;
+#endif
 
     typedef Board<BoardX, BoardY>   this_type;
 
@@ -45,8 +57,15 @@ union Board
     static const size_type kTotalUnits = (TotalBytes + kUnitBytes - 1) / kUnitBytes;
     static const size_type kTotalBytes = kTotalUnits * kUnitBytes;
 
+    static const size_type kAutoUnitBytes = sizeof(auto_type);
+    static const size_type kTotalAutoUnits = TotalBytes / kAutoUnitBytes;
+    static const size_type kTotalAutoBytes = kTotalAutoUnits * kAutoUnitBytes;
+    static const size_type kRemainAutoBytes = kTotalBytes - kTotalAutoBytes;
+
+    static const size_type kRemainUnits = (kRemainAutoBytes + kUnitBytes - 1) / kUnitBytes;
+
     std::uint8_t    cells[BoardSize];
-    unit_type       uints[kTotalUnits];
+    unit_type       units[kTotalUnits];
 
     Board() {
         this->clear();
@@ -62,27 +81,133 @@ union Board
         return *this;
     }
 
+    bool is_x64() const {
+        return (sizeof(std::size_t) == 8);
+    }
+
+    bool size() const {
+        return this->BoardSize;
+    }
+
+    bool capacity() const {
+        return this->kTotalBytes;
+    }
+
+    bool board_size() const {
+        return this->BoardSize;
+    }
+
+    bool unit_size() const {
+        return this->kTotalUnits;
+    }
+
+    std::uint8_t * data() {
+        return (std::uint8_t *)&this->units[0];
+    }
+
+    const std::uint8_t * data() const {
+        return (const std::uint8_t *)&this->units[0];
+    }
+
+    unit_type * unit_data() {
+        return (unit_type *)&this->units[0];
+    }
+
+    const unit_type * unit_data() const {
+        return (const unit_type *)&this->units[0];
+    }
+
+    auto_type * auto_data() {
+        return (auto_type *)&this->units[0];
+    }
+
+    const auto_type * auto_data() const {
+        return (const auto_type *)&this->units[0];
+    }
+
     void clear() noexcept {
-#if 1
-        std::fill_n(this->uints, kTotalUnits, unit_type(0));
-#else
-        for (size_type n = 0; n < kTotalUnits; n++) {
-            this->uints[n] = 0;
+        if (this->is_x64()) {
+            auto_type * auto_units = this->auto_data();
+            for (size_type n = 0; n < kTotalAutoUnits; n++) {
+                *auto_units++ = 0;
+            }
+            if (kRemainUnits != 0) {
+                unit_type * _units = (unit_type *)auto_units;
+                for (size_type n = 0; n < kRemainUnits; n++) {
+                    *_units++ = 0;
+                    if (n < kRemainUnits - 1)
+                        _units++;
+                }
+            }
         }
+        else {
+#if 0
+            std::fill_n(this->uints, kTotalUnits, unit_type(0));
+#else
+            for (size_type n = 0; n < kTotalUnits; n++) {
+                this->units[n] = 0;
+            }
 #endif
+        }
     }
 
     void internal_copy(const Board & other) noexcept {
-        for (size_type n = 0; n < kTotalUnits; n++) {
-            this->uints[n] = other.uints[n];
+        if (this->is_x64()) {
+                  auto_type * auto_units       = this->auto_data();
+            const auto_type * other_auto_units = other.auto_data();
+            for (size_type n = 0; n < kTotalAutoUnits; n++) {
+                *auto_units++ = *other_auto_units++;
+            }
+            if (kRemainUnits != 0) {
+                unit_type * _units       = (unit_type *)auto_units;
+                unit_type * _other_units = (unit_type *)other_auto_units;
+                for (size_type n = 0; n < kRemainUnits; n++) {
+                    *_units = *_other_units;
+                    if (n < kRemainUnits - 1) {
+                        _units++;
+                        _other_units++;
+                    }
+                }
+            }
+        }
+        else {
+            for (size_type n = 0; n < kTotalUnits; n++) {
+                this->units[n] = other.units[n];
+            }
         }
     }
 
     void internal_swap(Board & other) noexcept {
-        for (size_type n = 0; n < kTotalUnits; n++) {
-            unit_type temp = this->uints[n];
-            this->uints[n] = other.uints[n];
-            other.uints[n] = temp;
+        if (this->is_x64()) {
+            auto_type * auto_units       = this->auto_data();
+            auto_type * other_auto_units = other.auto_data();
+            for (size_type n = 0; n < kTotalAutoUnits; n++) {
+                auto_type temp = *auto_units;
+                *auto_units = *other_auto_units;
+                *other_auto_units = temp;
+                auto_units++;
+                other_auto_units++;
+            }
+            if (kRemainUnits != 0) {
+                unit_type * _units       = (unit_type *)auto_units;
+                unit_type * _other_units = (unit_type *)other_auto_units;
+                for (size_type n = 0; n < kRemainUnits; n++) {
+                    unit_type temp = *_units;
+                    *_units = *_other_units;
+                    *_other_units = temp;
+                    if (n < kRemainUnits - 1) {
+                        _units++;
+                        _other_units++;
+                    }
+                }
+            }
+        }
+        else {
+            for (size_type n = 0; n < kTotalUnits; n++) {
+                unit_type temp = this->units[n];
+                this->units[n] = other.units[n];
+                other.units[n] = temp;
+            }
         }
     }
 
@@ -109,9 +234,31 @@ union Board
     }
 
     bool is_equal(const Board & other) const noexcept {
-        for (size_type n = 0; n < kTotalUnits; n++) {
-            if (this->uints[n] != other.uints[n])
-                return false;
+        if (this->is_x64()) {
+            const auto_type * auto_units       = this->auto_data();
+            const auto_type * other_auto_units = other.auto_data();
+            for (size_type n = 0; n < kTotalAutoUnits; n++) {
+                if (*auto_units++ != *other_auto_units++)
+                    return false;
+            }
+            if (kRemainUnits != 0) {
+                unit_type * _units       = (unit_type *)auto_units;
+                unit_type * _other_units = (unit_type *)other_auto_units;
+                for (size_type n = 0; n < kRemainUnits; n++) {
+                    if (*_units != *_other_units)
+                        return false;
+                    if (n < kRemainUnits - 1) {
+                        _units++;
+                        _other_units++;
+                    }
+                }
+            }
+        }
+        else {
+            for (size_type n = 0; n < kTotalUnits; n++) {
+                if (this->units[n] != other.units[n])
+                    return false;
+            }
         }
         return true;
     }
@@ -510,6 +657,8 @@ inline
 void swap(Board<BoardX, BoardY> & lhs, Board<BoardX, BoardY> & rhs) noexcept {
     lhs.swap(rhs);
 }
+
+#pragma pack(pop)
 
 } // namespace AI
 } // namespace MagicBlock
