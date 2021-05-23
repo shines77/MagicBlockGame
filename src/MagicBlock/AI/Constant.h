@@ -10,6 +10,8 @@
 #define NOMINMAX
 #endif
 
+#define STAGES_USE_EMPLACE_PUSH     1
+
 namespace MagicBlock {
 namespace AI {
 

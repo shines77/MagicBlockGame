@@ -28,6 +28,20 @@ struct Stage {
 
     Stage() noexcept : board(), empty_pos(0), last_dir(0), rotate_type(0), move_seq() {}
 
+    Stage(const Board<BoardX, BoardY> & _board, Position move_pos,
+          uint8_t cur_dir, const MoveSeq & _move_seq) noexcept
+        : board(_board), empty_pos(move_pos), last_dir(Dir::opp_dir(cur_dir)),
+          rotate_type(0), move_seq(_move_seq) {
+        this->move_seq.push_back(cur_dir);
+    }
+
+    Stage(const Board<BoardX, BoardY> & _board, Position move_pos,
+          uint8_t cur_dir, uint8_t _rotate_type, const MoveSeq & _move_seq) noexcept
+        : board(_board), empty_pos(move_pos), last_dir(Dir::opp_dir(cur_dir)),
+          rotate_type(_rotate_type), move_seq(_move_seq) {
+        this->move_seq.push_back(cur_dir);
+    }
+
     Stage(const Stage & src) noexcept
         : board(src.board), empty_pos(src.empty_pos), last_dir(src.last_dir),
           rotate_type(src.rotate_type), move_seq(src.move_seq) {

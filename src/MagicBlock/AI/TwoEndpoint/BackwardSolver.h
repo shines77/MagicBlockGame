@@ -289,7 +289,7 @@ public:
             bool exit = false;
             if (this->curr_stages_.size() > 0) {
                 for (size_type i = 0; i < this->curr_stages_.size(); i++) {
-                    const stage_type & stage = this->curr_stages_[i];
+                    stage_type & stage = this->curr_stages_[i];
 
                     uint8_t empty_pos = stage.empty_pos;
                     const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
@@ -300,7 +300,19 @@ public:
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;
+#if STAGES_USE_EMPLACE_PUSH
+                        std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
 
+                        bool insert_new = this->visited_.try_append(stage.board);
+                        if (!insert_new) {
+                            std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
+                            continue;
+                        }
+
+                        this->next_stages_.emplace_back(stage.board, move_pos, cur_dir, stage.rotate_type, stage.move_seq);
+
+                        std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
+#else
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
@@ -316,6 +328,7 @@ public:
                         next_stage.move_seq.push_back(cur_dir);
 
                         this->next_stages_.push_back(std::move(next_stage));
+#endif // STAGES_USE_EMPLACE_PUSH
                     }
                 }
 
