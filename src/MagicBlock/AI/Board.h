@@ -594,7 +594,7 @@ union Board
         return this_type::translate_move_seq<EmptyPosValue, UnknownPosValue>(*this, move_seq, move_list, empty_pos);
     }
 
-    static void display_move_seq(const move_list_t & move_list) {
+    static void display_move_list(const move_list_t & move_list) {
         size_type index = 0;
         printf("Answer_Move_Path[ %u ] = {\n", (std::uint32_t)move_list.size());
         for (auto iter : move_list) {
@@ -617,7 +617,7 @@ union Board
     }
 
     template <size_type EmptyPosValue = Color::Empty, size_type UnknownPosValue = Color::Unknown>
-    static void display_num_move_seq(const move_list_t & move_list) {
+    static void display_num_move_list(const move_list_t & move_list) {
         size_type index = 0;
         printf("Answer_Move_Path[ %u ] = {\n", (std::uint32_t)move_list.size());
         for (auto iter : move_list) {

@@ -141,6 +141,10 @@ public:
         return *this;
     }
 
+    void clear() {
+        this->move_list.clear();
+    }
+
     void copy(const this_type & other) noexcept {
         if (&other != this) {
             this->internal_copy(other);
@@ -193,47 +197,47 @@ public:
         return this->translateMoveSeq(this->move_seq, this->move_list, empty_pos);
     }
 
-    static void displayMoveSeq(const move_list_t & move_list) {
+    static void displayMoveList(const move_list_t & move_list) {
         if (IsNumberBoard)
-            board_type::template display_num_move_seq<EmptyPosValue, UnknownPosValue>(move_list);
+            board_type::template display_num_move_list<EmptyPosValue, UnknownPosValue>(move_list);
         else
-            board_type::display_move_seq(move_list);
+            board_type::display_move_list(move_list);
     }
 
-    static void displayMoveSeq(const board_type & board, const move_seq_t & move_seq,
+    static void displayMoveList(const board_type & board, const move_seq_t & move_seq,
                                 Position empty_pos = std::uint8_t(-1)) {
         move_list_t move_list;
         if (board_type::translate_move_seq<EmptyPosValue, UnknownPosValue>(board, move_seq, move_list, empty_pos)) {
             if (IsNumberBoard)
-                board_type::template display_num_move_seq<EmptyPosValue, UnknownPosValue>(move_list);
+                board_type::template display_num_move_list<EmptyPosValue, UnknownPosValue>(move_list);
             else
-                board_type::display_move_seq(move_list);
+                board_type::display_move_list(move_list);
         }
     }
 
-    static void displayMoveSeq(const board_type & board, const stage_type & target_stage,
+    static void displayMoveList(const board_type & board, const stage_type & target_stage,
                                 Position empty_pos = std::uint8_t(-1)) {
-        this_type::displayMoveSeq(board, target_stage.move_seq, empty_pos);
+        this_type::displayMoveList(board, target_stage.move_seq, empty_pos);
     }
 
-    void displayMoveSeq(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
+    void displayMoveList(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
         if (this->translateMoveSeq(move_seq, this->move_list, empty_pos)) {
-            this_type::displayMoveSeq(this->move_list);
+            this_type::displayMoveList(this->move_list);
         }
     }
 
-    void displayMoveSeq(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
-        this->displayMoveSeq(target_stage.move_seq, empty_pos);
+    void displayMoveList(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
+        this->displayMoveList(target_stage.move_seq, empty_pos);
     }
 
-    void displayMoveSeq(Position empty_pos = std::uint8_t(-1)) {
+    void displayMoveList(Position empty_pos = std::uint8_t(-1)) {
         if (this->translateMoveSeq(this->move_seq, this->move_list, empty_pos)) {
-            this_type::displayMoveSeq(this->move_list);
+            this_type::displayMoveList(this->move_list);
         }
     }
 
-    void displayMoveSeqOnly() {
-        this_type::displayMoveSeq(this->move_list);
+    void displayMoveListOnly() {
+        this_type::displayMoveList(this->move_list);
     }
 };
 
@@ -311,6 +315,10 @@ public:
         this->best_answer_.move_list = std::forward<move_list_t>(move_list);
     }
 
+    void clearAnswer() {
+        this->best_answer_.clear();
+    }
+
     bool translateMoveSeq(const move_seq_t & move_seq, move_list_t & move_list,
                           Position empty_pos = std::uint8_t(-1)) const {
         return this->best_answer_.translateMoveSeq(move_seq, move_list, empty_pos);
@@ -333,20 +341,20 @@ public:
         return this->best_answer_.translateMoveSeq(empty_pos);
     }
 
-    void displayAnswerMoves(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
-        this->best_answer_.displayMoveSeq(move_seq, empty_pos);
+    void displayMoveList(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
+        this->best_answer_.displayMoveList(move_seq, empty_pos);
     }
 
-    void displayAnswerMoves(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
-        this->best_answer_.displayMoveSeq(target_stage, empty_pos);
+    void displayMoveList(const stage_type & target_stage, Position empty_pos = std::uint8_t(-1)) {
+        this->best_answer_.displayMoveList(target_stage, empty_pos);
     }
 
-    void displayAnswerMoves(Position empty_pos = std::uint8_t(-1)) {
-        this->best_answer_.displayMoveSeq(empty_pos);
+    void displayMoveList(Position empty_pos = std::uint8_t(-1)) {
+        this->best_answer_.displayMoveList(empty_pos);
     }
 
-    void displayAnswerMovesOnly() {
-        this->best_answer_.displayMoveSeqOnly();
+    void displayMoveListOnly() {
+        this->best_answer_.displayMoveListOnly();
     }
 };
 
@@ -446,43 +454,14 @@ public:
         return this->best_answer_list_[index].translateMoveSeq(empty_pos);
     }
 
-    void displayAnswerMoves(size_type index, Position empty_pos = std::uint8_t(-1)) {
+    void displayMoveList(size_type index, Position empty_pos = std::uint8_t(-1)) {
         assert(index >= 0 && index < best_answer_list_.size());
-        this->best_answer_list_[index].displayMoveSeq(empty_pos);
+        this->best_answer_list_[index].displayMoveList(empty_pos);
     }
 
-    void displayAnswerMovesOnly(size_type index) {
+    void displayMoveListOnly(size_type index) {
         assert(index >= 0 && index < best_answer_list_.size());
-        this->best_answer_list_[index].displayMoveSeqOnly();
-    }
-
-    void translateAllMoveSeq(std::vector<Position> empty_pos_list) {
-        size_type empty_size = empty_pos_list.size();
-        size_type list_size = this->best_answer_list_.size();
-        for (size_type i = 0; i < list_size; i++) {
-            if (i >= empty_size)
-                this->best_answer_list_[i].translateMoveSeq(std::uint8_t(-1));
-            else
-                this->best_answer_list_[i].translateMoveSeq(empty_pos_list[i]);
-        }
-    }
-
-    void displayAllAnswerMoves(std::vector<Position> empty_pos_list) {
-        size_type empty_size = empty_pos_list.size();
-        size_type list_size = this->best_answer_list_.size();
-        for (size_type i = 0; i < list_size; i++) {
-            if (i >= empty_size)
-                this->best_answer_list_[i].displayMoveSeq(std::uint8_t(-1));
-            else
-                this->best_answer_list_[i].displayMoveSeq(empty_pos_list[i]);
-        }
-    }
-
-    void displayAllAnswerMovesOnly() {
-        size_type list_size = this->best_answer_list_.size();
-        for (size_type i = 0; i < list_size; i++) {
-            this->best_answer_list_[i].displayMoveSeqOnly();
-        }
+        this->best_answer_list_[index].displayMoveListOnly();
     }
 };
 

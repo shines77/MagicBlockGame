@@ -675,7 +675,7 @@ public:
                                 Board<BoardX, BoardY>::display_board("Forward answer:", this->fw_answer_board_);
                                 Board<BoardX, BoardY>::display_board("Backward answer:", this->bw_answer_board_);
 
-                                this->displayAnswerMoves(fw_stage);
+                                this->displayMoveList(fw_stage);
 
                                 size_type n_rotate_type = bw_stage.rotate_type;
                                 size_type empty_pos = n_rotate_type >> 2;
@@ -683,7 +683,7 @@ public:
                                 printf("backward_solver: rotate_type = %u, empty_pos = %u\n\n",
                                        (uint32_t)rotate_type, (uint32_t)empty_pos);
 
-                                backward_solver.displayAnswerMoves(bw_stage);
+                                backward_solver.displayMoveList(bw_stage);
 
                                 printf("-----------------------------------------------\n\n");
                                 printf("Forward moves: %u, Backward moves: %u, Total moves: %u\n\n",
@@ -695,7 +695,7 @@ public:
                                 this->best_move_seq_ = this->move_seq_;
                                 printf("Total moves: %u\n\n", (uint32_t)this->best_move_seq_.size());
 
-                                this->displayBestAnswerMoves();
+                                this->displayMoveList();
                                 //Console::readKeyLine();
                             }
                         }
@@ -725,7 +725,7 @@ public:
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 
-                this->displayBestAnswerMoves();
+                this->displayMoveList();
             }
         }
 
@@ -860,7 +860,7 @@ public:
                                 Board<BoardX, BoardY>::display_board("Forward answer:", this->fw_answer_board_);
                                 Board<BoardX, BoardY>::display_board("Backward answer:", this->bw_answer_board_);
 
-                                this->displayAnswerMoves(fw_stage);
+                                this->displayMoveList(fw_stage);
 
                                 size_type n_rotate_type = bw_stage.rotate_type;
                                 size_type empty_pos = n_rotate_type >> 2;
@@ -868,7 +868,7 @@ public:
                                 printf("backward_solver: rotate_type = %u, empty_pos = %u\n\n",
                                        (uint32_t)rotate_type, (uint32_t)empty_pos);
 
-                                backward_solver.displayAnswerMoves(bw_stage);
+                                backward_solver.displayMoveList(bw_stage);
 
                                 printf("-----------------------------------------------\n\n");
                                 printf("Forward moves: %u, Backward moves: %u, Total moves: %u\n\n",
@@ -880,7 +880,7 @@ public:
                                 this->best_move_seq_ = this->move_seq_;
                                 printf("Total moves: %u\n\n", (uint32_t)this->best_move_seq_.size());
 
-                                this->displayBestAnswerMoves();
+                                this->displayMoveList();
                                 //Console::readKeyLine();
                             }
                         }
@@ -910,7 +910,7 @@ public:
                 double elapsed_time = sw.getElapsedMillisec();
                 printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
 
-                this->displayBestAnswerMoves();
+                this->displayMoveList();
             }
         }
 

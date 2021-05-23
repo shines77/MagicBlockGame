@@ -1,6 +1,6 @@
 
 #if defined(_MSC_VER)
-#if 0
+#if 1
 #ifndef NDEBUG
 #include <vld.h>
 #endif

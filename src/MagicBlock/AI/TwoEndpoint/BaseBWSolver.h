@@ -861,8 +861,8 @@ protected:
 
 public:
     bool translateMoveSeq(const MoveSeq & move_seq,
-                           size_type rotate_type, Position empty_pos,
-                           std::vector<MoveInfo> & move_list) const {
+                          size_type rotate_type, Position empty_pos,
+                          std::vector<MoveInfo> & move_list) const {
         assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
         return this->player_board_[rotate_type].translate_move_seq(move_seq, move_list, empty_pos);
     }
@@ -881,33 +881,32 @@ public:
         return this->translateMoveSeq(target_stage.move_seq, rotate_type, empty_pos, move_list);
     }
 
-    void displayAnswerMoves(const std::vector<MoveInfo> & move_list) const {
-        player_board_t::display_move_seq(move_list);
+    void displayMoveList(const std::vector<MoveInfo> & move_list) const {
+        player_board_t::display_move_list(move_list);
     }
 
-    void displayAnswerMoves(const MoveSeq & move_seq,
-                            size_type rotate_type, Position empty_pos) const {
+    void displayMoveList(const MoveSeq & move_seq, size_type rotate_type, Position empty_pos) const {
         std::vector<MoveInfo> move_list;
         if (this->translateMoveSeq(move_seq, rotate_type, empty_pos, move_list)) {
-            this->displayAnswerMoves(move_list);
+            this->displayMoveList(move_list);
         }
     }
 
-    void displayAnswerMoves(const stage_type & target_stage) {
+    void displayMoveList(const stage_type & target_stage) {
         std::vector<MoveInfo> move_list;
         if (this->translateMoveSeq(target_stage, move_list)) {
-            this->displayAnswerMoves(move_list);
+            this->displayMoveList(move_list);
         }
     }
 
-    void displayBestAnswerMovesOnly() const {
-        this->displayAnswerMoves(this->best_answer_);
-    }
-
-    void displayBestAnswerMoves() {
+    void displayMoveList() {
         if (this->translateMoveSeq(this->best_move_seq_, this->best_answer_)) {
-            this->displayAnswerMoves(this->best_answer_);
+            this->displayMoveList(this->best_answer_);
         }
+    }
+
+    void displayMoveListOnly() const {
+        this->displayMoveList(this->best_answer_);
     }
 };
 

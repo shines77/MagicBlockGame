@@ -803,21 +803,21 @@ protected:
         return this->translateMoveSeq(target_stage.move_seq, move_list);
     }
 
-    void displayAnswerMoves(const std::vector<MoveInfo> & move_list) const {
-        player_board_t::template display_move_seq<BoardX>(move_list);
+    void displayMoveList(const std::vector<MoveInfo> & move_list) const {
+        player_board_t::template display_move_list<BoardX>(move_list);
     }
 
-    void displayAnswerMoves(const MoveSeq & move_seq) const {
+    void displayMoveList(const MoveSeq & move_seq) const {
         std::vector<MoveInfo> move_list;
         if (this->translateMoveSeq(move_seq, move_list)) {
-            this->displayAnswerMoves(move_list);
+            this->displayMoveList(move_list);
         }
     }
 
-    void displayAnswerMoves(const stage_type & target_stage) {
+    void displayMoveList(const stage_type & target_stage) {
         std::vector<MoveInfo> move_list;
         if (this->translateMoveSeq(target_stage, move_list)) {
-            this->displayAnswerMoves(move_list);
+            this->displayMoveList(move_list);
         }
     }
 };

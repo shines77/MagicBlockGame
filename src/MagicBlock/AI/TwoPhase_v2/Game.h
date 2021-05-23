@@ -133,7 +133,7 @@ public:
                             bool phase2_solvable = phase2_solver.solve(out_rotate_type);
                             if (phase2_solvable) {
                                 solvable = true;
-                                this->move_path_ = phase2_solver.getMoveSeq();
+                                this->move_seq_ = phase2_solver.getMoveSeq();
                                 size_type total_steps = move_seq_size + this->move_seq_.size();
                                 printf("Phase1 moves: %u, Phase2 moves: %u, Total moves: %u\n\n",
                                        (uint32_t)move_seq_size,
@@ -143,9 +143,9 @@ public:
                                 if (total_steps < this->min_steps_) {
                                     this->map_used_ = phase2_solver.getMapUsed();
                                     this->min_steps_ = total_steps;
-                                    this->best_move_path_ = stage_list[n].move_path;
-                                    for (auto iter : this->move_path_) {
-                                        this->best_move_path_.push_back(iter);
+                                    this->best_move_seq_ = stage_list[n].move_seq;
+                                    for (auto iter : this->move_seq_) {
+                                        this->best_move_seq_.push_back(iter);
                                     }
                                     printf("Total moves: %u\n\n", (uint32_t)this->best_move_seq_.size());
                                 }
@@ -161,7 +161,7 @@ public:
                 if (this->min_steps_ != size_t(-1) || this->best_move_seq_.size() > 0) {
                     solvable = true;
 
-                    this->displayAnswerMoves(this->best_move_path_);
+                    this->displayMoveList(this->best_move_seq_);
                 }
             }
         }
@@ -195,7 +195,7 @@ public:
 
         bool solvable = solver.bitset_solve(out_rotate_type, dummy_phase2_search);
         if (solvable) {
-            this->move_path_ = solver.getMoveSeq();
+            this->move_seq_ = solver.getMoveSeq();
             size_type total_steps = stage.move_seq.size() + this->move_seq_.size();
             printf("Phase1 moves: %u, Phase2 moves: %u, Total moves: %u\n\n",
                     (uint32_t)stage.move_seq.size(),
@@ -205,9 +205,9 @@ public:
             if (total_steps < this->min_steps_) {
                 this->map_used_ = solver.getMapUsed();
                 this->min_steps_ = total_steps;
-                this->best_move_path_ = stage.move_path;
-                for (auto iter : this->move_path_) {
-                    this->best_move_path_.push_back(iter);
+                this->best_move_seq_ = stage.move_seq;
+                for (auto iter : this->move_seq_) {
+                    this->best_move_seq_.push_back(iter);
                 }
                 printf("Total moves: %u\n\n", (uint32_t)this->best_move_seq_.size());
             }
@@ -250,7 +250,7 @@ public:
                 if (this->min_steps_ != size_type(-1) || this->best_move_seq_.size() > 0) {
                     solvable = true;
 
-                    this->displayAnswerMoves(this->best_move_path_);
+                    this->displayMoveList(this->best_move_seq_);
                 }
             }
         }
@@ -309,7 +309,7 @@ public:
                             bool phase2_solvable = phase2_solver.bitset_solve(out_rotate_type, phase_search_cb);
                             if (phase2_solvable) {
                                 solvable = true;
-                                this->move_path_ = phase2_solver.getMoveSeq();
+                                this->move_seq_ = phase2_solver.getMoveSeq();
                                 size_type total_steps = move_seq_size + this->move_seq_.size();
                                 printf("Phase1 moves: %u, Phase2 moves: %u, Total moves: %u\n\n",
                                        (uint32_t)move_seq_size,
@@ -319,9 +319,9 @@ public:
                                 if (total_steps < this->min_steps_) {
                                     this->map_used_ = phase2_solver.getMapUsed();
                                     this->min_steps_ = total_steps;
-                                    this->best_move_path_ = stage_list[n].move_path;
-                                    for (auto iter : this->move_path_) {
-                                        this->best_move_path_.push_back(iter);
+                                    this->best_move_seq_ = stage_list[n].move_seq;
+                                    for (auto iter : this->move_seq_) {
+                                        this->best_move_seq_.push_back(iter);
                                     }
                                     printf("Total moves: %u\n\n", (uint32_t)this->best_move_seq_.size());
                                 }
@@ -337,7 +337,7 @@ public:
                 if (this->min_steps_ != size_type(-1) || this->best_move_seq_.size() > 0) {
                     solvable = true;
 
-                    this->displayAnswerMoves(this->best_move_path_);
+                    this->displayMoveList(this->best_move_seq_);
                 }
             }
         }
