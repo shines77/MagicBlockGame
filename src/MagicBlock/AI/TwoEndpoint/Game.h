@@ -72,6 +72,8 @@ public:
     typedef typename base_type::target_board_t      target_board_t;
     typedef typename base_type::phase2_callback     phase2_callback;
 
+    typedef typename stage_type::board_type         board_type;
+
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type kSingelColorNums = (BoardSize - 1) / (Color::Last - 1);
 
@@ -475,6 +477,25 @@ public:
         return true;
     }
 
+    template <size_type First, size_type Last>
+    bool is_coincident(const board_type & fw_board, const board_type & bw_board) const {
+        static const size_type first = First;
+        static const size_type last = (Last < BoardSize) ? Last : BoardSize;
+        for (size_type pos = first; pos < last; pos++) {
+            std::uint8_t fw_color = fw_board.cells[pos];
+            std::uint8_t bw_color = bw_board.cells[pos];
+            if (bw_color == Color::Unknown) {
+                if (fw_color == Color::Empty) {
+                    return false;
+                }
+            }
+            else if (fw_color != bw_color) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     int find_intersection(typename TForwardSolver::stdset_type & forward_visited,
                           typename TBackwardSolver::stdset_type & backward_visited) {
         this->board_value_list_.clear();
@@ -541,8 +562,8 @@ public:
         return total;
     }
 
-    int find_intersection(const std::vector<stage_type> & fw_stages,
-                          const std::vector<stage_type> & bw_stages) {
+    int find_intersection_value128(const std::vector<stage_type> & fw_stages,
+                                   const std::vector<stage_type> & bw_stages) {
 
         std::vector<std::pair<Value128, Value128>> curr_list;
         std::vector<std::pair<Value128, Value128>> next_list;
@@ -557,7 +578,7 @@ public:
                 const stage_type & bw_stage = bw_stages[i];
                 Value128 bw_value128 = bw_stage.board.value128();
                 if (!is_first) {
-                    for (size_type j = 0; j< cache_value_list.size(); j++) {
+                    for (size_type j = 0; j < cache_value_list.size(); j++) {
                         const Value128 & fw_value128 = cache_value_list[j];
                         if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
                             curr_list.push_back(std::make_pair(fw_value128, bw_value128));
@@ -581,11 +602,11 @@ public:
             cache_value_list.reserve(bw_stages.size());
 
             bool is_first = true;
-            for (size_type i = 0; i< fw_stages.size(); i++) {
+            for (size_type i = 0; i < fw_stages.size(); i++) {
                 const stage_type & fw_stage = fw_stages[i];
                 Value128 fw_value128 = fw_stage.board.value128();
                 if (!is_first) {
-                    for (size_type j = 0; j< cache_value_list.size(); j++) {
+                    for (size_type j = 0; j < cache_value_list.size(); j++) {
                         const Value128 & bw_value128 = cache_value_list[j];
                         if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
                             curr_list.push_back(std::make_pair(fw_value128, bw_value128));
@@ -594,7 +615,7 @@ public:
                 }
                 else {
                     is_first = false;
-                    for (size_type j = 0; j< bw_stages.size(); j++) {
+                    for (size_type j = 0; j < bw_stages.size(); j++) {
                         const stage_type & bw_stage = bw_stages[j];
                         Value128 bw_value128 = bw_stage.board.value128();
                         cache_value_list.push_back(bw_value128);
@@ -664,8 +685,8 @@ public:
         return total;
     }
 
-    int find_intersection_auto(const std::vector<stage_type> & fw_stages,
-                               const std::vector<stage_type> & bw_stages) {
+    int find_intersection_value128_auto(const std::vector<stage_type> & fw_stages,
+                                        const std::vector<stage_type> & bw_stages) {
 
         std::vector<std::pair<Value128, Value128>> curr_list;
         std::vector<std::pair<Value128, Value128>> next_list;
@@ -771,6 +792,130 @@ public:
         for (auto const & val_pair : curr_list) {
             if (this->template is_coincident<20, 25>(val_pair.first, val_pair.second)) {
                 this->board_value_list_.push_back(val_pair);
+                total++;
+            }
+        }
+        return total;
+    }
+
+    int find_intersection(const std::vector<stage_type> & fw_stages,
+                          const std::vector<stage_type> & bw_stages) {
+
+        std::map<std::uint32_t, std::vector<std::uint32_t> *> value_map;
+
+        for (size_type i = 0; i < fw_stages.size(); i++) {
+            const board_type & fw_board = fw_stages[i].board;
+            for (size_type j = 0; j < bw_stages.size(); j++) {
+                const board_type & bw_board = bw_stages[j].board;
+                if (this->template is_coincident<10, 15>(fw_board, bw_board)) {
+                    auto iter = value_map.find(std::uint32_t(i));
+                    if (iter != value_map.end()) {
+                        std::vector<std::uint32_t> * index_list = iter->second;
+                        if (index_list != nullptr) {
+                            index_list->push_back(std::uint32_t(j));
+                        }
+                    }
+                    else {
+                        std::vector<std::uint32_t> * index_list = new std::vector<std::uint32_t>;
+                        if (index_list != nullptr) {
+                            index_list->push_back(std::uint32_t(j));
+                            value_map.insert(std::make_pair(std::uint32_t(i), index_list));
+                        }
+                    }
+                }
+            }
+        }
+
+        if (value_map.size() == 0)
+            return 0;
+
+        size_type overlap_count = 0;
+        for (auto iter : value_map) {
+            std::uint32_t fw_index = iter.first;
+            const board_type & fw_board = fw_stages[fw_index].board;
+
+            std::vector<std::uint32_t> & bw_list = *(iter.second);
+            for (size_type n = 0; n < bw_list.size(); n++) {
+                std::uint32_t bw_index = bw_list[n];
+                if (bw_index != std::uint32_t(-1)) {
+                    const board_type & bw_board = bw_stages[bw_index].board;
+                    if (!this->template is_coincident<5, 10>(fw_board, bw_board)) {
+                        bw_list[n] = std::uint32_t(-1);
+                    }
+                    else {
+                        overlap_count++;
+                    }
+                }
+            }
+        }
+
+        if (overlap_count == 0)
+            return 0;
+
+        overlap_count = 0;
+        for (auto iter : value_map) {
+            std::uint32_t fw_index = iter.first;
+            const board_type & fw_board = fw_stages[fw_index].board;
+
+            std::vector<std::uint32_t> & bw_list = *(iter.second);
+            for (size_type n = 0; n < bw_list.size(); n++) {
+                std::uint32_t bw_index = bw_list[n];
+                if (bw_index != std::uint32_t(-1)) {
+                    const board_type & bw_board = bw_stages[bw_index].board;
+                    if (!this->template is_coincident<15, 20>(fw_board, bw_board)) {
+                        bw_list[n] = std::uint32_t(-1);
+                    }
+                    else {
+                        overlap_count++;
+                    }
+                }
+            }
+        }
+
+        if (overlap_count == 0)
+            return 0;
+
+        std::vector<std::pair<std::uint32_t, std::uint32_t>> curr_list;
+
+        for (auto iter : value_map) {
+            std::uint32_t fw_index = iter.first;
+            std::vector<std::uint32_t> & bw_list = *(iter.second);
+            for (size_type n = 0; n < bw_list.size(); n++) {
+                std::uint32_t bw_index = bw_list[n];
+                if (bw_index != std::uint32_t(-1)) {
+                    curr_list.push_back(std::make_pair(fw_index, bw_index));
+                }
+            }
+            std::vector<std::uint32_t> * pbw_list = iter.second;
+            delete pbw_list;
+            iter.second = nullptr;
+        }
+
+        value_map.clear();
+
+        std::vector<std::pair<std::uint32_t, std::uint32_t>> next_list;
+
+        for (size_type i = 0; i< curr_list.size(); i++) {
+            const std::pair<std::uint32_t, std::uint32_t> & val_pair = curr_list[i];
+            if (this->template is_coincident<0, 5>(fw_stages[val_pair.first].board, bw_stages[val_pair.second].board)) {
+                next_list.push_back(val_pair);
+            }
+        }
+
+        if (next_list.size() == 0)
+            return 0;
+
+        std::swap(curr_list, next_list);
+        next_list.clear();
+        next_list.shrink_to_fit();
+
+        int total = 0;
+        for (size_type i = 0; i< curr_list.size(); i++) {
+            const std::pair<std::uint32_t, std::uint32_t> & val_pair = curr_list[i];
+            if (this->template is_coincident<20, 25>(fw_stages[val_pair.first].board, bw_stages[val_pair.second].board)) {
+                Value128 fw_value128 = fw_stages[val_pair.first].board.value128();
+                Value128 bw_value128 = bw_stages[val_pair.second].board.value128();
+                this->board_value_list_.push_back(std::make_pair(fw_value128, bw_value128));
                 total++;
             }
         }

@@ -19,7 +19,9 @@ namespace AI {
 
 template <std::size_t BoardX, std::size_t BoardY>
 struct Stage {
-    Board<BoardX, BoardY> board;
+    typedef Board<BoardX, BoardY> board_type;
+
+    board_type  board;
 
     Position    empty_pos;
     uint8_t     last_dir;
@@ -28,14 +30,14 @@ struct Stage {
 
     Stage() noexcept : board(), empty_pos(0), last_dir(0), rotate_type(0), move_seq() {}
 
-    Stage(const Board<BoardX, BoardY> & _board, Position move_pos,
+    Stage(const board_type & _board, Position move_pos,
           uint8_t cur_dir, const MoveSeq & _move_seq) noexcept
         : board(_board), empty_pos(move_pos), last_dir(Dir::opp_dir(cur_dir)),
           rotate_type(0), move_seq(_move_seq) {
         this->move_seq.push_back(cur_dir);
     }
 
-    Stage(const Board<BoardX, BoardY> & _board, Position move_pos,
+    Stage(const board_type & _board, Position move_pos,
           uint8_t cur_dir, uint8_t _rotate_type, const MoveSeq & _move_seq) noexcept
         : board(_board), empty_pos(move_pos), last_dir(Dir::opp_dir(cur_dir)),
           rotate_type(_rotate_type), move_seq(_move_seq) {
@@ -52,7 +54,7 @@ struct Stage {
           rotate_type(src.rotate_type), move_seq(std::move(src.move_seq)) {
     }
 
-    Stage(const Board<BoardX, BoardY> & _board) noexcept
+    Stage(const board_type & _board) noexcept
         : board(_board), empty_pos(0), last_dir(0), rotate_type(0), move_seq() {
     }
 
