@@ -69,13 +69,12 @@ public:
 
     typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 1>  bitset_type;
     typedef std::set<Value128>                                          stdset_type;
+    typedef std::unordered_set<Value128, Value128_Hash>                 stdset_type_;
     typedef std::unordered_set<Value128, Value128_Hash>                 std_hashset_t;
 
 private:
-    bitset_type     visited_;
-
-    stdset_type     visited_set_;
-    std_hashset_t   visited_hashset_;
+    bitset_type visited_;
+    stdset_type visited_set_;
 
     std::vector<stage_type> curr_stages_;
     std::vector<stage_type> next_stages_;
@@ -122,6 +121,22 @@ public:
 
     const stdset_type & visited_set() const {
         return this->visited_set_;
+    }
+
+    std::vector<stage_type> & curr_stages() {
+        return this->curr_stages_;
+    }
+
+    const std::vector<stage_type> & curr_stages() const {
+        return this->curr_stages_;
+    }
+
+    std::vector<stage_type> & next_stages() {
+        return this->next_stages_;
+    }
+
+    const std::vector<stage_type> & next_stages() const {
+        return this->next_stages_;
     }
 
     void respawn() {
@@ -188,11 +203,10 @@ public:
             Position empty;
             bool found_empty = this->find_empty(this->player_board_, empty);
             if (found_empty) {
-                stage_type start;
+                stage_type start(this->player_board_);
                 start.empty_pos = empty;
                 start.last_dir = uint8_t(-1);
                 start.rotate_type = 0;
-                start.board = this->player_board_;
 
                 Value128 board_value = start.board.value128();
                 this->visited_set_.insert(board_value);

@@ -31,6 +31,7 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\CPUWarmUp.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\ErrorCode.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\get_char.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseBWSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseGame.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Move.h" />
@@ -50,7 +51,6 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\BackwardSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\Game.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\ForwardSolver.h" />
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoEndpoint\BaseBWSolver.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\UnitTest.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Utils.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_v1\Game.h" />

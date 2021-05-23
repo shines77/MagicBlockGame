@@ -479,65 +479,341 @@ public:
                           typename TBackwardSolver::stdset_type & backward_visited) {
         this->board_value_list_.clear();
 
-        std::vector<std::pair<Value128, Value128>> curr_set;
-        std::vector<std::pair<Value128, Value128>> next_set;
+        std::vector<std::pair<Value128, Value128>> curr_list;
+        std::vector<std::pair<Value128, Value128>> next_list;
 
-        for (auto const & fw_value128 : forward_visited) {
-            for (auto const & bw_value128 : backward_visited) {
+        for (auto const & bw_value128 : backward_visited) {
+            for (auto const & fw_value128 : forward_visited) {
                 if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
-                    curr_set.push_back(std::make_pair(fw_value128, bw_value128));
+                    curr_list.push_back(std::make_pair(fw_value128, bw_value128));
                 }
             }
         }
 
-        if (curr_set.size() == 0)
+        if (curr_list.size() == 0)
             return 0;
 
-        for (auto const & val_pair : curr_set) {
+        for (auto const & val_pair : curr_list) {
             if (this->template is_coincident_low<5, 10>(val_pair.first.low, val_pair.second.low)) {
-                next_set.push_back(val_pair);
+                next_list.push_back(val_pair);
             }
         }
 
-        if (next_set.size() == 0)
+        if (next_list.size() == 0)
             return 0;
 
-        std::swap(curr_set, next_set);
-        next_set.clear();
-        next_set.shrink_to_fit();
+        std::swap(curr_list, next_list);
+        next_list.clear();
+        next_list.shrink_to_fit();
 
-        for (auto const & val_pair : curr_set) {
+        for (auto const & val_pair : curr_list) {
             if (this->template is_coincident_low<15, 20>(val_pair.first.low, val_pair.second.low)) {
-                next_set.push_back(val_pair);
+                next_list.push_back(val_pair);
             }
         }
 
-        if (next_set.size() == 0)
+        if (next_list.size() == 0)
             return 0;
 
-        std::swap(curr_set, next_set);
-        next_set.clear();
-        next_set.shrink_to_fit();
+        std::swap(curr_list, next_list);
+        next_list.clear();
+        next_list.shrink_to_fit();
 
-        for (auto const & val_pair : curr_set) {
+        for (auto const & val_pair : curr_list) {
             if (this->template is_coincident_low<0, 5>(val_pair.first.low, val_pair.second.low)) {
-                next_set.push_back(val_pair);
+                next_list.push_back(val_pair);
             }
         }
 
-        if (next_set.size() == 0)
+        if (next_list.size() == 0)
             return 0;
 
-        std::swap(curr_set, next_set);
-        next_set.clear();
+        std::swap(curr_list, next_list);
+        next_list.clear();
 
         int total = 0;
-        for (auto const & val_pair : curr_set) {
+        for (auto const & val_pair : curr_list) {
             if (this->template is_coincident<20, 25>(val_pair.first, val_pair.second)) {
                 this->board_value_list_.push_back(val_pair);
                 total++;
             }
         }
+        return total;
+    }
+
+    int find_intersection(const std::vector<stage_type> & fw_stages,
+                          const std::vector<stage_type> & bw_stages) {
+
+        std::vector<std::pair<Value128, Value128>> curr_list;
+        std::vector<std::pair<Value128, Value128>> next_list;
+
+        std::vector<Value128> cache_value_list;
+
+        if (fw_stages.size() < bw_stages.size()) {
+            cache_value_list.reserve(fw_stages.size());
+
+            bool is_first = true;
+            for (size_type i = 0; i< bw_stages.size(); i++) {
+                const stage_type & bw_stage = bw_stages[i];
+                Value128 bw_value128 = bw_stage.board.value128();
+                if (!is_first) {
+                    for (size_type j = 0; j< cache_value_list.size(); j++) {
+                        const Value128 & fw_value128 = cache_value_list[j];
+                        if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                            curr_list.push_back(std::make_pair(fw_value128, bw_value128));
+                        }
+                    }
+                }
+                else {
+                    is_first = false;
+                    for (size_type j = 0; j< fw_stages.size(); j++) {
+                        const stage_type & fw_stage = fw_stages[j];
+                        Value128 fw_value128 = fw_stage.board.value128();
+                        cache_value_list.push_back(fw_value128);
+                        if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                            curr_list.push_back(std::make_pair(fw_value128, bw_value128));
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            cache_value_list.reserve(bw_stages.size());
+
+            bool is_first = true;
+            for (size_type i = 0; i< fw_stages.size(); i++) {
+                const stage_type & fw_stage = fw_stages[i];
+                Value128 fw_value128 = fw_stage.board.value128();
+                if (!is_first) {
+                    for (size_type j = 0; j< cache_value_list.size(); j++) {
+                        const Value128 & bw_value128 = cache_value_list[j];
+                        if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                            curr_list.push_back(std::make_pair(fw_value128, bw_value128));
+                        }
+                    }
+                }
+                else {
+                    is_first = false;
+                    for (size_type j = 0; j< bw_stages.size(); j++) {
+                        const stage_type & bw_stage = bw_stages[j];
+                        Value128 bw_value128 = bw_stage.board.value128();
+                        cache_value_list.push_back(bw_value128);
+                        if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                            curr_list.push_back(std::make_pair(fw_value128, bw_value128));
+                        }
+                    }
+                }
+            }
+        }
+
+        cache_value_list.clear();
+        cache_value_list.shrink_to_fit();
+
+        if (curr_list.size() == 0)
+            return 0;
+
+        for (size_type i = 0; i< curr_list.size(); i++) {
+            const std::pair<Value128, Value128> & val_pair = curr_list[i];
+            if (this->template is_coincident_low<5, 10>(val_pair.first.low, val_pair.second.low)) {
+                next_list.push_back(val_pair);
+            }
+        }
+
+        if (next_list.size() == 0)
+            return 0;
+
+        std::swap(curr_list, next_list);
+        next_list.clear();
+        next_list.shrink_to_fit();
+
+        for (size_type i = 0; i< curr_list.size(); i++) {
+            const std::pair<Value128, Value128> & val_pair = curr_list[i];
+            if (this->template is_coincident_low<15, 20>(val_pair.first.low, val_pair.second.low)) {
+                next_list.push_back(val_pair);
+            }
+        }
+
+        if (next_list.size() == 0)
+            return 0;
+
+        std::swap(curr_list, next_list);
+        next_list.clear();
+        next_list.shrink_to_fit();
+
+        for (size_type i = 0; i< curr_list.size(); i++) {
+            const std::pair<Value128, Value128> & val_pair = curr_list[i];
+            if (this->template is_coincident_low<0, 5>(val_pair.first.low, val_pair.second.low)) {
+                next_list.push_back(val_pair);
+            }
+        }
+
+        if (next_list.size() == 0)
+            return 0;
+
+        std::swap(curr_list, next_list);
+        next_list.clear();
+
+        int total = 0;
+        for (size_type i = 0; i< curr_list.size(); i++) {
+            const std::pair<Value128, Value128> & val_pair = curr_list[i];
+            if (this->template is_coincident<20, 25>(val_pair.first, val_pair.second)) {
+                this->board_value_list_.push_back(val_pair);
+                total++;
+            }
+        }
+        return total;
+    }
+
+    int find_intersection_auto(const std::vector<stage_type> & fw_stages,
+                               const std::vector<stage_type> & bw_stages) {
+
+        std::vector<std::pair<Value128, Value128>> curr_list;
+        std::vector<std::pair<Value128, Value128>> next_list;
+
+        std::vector<Value128> cache_value_list;
+
+        if (fw_stages.size() < bw_stages.size()) {
+            cache_value_list.reserve(fw_stages.size());
+
+            bool is_first = true;
+            for (auto const & bw_stage : bw_stages) {
+                Value128 bw_value128 = bw_stage.board.value128();
+                if (!is_first) {
+                    for (auto const & fw_value128 : cache_value_list) {
+                        if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                            curr_list.push_back(std::make_pair(fw_value128, bw_value128));
+                        }
+                    }
+                }
+                else {
+                    is_first = false;
+                    for (auto const & fw_stage : fw_stages) {
+                        Value128 fw_value128 = fw_stage.board.value128();
+                        cache_value_list.push_back(fw_value128);
+                        if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                            curr_list.push_back(std::make_pair(fw_value128, bw_value128));
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            cache_value_list.reserve(bw_stages.size());
+
+            bool is_first = true;
+            for (auto const & fw_stage : fw_stages) {
+                Value128 fw_value128 = fw_stage.board.value128();
+                if (!is_first) {
+                    for (auto const & bw_value128 : cache_value_list) {
+                        if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                            curr_list.push_back(std::make_pair(fw_value128, bw_value128));
+                        }
+                    }
+                }
+                else {
+                    is_first = false;
+                    for (auto const & bw_stage : bw_stages) {
+                        Value128 bw_value128 = bw_stage.board.value128();
+                        cache_value_list.push_back(bw_value128);
+                        if (this->template is_coincident_low<10, 15>(fw_value128.low, bw_value128.low)) {
+                            curr_list.push_back(std::make_pair(fw_value128, bw_value128));
+                        }
+                    }
+                }
+            }
+        }
+
+        cache_value_list.clear();
+        cache_value_list.shrink_to_fit();
+
+        if (curr_list.size() == 0)
+            return 0;
+
+        for (auto const & val_pair : curr_list) {
+            if (this->template is_coincident_low<5, 10>(val_pair.first.low, val_pair.second.low)) {
+                next_list.push_back(val_pair);
+            }
+        }
+
+        if (next_list.size() == 0)
+            return 0;
+
+        std::swap(curr_list, next_list);
+        next_list.clear();
+        next_list.shrink_to_fit();
+
+        for (auto const & val_pair : curr_list) {
+            if (this->template is_coincident_low<15, 20>(val_pair.first.low, val_pair.second.low)) {
+                next_list.push_back(val_pair);
+            }
+        }
+
+        if (next_list.size() == 0)
+            return 0;
+
+        std::swap(curr_list, next_list);
+        next_list.clear();
+        next_list.shrink_to_fit();
+
+        for (auto const & val_pair : curr_list) {
+            if (this->template is_coincident_low<0, 5>(val_pair.first.low, val_pair.second.low)) {
+                next_list.push_back(val_pair);
+            }
+        }
+
+        if (next_list.size() == 0)
+            return 0;
+
+        std::swap(curr_list, next_list);
+        next_list.clear();
+
+        int total = 0;
+        for (auto const & val_pair : curr_list) {
+            if (this->template is_coincident<20, 25>(val_pair.first, val_pair.second)) {
+                this->board_value_list_.push_back(val_pair);
+                total++;
+            }
+        }
+        return total;
+    }
+
+    int find_intersection(const TForwardSolver & fw_solver,
+                          const TBackwardSolver & bw_solver,
+                          int iterative_type = 0) {
+        this->board_value_list_.clear();
+
+        bool fw_curr_X_bw_next;
+        bool fw_next_X_bw_curr;
+        if (iterative_type == 1) {
+            fw_curr_X_bw_next = true;
+            fw_next_X_bw_curr = false;
+        }
+        else if (iterative_type == 2) {
+            fw_curr_X_bw_next = false;
+            fw_next_X_bw_curr = true;
+        }
+        else {
+            fw_curr_X_bw_next = true;
+            fw_next_X_bw_curr = true;
+        }
+
+        int count, total = 0;
+
+        if (fw_curr_X_bw_next) {
+            count = this->find_intersection(fw_solver.curr_stages(), bw_solver.next_stages());
+            total += count;
+        }
+
+        if (fw_next_X_bw_curr) {
+            count = this->find_intersection(fw_solver.next_stages(), bw_solver.curr_stages());
+            total += count;
+        }
+
+        if (total == 0) {
+            count = this->find_intersection(fw_solver.next_stages(), bw_solver.next_stages());
+            total += count;
+        }
+
         return total;
     }
 
@@ -628,7 +904,7 @@ public:
                 (void)forward_status;
                 (void)backward_status;
 
-                int total = this->find_intersection(forward_solver.visited_set(), backward_solver.visited_set());
+                int total = this->find_intersection(forward_solver, backward_solver, iterative_type);
                 if (this->board_value_list_.size() > 0) {
                     // Got some answers
                     assert(total == (int)this->board_value_list_.size());

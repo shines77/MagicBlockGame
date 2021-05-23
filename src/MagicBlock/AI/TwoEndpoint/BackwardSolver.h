@@ -21,7 +21,7 @@
 #include <algorithm>    // For std::swap(), until C++11. std::min()
 #include <utility>      // For std::swap(), since C++11
 
-#include "MagicBlock/AI/TwoEndpoint/BaseBWSolver.h"
+#include "MagicBlock/AI/internal/BaseBWSolver.h"
 
 #include "MagicBlock/AI/Constant.h"
 #include "MagicBlock/AI/Color.h"
@@ -68,13 +68,12 @@ public:
 
     typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2>  bitset_type;
     typedef std::set<Value128>                                          stdset_type;
+    typedef std::unordered_set<Value128, Value128_Hash>                 stdset_type_;
     typedef std::unordered_set<Value128, Value128_Hash>                 std_hashset_t;
 
 private:
-    bitset_type     visited_;
-
-    stdset_type     visited_set_;
-    std_hashset_t   visited_hashset_;
+    bitset_type visited_;
+    stdset_type visited_set_;
 
     std::vector<stage_type> curr_stages_;
     std::vector<stage_type> next_stages_;
@@ -106,6 +105,22 @@ public:
 
     const stdset_type & visited_set() const {
         return this->visited_set_;
+    }
+
+    std::vector<stage_type> & curr_stages() {
+        return this->curr_stages_;
+    }
+
+    const std::vector<stage_type> & curr_stages() const {
+        return this->curr_stages_;
+    }
+
+    std::vector<stage_type> & next_stages() {
+        return this->next_stages_;
+    }
+
+    const std::vector<stage_type> & next_stages() const {
+        return this->next_stages_;
     }
 
     void respawn() {
@@ -173,10 +188,10 @@ public:
                     this->player_board_[i].cells[empty_pos] = Color::Empty;
 
                     stage_type start;
+                    start.board = this->player_board_[i];
                     start.empty_pos = empty_pos;
                     start.last_dir = uint8_t(-1);
                     start.rotate_type = uint8_t((i & 0x03U) | (size_type(empty_pos) << 2U));
-                    start.board = this->player_board_[i];
 
                     // Restore unknown color
                     this->player_board_[i].cells[empty_pos] = Color::Unknown;
