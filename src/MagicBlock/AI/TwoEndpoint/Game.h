@@ -112,6 +112,68 @@ public:
     bool is_coincident(int fw_value, int bw_value) const {
         std::uint32_t fw_value32 = (std::uint32_t)fw_value;
         std::uint32_t bw_value32 = (std::uint32_t)bw_value;
+
+        std::uint32_t fw_color = fw_value32 & 0x00000007U;
+        std::uint32_t bw_color = bw_value32 & 0x00000007U;
+        if (bw_color == std::uint32_t(Color::Unknown)) {
+            if (fw_color == std::uint32_t(Color::Empty)) {
+                return false;
+            }
+        }
+        else if (bw_color != fw_color) {
+            return false;
+        }
+
+        fw_color = fw_value32 & (0x00000007U << 3U);
+        bw_color = bw_value32 & (0x00000007U << 3U);
+        if (bw_color == std::uint32_t(Color::Unknown << 3U)) {
+            if (fw_color == std::uint32_t(Color::Empty << 3U)) {
+                return false;
+            }
+        }
+        else if (bw_color != fw_color) {
+            return false;
+        }
+
+        fw_color = fw_value32 & (0x00000007U << 6U);
+        bw_color = bw_value32 & (0x00000007U << 6U);
+        if (bw_color == std::uint32_t(Color::Unknown << 6U)) {
+            if (fw_color == std::uint32_t(Color::Empty << 6U)) {
+                return false;
+            }
+        }
+        else if (bw_color != fw_color) {
+            return false;
+        }
+
+        fw_color = fw_value32 & (0x00000007U << 9U);
+        bw_color = bw_value32 & (0x00000007U << 9U);
+        if (bw_color == std::uint32_t(Color::Unknown << 9U)) {
+            if (fw_color == std::uint32_t(Color::Empty << 9U)) {
+                return false;
+            }
+        }
+        else if (bw_color != fw_color) {
+            return false;
+        }
+
+        fw_color = fw_value32 & (0x00000007U << 12U);
+        bw_color = bw_value32 & (0x00000007U << 12U);
+        if (bw_color == std::uint32_t(Color::Unknown << 12U)) {
+            if (fw_color == std::uint32_t(Color::Empty << 12U)) {
+                return false;
+            }
+        }
+        else if (bw_color != fw_color) {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool is_coincident_old(int fw_value, int bw_value) const {
+        std::uint32_t fw_value32 = (std::uint32_t)fw_value;
+        std::uint32_t bw_value32 = (std::uint32_t)bw_value;
         if (std::uint32_t(Color::Unknown) == 0x00000007U) {
             if ((bw_value32 & 0x00000007U) == std::uint32_t(Color::Unknown)) {
                 if ((fw_value32 & 0x00000007U) != std::uint32_t(Color::Empty)) {
@@ -944,7 +1006,7 @@ public:
 
         std::map<std::uint32_t, std::vector<std::uint32_t> *> value_map;
 
-        printf("find_intersection(): Enter.\n\n");
+        //printf("find_intersection(): Enter.\n\n");
 
         size_type overlap_count = 0;
 
@@ -972,8 +1034,8 @@ public:
             }
         }
 
-        printf("find_intersection(): [1] overlap_count = %u\n", std::uint32_t(overlap_count));
-        printf("find_intersection(): [1] value_map.size() = %u\n\n", std::uint32_t(value_map.size()));
+        //printf("find_intersection(): [1] overlap_count = %u\n", std::uint32_t(overlap_count));
+        //printf("find_intersection(): [1] value_map.size() = %u\n\n", std::uint32_t(value_map.size()));
 
         if (value_map.size() == 0)
             return 0;
@@ -998,7 +1060,7 @@ public:
             }
         }
 
-        printf("find_intersection(): [2] overlap_count = %u\n\n", std::uint32_t(overlap_count));
+        //printf("find_intersection(): [2] overlap_count = %u\n\n", std::uint32_t(overlap_count));
 
         if (overlap_count == 0)
             return 0;
@@ -1023,7 +1085,7 @@ public:
             }
         }
 
-        printf("find_intersection(): [3] overlap_count = %u\n\n", std::uint32_t(overlap_count));
+        //printf("find_intersection(): [3] overlap_count = %u\n\n", std::uint32_t(overlap_count));
 
         if (overlap_count == 0)
             return 0;
@@ -1055,7 +1117,7 @@ public:
             }
         }
 
-        printf("find_intersection(): [4] overlap_count = %u\n\n", std::uint32_t(next_list.size()));
+        //printf("find_intersection(): [4] overlap_count = %u\n\n", std::uint32_t(next_list.size()));
 
         if (next_list.size() == 0)
             return 0;
@@ -1075,7 +1137,7 @@ public:
             }
         }
 
-        printf("find_intersection(): [5] overlap_count = %u\n\n", std::uint32_t(total));
+        //printf("find_intersection(): [5] overlap_count = %u\n\n", std::uint32_t(total));
         return total;
     }
 #endif
