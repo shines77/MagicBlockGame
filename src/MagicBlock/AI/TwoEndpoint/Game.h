@@ -798,10 +798,15 @@ public:
         return total;
     }
 
+#if 0
     int find_intersection(const std::vector<stage_type> & fw_stages,
                           const std::vector<stage_type> & bw_stages) {
 
         std::map<std::uint32_t, std::vector<std::uint32_t> *> value_map;
+
+        printf("find_intersection(): Enter.\n\n");
+
+        size_type overlap_count = 0;
 
         for (size_type i = 0; i < fw_stages.size(); i++) {
             const board_type & fw_board = fw_stages[i].board;
@@ -822,14 +827,18 @@ public:
                             value_map.insert(std::make_pair(std::uint32_t(i), index_list));
                         }
                     }
+                    overlap_count++;
                 }
             }
         }
 
+        printf("find_intersection(): [1] overlap_count = %u\n", std::uint32_t(overlap_count));
+        printf("find_intersection(): [1] value_map.size() = %u\n\n", std::uint32_t(value_map.size()));
+
         if (value_map.size() == 0)
             return 0;
 
-        size_type overlap_count = 0;
+        overlap_count = 0;
         for (auto iter : value_map) {
             std::uint32_t fw_index = iter.first;
             const board_type & fw_board = fw_stages[fw_index].board;
@@ -848,6 +857,8 @@ public:
                 }
             }
         }
+
+        printf("find_intersection(): [2] overlap_count = %u\n\n", std::uint32_t(overlap_count));
 
         if (overlap_count == 0)
             return 0;
@@ -871,6 +882,8 @@ public:
                 }
             }
         }
+
+        printf("find_intersection(): [3] overlap_count = %u\n\n", std::uint32_t(overlap_count));
 
         if (overlap_count == 0)
             return 0;
@@ -902,6 +915,8 @@ public:
             }
         }
 
+        printf("find_intersection(): [4] overlap_count = %u\n\n", std::uint32_t(next_list.size()));
+
         if (next_list.size() == 0)
             return 0;
 
@@ -919,8 +934,151 @@ public:
                 total++;
             }
         }
+
+        printf("find_intersection(): [5] overlap_count = %u\n\n", std::uint32_t(total));
         return total;
     }
+#else
+    int find_intersection(const std::vector<stage_type> & fw_stages,
+                          const std::vector<stage_type> & bw_stages) {
+
+        std::map<std::uint32_t, std::vector<std::uint32_t> *> value_map;
+
+        printf("find_intersection(): Enter.\n\n");
+
+        size_type overlap_count = 0;
+
+        for (size_type i = 0; i < bw_stages.size(); i++) {
+            const board_type & bw_board = bw_stages[i].board;
+            for (size_type j = 0; j < fw_stages.size(); j++) {
+                const board_type & fw_board = fw_stages[j].board;
+                if (this->template is_coincident<5, 15>(fw_board, bw_board)) {
+                    auto iter = value_map.find(std::uint32_t(i));
+                    if (iter != value_map.end()) {
+                        std::vector<std::uint32_t> * index_list = iter->second;
+                        if (index_list != nullptr) {
+                            index_list->push_back(std::uint32_t(j));
+                        }
+                    }
+                    else {
+                        std::vector<std::uint32_t> * index_list = new std::vector<std::uint32_t>;
+                        if (index_list != nullptr) {
+                            index_list->push_back(std::uint32_t(j));
+                            value_map.insert(std::make_pair(std::uint32_t(i), index_list));
+                        }
+                    }
+                    overlap_count++;
+                }
+            }
+        }
+
+        printf("find_intersection(): [1] overlap_count = %u\n", std::uint32_t(overlap_count));
+        printf("find_intersection(): [1] value_map.size() = %u\n\n", std::uint32_t(value_map.size()));
+
+        if (value_map.size() == 0)
+            return 0;
+#if 0
+        overlap_count = 0;
+        for (auto iter : value_map) {
+            std::uint32_t bw_index = iter.first;
+            const board_type & bw_board = bw_stages[bw_index].board;
+
+            std::vector<std::uint32_t> & fw_list = *(iter.second);
+            for (size_type n = 0; n < fw_list.size(); n++) {
+                std::uint32_t fw_index = fw_list[n];
+                if (fw_index != std::uint32_t(-1)) {
+                    const board_type & fw_board = fw_stages[fw_index].board;
+                    if (!this->template is_coincident<5, 10>(fw_board, bw_board)) {
+                        fw_list[n] = std::uint32_t(-1);
+                    }
+                    else {
+                        overlap_count++;
+                    }
+                }
+            }
+        }
+
+        printf("find_intersection(): [2] overlap_count = %u\n\n", std::uint32_t(overlap_count));
+
+        if (overlap_count == 0)
+            return 0;
+#endif
+        overlap_count = 0;
+        for (auto iter : value_map) {
+            std::uint32_t bw_index = iter.first;
+            const board_type & bw_board = bw_stages[bw_index].board;
+
+            std::vector<std::uint32_t> & fw_list = *(iter.second);
+            for (size_type n = 0; n < fw_list.size(); n++) {
+                std::uint32_t fw_index = fw_list[n];
+                if (fw_index != std::uint32_t(-1)) {
+                    const board_type & fw_board = fw_stages[fw_index].board;
+                    if (!this->template is_coincident<15, 20>(fw_board, bw_board)) {
+                        fw_list[n] = std::uint32_t(-1);
+                    }
+                    else {
+                        overlap_count++;
+                    }
+                }
+            }
+        }
+
+        printf("find_intersection(): [3] overlap_count = %u\n\n", std::uint32_t(overlap_count));
+
+        if (overlap_count == 0)
+            return 0;
+
+        std::vector<std::pair<std::uint32_t, std::uint32_t>> curr_list;
+
+        for (auto iter : value_map) {
+            std::uint32_t bw_index = iter.first;
+            std::vector<std::uint32_t> & fw_list = *(iter.second);
+            for (size_type n = 0; n < fw_list.size(); n++) {
+                std::uint32_t fw_index = fw_list[n];
+                if (fw_index != std::uint32_t(-1)) {
+                    curr_list.push_back(std::make_pair(fw_index, bw_index));
+                }
+            }
+            std::vector<std::uint32_t> * pfw_list = iter.second;
+            delete pfw_list;
+            iter.second = nullptr;
+        }
+
+        value_map.clear();
+
+        std::vector<std::pair<std::uint32_t, std::uint32_t>> next_list;
+
+        for (size_type i = 0; i< curr_list.size(); i++) {
+            const std::pair<std::uint32_t, std::uint32_t> & val_pair = curr_list[i];
+            if (this->template is_coincident<0, 5>(fw_stages[val_pair.first].board, bw_stages[val_pair.second].board)) {
+                next_list.push_back(val_pair);
+            }
+        }
+
+        printf("find_intersection(): [4] overlap_count = %u\n\n", std::uint32_t(next_list.size()));
+
+        if (next_list.size() == 0)
+            return 0;
+
+        std::swap(curr_list, next_list);
+        next_list.clear();
+        next_list.shrink_to_fit();
+
+        int total = 0;
+        for (size_type i = 0; i< curr_list.size(); i++) {
+            const std::pair<std::uint32_t, std::uint32_t> & val_pair = curr_list[i];
+            if (this->template is_coincident<20, 25>(fw_stages[val_pair.first].board, bw_stages[val_pair.second].board)) {
+                Value128 fw_value128 = fw_stages[val_pair.first].board.value128();
+                Value128 bw_value128 = bw_stages[val_pair.second].board.value128();
+                this->board_value_list_.push_back(std::make_pair(fw_value128, bw_value128));
+                total++;
+            }
+        }
+
+        printf("find_intersection(): [5] overlap_count = %u\n\n", std::uint32_t(total));
+        return total;
+    }
+#endif
 
     int find_intersection(const TForwardSolver & fw_solver,
                           const TBackwardSolver & bw_solver,
