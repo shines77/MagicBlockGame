@@ -145,6 +145,9 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseBWSolver.h">
       <Filter>src\internal</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_ida\Solver.h">
+      <Filter>src\TwoPhase_ida</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlock\AI\UnitTest.cpp">

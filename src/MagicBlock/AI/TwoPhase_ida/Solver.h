@@ -32,18 +32,19 @@
 
 namespace MagicBlock {
 namespace AI {
+namespace TwoPhase_ida {
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
           bool AllowRotate, std::size_t N_SolverType,
           typename Phase2CallBack>
-class BaseBWSolver
+class Solver
 {
 public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    typedef BaseBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>  this_type;
+    typedef Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>  this_type;
 
     typedef SharedData<BoardX, BoardY, TargetX, TargetY>    shared_data_type;
     typedef typename shared_data_type::stage_type           stage_type;
@@ -60,12 +61,14 @@ public:
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
+    static const size_type kMaxPhase1Type = 8;
+
 protected:
     shared_data_type * data_;
 
     Board<BoardX, BoardX>   target_board_;
-    Board<BoardX, BoardY>   player_board_[4];
-    Board<TargetX, TargetX> fw_target_board_[4];
+    Board<BoardX, BoardY>   player_board_[MAX_ROTATE_TYPE][kMaxPhase1Type];
+    Board<TargetX, TargetX> orig_target_board_[4];
 
     size_type target_len_;
     size_type rotate_type_;
@@ -82,26 +85,26 @@ protected:
         assert(this->data_ != nullptr);
 
         for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
-            this->fw_target_board_[i] = this->data_->target_board[i];
+            this->orig_target_board_[i] = this->data_->target_board[i];
         }
         if (AllowRotate)
             this->target_len_ = this->data_->target_len;
         else
             this->target_len_ = 1;
 
-        this->count_target_color_nums(this->fw_target_board_[0]);
+        this->count_target_color_nums(this->orig_target_board_[0]);
 
-        this->setPlayerBoard(this->data_->target_board);
+        this->setPhase1PlayerBoard(this->data_->target_board);
         this->setTargetBoard(this->data_->player_board);
     }
 
 public:
-    BaseBWSolver(shared_data_type * data)
+    Solver(shared_data_type * data)
         : data_(data), target_len_(0), rotate_type_(0), map_used_(0) {
         this->init();
     }
 
-    ~BaseBWSolver() {
+    ~Solver() {
         this->destory();
     }
 
@@ -142,32 +145,32 @@ public:
     }
 
     Board<TargetX, TargetY> & getFwTargetBoard() {
-        return this->fw_target_board_[0];
+        return this->orig_target_board_[0];
     }
 
     const Board<TargetX, TargetY> & getFwTargetBoard() const {
-        return this->fw_target_board_[0];
+        return this->orig_target_board_[0];
     }
 
     size_type getRotateType() const {
         return this->rotate_type_;
     }
 
-    void setPlayerBoard(const Board<TargetX, TargetY> target_board[4],
-                        size_type rotate_type = size_type(-1)) {
+    void setPhase1PlayerBoard(const Board<TargetX, TargetY> target_board[4],
+                              size_type rotate_type = size_type(-1)) {
         if (AllowRotate) {
             rotate_type = size_type(-1);
             assert(this->target_len_ > 1);
             for (size_type i = 0; i < this->target_len_; i++) {
-                this->setPlayerBoardFromTargetBoard(this->player_board_[i],
-                                                    this->data_->target_board[i]);
+                this->setPhase1PlayerBoardFromTargetBoard(&this->player_board_[i][0],
+                                                          this->data_->target_board[i]);
             }
         }
         else {
             if (rotate_type >= MAX_ROTATE_TYPE)
                 rotate_type = 0;
-            this->setPlayerBoardFromTargetBoard(this->player_board_[0],
-                                                this->data_->target_board[rotate_type]);
+            this->setPhase1PlayerBoardFromTargetBoard(&this->player_board_[0][0],
+                                                      this->data_->target_board[rotate_type]);
             assert(this->target_len_ == 1);
             this->target_len_ = 1;
         }
@@ -202,6 +205,29 @@ protected:
                 assert_color(clr);
                 size_type new_pos = (y + kStartY) * BoardX + (x + kStartX);
                 player_board.cells[new_pos] = clr;
+            }
+        }
+    }
+
+    void setPhase1PlayerBoardFromTargetBoard(Board<BoardX, BoardY> * player_board,
+                                             const Board<TargetX, TargetY> & target_board) {
+        // There are eight phase1 types for each direction of rotation.
+        for (size_type p1_type = 0; p1_type < kMaxPhase1Type; p1_type++) {
+            // Fill the Color::Unknown to player board
+            for (size_type pos = 0; pos < BoardSize; pos++) {
+                player_board[p1_type].cells[pos] = Color::Unknown;
+            }
+        }
+
+        for (size_type p1_type = 0; p1_type < kMaxPhase1Type; p1_type++) {
+            // Copy input target board to player board
+            for (size_type y = 0; y < TargetY; y++) {
+                for (size_type x = 0; x < TargetX; x++) {
+                    uint8_t clr = target_board.cells[y * TargetX + x];
+                    assert_color(clr);
+                    size_type new_pos = (y + kStartY) * BoardX + (x + kStartX);
+                    player_board.cells[new_pos] = clr;
+                }
             }
         }
     }
@@ -909,5 +935,6 @@ public:
     }
 };
 
+} // namespace TwoPhase_ida
 } // namespace AI
 } // namespace MagicBlock

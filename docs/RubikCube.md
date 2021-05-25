@@ -64,6 +64,12 @@ $$\frac{8! \times {3}^{8} \times 12! \times {2}^{12}}{3 \times 2 \times 2} = 43,
 
     里面有 4x4 数字华容道解题顺序 和 数字华容道 3×3 解题方式教学（视频，作者：喵喵Limo）。
 
+* 十六格拼图 -- IDA * 算法
+
+    [https://www.cnblogs.com/gao79135/p/14066131.html]()
+
+
+
 ## X. 3D魔方程序
 
 * HTML5交互式3D魔方游戏代码
