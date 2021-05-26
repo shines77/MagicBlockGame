@@ -353,7 +353,7 @@ union Board
         return value64;
     }
 
-    template <size_type kEmptyColor = 0>
+    template <size_type kEmptyColor = Color::Empty>
     size_type compactValue() const noexcept {
         size_type value = 0;
         for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
@@ -365,7 +365,7 @@ union Board
         return value;
     }
 
-    template <size_type kEmptyColor = 0>
+    template <size_type kEmptyColor = Color::Empty>
     std::uint64_t compactValue64() const noexcept {
         std::uint64_t value64 = 0;
         for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
