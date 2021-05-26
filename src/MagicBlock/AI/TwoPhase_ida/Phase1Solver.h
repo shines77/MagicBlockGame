@@ -301,34 +301,18 @@ protected:
                         }
                     }
                 }
-                prototype_mask[prototype].rotate_90_cw();
+                prototype_mask[prototype].rotate_90();
             }
         }
     }
 
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
-        for (size_type y = 0; y < BoardY; y++) {
-            for (size_type x = 0; x < BoardX; x++) {
-                uint8_t clr = board.cells[y * BoardX + x];
-                if (clr == Color::Empty) {
-                    empty_pos = (uint8_t)(y * BoardX + x);
-                    return true;
-                }
-            }
-        }
-        return false;
+        return board.find_empty(empty_pos);
     }
 
     bool find_unknown(const Board<BoardX, BoardY> & board,
                       size_type start_pos, Position & unknown_pos) const {
-        for (size_type pos = start_pos; pos < BoardSize; pos++) {
-            uint8_t clr = board.cells[pos];
-            if (clr == Color::Unknown) {
-                unknown_pos = pos;
-                return true;
-            }
-        }
-        return false;
+        return board.template find_color<Color::Unknown>(start_pos, unknown_pos);
     }
 
     void find_all_colors(const Board<BoardX, BoardY> & board,

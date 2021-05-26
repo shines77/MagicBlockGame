@@ -279,6 +279,30 @@ union Board
         return true;
     }
 
+    template <size_type TargetColor = Color::Empty>
+    bool find_color(Position & target_pos) const {
+        for (size_type pos = 0; pos < BoardSize; pos++) {
+            uint8_t clr = board.cells[pos];
+            if (clr == TargetColor) {
+                target_pos = pos;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    template <size_type TargetColor = Color::Empty>
+    bool find_color(size_type start_pos, Position & target_pos) const {
+        for (size_type pos = start_pos; pos < BoardSize; pos++) {
+            uint8_t clr = board.cells[pos];
+            if (clr == TargetColor) {
+                target_pos = pos;
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool find_empty(Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
@@ -292,18 +316,23 @@ union Board
         return false;
     }
 
-    template <size_type EmptyPosValue = Color::Empty>
+    template <size_type EmptyColor = Color::Empty>
     bool find_empty(Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t color = this->cells[y * BoardX + x];
-                if (color == EmptyPosValue) {
+                uint8_t clr = this->cells[y * BoardX + x];
+                if (clr == EmptyColor) {
                     empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    template <size_type EmptyColor = Color::Empty>
+    bool find_empty(size_type start_pos, Position & empty_pos) const {
+        return this->template find_color<EmptyColor>(start_pos, empty_pos);
     }
 
     size_type value() const noexcept {
@@ -378,7 +407,7 @@ union Board
     }
 
     // clockwise rotate 90 degrees
-    void rotate_90_cw() {
+    void rotate_90() {
         Board<BoardX, BoardY> copy(*this);
 
         for (size_type y = 0; y < BoardY; y++) {
@@ -393,7 +422,7 @@ union Board
     }
 
     // clockwise rotate 180 degrees
-    void rotate_180_cw() {
+    void rotate_180() {
         Board<BoardX, BoardY> copy(*this);
 
         for (size_type y = 0; y < BoardY; y++) {
@@ -408,7 +437,7 @@ union Board
     }
 
     // clockwise rotate 270 degrees
-    void rotate_270_cw() {
+    void rotate_270() {
         Board<BoardX, BoardY> copy(*this);
 
         for (size_type y = 0; y < BoardY; y++) {
@@ -423,7 +452,7 @@ union Board
     }
 
     // clockwise rotate 90 degrees
-    void rotate_90_cw(Board<BoardX, BoardY> & dest) {
+    void rotate_to_90(Board<BoardX, BoardY> & dest) {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 size_type src_pos = y * BoardX + x;
@@ -436,7 +465,7 @@ union Board
     }
 
     // clockwise rotate 180 degrees
-    void rotate_180_cw(Board<BoardX, BoardY> & dest) {
+    void rotate_to_180(Board<BoardX, BoardY> & dest) {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 size_type src_pos = y * BoardX + x;
@@ -449,7 +478,7 @@ union Board
     }
 
     // clockwise rotate 270 degrees
-    void rotate_270_cw(Board<BoardX, BoardY> & dest) {
+    void rotate_to_270(Board<BoardX, BoardY> & dest) {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 size_type src_pos = y * BoardX + x;

@@ -301,9 +301,9 @@ public:
     }
 
     void rotate_target_board() {
-        this->data_.target_board[0].rotate_90_cw(this->data_.target_board[1]);
-        this->data_.target_board[0].rotate_180_cw(this->data_.target_board[2]);
-        this->data_.target_board[0].rotate_270_cw(this->data_.target_board[3]);
+        this->data_.target_board[0].rotate_to_90(this->data_.target_board[1]);
+        this->data_.target_board[0].rotate_to_180(this->data_.target_board[2]);
+        this->data_.target_board[0].rotate_to_270(this->data_.target_board[3]);
 
         for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
             this->data_.rotate_type[i] = i;

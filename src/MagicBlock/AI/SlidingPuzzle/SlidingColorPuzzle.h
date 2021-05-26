@@ -215,9 +215,9 @@ public:
     }
 
     void rotate_target_board() {
-        this->target_board_[0].rotate_90_cw(this->target_board_[1]);
-        this->target_board_[0].rotate_180_cw(this->target_board_[2]);
-        this->target_board_[0].rotate_270_cw(this->target_board_[3]);
+        this->target_board_[0].rotate_to_90(this->target_board_[1]);
+        this->target_board_[0].rotate_to_180(this->target_board_[2]);
+        this->target_board_[0].rotate_to_270(this->target_board_[3]);
 
         bool is_duplicated[4];
         for (size_type i = 0; i < 4; i++) {

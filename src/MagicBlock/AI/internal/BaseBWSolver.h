@@ -153,6 +153,11 @@ public:
         return this->rotate_type_;
     }
 
+    void setRotateType(size_type rotate_type) {
+        assert((rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE) || (rotate_type == size_type(-1)));
+        this->rotate_type_ = rotate_type;
+    }
+
     void setPlayerBoard(const Board<TargetX, TargetY> target_board[4],
                         size_type rotate_type = size_type(-1)) {
         if (AllowRotate) {
@@ -183,11 +188,6 @@ protected:
         assert(color >= Color::First && color < Color::Maximum);
     }
 
-    void setRotateType(size_type rotate_type) {
-        assert((rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE) || (rotate_type == size_type(-1)));
-        this->rotate_type_ = rotate_type;
-    }
-
     void setPlayerBoardFromTargetBoard(Board<BoardX, BoardY> & player_board,
                                        const Board<TargetX, TargetY> & target_board) {
         // Fill the Color::Unknown to player board
@@ -207,28 +207,12 @@ protected:
     }
 
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
-        for (size_type y = 0; y < BoardY; y++) {
-            for (size_type x = 0; x < BoardX; x++) {
-                uint8_t clr = board.cells[y * BoardX + x];
-                if (clr == Color::Empty) {
-                    empty_pos = (uint8_t)(y * BoardX + x);
-                    return true;
-                }
-            }
-        }
-        return false;
+        return board.find_empty(empty_pos);
     }
 
     bool find_unknown(const Board<BoardX, BoardY> & board,
                       size_type start_pos, Position & unknown_pos) const {
-        for (size_type pos = start_pos; pos < BoardSize; pos++) {
-            uint8_t clr = board.cells[pos];
-            if (clr == Color::Unknown) {
-                unknown_pos = pos;
-                return true;
-            }
-        }
-        return false;
+        return board.template find_color<Color::Unknown>(start_pos, unknown_pos);
     }
 
     void find_all_colors(const Board<BoardX, BoardY> & board,
