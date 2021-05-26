@@ -49,14 +49,14 @@ public:
 
     static const size_type kOrigMapBits = size_type(1U) << ((BoardSize * GridBits) % (sizeof(size_type) * 8));
     static const size_type kMapBits = (BoardSize <= 10) ? kOrigMapBits : 10;
-    static const size_type kEmptyPosValue = MaxValidValue;
-    static const size_type kUnknownPosValue = kEmptyPosValue + 1;
-    static const size_type kMaxGridValue = kUnknownPosValue + 1;
+    static const size_type kEmptyColor = MaxValidValue;
+    static const size_type kUnknownColor = kEmptyColor + 1;
+    static const size_type kMaxGridValue = kUnknownColor + 1;
 
     static const size_type MaxValidNumber = size_type(1U) << GridBits;
     static const size_type MaxNumber = (kMaxGridValue > MaxValidNumber) ? kMaxGridValue : MaxValidNumber;
 
-    typedef Number<kEmptyPosValue, kUnknownPosValue> number_t;
+    typedef Number<kEmptyColor, kUnknownColor> number_t;
 
 private:
     player_board_t player_board_;
@@ -190,13 +190,13 @@ public:
     int check_player_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
         for (size_type num = 0; num < MaxNumber; num++) {
-            if (this->player_num_cnt_[num] > (int)kSingelNumMaxCount && num != kUnknownPosValue) {
+            if (this->player_num_cnt_[num] > (int)kSingelNumMaxCount && num != kUnknownColor) {
                 err_code = ErrorCode::PlayerBoardNumberOverflow;
                 duplicated_num = num;
                 return err_code;
             }
         }
-        if (this->player_num_cnt_[kUnknownPosValue] != 0) {
+        if (this->player_num_cnt_[kUnknownColor] != 0) {
             this->has_unknown_ = true;
         }
 
@@ -206,13 +206,13 @@ public:
     int check_target_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
         for (size_type num = 0; num < MaxNumber; num++) {
-            if (this->target_num_cnt_[num] > (int)kSingelNumMaxCount && num != kUnknownPosValue) {
+            if (this->target_num_cnt_[num] > (int)kSingelNumMaxCount && num != kUnknownColor) {
                 err_code = ErrorCode::TargetBoardNumberIsDuplicated;
                 duplicated_num = num;
                 return err_code;
             }
         }
-        if (this->target_num_cnt_[kUnknownPosValue] != 0) {
+        if (this->target_num_cnt_[kUnknownColor] != 0) {
             this->has_unknown_ = true;
         }
             
@@ -263,7 +263,7 @@ public:
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 char num = this->player_board_.cells[y * BoardX + x];
-                if (num == kEmptyPosValue) {
+                if (num == kEmptyColor) {
                     empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
@@ -277,7 +277,7 @@ public:
         if (this->has_unknown_) {
             for (size_type pos = 0; pos < BoardSize; pos++) {
                 size_type target_num = target.cells[pos];
-                bool is_unknown = (target_num == kUnknownPosValue);
+                bool is_unknown = (target_num == kUnknownColor);
                 if (!is_unknown) {
                     size_type cur_num = current.cells[pos];
                     if (cur_num != target_num) {
@@ -962,8 +962,8 @@ public:
     }
 
     void display_start_boards() {
-        Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Player Board", this->player_board_);
-        Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
+        Board<BoardX, BoardY>::template display_num_board<kEmptyColor, kUnknownColor>("Player Board", this->player_board_);
+        Board<BoardX, BoardY>::template display_num_board<kEmptyColor, kUnknownColor>("Target Board", this->target_board_);
     }
 
     void display_answer_boards() {
@@ -972,13 +972,13 @@ public:
         size_type answer_count = this->getAnswerCount();
         if (SearchAllAnswers && answer_count > 1) {
             for (size_type i = 0; i < answer_count; i++) {
-                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
+                Board<BoardX, BoardY>::template display_num_board<kEmptyColor, kUnknownColor>(
                     "Answer Board", i, this->best_answer_list_[i].final_board);
                 this->displayMoveList(i);
             }
         }
         else {
-            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
+            Board<BoardX, BoardY>::template display_num_board<kEmptyColor, kUnknownColor>(
                 "Answer Board", this->best_answer_list_[0].final_board);
             this->displayMoveList(0);
         }

@@ -353,11 +353,11 @@ union Board
         return value64;
     }
 
-    template <size_type kEmptyPosValue = 0>
+    template <size_type kEmptyColor = 0>
     size_type compactValue() const noexcept {
         size_type value = 0;
         for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
-            if (this->cells[pos] != kEmptyPosValue) {
+            if (this->cells[pos] != kEmptyColor) {
                 value <<= 3;
                 value |= (this->cells[pos] & 0x07U);
             }
@@ -365,11 +365,11 @@ union Board
         return value;
     }
 
-    template <size_type kEmptyPosValue = 0>
+    template <size_type kEmptyColor = 0>
     std::uint64_t compactValue64() const noexcept {
         std::uint64_t value64 = 0;
         for (ssize_type pos = BoardSize - 1; pos >= 0; pos--) {
-            if (this->cells[pos] != kEmptyPosValue) {
+            if (this->cells[pos] != kEmptyColor) {
                 value64 <<= 3;
                 value64 |= (this->cells[pos] & 0x07U);
             }
@@ -515,7 +515,7 @@ union Board
         printf("\n\n");
     }
 
-    template <size_type EmptyPosValue>
+    template <size_type EmptyColor>
     static void display_num_board(const char * title, const this_type & board) {
         printf("%s\n\n", title);
         // -------
@@ -528,8 +528,8 @@ union Board
             printf("| ");
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t num = board.cells[y * BoardX + x];
-                assert((num == EmptyPosValue) || (num >= 0 && num < BoardSize));
-                printf("%c ", (num != EmptyPosValue) ? (num + '1') : '0');
+                assert((num == EmptyColor) || (num >= 0 && num < BoardSize));
+                printf("%c ", (num != EmptyColor) ? (num + '1') : '0');
             }
             printf("|\n");
         }
@@ -541,7 +541,7 @@ union Board
         printf("\n\n");
     }
 
-    template <size_type EmptyPosValue, size_type UnknownPosValue>
+    template <size_type EmptyColor, size_type UnknownColor>
     static void display_num_board(const char * title, const this_type & board) {
         printf("%s\n\n", title);
         // -------
@@ -554,8 +554,8 @@ union Board
             printf("| ");
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t num = board.cells[y * BoardX + x];
-                assert((num == UnknownPosValue) || (num == EmptyPosValue) || (num >= 0 && num < BoardSize));
-                printf("%c ", (num != UnknownPosValue) ? ((num != EmptyPosValue) ? (num + '1') : '0') : '?');
+                assert((num == UnknownColor) || (num == EmptyColor) || (num >= 0 && num < BoardSize));
+                printf("%c ", (num != UnknownColor) ? ((num != EmptyColor) ? (num + '1') : '0') : '?');
             }
             printf("|\n");
         }
@@ -567,7 +567,7 @@ union Board
         printf("\n\n");
     }
 
-    template <size_type EmptyPosValue, size_type UnknownPosValue>
+    template <size_type EmptyColor, size_type UnknownColor>
     static void display_num_board(const char * title, size_type index, const this_type & board) {
         printf("%s #%d\n\n", title, (int)(index + 1));
         // -------
@@ -580,8 +580,8 @@ union Board
             printf("| ");
             for (size_type x = 0; x < BoardX; x++) {
                 uint8_t num = board.cells[y * BoardX + x];
-                assert((num == UnknownPosValue) || (num == EmptyPosValue) || (num >= 0 && num < BoardSize));
-                printf("%c ", (num != UnknownPosValue) ? ((num != EmptyPosValue) ? (num + '1') : '0') : '?');
+                assert((num == UnknownColor) || (num == EmptyColor) || (num >= 0 && num < BoardSize));
+                printf("%c ", (num != UnknownColor) ? ((num != EmptyColor) ? (num + '1') : '0') : '?');
             }
             printf("|\n");
         }
@@ -601,25 +601,25 @@ union Board
         }
     }
 
-    template <size_type EmptyPosValue>
+    template <size_type EmptyColor>
     static void display_num_boards(const char * title, const std::vector<this_type> & board_list) {
         for (size_type n = 0; n < board_list.size(); n++) {
             char title_no[128];
             snprintf(title_no, sizeof(title_no), "%s #%u", title, (uint32_t)(n + 1));
-            this_type::template display_num_board<EmptyPosValue>(title_no, board_list[n]);
+            this_type::template display_num_board<EmptyColor>(title_no, board_list[n]);
         }
     }
 
-    template <size_type EmptyPosValue, size_type UnknownPosValue>
+    template <size_type EmptyColor, size_type UnknownColor>
     static void display_num_boards(const char * title, const std::vector<this_type> & board_list) {
         for (size_type n = 0; n < board_list.size(); n++) {
             char title_no[128];
             snprintf(title_no, sizeof(title_no), "%s #%u", title, (uint32_t)(n + 1));
-            this_type::template display_num_board<EmptyPosValue, UnknownPosValue>(title_no, board_list[n]);
+            this_type::template display_num_board<EmptyColor, UnknownColor>(title_no, board_list[n]);
         }
     }
 
-    template <size_type EmptyPosValue = Color::Empty, size_type UnknownPosValue = Color::Unknown>
+    template <size_type EmptyColor = Color::Empty, size_type UnknownColor = Color::Unknown>
     static bool translate_move_seq(const this_type & in_board,
                                    const move_seq_t & move_seq,
                                    move_list_t & move_list,
@@ -633,11 +633,11 @@ union Board
         std::uint8_t move_clr, empty_clr;
         std::uint8_t move_dir = std::uint8_t(-1);
         Position empty_pos = in_empty_pos;
-        assert((empty_pos.value == std::uint8_t(-1)) || (board.cells[empty_pos] == UnknownPosValue));
+        assert((empty_pos.value == std::uint8_t(-1)) || (board.cells[empty_pos] == UnknownColor));
         if (empty_pos.value != std::uint8_t(-1)) {
-            board.cells[empty_pos] = EmptyPosValue;
+            board.cells[empty_pos] = EmptyColor;
         }
-        bool found_empty = board.find_empty<EmptyPosValue>(empty_pos);
+        bool found_empty = board.find_empty<EmptyColor>(empty_pos);
         if (!found_empty) {
             empty_pos = std::uint8_t(-1);
         }
@@ -645,11 +645,11 @@ union Board
             if (empty_pos.value != std::uint8_t(-1))
                 empty_clr = board.cells[empty_pos];
             else
-                empty_clr = UnknownPosValue;
+                empty_clr = UnknownColor;
             move_dir = move_seq[i];
             move_pos = Dir::template getMovePos<BoardX, BoardY>(move_dir, empty_pos);
             move_clr = board.cells[move_pos];
-            if (move_clr != EmptyPosValue && empty_clr == EmptyPosValue) {
+            if (move_clr != EmptyColor && empty_clr == EmptyColor) {
                 MoveInfo move_info;
                 move_info.from_pos  = move_pos;
                 move_info.to_pos    = empty_pos;
@@ -677,11 +677,11 @@ union Board
         return success;
     }
 
-    template <size_type EmptyPosValue = Color::Empty, size_type UnknownPosValue = Color::Unknown>
+    template <size_type EmptyColor = Color::Empty, size_type UnknownColor = Color::Unknown>
     bool translate_move_seq(const move_seq_t & move_seq,
                             move_list_t & move_list,
                             Position empty_pos = std::uint8_t(-1)) const {
-        return this_type::translate_move_seq<EmptyPosValue, UnknownPosValue>(*this, move_seq, move_list, empty_pos);
+        return this_type::translate_move_seq<EmptyColor, UnknownColor>(*this, move_seq, move_list, empty_pos);
     }
 
     static void display_move_list(const move_list_t & move_list) {
@@ -706,7 +706,7 @@ union Board
         printf("};\n\n");
     }
 
-    template <size_type EmptyPosValue = Color::Empty, size_type UnknownPosValue = Color::Unknown>
+    template <size_type EmptyColor = Color::Empty, size_type UnknownColor = Color::Unknown>
     static void display_num_move_list(const move_list_t & move_list) {
         size_type index = 0;
         printf("Answer_Move_Path[ %u ] = {\n", (std::uint32_t)move_list.size());
@@ -717,7 +717,7 @@ union Board
             size_type dir       = iter.dir;
             printf("    [%2u]: [%c], %c%c --> %c%c, dir: %-5s (%u)\n",
                    (std::uint32_t)(index + 1),
-                   Number<EmptyPosValue, UnknownPosValue>::toChar(num),
+                   Number<EmptyColor, UnknownColor>::toChar(num),
                    Position::template toFirstChar<BoardX>(from_pos),
                    Position::template toSecondChar<BoardX>(from_pos),
                    Position::template toFirstChar<BoardX>(to_pos),

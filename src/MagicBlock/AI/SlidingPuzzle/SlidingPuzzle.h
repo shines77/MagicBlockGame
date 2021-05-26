@@ -37,7 +37,7 @@ public:
     static const size_type BoardSize = BoardX * BoardY;
     static const size_type kMapBits = size_type(1U) << (BoardSize * 3);
     static const size_type MaxNumber = 8;
-    static const size_type kEmptyPosValue = MaxNumber;
+    static const size_type kEmptyColor = MaxNumber;
 
     typedef Stage<BoardX, BoardY>                   stage_type;
     typedef Board<BoardX, BoardY>                   player_board_t;
@@ -45,7 +45,7 @@ public:
     typedef CanMoves<BoardX, BoardY>                can_moves_t;
     typedef typename can_moves_t::can_move_list_t   can_move_list_t;
 
-    typedef Number<kEmptyPosValue, kEmptyPosValue + 1> number_t;
+    typedef Number<kEmptyColor, kEmptyColor + 1> number_t;
 
 private:
     Board<BoardX, BoardY> player_board_;
@@ -93,14 +93,14 @@ public:
     static uint8_t charToNumber(uint8_t ch) {
         if (ch >= '1' && ch <= '9') {
             uint8_t num = (ch - '1');
-            return ((num < kEmptyPosValue) ? num : (uint8_t)-1);
+            return ((num < kEmptyColor) ? num : (uint8_t)-1);
         }
         else if (ch >= 'A' && ch <= 'Z') {
             uint8_t num = (ch - 'A');
-            return ((num < kEmptyPosValue) ? num : (uint8_t)-1);
+            return ((num < kEmptyColor) ? num : (uint8_t)-1);
         }
         else if (ch == ' ' || ch == '0')
-            return kEmptyPosValue;
+            return kEmptyColor;
         else
             return (uint8_t)-1;
     }
@@ -272,7 +272,7 @@ public:
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 char num = this->player_board_.cells[y * BoardX + x];
-                if (num == kEmptyPosValue) {
+                if (num == kEmptyColor) {
                     empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
@@ -304,7 +304,7 @@ public:
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited[empty.value].set(start.board.template compactValue<kEmptyPosValue>());
+            visited[empty.value].set(start.board.template compactValue<kEmptyColor>());
 
             std::vector<stage_type> cur_stages;
             std::vector<stage_type> next_stages;
@@ -327,7 +327,7 @@ public:
                         uint8_t move_pos = can_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type value64 = next_stage.board.template compactValue<kEmptyPosValue>();
+                        size_type value64 = next_stage.board.template compactValue<kEmptyColor>();
                         if (visited[move_pos].test(value64))
                             continue;
 
@@ -400,7 +400,7 @@ public:
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited[empty.value].set(start.board.template compactValue<kEmptyPosValue>());
+            visited[empty.value].set(start.board.template compactValue<kEmptyColor>());
 
             std::queue<stage_type> cur_stages;
             std::queue<stage_type> next_stages;
@@ -423,7 +423,7 @@ public:
                         uint8_t move_pos = can_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type value64 = next_stage.board.template compactValue<kEmptyPosValue>();
+                        size_type value64 = next_stage.board.template compactValue<kEmptyColor>();
                         if (visited[move_pos].test(value64))
                             continue;
 
@@ -480,16 +480,16 @@ public:
     }
 
     void display_boards() {
-        Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Player Board", this->player_board_);
-        Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Target Board", this->target_board_);
+        Board<BoardX, BoardY>::template display_num_board<kEmptyColor>("Player Board", this->player_board_);
+        Board<BoardX, BoardY>::template display_num_board<kEmptyColor>("Target Board", this->target_board_);
     }
 
     void display_answer_boards() {
         this->display_boards();
         if (SearchAllAnswers && this->answer_list_.size() > 1)
-            Board<BoardX, BoardY>::template display_num_boards<kEmptyPosValue>("Answer Board", this->answer_list_);
+            Board<BoardX, BoardY>::template display_num_boards<kEmptyColor>("Answer Board", this->answer_list_);
         else
-            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue>("Answer Board", this->answer_list_[0]);
+            Board<BoardX, BoardY>::template display_num_board<kEmptyColor>("Answer Board", this->answer_list_[0]);
     }
 };
 

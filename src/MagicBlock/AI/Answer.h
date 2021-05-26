@@ -64,8 +64,8 @@ public:
 };
 
 template <std::size_t BoardX, std::size_t BoardY,
-          std::size_t EmptyPosValue = Color::Empty,
-          std::size_t UnknownPosValue = Color::Unknown,
+          std::size_t EmptyColor = Color::Empty,
+          std::size_t UnknownColor = Color::Unknown,
           bool IsNumberBoard = false>
 class Answer {
 public:
@@ -75,7 +75,7 @@ public:
     typedef typename board_type::move_seq_t     move_seq_t;
     typedef typename board_type::move_list_t    move_list_t;
 
-    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue, IsNumberBoard> this_type;
+    typedef Answer<BoardX, BoardY, EmptyColor, UnknownColor, IsNumberBoard> this_type;
 
     board_type *    start_board;
     board_type      final_board;
@@ -173,12 +173,12 @@ public:
 
     static bool translateMoveSeq(const board_type & board, const move_seq_t & move_seq,
                                   move_list_t & move_list, Position empty_pos = std::uint8_t(-1)) {
-        return board_type::template translate_move_seq<EmptyPosValue, UnknownPosValue>(board, move_seq, move_list, empty_pos);
+        return board_type::template translate_move_seq<EmptyColor, UnknownColor>(board, move_seq, move_list, empty_pos);
     }
 
     bool translateMoveSeq(const move_seq_t & move_seq, move_list_t & move_list, Position empty_pos = std::uint8_t(-1)) const {
         assert(this->start_board != nullptr);
-        return this->start_board->template translate_move_seq<EmptyPosValue, UnknownPosValue>(move_seq, move_list, empty_pos);
+        return this->start_board->template translate_move_seq<EmptyColor, UnknownColor>(move_seq, move_list, empty_pos);
     }
 
     bool translateMoveSeq(const move_seq_t & move_seq, Position empty_pos = std::uint8_t(-1)) {
@@ -199,7 +199,7 @@ public:
 
     static void displayMoveList(const move_list_t & move_list) {
         if (IsNumberBoard)
-            board_type::template display_num_move_list<EmptyPosValue, UnknownPosValue>(move_list);
+            board_type::template display_num_move_list<EmptyColor, UnknownColor>(move_list);
         else
             board_type::display_move_list(move_list);
     }
@@ -207,9 +207,9 @@ public:
     static void displayMoveList(const board_type & board, const move_seq_t & move_seq,
                                 Position empty_pos = std::uint8_t(-1)) {
         move_list_t move_list;
-        if (board_type::translate_move_seq<EmptyPosValue, UnknownPosValue>(board, move_seq, move_list, empty_pos)) {
+        if (board_type::translate_move_seq<EmptyColor, UnknownColor>(board, move_seq, move_list, empty_pos)) {
             if (IsNumberBoard)
-                board_type::template display_num_move_list<EmptyPosValue, UnknownPosValue>(move_list);
+                board_type::template display_num_move_list<EmptyColor, UnknownColor>(move_list);
             else
                 board_type::display_move_list(move_list);
         }
@@ -242,13 +242,13 @@ public:
 };
 
 template <std::size_t BoardX, std::size_t BoardY,
-          std::size_t EmptyPosValue = Color::Empty,
-          std::size_t UnknownPosValue = Color::Unknown,
+          std::size_t EmptyColor = Color::Empty,
+          std::size_t UnknownColor = Color::Unknown,
           bool IsNumberBoard = false>
 class SingleAnswerGame : public BaseAnswerGame
 {
 public:
-    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue, IsNumberBoard> answer_type;
+    typedef Answer<BoardX, BoardY, EmptyColor, UnknownColor, IsNumberBoard> answer_type;
 
     typedef typename answer_type::size_type     size_type;
     typedef typename answer_type::board_type    board_type;
@@ -359,13 +359,13 @@ public:
 };
 
 template <std::size_t BoardX, std::size_t BoardY,
-          std::size_t EmptyPosValue = Color::Empty,
-          std::size_t UnknownPosValue = Color::Unknown,
+          std::size_t EmptyColor = Color::Empty,
+          std::size_t UnknownColor = Color::Unknown,
           bool IsNumberBoard = false>
 class MultiAnswerGame : public BaseAnswerGame
 {
 public:
-    typedef Answer<BoardX, BoardY, EmptyPosValue, UnknownPosValue, IsNumberBoard> answer_type;
+    typedef Answer<BoardX, BoardY, EmptyColor, UnknownColor, IsNumberBoard> answer_type;
 
     typedef typename answer_type::size_type     size_type;
     typedef typename answer_type::board_type    board_type;

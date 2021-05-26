@@ -41,9 +41,9 @@ public:
     static const size_type kSingelNumMaxCount = 4;
 
     static const size_type kMapBits = size_type(1U) << (BoardSize * GridBits);
-    static const size_type kEmptyPosValue = MaxValidValue;
-    static const size_type kUnknownPosValue = kEmptyPosValue + 1;
-    static const size_type kMaxGridValue = kUnknownPosValue + 1;
+    static const size_type kEmptyColor = MaxValidValue;
+    static const size_type kUnknownColor = kEmptyColor + 1;
+    static const size_type kMaxGridValue = kUnknownColor + 1;
 
     static const size_type MaxValidNumber = size_type(1U) << GridBits;
     static const size_type MaxNumber = (kMaxGridValue > MaxValidNumber) ? kMaxGridValue : MaxValidNumber;
@@ -54,7 +54,7 @@ public:
     typedef CanMoves<BoardX, BoardY>                can_moves_t;
     typedef typename can_moves_t::can_move_list_t   can_move_list_t;
 
-    typedef Number<kEmptyPosValue, kUnknownPosValue> number_t;
+    typedef Number<kEmptyColor, kUnknownColor> number_t;
 
 private:
     Board<BoardX, BoardY> player_board_;
@@ -112,7 +112,7 @@ public:
                         for (size_type x = 0; x < BoardX; x++) {
                             uint8_t num = number_t::toNumber(line[x]);
                             if (num >= 0 && num < (uint8_t)kMaxGridValue) {
-                                if (num != kUnknownPosValue) {
+                                if (num != kUnknownColor) {
                                     this->player_board_.cells[boardY * BoardX + x] = num;
                                 }
                                 else {
@@ -192,7 +192,7 @@ public:
     int check_player_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
         for (size_type num = 0; num < MaxNumber; num++) {
-            if (this->player_num_cnt_[num] > (int)kSingelNumMaxCount && num != kUnknownPosValue) {
+            if (this->player_num_cnt_[num] > (int)kSingelNumMaxCount && num != kUnknownColor) {
                 err_code = ErrorCode::PlayerBoardNumberOverflow;
                 duplicated_num = num;
                 return err_code;
@@ -204,13 +204,13 @@ public:
     int check_target_board_nums(size_type & duplicated_num) {
         int err_code = ErrorCode::Success;
         for (size_type num = 0; num < MaxNumber; num++) {
-            if (this->target_num_cnt_[num] > 1 && num != kUnknownPosValue) {
+            if (this->target_num_cnt_[num] > 1 && num != kUnknownColor) {
                 err_code = ErrorCode::TargetBoardNumberIsDuplicated;
                 duplicated_num = num;
                 return err_code;
             }
         }
-        if (this->target_num_cnt_[kUnknownPosValue] == 0)
+        if (this->target_num_cnt_[kUnknownColor] == 0)
             this->has_unknown_ = false;
         else
             this->has_unknown_ = true;
@@ -261,7 +261,7 @@ public:
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
                 char num = this->player_board_.cells[y * BoardX + x];
-                if (num == kEmptyPosValue) {
+                if (num == kEmptyColor) {
                     empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
@@ -275,7 +275,7 @@ public:
         if (this->has_unknown_) {
             for (size_type pos = 0; pos < BoardSize; pos++) {
                 size_type target_num = target.cells[pos];
-                bool is_unknown = (target_num == kUnknownPosValue);
+                bool is_unknown = (target_num == kUnknownColor);
                 if (!is_unknown) {
                     size_type cur_num = current.cells[pos];
                     if (cur_num != target_num) {
@@ -308,7 +308,7 @@ public:
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited[empty.value].set(start.board.template compactValue<kEmptyPosValue>());
+            visited[empty.value].set(start.board.template compactValue<kEmptyColor>());
 
             std::vector<stage_type> cur_stages;
             std::vector<stage_type> next_stages;
@@ -342,7 +342,7 @@ public:
                         uint8_t move_pos = can_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type board_value = next_stage.board.template compactValue<kEmptyPosValue>();
+                        size_type board_value = next_stage.board.template compactValue<kEmptyColor>();
                         if (visited[move_pos].test(board_value))
                             continue;
 
@@ -434,7 +434,7 @@ public:
             start.last_dir = uint8_t(-1);
             start.rotate_type = 0;
             start.board = this->player_board_;
-            visited[empty.value].set(start.board.template compactValue<kEmptyPosValue>());
+            visited[empty.value].set(start.board.template compactValue<kEmptyColor>());
 
             std::queue<stage_type> cur_stages;
             std::queue<stage_type> next_stages;
@@ -468,7 +468,7 @@ public:
                         uint8_t move_pos = can_moves[n].pos;
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
-                        size_type board_value = next_stage.board.template compactValue<kEmptyPosValue>();
+                        size_type board_value = next_stage.board.template compactValue<kEmptyColor>();
                         if (visited[move_pos].test(board_value))
                             continue;
 
@@ -544,8 +544,8 @@ public:
     }
 
     void display_start_boards() {
-        Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Player Board", this->player_board_);
-        Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>("Target Board", this->target_board_);
+        Board<BoardX, BoardY>::template display_num_board<kEmptyColor, kUnknownColor>("Player Board", this->player_board_);
+        Board<BoardX, BoardY>::template display_num_board<kEmptyColor, kUnknownColor>("Target Board", this->target_board_);
     }
 
     void display_answer_boards() {
@@ -554,13 +554,13 @@ public:
         size_type answer_count = this->getAnswerCount();
         if (SearchAllAnswers && answer_count > 1) {
             for (size_type i = 0; i < answer_count; i++) {
-                Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
+                Board<BoardX, BoardY>::template display_num_board<kEmptyColor, kUnknownColor>(
                     "Answer Board", i, this->best_answer_list_[i].final_board);
                 this->displayMoveList(i);
             }
         }
         else {
-            Board<BoardX, BoardY>::template display_num_board<kEmptyPosValue, kUnknownPosValue>(
+            Board<BoardX, BoardY>::template display_num_board<kEmptyColor, kUnknownColor>(
                 "Answer Board", this->best_answer_list_[0].final_board);
             this->displayMoveList(0);
         }

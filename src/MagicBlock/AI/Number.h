@@ -15,38 +15,38 @@
 namespace MagicBlock {
 namespace AI {
 
-template <std::size_t EmptyPosValue = Color::Empty,
-          std::size_t UnknownPosValue = Color::Unknown>
+template <std::size_t EmptyColor = Color::Empty,
+          std::size_t UnknownColor = Color::Unknown>
 struct Number {
-    static const std::uint8_t kEmptyPosValue    = (std::uint8_t)EmptyPosValue;
-    static const std::uint8_t kUnknownPosValue  = (std::uint8_t)UnknownPosValue;
-    static const std::uint8_t kInvalidValue     = (std::uint8_t)-1;
+    static const std::uint8_t kEmptyColor    = (std::uint8_t)EmptyColor;
+    static const std::uint8_t kUnknownColor  = (std::uint8_t)UnknownColor;
+    static const std::uint8_t kInvalidValue  = (std::uint8_t)-1;
 
     static std::uint8_t toNumber(std::uint8_t ascii) {
         if (ascii >= '1' && ascii <= '9') {
             std::uint8_t num = (ascii - '1');
-            return ((num < kEmptyPosValue) ? num : kInvalidValue);
+            return ((num < kEmptyColor) ? num : kInvalidValue);
         }
         else if (ascii >= 'A' && ascii <= 'Z') {
             std::uint8_t num = (ascii - 'A');
-            return ((num < kEmptyPosValue) ? num : kInvalidValue);
+            return ((num < kEmptyColor) ? num : kInvalidValue);
         }
         else if (ascii == ' ' || ascii == '0')
-            return kEmptyPosValue;
+            return kEmptyColor;
         else if (ascii == '?')
-            return kUnknownPosValue;
+            return kUnknownColor;
         else
             return kInvalidValue;
     }
 
     static char toChar(std::size_t num) {
-        if (num == UnknownPosValue) {
+        if (num == UnknownColor) {
             return '?';
         }
-        else if (num == EmptyPosValue) {
+        else if (num == EmptyColor) {
             return '0';
         }
-        else if (num < EmptyPosValue && num < 10) {
+        else if (num < EmptyColor && num < 10) {
             return (char)('1' + num);
         }
         else {
@@ -55,13 +55,13 @@ struct Number {
     }
 
     static const char * toString(std::size_t num) {
-        if (num == UnknownPosValue) {
+        if (num == UnknownColor) {
             return "?";
         }
-        else if (num == EmptyPosValue) {
+        else if (num == EmptyColor) {
             return "0";
         }
-        else if (num < EmptyPosValue) {
+        else if (num < EmptyColor) {
 #if 1
             static char num_buf[32];
             snprintf(num_buf, sizeof(num_buf), "%u", (std::uint32_t)(num + 1));
