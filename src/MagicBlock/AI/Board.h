@@ -151,6 +151,22 @@ union Board
         }
     }
 
+    void fill(std::uint8_t color) noexcept {
+        for (size_type pos = 0; pos < BoardSize; pos++) {
+            this->cells[pos] = color;
+        }
+    }
+
+    void fill_all(std::uint8_t color) noexcept {
+        size_type pos;
+        for (pos = 0; pos < BoardSize; pos++) {
+            this->cells[pos] = color;
+        }
+        for (; pos < kTotalBytes; pos++) {
+            this->cells[pos] = 0;
+        }
+    }
+
     void internal_copy(const Board & other) noexcept {
         if (this->is_x64()) {
                   auto_type * auto_units       = this->auto_data();
@@ -218,12 +234,12 @@ union Board
     }
 
     void copy(uint8_t cells[BoardSize]) noexcept {
-        size_type cell;
-        for (cell = 0; cell < BoardSize; cell++) {
-            this->cells[cell] = cells[cell];
+        size_type pos;
+        for (pos = 0; pos < BoardSize; pos++) {
+            this->cells[pos] = cells[pos];
         }
-        for (; cell < kTotalBytes; cell++) {
-            this->cells[cell] = 0;
+        for (; pos < kTotalBytes; pos++) {
+            this->cells[pos] = 0;
         }
     }
 
@@ -359,6 +375,51 @@ union Board
             high >>= 1;
         }
         return Value128(low, high);
+    }
+
+    // clockwise rotate 90 degrees
+    void rotate_90_cw() {
+        Board<BoardX, BoardY> copy(*this);
+
+        for (size_type y = 0; y < BoardY; y++) {
+            for (size_type x = 0; x < BoardX; x++) {
+                size_type src_pos = y * BoardX + x;
+                size_type dest_x = (BoardY - 1) - y;
+                size_type dest_y = x;
+                size_type dest_pos = dest_y * BoardX + dest_x;
+                this->cells[dest_pos] = copy.cells[src_pos];
+            }
+        }
+    }
+
+    // clockwise rotate 180 degrees
+    void rotate_180_cw() {
+        Board<BoardX, BoardY> copy(*this);
+
+        for (size_type y = 0; y < BoardY; y++) {
+            for (size_type x = 0; x < BoardX; x++) {
+                size_type src_pos = y * BoardX + x;
+                size_type dest_x = (BoardX - 1) - x;
+                size_type dest_y = (BoardY - 1) - y;
+                size_type dest_pos = dest_y * BoardX + dest_x;
+                this->cells[dest_pos] = copy.cells[src_pos];
+            }
+        }
+    }
+
+    // clockwise rotate 270 degrees
+    void rotate_270_cw() {
+        Board<BoardX, BoardY> copy(*this);
+
+        for (size_type y = 0; y < BoardY; y++) {
+            for (size_type x = 0; x < BoardX; x++) {
+                size_type src_pos = y * BoardX + x;
+                size_type dest_x = y;
+                size_type dest_y = (BoardX - 1) - x;
+                size_type dest_pos = dest_y * BoardX + dest_x;
+                this->cells[dest_pos] = copy.cells[src_pos];
+            }
+        }
     }
 
     // clockwise rotate 90 degrees

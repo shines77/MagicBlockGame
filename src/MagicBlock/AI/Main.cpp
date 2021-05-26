@@ -33,6 +33,7 @@
 #include "MagicBlock/AI/SlidingPuzzle/SlidingUnknownPuzzle3x3.h"
 #include "MagicBlock/AI/SlidingPuzzle/SlidingColorPuzzle.h"
 #include "MagicBlock/AI/TwoPhase_v1/Game.h"
+#include "MagicBlock/AI/TwoPhase_ida/IDAGame.h"
 #include "MagicBlock/AI/TwoEndpoint/Game.h"
 #include "MagicBlock/AI/Algorithm.h"
 #include "MagicBlock/AI/UnitTest.h"

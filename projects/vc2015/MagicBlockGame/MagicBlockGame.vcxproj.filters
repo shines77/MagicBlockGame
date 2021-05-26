@@ -145,7 +145,10 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\internal\BaseBWSolver.h">
       <Filter>src\internal</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_ida\Solver.h">
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_ida\IDAGame.h">
+      <Filter>src\TwoPhase_ida</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_ida\Phase1Solver.h">
       <Filter>src\TwoPhase_ida</Filter>
     </ClInclude>
   </ItemGroup>
