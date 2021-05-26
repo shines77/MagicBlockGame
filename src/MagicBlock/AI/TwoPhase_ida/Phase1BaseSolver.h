@@ -32,18 +32,19 @@
 
 namespace MagicBlock {
 namespace AI {
+namespace TwoPhase {
 
 template <std::size_t BoardX, std::size_t BoardY,
           std::size_t TargetX, std::size_t TargetY,
           bool AllowRotate, std::size_t N_SolverType,
           typename Phase2CallBack>
-class BaseBWSolver
+class Phase1BaseSolver
 {
 public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    typedef BaseBWSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>  this_type;
+    typedef Phase1BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>  this_type;
 
     typedef SharedData<BoardX, BoardY, TargetX, TargetY>    shared_data_type;
     typedef typename shared_data_type::stage_type           stage_type;
@@ -60,12 +61,32 @@ public:
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
+    //
+    // Total number of prototype types that do not rotate.
+    //
+    //      <type 0>      <type 1>       <type 2>
+    //
+    //      1  2  3       1  2  3        1  2  3
+    //      4  ?  ?       ?  ?  4        ?  4  ?
+    //      ?  ?  ?       ?  ?  ?        ?  ?  ?
+    //
+    static const size_type MAX_PHASE1_PROTOTYPE = 3;
+
+    //
+    // All phase1 types after rotation.
+    //
+    // Value = 3 * 4 = 12
+    //
+    static const size_type kMaxPhase1Type = MAX_PHASE1_PROTOTYPE * MAX_ROTATE_TYPE;
+
+    static const std::uint8_t MaskColor = std::uint8_t(1);
+
 protected:
     shared_data_type * data_;
 
     Board<BoardX, BoardX>   target_board_;
-    Board<BoardX, BoardY>   player_board_[4];
-    Board<TargetX, TargetX> fw_target_board_[4];
+    Board<BoardX, BoardY>   player_board_[MAX_ROTATE_TYPE][kMaxPhase1Type];
+    Board<TargetX, TargetX> orig_target_board_[4];
 
     size_type target_len_;
     size_type rotate_type_;
@@ -82,26 +103,26 @@ protected:
         assert(this->data_ != nullptr);
 
         for (size_type i = 0; i < MAX_ROTATE_TYPE; i++) {
-            this->fw_target_board_[i] = this->data_->target_board[i];
+            this->orig_target_board_[i] = this->data_->target_board[i];
         }
         if (AllowRotate)
             this->target_len_ = this->data_->target_len;
         else
             this->target_len_ = 1;
 
-        this->count_target_color_nums(this->fw_target_board_[0]);
+        this->count_target_color_nums(this->orig_target_board_[0]);
 
-        this->setPlayerBoard(this->data_->target_board);
+        this->setPhase1PlayerBoard(this->data_->target_board);
         this->setTargetBoard(this->data_->player_board);
     }
 
 public:
-    BaseBWSolver(shared_data_type * data)
+    Phase1BaseSolver(shared_data_type * data)
         : data_(data), target_len_(0), rotate_type_(0), map_used_(0) {
         this->init();
     }
 
-    ~BaseBWSolver() {
+    ~Phase1BaseSolver() {
         this->destory();
     }
 
@@ -142,11 +163,11 @@ public:
     }
 
     Board<TargetX, TargetY> & getFwTargetBoard() {
-        return this->fw_target_board_[0];
+        return this->orig_target_board_[0];
     }
 
     const Board<TargetX, TargetY> & getFwTargetBoard() const {
-        return this->fw_target_board_[0];
+        return this->orig_target_board_[0];
     }
 
     size_type getRotateType() const {
@@ -158,21 +179,28 @@ public:
         this->rotate_type_ = rotate_type;
     }
 
-    void setPlayerBoard(const Board<TargetX, TargetY> target_board[4],
-                        size_type rotate_type = size_type(-1)) {
+    void setPhase1PlayerBoard(const Board<TargetX, TargetY> target_board[4],
+                              size_type rotate_type = size_type(-1)) {
+        Board<BoardX, BoardY> phase1_prototype[MAX_PHASE1_PROTOTYPE];
+        for (size_type i = 0; i < MAX_PHASE1_PROTOTYPE; i++) {
+            this->buildPrototypeBoard(i, phase1_prototype[i]);
+        }
+
         if (AllowRotate) {
             rotate_type = size_type(-1);
             assert(this->target_len_ > 1);
             for (size_type i = 0; i < this->target_len_; i++) {
-                this->setPlayerBoardFromTargetBoard(this->player_board_[i],
-                                                    target_board[i]);
+                this->setPhase1PlayerBoardFromTargetBoard(&this->player_board_[i][0],
+                                                          phase1_prototype,
+                                                          target_board[i]);
             }
         }
         else {
             if (rotate_type >= MAX_ROTATE_TYPE)
                 rotate_type = 0;
-            this->setPlayerBoardFromTargetBoard(this->player_board_[0],
-                                                target_board[rotate_type]);
+            this->setPhase1PlayerBoardFromTargetBoard(&this->player_board_[0][0],
+                                                      phase1_prototype,
+                                                      target_board[rotate_type]);
             assert(this->target_len_ == 1);
             this->target_len_ = 1;
         }
@@ -206,6 +234,78 @@ protected:
         }
     }
 
+    void setupPrototypeBoard(Board<BoardX, BoardY> & board,
+                             std::uint8_t fill_color,
+                             size_type firstX, size_type lastX,
+                             size_type firstY, size_type lastY) {
+        for (size_type y = firstY; y < lastY; y++) {
+            ptrdiff_t baseY = y * BoardX;
+            for (size_type x = firstX; x < lastX; x++) {
+                board.cells[baseY + x] = fill_color;
+            }
+        }
+    }
+
+    void buildPrototypeBoard(size_type prototype, Board<BoardX, BoardY> & board) {
+        board.clear();
+        if (prototype == 0) {
+            // Setup x: [kStartX, kStartX + TargetX) -- y: [1, 2)
+            this->setupPrototypeBoard(board, MaskColor, kStartX, kStartX + TargetX, kStartY, kStartY + 1);
+            // [kStartX, kStartY + 1] = MaskColor
+            board.cells[(kStartY + 1) * BoardX + kStartX] = MaskColor;
+        }
+        else if (prototype == 1) {
+            // Setup x: [kStartX, kStartX + TargetX) -- y: [1, 2)
+            this->setupPrototypeBoard(board, MaskColor, kStartX, kStartX + TargetX, kStartY, kStartY + 1);
+            // [kStartX + TargetX - 1, kStartY + 1] = MaskColor
+            board.cells[(kStartY + 1) * BoardX + (kStartX + TargetX - 1)] = MaskColor;
+        }
+        else if (prototype == 2) {
+            // Setup x: [kStartX, kStartX + TargetX) -- y: [1, 2)
+            this->setupPrototypeBoard(board, MaskColor, kStartX, kStartX + TargetX, kStartY, kStartY + 1);
+            // [kStartX + 1, kStartY + 1] = MaskColor
+            board.cells[(kStartY + 1) * BoardX + (kStartX + 1)] = MaskColor;
+        }
+        else {
+            assert(false);
+        }
+    }
+
+    void setPhase1PlayerBoardFromTargetBoard(Board<BoardX, BoardY> * player_board_array,
+                                             const Board<BoardX, BoardY> prototype_board[3],
+                                             const Board<TargetX, TargetY> & target_board) {
+        Board<BoardX, BoardY> prototype_mask[MAX_PHASE1_PROTOTYPE];
+        for (size_type n = 0; n < MAX_PHASE1_PROTOTYPE; n++) {
+            prototype_mask[n] = prototype_board[n];
+        }
+
+        // There are 12 phase1 types for each direction of rotation.
+        for (size_type n = 0; n < kMaxPhase1Type; n++) {
+            // Fill the Color::Unknown to player board
+            player_board_array[n].fill(Color::Unknown);
+        }
+
+        for (size_type rotate = 0; rotate < MAX_ROTATE_TYPE; rotate++) {
+            for (size_type prototype = 0; prototype < MAX_PHASE1_PROTOTYPE; prototype++) {
+                // Copy input target board to player board pass through prototype mask.
+                size_type p1_type = prototype * MAX_ROTATE_TYPE + rotate;
+                Board<BoardX, BoardY> & player_board = player_board_array[p1_type];
+                for (size_type y = 0; y < TargetY; y++) {
+                    for (size_type x = 0; x < TargetX; x++) {
+                        std::uint8_t clr = target_board.cells[y * TargetX + x];
+                        assert_color(clr);
+                        size_type new_pos = (y + kStartY) * BoardX + (x + kStartX);
+                        bool isMask = (prototype_mask[prototype].cells[new_pos] == MaskColor);
+                        if (isMask) {
+                            player_board.cells[new_pos] = clr;
+                        }
+                    }
+                }
+                prototype_mask[prototype].rotate_90();
+            }
+        }
+    }
+
     bool find_empty(const Board<BoardX, BoardY> & board, Position & empty_pos) const {
         return board.find_empty(empty_pos);
     }
@@ -216,7 +316,7 @@ protected:
     }
 
     void find_all_colors(const Board<BoardX, BoardY> & board,
-                         size_type color, std::vector<Position> & pos_list) {
+                         size_type color, std::vector<Position> & pos_list) const {
         for (size_type pos = 0; pos < BoardSize; pos++) {
             uint8_t clr = board.cells[pos];
             if (clr == color) {
@@ -844,33 +944,36 @@ protected:
 
 public:
     bool translateMoveSeq(const MoveSeq & move_seq,
-                          size_type rotate_type, Position empty_pos,
-                          std::vector<MoveInfo> & move_list) const {
+                          size_type rotate_type, size_type phase1_type,
+                          Position empty_pos, std::vector<MoveInfo> & move_list) const {
         assert(rotate_type >= 0 && rotate_type < MAX_ROTATE_TYPE);
-        return this->player_board_[rotate_type].translate_move_seq(move_seq, move_list, empty_pos);
+        return this->player_board_[rotate_type][phase1_type].translate_move_seq(move_seq, move_list, empty_pos);
     }
 
     bool translateMoveSeq(const stage_type & target_stage) {
         size_type n_rotate_type = target_stage.rotate_type;
-        size_type empty_pos = n_rotate_type >> 2U;
+        size_type empty_pos = n_rotate_type >> 6U;
         size_type rotate_type = n_rotate_type & 0x03U;
-        return this->translateMoveSeq(target_stage.move_seq, rotate_type, empty_pos, this->best_answer_);
+        size_type phase1_type = (n_rotate_type >> 2U) & 0x0FU;
+        return this->translateMoveSeq(target_stage.move_seq, rotate_type, phase1_type, empty_pos, this->best_answer_);
     }
 
     bool translateMoveSeq(const stage_type & target_stage, std::vector<MoveInfo> & move_list) const {
         size_type n_rotate_type = target_stage.rotate_type;
-        size_type empty_pos = n_rotate_type >> 2U;
+        size_type empty_pos = n_rotate_type >> 6U;
         size_type rotate_type = n_rotate_type & 0x03U;
-        return this->translateMoveSeq(target_stage.move_seq, rotate_type, empty_pos, move_list);
+        size_type phase1_type = (n_rotate_type >> 2U) & 0x0FU;
+        return this->translateMoveSeq(target_stage.move_seq, rotate_type, phase1_type, empty_pos, move_list);
     }
 
     void displayMoveList(const std::vector<MoveInfo> & move_list) const {
         player_board_t::display_move_list(move_list);
     }
 
-    void displayMoveList(const MoveSeq & move_seq, size_type rotate_type, Position empty_pos) const {
+    void displayMoveList(const MoveSeq & move_seq, size_type rotate_type,
+                         size_type phase1_type, Position empty_pos) const {
         std::vector<MoveInfo> move_list;
-        if (this->translateMoveSeq(move_seq, rotate_type, empty_pos, move_list)) {
+        if (this->translateMoveSeq(move_seq, rotate_type, phase1_type, empty_pos, move_list)) {
             this->displayMoveList(move_list);
         }
     }
@@ -893,5 +996,6 @@ public:
     }
 };
 
+} // namespace TwoPhase
 } // namespace AI
 } // namespace MagicBlock

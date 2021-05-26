@@ -151,6 +151,9 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_ida\Phase1Solver.h">
       <Filter>src\TwoPhase_ida</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\TwoPhase_ida\Phase1BaseSolver.h">
+      <Filter>src\TwoPhase_ida</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\MagicBlock\AI\UnitTest.cpp">

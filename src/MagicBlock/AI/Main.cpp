@@ -56,6 +56,7 @@ struct Category {
     enum {
         TwoPhase_v1,
         TwoPhase_v2,
+        TwoPhase_IDA,
         TwoEndpoint,
         Last
     };
@@ -85,6 +86,9 @@ static const char * get_category_name()
     }
     else if (CategoryId == Category::TwoPhase_v2) {
         return "Algorithm::TwoPhase_v2";
+    }
+    else if (CategoryId == Category::TwoPhase_IDA) {
+        return "Algorithm::TwoPhase_IDA";
     }
     else if (CategoryId == Category::TwoEndpoint) {
         return "Algorithm::TwoEndpoint";
@@ -378,6 +382,59 @@ void solve_magic_block_two_phase_v1()
 }
 
 template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = true>
+void solve_magic_block_two_phase_ida()
+{
+    printf("-------------------------------------------------------\n\n");
+    printf("solve_magic_block<%s, %s, AllowRotate = %s>()\n\n",
+            get_category_name<CategoryId>(),
+            get_solver_name<N_SolverId>(),
+            (AllowRotate ? "true" : "false"));
+
+    TwoPhase::IDAGame<5, 5, 3, 3, AllowRotate> game;
+
+    int readStatus = game.readConfig(PUZZLES_PATH("magic_block.txt"));
+    if (ErrorCode::isFailure(readStatus)) {
+        printf("readStatus = %d (Error: %s)\n\n", readStatus, ErrorCode::toString(readStatus));
+        return;
+    }
+
+    bool solvable;
+    jtest::StopWatch sw;
+
+    sw.start();
+    if (N_SolverId == SolverId::BitSet) {
+        if (AllowRotate)
+            solvable = game.bitset_solve(MAX_ROTATE_FORWARD_DEPTH, MAX_ROTATE_BACKWARD_DEPTH);
+        else
+            solvable = game.bitset_solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
+    }
+    else {
+        if (AllowRotate)
+            solvable = game.stdset_solve(MAX_ROTATE_FORWARD_DEPTH, MAX_ROTATE_BACKWARD_DEPTH);
+        else
+            solvable = game.stdset_solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
+    }
+    sw.stop();
+    double elapsed_time = sw.getElapsedMillisec();
+
+    printf("solve_magic_block<%s, %s, AllowRotate = %s>()\n\n",
+            get_category_name<CategoryId>(),
+            get_solver_name<N_SolverId>(),
+            (AllowRotate ? "true" : "false"));
+
+    if (solvable) {
+        printf("Found a answer!\n\n");
+        printf("MinSteps: %d\n\n", (int)game.getMinSteps());
+        printf("Map Used: %d\n\n", (int)game.getMapUsed());
+    }
+    else {
+        printf("Not found a answer!\n\n");
+    }
+
+    printf("Total elapsed time: %0.3f ms\n\n", elapsed_time);
+}
+
+template <std::size_t CategoryId, std::size_t N_SolverId, bool AllowRotate = true>
 void solve_magic_block_two_endpoint()
 {
     printf("-------------------------------------------------------\n\n");
@@ -438,6 +495,9 @@ void solve_magic_block()
     }
     else if (CategoryId == Category::TwoPhase_v2) {
         //solve_magic_block_two_phase_v2<CategoryId, N_SolverId, AllowRotate>();
+    }
+    else if (CategoryId == Category::TwoPhase_IDA) {
+        solve_magic_block_two_phase_ida<CategoryId, N_SolverId, AllowRotate>();
     }
     else if (CategoryId == Category::TwoEndpoint) {
         solve_magic_block_two_endpoint<CategoryId, N_SolverId, AllowRotate>();
@@ -524,11 +584,16 @@ int main(int argc, char * argv[])
 #endif
 
 #if 1
+    solve_magic_block<Category::TwoPhase_IDA, SolverId::BitSet, true>();
+    Console::readKeyLine();
+#endif
+
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::StdSet, true>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
     Console::readKeyLine();
 #endif
@@ -555,12 +620,17 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
+#if 1
+    solve_magic_block<Category::TwoPhase_IDA, SolverId::BitSet, false>();
+    Console::readKeyLast();
+#endif
+
 #if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::StdSet, false>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
     Console::readKeyLast();
 #endif
