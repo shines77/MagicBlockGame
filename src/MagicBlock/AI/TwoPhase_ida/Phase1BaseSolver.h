@@ -950,17 +950,10 @@ public:
         return this->player_board_[rotate_type][phase1_type].translate_move_seq(move_seq, move_list, empty_pos);
     }
 
-    bool translateMoveSeq(const stage_type & target_stage) {
-        size_type n_rotate_type = target_stage.rotate_type;
-        size_type empty_pos = n_rotate_type >> 6U;
-        size_type rotate_type = n_rotate_type & 0x03U;
-        size_type phase1_type = (n_rotate_type >> 2U) & 0x0FU;
-        return this->translateMoveSeq(target_stage.move_seq, rotate_type, phase1_type, empty_pos, this->best_answer_);
-    }
-
     bool translateMoveSeq(const stage_type & target_stage, std::vector<MoveInfo> & move_list) const {
+        size_type n_last_dir = target_stage.last_dir;
         size_type n_rotate_type = target_stage.rotate_type;
-        size_type empty_pos = n_rotate_type >> 6U;
+        Position empty_pos = std::uint8_t(n_last_dir >> 2U);
         size_type rotate_type = n_rotate_type & 0x03U;
         size_type phase1_type = (n_rotate_type >> 2U) & 0x0FU;
         return this->translateMoveSeq(target_stage.move_seq, rotate_type, phase1_type, empty_pos, move_list);

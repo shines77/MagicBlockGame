@@ -191,7 +191,7 @@ public:
                         stage_type start;
                         start.board = this->player_board_[i][j];
                         start.empty_pos = empty_pos;
-                        start.last_dir = uint8_t(-1);
+                        start.last_dir = uint8_t((empty_pos.value << 2) | 0x03);
                         start.rotate_type = uint8_t((i & 0x03U) | ((j & 0x0FU) << 2U));
 
                         // Restore unknown color
@@ -219,7 +219,8 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
+                        assert(cur_dir >= 0 && cur_dir < Dir::Maximum);
+                        if ((cur_dir == (stage.last_dir & 0x03)) && (depth != 0))
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;
@@ -234,7 +235,7 @@ public:
                         this->visited_set_.insert(board_value);
 
                         next_stage.empty_pos = move_pos;
-                        next_stage.last_dir = Dir::opp_dir(cur_dir);
+                        next_stage.last_dir = ((stage.last_dir) & 0xFC) | Dir::opp_dir(cur_dir);
                         next_stage.rotate_type = stage.rotate_type;
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
@@ -286,7 +287,7 @@ public:
                         stage_type start;
                         start.board = this->player_board_[i][j];
                         start.empty_pos = empty_pos;
-                        start.last_dir = uint8_t(-1);
+                        start.last_dir = uint8_t((empty_pos.value << 2) | 0x03);
                         start.rotate_type = uint8_t((i & 0x03U) | ((j & 0x0FU) << 2U));
 
                         // Restore unknown color
@@ -314,7 +315,8 @@ public:
                     size_type total_moves = can_moves.size();
                     for (size_type n = 0; n < total_moves; n++) {
                         uint8_t cur_dir = can_moves[n].dir;
-                        if (cur_dir == stage.last_dir)
+                        assert(cur_dir >= 0 && cur_dir < Dir::Maximum);
+                        if ((cur_dir == (stage.last_dir & 0x03)) && (depth != 0))
                             continue;
 
                         uint8_t move_pos = can_moves[n].pos;
@@ -340,7 +342,7 @@ public:
                         }
 
                         next_stage.empty_pos = move_pos;
-                        next_stage.last_dir = Dir::opp_dir(cur_dir);
+                        next_stage.last_dir = ((stage.last_dir) & 0xFC) | Dir::opp_dir(cur_dir);
                         next_stage.rotate_type = stage.rotate_type;
                         next_stage.move_seq = stage.move_seq;
                         next_stage.move_seq.push_back(cur_dir);
@@ -396,7 +398,7 @@ public:
                     stage_type start;
                     start.board = this->player_board_[i][j];
                     start.empty_pos = empty_pos;
-                    start.last_dir = uint8_t(-1);
+                    start.last_dir = uint8_t((empty_pos.value << 2) | 0x03);
                     start.rotate_type = uint8_t((i & 0x03U) | ((j & 0x0FU) << 2U));
 
                     // Restore unknown color
@@ -428,7 +430,8 @@ public:
                 size_type total_moves = can_moves.size();
                 for (size_type n = 0; n < total_moves; n++) {
                     uint8_t cur_dir = can_moves[n].dir;
-                    if (cur_dir == stage.last_dir)
+                    assert(cur_dir >= 0 && cur_dir < Dir::Maximum);
+                    if ((cur_dir == (stage.last_dir & 0x03)) && (depth != 0))
                         continue;
 
                     uint8_t move_pos = can_moves[n].pos;
@@ -442,7 +445,7 @@ public:
                     }
 
                     next_stage.empty_pos = move_pos;
-                    next_stage.last_dir = Dir::opp_dir(cur_dir);
+                    next_stage.last_dir = ((stage.last_dir) & 0xFC) | Dir::opp_dir(cur_dir);
                     next_stage.rotate_type = stage.rotate_type;
                     next_stage.move_seq = stage.move_seq;
                     next_stage.move_seq.push_back(cur_dir);
@@ -472,8 +475,10 @@ public:
                     (uint32_t)(this->curr_stages_.size()), (uint32_t)(this->next_stages_.size()));
             printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 #endif
+            size_type next_capacity = calc_next_capacity();
             std::swap(this->curr_stages_, this->next_stages_);
             this->next_stages_.clear();
+            this->next_stages_.reserve(next_capacity);
 
             if (result != 1 && (depth >= max_depth || this->curr_stages_.size() == 0)) {
                 result = -1;

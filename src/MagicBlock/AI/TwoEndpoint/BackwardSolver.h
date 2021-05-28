@@ -467,8 +467,10 @@ public:
                     (uint32_t)(this->curr_stages_.size()), (uint32_t)(this->next_stages_.size()));
             printf("visited.size() = %u\n\n", (uint32_t)(this->visited_.size()));
 #endif
+            size_type next_capacity = calc_next_capacity();
             std::swap(this->curr_stages_, this->next_stages_);
             this->next_stages_.clear();
+            this->next_stages_.reserve(next_capacity);
 
             if (result != 1 && (depth >= max_depth || this->curr_stages_.size() == 0)) {
                 result = -1;
