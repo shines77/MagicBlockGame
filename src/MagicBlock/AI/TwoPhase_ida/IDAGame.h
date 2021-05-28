@@ -1401,6 +1401,8 @@ public:
             TForwardSolver forward_solver(&this->data_);
             TBackwardSolver backward_solver(&this->data_);
 
+            backward_solver.bitset_prepare(18);
+
             int forward_status, backward_status;
             size_type forward_depth = 0;
             size_type backward_depth = 0;

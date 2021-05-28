@@ -744,7 +744,7 @@ public:
 
                         assert(last_layer >= 0 && last_layer <= BoardY);
                         assert(last_container != nullptr);
-                        visited.insert_new(next_stage.board, last_layer, last_container);
+                        visited.always_insert_new(next_stage.board, last_layer, last_container);
 #endif
                         next_stage.empty_pos = move_pos;
                         next_stage.last_dir = Dir::opp_dir(cur_dir);

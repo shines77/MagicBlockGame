@@ -179,7 +179,10 @@ public:
     static const size_type MAX_PHASE1_PREPARE_DEPTH = 18;
 
     void bitset_prepare(size_type max_depth) {
+        bool solvable = false;
         max_depth = std::min(max_depth, MAX_PHASE1_PREPARE_DEPTH);
+
+        size_type depth = 0;
 
         std::vector<stage_type> curr_stages;
         std::vector<stage_type> next_stages;
@@ -213,9 +216,13 @@ public:
             }
         }
 
-        while (this->curr_stages_.size() > 0) {
-            for (size_type i = 0; i < this->curr_stages_.size(); i++) {
-                stage_type & stage = this->curr_stages_[i];
+        printf("Phase1Solver:: depth = %u\n", (uint32_t)depth);
+        printf("cur.size()   = %u\n", (uint32_t)(curr_stages.size()));
+        printf("cache.size() = %u\n\n", (uint32_t)(this->phase1_cache_.size()));
+
+        while (curr_stages.size() > 0) {
+            for (size_type i = 0; i < curr_stages.size(); i++) {
+                stage_type & stage = curr_stages[i];
 
                 uint8_t empty_pos = stage.empty_pos;
                 const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
@@ -260,27 +267,27 @@ public:
             }
 
             depth++;
-            printf("Phase1Solver:: depth = %u\n", (uint32_t)depth);
-            printf("cur.size() = %u, next.size() = %u\n",
-                    (uint32_t)(curr_stages.size()), (uint32_t)(next_stages.size()));
-            printf("visited.size() = %u\n\n", (uint32_t)(this->phase1_cache_.size()));
+            printf("Phase1Solver:: depth = %u\n\n", (uint32_t)depth);
+            printf("stages.size() = %u\n", (uint32_t)(next_stages.size()));
+            printf("cache.size()  = %u\n\n", (uint32_t)(this->phase1_cache_.size()));
 
             size_type next_capacity = calc_next_capacity();
             std::swap(curr_stages, next_stages);
             next_stages.clear();
             next_stages.reserve(next_capacity);
 
-            if (depth >= max_depth || this->curr_stages_.size() == 0) {
+            if (depth >= max_depth || curr_stages.size() == 0) {
+                solvable = true;
                 break;
             }
         }
 
-        this->map_used_ = this->phase1_cache_.size();
+        size_type map_used = this->phase1_cache_.size();
 
-        if (result == 1) {
-            printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
-            printf("next.size() = %u\n", (uint32_t)curr_stages.size());
-            printf("move_seq.size() = %u\n", (uint32_t)this->best_move_seq_.size());
+        if (solvable) {
+            printf("Solvable: %s\n\n", (solvable ? "true" : "false"));
+            printf("phase1_cache.size() = %u\n", (uint32_t)map_used);
+            printf("next_stages.size()  = %u\n", (uint32_t)curr_stages.size());
             printf("\n");
         }
 
@@ -378,7 +385,7 @@ public:
 
             if (result == 1) {
                 printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
-                printf("next.size() = %u\n", (uint32_t)this->curr_stages_.size());
+                printf("next.size() = %u\n", (uint32_t)this->next_stages_.size());
                 printf("move_seq.size() = %u\n", (uint32_t)this->best_move_seq_.size());
                 printf("\n");
             }
@@ -486,7 +493,7 @@ public:
 
             if (result == 1) {
                 printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
-                printf("next.size() = %u\n", (uint32_t)this->curr_stages_.size());
+                printf("next.size() = %u\n", (uint32_t)this->next_stages_.size());
                 printf("move_seq.size() = %u\n", (uint32_t)this->best_move_seq_.size());
                 printf("\n");
             }
@@ -612,7 +619,7 @@ public:
         if (result == 1) {
 #if 0
             printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
-            printf("next.size() = %u\n", (uint32_t)this->curr_stages_.size());
+            printf("next.size() = %u\n", (uint32_t)this->next_stages_.size());
             printf("move_seq.size() = %u\n", (uint32_t)this->move_seq_.size());
             printf("\n");
 #endif

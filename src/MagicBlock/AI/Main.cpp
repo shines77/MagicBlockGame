@@ -414,6 +414,7 @@ void solve_magic_block_two_phase_ida()
         else
             solvable = game.stdset_solve(MAX_FORWARD_DEPTH, MAX_BACKWARD_DEPTH);
     }
+    (void)solvable;
     sw.stop();
     double elapsed_time = sw.getElapsedMillisec();
 

@@ -24,23 +24,24 @@
 #include "MagicBlock/AI/Value128.h"
 #include "MagicBlock/AI/Algorithm.h"
 
-#define SPARSEBITSET_USE_INDEX_SORT     1
-#define SPARSEBITSET_USE_TRIE_INFO      0
+#define SPARSEHASHMAP_USE_INDEX_SORT    1
+#define SPARSEHASHMAP_USE_TRIE_INFO     0
 
 namespace MagicBlock {
 namespace AI {
 
-template <typename Board, std::size_t Bits, std::size_t Length>
-class SparseBitset {
+template <typename Key, typename Value, std::size_t Bits, std::size_t Length>
+class SparseHashMap {
 public:
     typedef std::size_t         size_type;
     typedef std::ptrdiff_t      ssize_type;
 
-    typedef Board               board_type;
+    typedef Key                 key_type;
+    typedef value               value_type;
 
-    static const size_type      BoardX = board_type::Y;
-    static const size_type      BoardY = board_type::X;
-    static const size_type      BoardSize = board_type::BoardSize;
+    static const size_type      BoardX = key_type::Y;
+    static const size_type      BoardY = key_type::X;
+    static const size_type      BoardSize = key_type::BoardSize;
 
     static const size_type      kBitMask = (size_type(1) << Bits) - 1;
 
@@ -71,6 +72,8 @@ public:
     };
 
     class Container;
+
+    typedef std::pair<Container *, bool>    insert_return_type;
 
     class IndexArray {
     public:
@@ -113,7 +116,7 @@ public:
         int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t sorted, std::uint16_t value) const {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
-#if SPARSEBITSET_USE_INDEX_SORT
+#if SPARSEHASHMAP_USE_INDEX_SORT
             if (sorted > 0) {
                 int index = Algorithm::binary_search((std::uint16_t *)ptr, 0, sorted, value);
                 if (index != kInvalidIndex32)
@@ -364,13 +367,13 @@ public:
             return this->append(static_cast<std::uint16_t>(value));
         }
 
-        virtual Container * appendLeaf(std::uint16_t value) {
+        virtual Container * appendLeaf(std::uint16_t value, const value_type & leaf_value) {
             // Not implemented!
             return nullptr;
         }
 
-        Container * appendLeaf(std::size_t value) {
-            return this->appendLeaf(static_cast<std::uint16_t>(value));
+        Container * appendLeaf(std::size_t value, const value_type & leaf_value) {
+            return this->appendLeaf(static_cast<std::uint16_t>(value), leaf_value);
         }
 
         virtual int indexOf(std::uint16_t index) const {
@@ -388,6 +391,15 @@ public:
         }
 
         Container * valueOf(size_type index) const {
+            return this->valueOf(static_cast<int>(index));
+        }
+
+        virtual value_type * valueOfLeaf(int index) const {
+            // Not implemented!
+            return nullptr;
+        }
+
+        value_type * valueOfLeaf(size_type index) const {
             return this->valueOf(static_cast<int>(index));
         }
     };
@@ -408,7 +420,7 @@ public:
                     std::uint16_t * newIndexEnd = (std::uint16_t *)new_ptr + newCapacity;
                     Container ** valueFirst = (Container **)indexEnd;
                     Container ** newValueFirst = (Container **)newIndexEnd;
-#if SPARSEBITSET_USE_INDEX_SORT
+#if SPARSEHASHMAP_USE_INDEX_SORT
                     if (this->capacity() <= kArraySizeSortThersold) {
                         std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
                         std::memcpy(newValueFirst, valueFirst, sizeof(Container *) * this->capacity());
@@ -559,7 +571,7 @@ public:
                 uintptr_t * new_ptr = (uintptr_t *)std::malloc(newSize);
                 if (new_ptr != nullptr) {
                     //assert(this->ptr_ != nullptr);
-#if SPARSEBITSET_USE_INDEX_SORT
+#if SPARSEHASHMAP_USE_INDEX_SORT
                     if (this->capacity() <= kArraySizeSortThersold) {
                         std::memcpy(new_ptr, this->ptr_, sizeof(std::uint16_t) * this->capacity());
                     }
@@ -897,7 +909,7 @@ private:
     Container *     root_;
     size_type       size_;
     size_type       y_index_[BoardY];
-#if SPARSEBITSET_USE_TRIE_INFO
+#if SPARSEHASHMAP_USE_TRIE_INFO
     LayerInfo       layer_info_[BoardY];
 #endif
 
@@ -926,11 +938,11 @@ private:
     }
 
 public:
-    SparseBitset() : root_(nullptr), size_(0) {
+    SparseHashMap() : root_(nullptr), size_(0) {
         this->init();
     }
 
-    ~SparseBitset() {
+    ~SparseHashMap() {
         this->destroy();
     }
 
@@ -981,7 +993,7 @@ public:
     }
 
     void destroy_trie() {
-        Container * container = this->root_;
+        Container * container = this->root();
         if (container == nullptr) {
             return;
         }
@@ -999,7 +1011,7 @@ public:
     }
 
     void clear_trie_info() {
-#if SPARSEBITSET_USE_TRIE_INFO
+#if SPARSEHASHMAP_USE_TRIE_INFO
         for (size_type i = 0; i < BoardY; i++) {
             this->layer_info_[i].maxLayerSize = 0;
             this->layer_info_[i].childCount = 0;
@@ -1008,7 +1020,7 @@ public:
 #endif
     }
 
-    size_type get_layer_value(const board_type & board, size_type layer) const {
+    size_type get_layer_value(const key_type & board, size_type layer) const {
         size_type y = this->y_index_[layer];
         ssize_type cell_y = y * BoardX;
         size_type layer_value = 0;
@@ -1019,7 +1031,7 @@ public:
         return layer_value;
     }
 
-    void compose_segment_to_board(board_type & board, const std::uint16_t segment_list[BoardY]) {
+    void compose_segment_to_board(key_type & board, const std::uint16_t segment_list[BoardY]) {
         for (size_type segment = 0; segment < BoardY; segment++) {
             std::uint32_t value = (std::uint32_t)segment_list[segment];
             size_type y = this->y_index_[segment];
@@ -1035,8 +1047,8 @@ public:
         }
     }
 
-    bool contains(const board_type & board) const {
-        Container * container = this->root_;
+    bool contains(const key_type & board) const {
+        Container * container = this->root();
         assert(container != nullptr);
         // Normal container
         size_type layer;
@@ -1066,8 +1078,8 @@ public:
         }
     }
 
-    bool contains(const board_type & board, size_type & last_layer, Container *& last_container) const {
-        Container * container = this->root_;
+    bool contains(const key_type & board, size_type & last_layer, Container *& last_container) const {
+        Container * container = this->root();
         assert(container != nullptr);
         // Normal container
         size_type layer;
@@ -1103,11 +1115,14 @@ public:
         }
     }
 
+protected:
     //
     // Root -> (ArrayContainer)0 -> (ArrayContainer)1 -> (ArrayContainer)2 -> (LeafArrayContainer)3 -> 4444
     //
-    void insert(const board_type & board) {
-        Container * container = this->root_;
+    template <bool OnlyIfAbsent, typename ReturnType>
+    ReturnType insert_unique(const key_type & key, const value_type & value) {
+        assert(this->root() != nullptr);
+        Container * container = this->root();
         assert(container != nullptr);
         bool insert_new = false;
         // Normal container
@@ -1142,19 +1157,33 @@ public:
             if (!insert_new) {
                 bool is_exists = container->hasLeaf(layer_value);
                 if (is_exists) {
-                    return;
+                    if (!OnlyIfAbsent) {
+                        container->updateLeaf(layer_value, value);
+                    }
+                    return ReturnType(container, false);
                 }
             }
-            container->appendLeaf(layer_value);
+            container->appendLeaf(layer_value, value);
             this->size_++;
+            return ReturnType(container, true);
         }
     }
 
-    //
-    // Root -> (ArrayContainer)0 -> (ArrayContainer)1 -> (ArrayContainer)2 -> (LeafArrayContainer)3 -> 4444
-    //
-    bool try_insert(const board_type & board) {
-        Container * container = this->root_;
+public:
+    insert_return_type insert(const key_type & board, const value_type & value) {
+        return this->template insert_unique<true, insert_return_type>(board, value);
+    }
+
+    insert_return_type insert_or_update(const key_type & board, const value_type & value) {
+        return this->template insert_unique<false, insert_return_type>(board, value);
+    }
+
+    insert_return_type try_insert(const key_type & board) {
+        return this->try_insert(board, value_type());
+    }
+
+    insert_return_type try_insert(const key_type & board, const value_type & value) {
+        Container * container = this->root();
         assert(container != nullptr);
         bool insert_new = false;
         // Normal container
@@ -1189,20 +1218,21 @@ public:
             if (!insert_new) {
                 bool is_exists = container->hasLeaf(layer_value);
                 if (is_exists) {
-                    return false;
+                    return insert_return_type(container, false);
                 }
             }
-            container->appendLeaf(layer_value);
+            container->appendLeaf(layer_value, value);
             this->size_++;
-        }
 
-        return true;
+            return insert_return_type(container, true);
+        }
     }
 
     //
     // When using this function, you must ensure that the key does not exist.
     //
-    void always_insert_new(const board_type & board, size_type last_layer, Container * last_container) {
+    void always_insert_new(const key_type & board, , const value_type & value,
+                           size_type last_layer, Container * last_container) {
         Container * container = last_container;
         assert(container != nullptr);
         // Normal container
@@ -1221,18 +1251,18 @@ public:
             size_type layer_value = this->get_layer_value(board, layer);
             assert(container->type() == NodeType::LeafArrayContainer ||
                    container->type() == NodeType::LeafBitmapContainer);
-            container->appendLeaf(layer_value);
+            container->appendLeaf(layer_value, value);
         }
 
         this->size_++;
     }
 
-    bool remove(const board_type & board) {
+    bool remove(const key_type & board) {
         return true;
     }
 
     void count_trie_info_impl(Container * container, size_type layer) {
-#if SPARSEBITSET_USE_TRIE_INFO
+#if SPARSEHASHMAP_USE_TRIE_INFO
         assert(container != nullptr);
         size_type layer_size = container->size();
         if (layer_size > this->layer_info_[layer].maxLayerSize) {
@@ -1255,7 +1285,7 @@ public:
     }
 
     void count_trie_info() {
-#if SPARSEBITSET_USE_TRIE_INFO
+#if SPARSEHASHMAP_USE_TRIE_INFO
         this->clear_trie_info();
 
         Container * container = this->root_;
@@ -1280,10 +1310,10 @@ public:
     }
 
     void display_trie_info() {
-#if SPARSEBITSET_USE_TRIE_INFO
+#if SPARSEHASHMAP_USE_TRIE_INFO
         this->count_trie_info();
 
-        printf("SparseBitset<T> trie info:\n\n");
+        printf("SparseHashMap<T> trie info:\n\n");
         for (size_type i = 0; i < BoardY; i++) {
             printf("[%u]: maxLayerSize = %8u, childCount = %8u, averageSize = %0.2f\n\n",
                    uint32_t(i + 1),

@@ -43,6 +43,7 @@
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle\SlidingUnknownPuzzle.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SlidingPuzzle\SlidingUnknownPuzzle3x3.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\SparseBitset.h" />
+    <ClInclude Include="..\..\..\src\MagicBlock\AI\SparseHashMap.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\Stage.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\StopWatch.h" />
     <ClInclude Include="..\..\..\src\MagicBlock\AI\support\CT_PowerOf2.h" />
