@@ -22,7 +22,7 @@ using namespace jm_malloc;
 
 void SparseTrieBitset_test()
 {
-    MagicBlock::AI::SparseBitset<Board<5, 5>, 3, 25, 1> visited;
+    MagicBlock::AI::SparseBitset<Board<5, 5>, 3, 25> visited;
     Board<5, 5> board;
     board.cells[0] = Color::Blue;
     board.cells[1] = Color::Red;
@@ -54,8 +54,8 @@ void SparseTrieBitset_test()
     board.cells[23] = Color::Blue;
     board.cells[24] = Color::White;
 
-    visited.append(board);
-    visited.append(board);
+    visited.insert(board);
+    visited.insert(board);
 
     visited.shutdown();
 }

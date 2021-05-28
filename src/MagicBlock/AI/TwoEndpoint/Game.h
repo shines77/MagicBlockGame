@@ -1441,8 +1441,8 @@ public:
                     stage_type bw_stage;
 
                     for (size_type i = 0; i < this->segment_list_.size(); i++) {
-                        forward_solver.visited().compose_segments_to_board(this->fw_answer_board_, this->segment_list_[i].fw_segments);
-                        backward_solver.visited().compose_segments_to_board(this->bw_answer_board_, this->segment_list_[i].bw_segments);
+                        forward_solver.visited().compose_segment_to_board(this->fw_answer_board_, this->segment_list_[i].fw_segments);
+                        backward_solver.visited().compose_segment_to_board(this->bw_answer_board_, this->segment_list_[i].bw_segments);
 
                         fw_stage.move_seq.clear();
 

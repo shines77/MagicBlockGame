@@ -798,7 +798,7 @@ public:
         Position first_empty;
         bool found_empty = this->find_empty(this->player_board_, first_empty);
         if (found_empty) {
-            typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2> bitset_type;
+            typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY> bitset_type;
             bitset_type visited;
 
             stage_type start;
@@ -827,7 +827,7 @@ public:
                 start.rotate_type = 0;
                 start.board = this->player_board_;
             }
-            visited.append(start.board);
+            visited.insert(start.board);
 
             std::vector<stage_type> cur_stages;
             std::vector<stage_type> next_stages;
@@ -857,7 +857,7 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
-                        bool insert_new = visited.try_append(next_stage.board);
+                        bool insert_new = visited.try_insert(next_stage.board);
                         if (!insert_new) {
                             continue;
                         }

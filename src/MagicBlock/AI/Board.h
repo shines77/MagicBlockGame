@@ -306,6 +306,11 @@ union Board
         return false;
     }
 
+    template <size_type EmptyColor = Color::Empty>
+    bool find_empty(size_type start_pos, Position & empty_pos) const {
+        return this->template find_color<EmptyColor>(start_pos, empty_pos);
+    }
+
     template <size_type TargetColor = Color::Empty>
     bool find_color(Position & target_pos) const {
         for (size_type pos = 0; pos < BoardSize; pos++) {
@@ -339,11 +344,6 @@ union Board
                 pos_list.push_back(pos);
             }
         }
-    }
-
-    template <size_type EmptyColor = Color::Empty>
-    bool find_empty(size_type start_pos, Position & empty_pos) const {
-        return this->template find_color<EmptyColor>(start_pos, empty_pos);
     }
 
     size_type value() const noexcept {

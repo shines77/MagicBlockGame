@@ -66,7 +66,7 @@ public:
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
-    typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 2>  bitset_type;
+    typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY>     bitset_type;
     typedef std::set<Value128>                                          stdset_type;
     typedef std::unordered_set<Value128, Value128_Hash>                 stdset_type_;
     typedef std::unordered_set<Value128, Value128_Hash>                 std_hashset_t;
@@ -74,6 +74,8 @@ public:
 private:
     bitset_type visited_;
     stdset_type visited_set_;
+
+    bitset_type phase1_cache_;
 
     std::vector<stage_type> curr_stages_;
     std::vector<stage_type> next_stages_;
@@ -174,6 +176,121 @@ public:
         return false;
     }
 
+    static const size_type MAX_PHASE1_PREPARE_DEPTH = 18;
+
+    void bitset_prepare(size_type max_depth) {
+        max_depth = std::min(max_depth, MAX_PHASE1_PREPARE_DEPTH);
+
+        std::vector<stage_type> curr_stages;
+        std::vector<stage_type> next_stages;
+
+        for (size_type i = 0; i < this->target_len_; i++) {
+            for (size_type j = 0; j < kMaxPhase1Type; j++) {
+                std::vector<Position> unknown_list;
+                this->player_board_[i][j].template find_all_color<Color::Unknown>(unknown_list);
+
+                for (size_type n = 0; n < unknown_list.size(); n++) {
+                    Position empty_pos = unknown_list[n];
+                    assert(this->player_board_[i][j].cells[empty_pos] == Color::Unknown);
+                    // Setting empty color
+                    this->player_board_[i][j].cells[empty_pos] = Color::Empty;
+
+                    stage_type start;
+                    start.board = this->player_board_[i][j];
+                    start.empty_pos = empty_pos;
+                    start.last_dir = uint8_t((empty_pos.value << 2) | 0x03);
+                    start.rotate_type = uint8_t((i & 0x03U) | ((j & 0x0FU) << 2U));
+
+                    // Restore unknown color
+                    this->player_board_[i][j].cells[empty_pos] = Color::Unknown;
+
+                    bool insert_new = this->phase1_cache_.try_insert(start.board);
+                    if (!insert_new) {
+                        continue;
+                    }
+                    curr_stages.push_back(start);
+                }
+            }
+        }
+
+        while (this->curr_stages_.size() > 0) {
+            for (size_type i = 0; i < this->curr_stages_.size(); i++) {
+                stage_type & stage = this->curr_stages_[i];
+
+                uint8_t empty_pos = stage.empty_pos;
+                const can_move_list_t & can_moves = this->data_->can_moves[empty_pos];
+                size_type total_moves = can_moves.size();
+                for (size_type n = 0; n < total_moves; n++) {
+                    uint8_t cur_dir = can_moves[n].dir;
+                    assert(cur_dir >= 0 && cur_dir < Dir::Maximum);
+                    if ((cur_dir == (stage.last_dir & 0x03)) && (depth != 0))
+                        continue;
+
+                    uint8_t move_pos = can_moves[n].pos;
+#if STAGES_USE_EMPLACE_PUSH
+                    std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
+
+                    bool insert_new = this->phase1_cache_.try_insert(stage.board);
+                    if (!insert_new) {
+                        std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
+                        continue;
+                    }
+
+                    this->next_stages_.emplace_back(stage.board, move_pos, cur_dir, stage.rotate_type, stage.move_seq);
+
+                    std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
+#else
+                    stage_type next_stage(stage.board);
+                    std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
+
+                    bool insert_new = this->phase1_cache_.try_insert(next_stage.board);
+                    if (!insert_new) {
+                        continue;
+                    }
+
+                    next_stage.empty_pos = move_pos;
+                    next_stage.last_dir = ((stage.last_dir) & 0xFC) | Dir::opp_dir(cur_dir);
+                    next_stage.rotate_type = stage.rotate_type;
+                    next_stage.move_seq = stage.move_seq;
+                    next_stage.move_seq.push_back(cur_dir);
+
+                    next_stages.push_back(std::move(next_stage));
+#endif // STAGES_USE_EMPLACE_PUSH
+                }
+            }
+
+            depth++;
+            printf("Phase1Solver:: depth = %u\n", (uint32_t)depth);
+            printf("cur.size() = %u, next.size() = %u\n",
+                    (uint32_t)(curr_stages.size()), (uint32_t)(next_stages.size()));
+            printf("visited.size() = %u\n\n", (uint32_t)(this->phase1_cache_.size()));
+
+            size_type next_capacity = calc_next_capacity();
+            std::swap(curr_stages, next_stages);
+            next_stages.clear();
+            next_stages.reserve(next_capacity);
+
+            if (depth >= max_depth || this->curr_stages_.size() == 0) {
+                break;
+            }
+        }
+
+        this->map_used_ = this->phase1_cache_.size();
+
+        if (result == 1) {
+            printf("Solvable: %s\n\n", ((result == 1) ? "true" : "false"));
+            printf("next.size() = %u\n", (uint32_t)curr_stages.size());
+            printf("move_seq.size() = %u\n", (uint32_t)this->best_move_seq_.size());
+            printf("\n");
+        }
+
+        this->phase1_cache_.display_trie_info();
+    }
+
+    int bitset_search(size_type max_depth, size_type time_limit) {
+        int result = 0;
+    }
+
     int stdset_solve(size_type depth, size_type max_depth) {
         int result = 0;
         if (depth == 0) {
@@ -197,7 +314,7 @@ public:
                         // Restore unknown color
                         this->player_board_[i][j].cells[empty_pos] = Color::Unknown;
 
-                        bool insert_new = this->visited_.try_append(start.board);
+                        bool insert_new = this->visited_.try_insert(start.board);
                         if (!insert_new) {
                             continue;
                         }
@@ -293,7 +410,7 @@ public:
                         // Restore unknown color
                         this->player_board_[i][j].cells[empty_pos] = Color::Unknown;
 
-                        bool insert_new = this->visited_.try_append(start.board);
+                        bool insert_new = this->visited_.try_insert(start.board);
                         if (!insert_new) {
                             continue;
                         }
@@ -323,7 +440,7 @@ public:
 #if STAGES_USE_EMPLACE_PUSH
                         std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
 
-                        bool insert_new = this->visited_.try_append(stage.board);
+                        bool insert_new = this->visited_.try_insert(stage.board);
                         if (!insert_new) {
                             std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
                             continue;
@@ -336,7 +453,7 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
-                        bool insert_new = this->visited_.try_append(next_stage.board);
+                        bool insert_new = this->visited_.try_insert(next_stage.board);
                         if (!insert_new) {
                             continue;
                         }
@@ -404,7 +521,7 @@ public:
                     // Restore unknown color
                     this->player_board_[i][j].cells[empty_pos] = Color::Unknown;
 
-                    bool insert_new = this->visited_.try_append(start.board);
+                    bool insert_new = this->visited_.try_insert(start.board);
                     if (!insert_new) {
                         continue;
                     }
@@ -439,7 +556,7 @@ public:
                     stage_type next_stage(stage.board);
                     std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
-                    bool insert_new = this->visited_.try_append(next_stage.board);
+                    bool insert_new = this->visited_.try_insert(next_stage.board);
                     if (!insert_new) {
                         continue;
                     }

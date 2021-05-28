@@ -67,7 +67,7 @@ public:
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
-    typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY, 1>  bitset_type;
+    typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY>     bitset_type;
     typedef std::set<Value128>                                          stdset_type;
     typedef std::unordered_set<Value128, Value128_Hash>                 stdset_type_;
     typedef std::unordered_set<Value128, Value128_Hash>                 std_hashset_t;
@@ -295,7 +295,7 @@ public:
                 start.rotate_type = 0;
                 start.board = this->player_board_;
 
-                this->visited_.append(start.board);
+                this->visited_.insert(start.board);
                 this->curr_stages_.push_back(start);
             }
         }
@@ -319,7 +319,7 @@ public:
 #if STAGES_USE_EMPLACE_PUSH
                         std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
 
-                        bool insert_new = this->visited_.try_append(stage.board);
+                        bool insert_new = this->visited_.try_insert(stage.board);
                         if (!insert_new) {
                             std::swap(stage.board.cells[empty_pos], stage.board.cells[move_pos]);
                             continue;
@@ -332,7 +332,7 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
-                        bool insert_new = this->visited_.try_append(next_stage.board);
+                        bool insert_new = this->visited_.try_insert(next_stage.board);
                         if (!insert_new) {
                             continue;
                         }
@@ -396,7 +396,7 @@ public:
             start.rotate_type = 0;
             start.board = this->player_board_;
 
-            this->visited_.append(start.board);
+            this->visited_.insert(start.board);
             this->curr_stages_.push_back(start);
 
             bool exit = false;
@@ -417,7 +417,7 @@ public:
                         stage_type next_stage(stage.board);
                         std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
-                        bool insert_new = this->visited_.try_append(next_stage.board);
+                        bool insert_new = this->visited_.try_insert(next_stage.board);
                         if (!insert_new) {
                             continue;
                         }

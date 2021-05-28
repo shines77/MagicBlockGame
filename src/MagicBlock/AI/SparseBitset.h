@@ -30,7 +30,7 @@
 namespace MagicBlock {
 namespace AI {
 
-template <typename Board, std::size_t Bits, std::size_t Length, std::size_t PoolId = 0>
+template <typename Board, std::size_t Bits, std::size_t Length>
 class SparseBitset {
 public:
     typedef std::size_t         size_type;
@@ -71,85 +71,6 @@ public:
     };
 
     class Container;
-
-    class IndexVector {
-    private:
-        std::vector<std::uint16_t> array_;
-
-    public:
-        IndexVector() noexcept {}
-        ~IndexVector() {}
-
-        size_type size() const {
-            return this->array_.size();
-        }
-
-        void reserve(size_type capacity) {
-            this->array_.reserve(capacity);
-        }
-
-        void resize(size_type newSize) {
-            this->array_.resize(newSize, kInvalidIndex);
-        }
-
-        int indexOf(std::uint16_t value) const {
-            assert(value != kInvalidIndex);
-            assert(this->array_.size() <= kArraySizeThreshold);
-            if (this->array_.size() > 0) {
-                int index = 0;
-                for (auto & iter : this->array_) {
-                    assert(iter != kInvalidIndex);
-                    if (iter != value)
-                        index++;
-                    else
-                        return index;                    
-                }
-            }
-            return kInvalidIndex32;
-        }
-
-        void append(std::uint16_t value) {
-            assert(this->array_.size() <= kArraySizeThreshold);
-            assert(this->array_.size() <= kMaxArraySize);
-            this->array_.push_back(value);
-        }
-    };
-
-    class ValueVector {
-    private:
-        std::vector<Container *> array_;
-
-    public:
-        ValueVector() noexcept {}
-        ~ValueVector() {}
-
-        size_type size() const {
-            return this->array_.size();
-        }
-
-        void reserve(size_type capacity) {
-            this->array_.reserve(capacity);
-        }
-
-        void resize(size_type newSize) {
-            this->array_.resize(newSize, nullptr);
-        }
-
-        Container * valueOf(int index) const {
-            assert(index != (int)kInvalidIndex);
-            assert(index != kInvalidIndex32);
-            assert(index >= 0 && index < (int)kInvalidIndex);
-            assert(this->array_.size() <= kMaxArraySize);
-            return this->array_[index];
-        }
-
-        void append(Container * container) {
-            assert(container != nullptr);
-            assert(this->array_.size() <= kArraySizeThreshold);
-            assert(this->array_.size() <= kMaxArraySize);
-            this->array_.push_back(container);
-        }
-    };
 
     class IndexArray {
     public:
@@ -1098,7 +1019,7 @@ public:
         return layer_value;
     }
 
-    void compose_segments_to_board(board_type & board, const std::uint16_t segment_list[BoardY]) {
+    void compose_segment_to_board(board_type & board, const std::uint16_t segment_list[BoardY]) {
         for (size_type segment = 0; segment < BoardY; segment++) {
             std::uint32_t value = (std::uint32_t)segment_list[segment];
             size_type y = this->y_index_[segment];
@@ -1185,7 +1106,7 @@ public:
     //
     // Root -> (ArrayContainer)0 -> (ArrayContainer)1 -> (ArrayContainer)2 -> (LeafArrayContainer)3 -> 4444
     //
-    void append(const board_type & board) {
+    void insert(const board_type & board) {
         Container * container = this->root_;
         assert(container != nullptr);
         bool insert_new = false;
@@ -1232,7 +1153,7 @@ public:
     //
     // Root -> (ArrayContainer)0 -> (ArrayContainer)1 -> (ArrayContainer)2 -> (LeafArrayContainer)3 -> 4444
     //
-    bool try_append(const board_type & board) {
+    bool try_insert(const board_type & board) {
         Container * container = this->root_;
         assert(container != nullptr);
         bool insert_new = false;
@@ -1278,7 +1199,7 @@ public:
         return true;
     }
 
-    void append_new(const board_type & board, size_type last_layer, Container * last_container) {
+    void insert_new(const board_type & board, size_type last_layer, Container * last_container) {
         Container * container = last_container;
         assert(container != nullptr);
         // Normal container
