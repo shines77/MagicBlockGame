@@ -279,35 +279,11 @@ union Board
         return true;
     }
 
-    template <size_type TargetColor = Color::Empty>
-    bool find_color(Position & target_pos) const {
-        for (size_type pos = 0; pos < BoardSize; pos++) {
-            uint8_t clr = board.cells[pos];
-            if (clr == TargetColor) {
-                target_pos = pos;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    template <size_type TargetColor = Color::Empty>
-    bool find_color(size_type start_pos, Position & target_pos) const {
-        for (size_type pos = start_pos; pos < BoardSize; pos++) {
-            uint8_t clr = board.cells[pos];
-            if (clr == TargetColor) {
-                target_pos = pos;
-                return true;
-            }
-        }
-        return false;
-    }
-
     bool find_empty(Position & empty_pos) const {
         for (size_type y = 0; y < BoardY; y++) {
             for (size_type x = 0; x < BoardX; x++) {
-                uint8_t color = this->cells[y * BoardX + x];
-                if (color == Color::Empty) {
+                uint8_t clr = this->cells[y * BoardX + x];
+                if (clr == Color::Empty) {
                     empty_pos = (uint8_t)(y * BoardX + x);
                     return true;
                 }
@@ -328,6 +304,41 @@ union Board
             }
         }
         return false;
+    }
+
+    template <size_type TargetColor = Color::Empty>
+    bool find_color(Position & target_pos) const {
+        for (size_type pos = 0; pos < BoardSize; pos++) {
+            uint8_t clr = this->cells[pos];
+            if (clr == TargetColor) {
+                target_pos = pos;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    template <size_type TargetColor = Color::Empty>
+    bool find_color(size_type start_pos, Position & target_pos) const {
+        for (size_type pos = start_pos; pos < BoardSize; pos++) {
+            uint8_t clr = this->cells[pos];
+            if (clr == TargetColor) {
+                target_pos = pos;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    template <size_type TargetColor = Color::Empty>
+    void find_all_color(std::vector<Position> & pos_list) const {
+        pos_list.clear();
+        for (size_type pos = 0; pos < BoardSize; pos++) {
+            uint8_t clr = this->cells[pos];
+            if (clr == TargetColor) {
+                pos_list.push_back(pos);
+            }
+        }
     }
 
     template <size_type EmptyColor = Color::Empty>

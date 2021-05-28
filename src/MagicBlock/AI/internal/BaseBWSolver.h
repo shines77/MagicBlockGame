@@ -215,16 +215,6 @@ protected:
         return board.template find_color<Color::Unknown>(start_pos, unknown_pos);
     }
 
-    void find_all_colors(const Board<BoardX, BoardY> & board,
-                         size_type color, std::vector<Position> & pos_list) {
-        for (size_type pos = 0; pos < BoardSize; pos++) {
-            uint8_t clr = board.cells[pos];
-            if (clr == color) {
-                pos_list.push_back(pos);
-            }
-        }
-    }
-
     void count_partial_color_nums(const Board<BoardX, BoardY> & board,
                                   size_type firstX, size_type lastX,
                                   size_type firstY, size_type lastY) {

@@ -179,7 +179,7 @@ public:
         if (depth == 0) {
             for (size_type i = 0; i < this->target_len_; i++) {
                 std::vector<Position> unknown_list;
-                this->find_all_colors(this->player_board_[i], Color::Unknown, unknown_list);
+                this->player_board_[i].template find_all_color<Color::Unknown>(unknown_list);
 
                 for (size_type n = 0; n < unknown_list.size(); n++) {
                     Position empty_pos = unknown_list[n];
@@ -273,7 +273,7 @@ public:
         if (depth == 0) {
             for (size_type i = 0; i < this->target_len_; i++) {
                 std::vector<Position> unknown_list;
-                this->find_all_colors(this->player_board_[i], Color::Unknown, unknown_list);
+                this->player_board_[i].template find_all_color<Color::Unknown>(unknown_list);
 
                 for (size_type n = 0; n < unknown_list.size(); n++) {
                     Position empty_pos = unknown_list[n];
@@ -381,7 +381,7 @@ public:
 
         for (size_type i = 0; i < this->target_len_; i++) {
             std::vector<Position> unknown_list;
-            this->find_all_colors(this->player_board_[i], Color::Unknown, unknown_list);
+            this->player_board_[i].template find_all_color<Color::Unknown>(unknown_list);
 
             for (size_type n = 0; n < unknown_list.size(); n++) {
                 Position empty_pos = unknown_list[n];

@@ -180,7 +180,7 @@ public:
             for (size_type i = 0; i < this->target_len_; i++) {
                 for (size_type j = 0; j < kMaxPhase1Type; j++) {
                     std::vector<Position> unknown_list;
-                    this->find_all_colors(this->player_board_[i][j], Color::Unknown, unknown_list);
+                    this->player_board_[i][j].template find_all_color<Color::Unknown>(unknown_list);
 
                     for (size_type n = 0; n < unknown_list.size(); n++) {
                         Position empty_pos = unknown_list[n];
@@ -276,7 +276,7 @@ public:
             for (size_type i = 0; i < this->target_len_; i++) {
                 for (size_type j = 0; j < kMaxPhase1Type; j++) {
                     std::vector<Position> unknown_list;
-                    this->find_all_colors(this->player_board_[i][j], Color::Unknown, unknown_list);
+                    this->player_board_[i][j].template find_all_color<Color::Unknown>(unknown_list);
 
                     for (size_type n = 0; n < unknown_list.size(); n++) {
                         Position empty_pos = unknown_list[n];
@@ -387,7 +387,7 @@ public:
         for (size_type i = 0; i < this->target_len_; i++) {
             for (size_type j = 0; j < kMaxPhase1Type; j++) {
                 std::vector<Position> unknown_list;
-                this->find_all_colors(this->player_board_[i][j], Color::Unknown, unknown_list);
+                this->player_board_[i][j].template find_all_color<Color::Unknown>(unknown_list);
 
                 for (size_type n = 0; n < unknown_list.size(); n++) {
                     Position empty_pos = unknown_list[n];
