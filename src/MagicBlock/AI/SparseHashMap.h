@@ -81,45 +81,35 @@ public:
         IndexArray() noexcept {}
         ~IndexArray() {}
 
-        size_type size() const {
-            return 0;
-        }
-
-        void reserve(size_type capacity) {
-        }
-
-        void resize(size_type newSize) {
-        }
-
-        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) {
+        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t id) {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
-            std::uint16_t * target = (std::uint16_t *)ptr + size;
-            assert(target != nullptr);
-            *target = value;
+            std::uint16_t * pid = (std::uint16_t *)ptr + size;
+            assert(pid != nullptr);
+            *pid = id;
         }
 
-        int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) const {
+        int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t id) const {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
-            std::uint16_t * indexFirst = (std::uint16_t *)ptr;
-            std::uint16_t * indexLast  = (std::uint16_t *)ptr + size;
-            for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
-                assert(*indexs != kInvalidIndex);
-                if (*indexs != value)
+            std::uint16_t * idFirst = (std::uint16_t *)ptr;
+            std::uint16_t * idLast  = (std::uint16_t *)ptr + size;
+            for (std::uint16_t * pid = idFirst; pid < idLast; pid++) {
+                assert(*pid != kInvalidIndex);
+                if (*pid != id)
                     continue;
                 else
-                    return int(indexs - indexFirst);
+                    return int(pid - idFirst);
             }
             return kInvalidIndex32;
         }
 
-        int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t sorted, std::uint16_t value) const {
+        int indexOf(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t sorted, std::uint16_t id) const {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
 #if SPARSEHASHMAP_USE_INDEX_SORT
             if (sorted > 0) {
-                int index = Algorithm::binary_search((std::uint16_t *)ptr, 0, sorted, value);
+                int index = Algorithm::binary_search((std::uint16_t *)ptr, 0, sorted, id);
                 if (index != kInvalidIndex32)
                     return index;
             }
@@ -127,33 +117,33 @@ public:
             assert(sorted <= size);
 #if MBG_USE_AVX2
             if (sorted < size)
-                return (int)(Algorithm::find_uint16_avx2((std::uint16_t *)ptr, sorted, size, value));
+                return (int)(Algorithm::find_uint16_avx2((std::uint16_t *)ptr, sorted, size, id));
             else
                 return kInvalidIndex32;
 #elif MBG_USE_SSE2
             if (sorted < size)
-                return (int)(Algorithm::find_uint16_sse2((std::uint16_t *)ptr, sorted, size, value));
+                return (int)(Algorithm::find_uint16_sse2((std::uint16_t *)ptr, sorted, size, id));
             else
                 return kInvalidIndex32;
 #else
-            std::uint16_t * indexFirst = (std::uint16_t *)ptr + sorted;
-            std::uint16_t * indexLast  = (std::uint16_t *)ptr + size;
-            for (std::uint16_t * indexs = indexFirst; indexs < indexLast; indexs++) {
-                assert(*indexs != kInvalidIndex);
-                if (*indexs != value)
+            std::uint16_t * idFirst = (std::uint16_t *)ptr + sorted;
+            std::uint16_t * idLast  = (std::uint16_t *)ptr + size;
+            for (std::uint16_t * pid = idFirst; pid < idLast; pid++) {
+                assert(*pid != kInvalidIndex);
+                if (*pid != id)
                     continue;
                 else
-                    return int(indexs - (std::uint16_t *)ptr);
+                    return int(pid - (std::uint16_t *)ptr);
             }
             return kInvalidIndex32;
 #endif
         }
 
-        std::uint16_t valueOf(std::uintptr_t * ptr, std::uint16_t index) const {
+        std::uint16_t getValue(std::uintptr_t * ptr, std::uint16_t index) const {
             assert(index != kInvalidIndex);
             assert(index >= 0 && index < (std::uint16_t)kMaxArraySize);
-            std::uint16_t * value = (std::uint16_t *)ptr + index;
-            return *value;
+            std::uint16_t * pid = (std::uint16_t *)ptr + index;
+            return *pid;
         }
     };
 
@@ -168,14 +158,37 @@ public:
         ValueArray() noexcept {}
         ~ValueArray() {}
 
-        size_type size() const {
-            return 0;
+        pointer getValue(std::uintptr_t * ptr, int index) const {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)kMaxArraySize);
+            pointer data = reinterpret_cast<pointer>(ptr) + index;
+            return data;
         }
 
-        void reserve(size_type capacity) {
+        pointer getValue(std::uintptr_t * ptr, std::uint16_t capacity, int index) const {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)capacity);
+            assert(capacity <= std::uint16_t(kMaxArraySize));
+            std::uint16_t * idEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
+            pointer data = reinterpret_cast<pointer>(idEnd) + index;
+            return data;
         }
 
-        void resize(size_type newSize) {
+        void setValue(std::uintptr_t * ptr, int index, const value_type & value) {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)kMaxArraySize);
+            pointer data = reinterpret_cast<pointer>(ptr) + index;
+            assert(data != nullptr);
+            *data = value;
+        }
+
+        void setValue(std::uintptr_t * ptr, std::uint16_t capacity, int index, const value_type & value) {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)kMaxArraySize);
+            std::uint16_t * idEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
+            pointer data = reinterpret_cast<pointer>(idEnd) + index;
+            assert(data != nullptr);
+            *data = value;
         }
 
         void append(std::uintptr_t * ptr, std::uint16_t size, const value_type & value) {
@@ -185,29 +198,13 @@ public:
             *data = value;
         }
 
-        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t capacity, const value_type & value) {
+        void append(std::uintptr_t * ptr, std::uint16_t capacity, std::uint16_t size, const value_type & value) {
             assert(size <= std::uint16_t(kMaxArraySize));
             assert(size <= capacity);
-            std::uint16_t * indexEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
-            pointer data = reinterpret_cast<pointer>(indexEnd) + size;
+            std::uint16_t * idEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
+            pointer data = reinterpret_cast<pointer>(idEnd) + size;
             assert(data != nullptr);
             *data = value;
-        }
-
-        value_type & valueOf(std::uintptr_t * ptr, int index) const {
-            assert(index != kInvalidIndex32);
-            assert(index >= 0 && index < (int)kMaxArraySize);
-            pointer data = reinterpret_cast<pointer>(ptr) + index;
-            return *data;
-        }
-
-        value_type & valueOf(std::uintptr_t * ptr, std::uint16_t capacity, int index) const {
-            assert(index != kInvalidIndex32);
-            assert(index >= 0 && index < (int)capacity);
-            assert(capacity <= std::uint16_t(kMaxArraySize));
-            std::uint16_t * indexEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
-            pointer data = reinterpret_cast<pointer>(indexEnd) + index;
-            return *data;
         }
     };
 
@@ -222,14 +219,37 @@ public:
         ValueArray() noexcept {}
         ~ValueArray() {}
 
-        size_type size() const {
-            return 0;
+        value_type getValue(std::uintptr_t * ptr, int index) const {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)kMaxArraySize);
+            pointer data = reinterpret_cast<pointer>(ptr) + index;
+            return *data;
         }
 
-        void reserve(size_type capacity) {
+        value_type getValue(std::uintptr_t * ptr, std::uint16_t capacity, int index) const {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)capacity);
+            assert(capacity <= std::uint16_t(kMaxArraySize));
+            std::uint16_t * idEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
+            pointer data = reinterpret_cast<pointer>(idEnd) + index;
+            return *data;
         }
 
-        void resize(size_type newSize) {
+        void setValue(std::uintptr_t * ptr, int index, value_type value) {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)kMaxArraySize);
+            pointer data = reinterpret_cast<pointer>(ptr) + index;
+            assert(data != nullptr);
+            *data = value;
+        }
+
+        void setValue(std::uintptr_t * ptr, std::uint16_t capacity, int index, value_type value) {
+            assert(index != kInvalidIndex32);
+            assert(index >= 0 && index < (int)kMaxArraySize);
+            std::uint16_t * idEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
+            pointer data = reinterpret_cast<pointer>(idEnd) + index;
+            assert(data != nullptr);
+            *data = value;
         }
 
         void append(std::uintptr_t * ptr, std::uint16_t size, value_type value) {
@@ -239,29 +259,13 @@ public:
             *data = value;
         }
 
-        void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t capacity, value_type value) {
+        void append(std::uintptr_t * ptr, std::uint16_t capacity, std::uint16_t size, value_type value) {
             assert(size <= std::uint16_t(kMaxArraySize));
             assert(size <= capacity);
-            std::uint16_t * indexEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
-            pointer data = reinterpret_cast<pointer>(indexEnd) + size;
+            std::uint16_t * idEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
+            pointer data = reinterpret_cast<pointer>(idEnd) + size;
             assert(data != nullptr);
             *data = value;
-        }
-
-        value_type valueOf(std::uintptr_t * ptr, int index) const {
-            assert(index != kInvalidIndex32);
-            assert(index >= 0 && index < (int)kMaxArraySize);
-            pointer data = reinterpret_cast<pointer>(ptr) + index;
-            return *data;
-        }
-
-        value_type valueOf(std::uintptr_t * ptr, std::uint16_t capacity, int index) const {
-            assert(index != kInvalidIndex32);
-            assert(index >= 0 && index < (int)capacity);
-            assert(capacity <= std::uint16_t(kMaxArraySize));
-            std::uint16_t * indexEnd = reinterpret_cast<std::uint16_t *>(ptr) + capacity;
-            pointer data = reinterpret_cast<pointer>(indexEnd) + index;
-            return *data;
         }
     };
 
@@ -361,10 +365,10 @@ public:
             // Not implemented!
         }
 
-        void allocate(size_type size, size_type capacity) {
+        void allocate(size_type allocSize, size_type capacity) {
             assert(this->ptr_ == nullptr);
             assert(capacity != this->capacity());
-            this->ptr_ = (uintptr_t *)std::malloc(size);
+            this->ptr_ = (uintptr_t *)std::malloc(allocSize);
             this->capacity_ = std::uint16_t(capacity);
         }
 
@@ -510,15 +514,6 @@ public:
             return false;
         }
 
-        virtual bool hasLeaf(std::uint16_t id) const {
-            // Not implemented!
-            return false;
-        }
-
-        bool hasLeaf(std::size_t id) const {
-            return this->hasLeaf(static_cast<std::uint16_t>(id));
-        }
-
         void append(std::uint16_t id, IContainer * container) override {
             // Not implemented!
         }
@@ -528,7 +523,7 @@ public:
             return kInvalidIndex;
         }
 
-        IContainer * valueOf(int id) const override {
+        IContainer * valueOf(int index) const override {
             // Not implemented!
             return nullptr;
         }
@@ -565,9 +560,8 @@ public:
         }
 
         bool isExists(std::uint16_t id) const {
-            value_type * value;
-            int index = this->indexOf(id, value);
-            return (index != kInvalidIndex && value != nullptr);
+            int index = this->hasValue(id);
+            return (index != kInvalidIndex);
         }
 
         bool isExists(size_type id) const {
@@ -651,18 +645,18 @@ public:
             return kInvalidIndex;
         }
 
-        IContainer * valueOf(int id) const override {
+        IContainer * valueOf(int index) const override {
             // Not implemented!
             return nullptr;
         }
 
-        virtual value_type * valueOfData(int id) const {
+        virtual value_type * valueOfData(int index) const {
             // Not implemented!
             return nullptr;
         }
 
-        value_type * valueOfData(size_type id) const {
-            return this->valueOfData(static_cast<int>(id));
+        value_type * valueOfData(size_type index) const {
+            return this->valueOfData(static_cast<int>(index));
         }
     };
 
@@ -724,7 +718,6 @@ public:
 
     public:
         ArrayContainer() noexcept : Container(NodeType::ArrayContainer) {
-            this->init();
         }
         ArrayContainer(const ArrayContainer & src) = delete;
 
@@ -752,7 +745,7 @@ public:
             int index = this->indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, id);
             assert(index >= kInvalidIndex32);
             if (index != kInvalidIndex32) {
-                IContainer * child = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
+                IContainer * child = this->valueArray_.getValue(this->ptr_, this->capacity_, index);
                 return child;
             }
             return nullptr;
@@ -768,15 +761,11 @@ public:
             int index = this->indexArray_.indexOf(this->ptr_, this->size_, this->sorted_, id);
             assert(index >= kInvalidIndex32);
             if (index != kInvalidIndex32) {
-                IContainer * nextChild = this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
+                IContainer * nextChild = this->valueArray_.getValue(this->ptr_, this->capacity_, index);
                 assert(nextChild != nullptr);
                 child = nextChild;
                 return true;
             }
-            return false;
-        }
-
-        bool hasLeaf(std::uint16_t value) const final {
             return false;
         }
 
@@ -794,12 +783,12 @@ public:
 
         int indexOf(std::uint16_t index) const final {
             assert(index < this->size_);
-            return this->indexArray_.valueOf(this->ptr_, index);
+            return this->indexArray_.getValue(this->ptr_, index);
         }
 
         IContainer * valueOf(int index) const final {
             assert(index < (int)this->size_);
-            return this->valueArray_.valueOf(this->ptr_, this->capacity_, index);
+            return this->valueArray_.getValue(this->ptr_, this->capacity_, index);
         }
     };
 
@@ -852,7 +841,6 @@ public:
 
     public:
         LeafArrayContainer() noexcept : LeafContainer(NodeType::LeafArrayContainer) {
-            this->init();
         }
         LeafArrayContainer(const LeafArrayContainer & src) = delete;
 
@@ -906,11 +894,12 @@ public:
             assert(this->size() <= kArraySizeThreshold);
             assert(this->size() <= kMaxArraySize);
             this->indexArray_.append(this->ptr_, this->size_, id);
+            return nullptr;
         }
 
         int indexOf(std::uint16_t index) const final {
             assert(index < this->size_);
-            return this->indexArray_.valueOf(this->ptr_, index);
+            return this->indexArray_.getValue(this->ptr_, index);
         }
 
         IContainer * valueOf(int index) const final {
@@ -919,7 +908,7 @@ public:
 
         value_type * valueOfData(int index) const final {
             assert(index < (int)this->size_);
-            return this->valueArray_.valueOf(this->ptr_, index);
+            return this->valueArray_.getValue(this->ptr_, index);
         }
     };
 
@@ -929,7 +918,7 @@ public:
         ValueArray<IContainer *>    valueArray_;
 
         void init() {
-            size_type allocSize = (sizeof(Container *)) * kMaxArraySize;
+            size_type allocSize = sizeof(Container *) * kMaxArraySize;
             this->allocate(allocSize, kMaxArraySize);
         }
 
@@ -955,19 +944,19 @@ public:
             // Do nothing !!
         }
 
-        IContainer * getChild(std::uint16_t value) const final {
-            bool exists = this->bitset_.test(value);
+        IContainer * getChild(std::uint16_t id) const final {
+            bool exists = this->bitset_.test(id);
             if (exists) {
-                IContainer * child = this->valueArray_.valueOf(this->ptr_, value);
+                IContainer * child = this->valueArray_.getValue(this->ptr_, id);
                 return child;
             }
             return nullptr;
         }
 
-        bool hasChild(std::uint16_t value, IContainer *& child) const final {
-            bool exists = this->bitset_.test(value);
+        bool hasChild(std::uint16_t id, IContainer *& child) const final {
+            bool exists = this->bitset_.test(id);
             if (exists) {
-                IContainer * nextChild = this->valueArray_.valueOf(this->ptr_, value);
+                IContainer * nextChild = this->valueArray_.getValue(this->ptr_, id);
                 assert(nextChild != nullptr);
                 child = nextChild;
                 return true;
@@ -975,25 +964,21 @@ public:
             return false;
         }
 
-        bool hasLeaf(std::uint16_t value) const final {
-            return false;
-        }
-
-        void append(std::uint16_t value, IContainer * container) final {
-            this->bitset_.set(value);
-            this->valueArray_.append(this->ptr_, value, container);
+        void append(std::uint16_t id, IContainer * container) final {
+            this->bitset_.set(id);
+            this->valueArray_.append(this->ptr_, id, container);
             this->size_++;
         }
 
-        int indexOf(std::uint16_t index) const final {
-            bool exists = this->bitset_.test(index);
-            return (exists ? index : kInvalidIndex32);
+        int indexOf(std::uint16_t id) const final {
+            bool exists = this->bitset_.test(id);
+            return (exists ? id : kInvalidIndex32);
         }
 
         IContainer * valueOf(int index) const final {
             bool exists = this->bitset_.test(index);
             if (exists)
-                return this->valueArray_.valueOf(this->ptr_, index);
+                return this->valueArray_.getValue(this->ptr_, index);
             else
                 return nullptr;
         }
@@ -1005,7 +990,8 @@ public:
         ValueArray<value_type>      valueArray_;
 
         void init() {
-            // Do nothing !!
+            size_type allocSize = sizeof(value_type) * kMaxArraySize;
+            this->allocate(allocSize, kMaxArraySize);
         }
 
     public:
@@ -1035,23 +1021,38 @@ public:
             return nullptr;
         }
 
-        bool hasChild(std::uint16_t value, IContainer *& child) const final {
+        bool hasChild(std::uint16_t id, IContainer *& child) const final {
             child = nullptr;
-            return this->hasLeaf(value);
+            return this->hasValue(id);
         }
 
-        bool hasLeaf(std::uint16_t value) const final {
-            return this->bitset_.test(value);
+        bool hasValue(std::uint16_t id) const final {
+            return this->bitset_.test(id);
         }
 
-        void append(std::uint16_t value, IContainer * container) final {
-            this->bitset_.set(value);
+        void append(std::uint16_t id, IContainer * container) final {
+            this->bitset_.set(id);
             this->size_++;
         }
 
-        int indexOf(std::uint16_t index) const final {
-            bool exists = this->bitset_.test(index);
-            return (exists ? index : kInvalidIndex32);
+        value_type * appendValue(std::uint16_t id, const value_type & value) final {
+            assert(this->size() <= kArraySizeThreshold);
+            assert(this->size() <= kMaxArraySize);
+            this->bitset_.set(id);
+            this->size_++;
+            return nullptr;
+        }
+
+        value_type * updateValue(std::uint16_t id, const value_type & value) final {
+            assert(this->size() <= kArraySizeThreshold);
+            assert(this->size() <= kMaxArraySize);
+            this->indexArray_.setValue(this->ptr_, this->size_, id, value);
+            return nullptr;
+        }
+
+        int indexOf(std::uint16_t id) const final {
+            bool exists = this->bitset_.test(id);
+            return (exists ? id : kInvalidIndex32);
         }
 
         IContainer * valueOf(int index) const final {
@@ -1060,8 +1061,8 @@ public:
         }
 
         value_type * valueOfData(int index) const final {
-            // Not supported, do nothing !!
-            return nullptr;
+            assert(index < (int)this->size_);
+            return this->valueArray_.getValue(this->ptr_, index);
         }
     };
 
