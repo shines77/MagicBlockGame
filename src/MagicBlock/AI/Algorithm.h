@@ -851,12 +851,12 @@ static int binary_search(std::uint16_t * buf, std::size_t first,
 
     return -1;
 
-#if _USE_AVX2_
+#if MBG_USE_AVX2
     if (low < high)
         return Algorithm::find_uint16_avx2(buf, low, high, value);
     else
         return -1;
-#elif _USE_SSE2_
+#elif MBG_USE_SSE2
     if (low < high)
         return Algorithm::find_uint16_sse2(buf, low, high, value);
     else

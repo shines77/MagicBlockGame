@@ -15,8 +15,8 @@
 #define __AVX2__
 #endif
 
-#define _USE_SSE2_  1
-#define _USE_AVX2_  1
+#define MBG_USE_SSE2    1
+#define MBG_USE_AVX2    1
 
 #define DISABLE_CPU_WARM_UP
 

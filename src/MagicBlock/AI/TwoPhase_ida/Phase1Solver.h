@@ -32,6 +32,7 @@
 #include "MagicBlock/AI/Stage.h"
 #include "MagicBlock/AI/SharedData.h"
 #include "MagicBlock/AI/SparseBitset.h"
+#include "MagicBlock/AI/SparseHashMap.h"
 #include "MagicBlock/AI/Utils.h"
 
 namespace MagicBlock {
@@ -66,7 +67,10 @@ public:
     static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
     static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
 
-    typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY>     bitset_type;
+    typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY>             bitset_type;
+    typedef SparseHashMap<Board<BoardX, BoardY>, MoveSeq, 3, BoardX * BoardY>   sparse_hashmap_t;
+    typedef typename sparse_hashmap_t::insert_return_type                       insert_return_t;
+
     typedef std::set<Value128>                                          stdset_type;
     typedef std::unordered_set<Value128, Value128_Hash>                 stdset_type_;
     typedef std::unordered_set<Value128, Value128_Hash>                 std_hashset_t;
@@ -75,7 +79,7 @@ private:
     bitset_type visited_;
     stdset_type visited_set_;
 
-    bitset_type phase1_cache_;
+    sparse_hashmap_t phase1_cache_;
 
     std::vector<stage_type> curr_stages_;
     std::vector<stage_type> next_stages_;
@@ -207,7 +211,8 @@ public:
                     // Restore unknown color
                     this->player_board_[i][j].cells[empty_pos] = Color::Unknown;
 
-                    bool insert_new = this->phase1_cache_.try_insert(start.board);
+                    insert_return_t result = this->phase1_cache_.try_insert(start.board, MoveSeq());
+                    bool insert_new = result.second;
                     if (!insert_new) {
                         continue;
                     }
@@ -250,7 +255,11 @@ public:
                     stage_type next_stage(stage.board);
                     std::swap(next_stage.board.cells[empty_pos], next_stage.board.cells[move_pos]);
 
-                    bool insert_new = this->phase1_cache_.try_insert(next_stage.board);
+                    next_stage.move_seq = stage.move_seq;
+                    next_stage.move_seq.push_back(cur_dir);
+
+                    insert_return_t result = this->phase1_cache_.try_insert(next_stage.board, next_stage.move_seq);
+                    bool insert_new = result.second;
                     if (!insert_new) {
                         continue;
                     }
@@ -258,8 +267,6 @@ public:
                     next_stage.empty_pos = move_pos;
                     next_stage.last_dir = ((stage.last_dir) & 0xFC) | Dir::opp_dir(cur_dir);
                     next_stage.rotate_type = stage.rotate_type;
-                    next_stage.move_seq = stage.move_seq;
-                    next_stage.move_seq.push_back(cur_dir);
 
                     next_stages.push_back(std::move(next_stage));
 #endif // STAGES_USE_EMPLACE_PUSH
