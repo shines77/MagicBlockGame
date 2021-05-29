@@ -1360,7 +1360,7 @@ protected:
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_id = this->get_layer_value(board, layer);
+            size_type layer_id = this->get_layer_value(key, layer);
             if (!insert_new) {
                 assert(!container->isLeaf());
                 IContainer * child;
@@ -1390,7 +1390,7 @@ protected:
         {
             assert(leafContainer != nullptr);
             assert(leafContainer->isLeaf());
-            size_type layer_id = this->get_layer_value(board, layer);
+            size_type layer_id = this->get_layer_value(key, layer);
             if (!insert_new) {
                 bool is_exists = leafContainer->hasValue(layer_id);
                 if (is_exists) {

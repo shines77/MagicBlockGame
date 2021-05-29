@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <cmath>
 #include <vector>
 #include <queue>
 #include <set>
@@ -47,7 +48,7 @@ class Phase1Solver : public Phase1BaseSolver<BoardX, BoardY, TargetX, TargetY, A
 {
 public:
     typedef Phase1BaseSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>   base_type;
-    typedef Phase1Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack> this_type;
+    typedef Phase1Solver<BoardX, BoardY, TargetX, TargetY, AllowRotate, N_SolverType, Phase2CallBack>       this_type;
 
     typedef typename base_type::size_type           size_type;
     typedef typename base_type::ssize_type          ssize_type;
@@ -61,12 +62,6 @@ public:
     typedef typename base_type::target_board_t      target_board_t;
     typedef typename base_type::phase2_callback     phase2_callback;
 
-    static const size_type BoardSize = BoardX * BoardY;
-    static const size_type kSingelColorNums = (BoardSize - 1) / (Color::Last - 1);
-
-    static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
-    static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
-
     typedef SparseBitset<Board<BoardX, BoardY>, 3, BoardX * BoardY>             bitset_type;
     typedef SparseHashMap<Board<BoardX, BoardY>, MoveSeq, 3, BoardX * BoardY>   sparse_hashmap_t;
     typedef typename sparse_hashmap_t::insert_return_type                       insert_return_t;
@@ -74,6 +69,32 @@ public:
     typedef std::set<Value128>                                          stdset_type;
     typedef std::unordered_set<Value128, Value128_Hash>                 stdset_type_;
     typedef std::unordered_set<Value128, Value128_Hash>                 std_hashset_t;
+
+    static const size_type BoardSize = BoardX * BoardY;
+    static const size_type kSingelColorNums = (BoardSize - 1) / (Color::Last - 1);
+
+    static const ptrdiff_t kStartX = (BoardX - TargetX) / 2;
+    static const ptrdiff_t kStartY = (BoardY - TargetY) / 2;
+
+    //
+    // Total number of prototype types that do not rotate.
+    //
+    //      <type 0>      <type 1>       <type 2>
+    //
+    //      1  2  3       1  2  3        1  2  3
+    //      4  ?  ?       ?  ?  4        ?  4  ?
+    //      ?  ?  ?       ?  ?  ?        ?  ?  ?
+    //
+    static const size_type MAX_PHASE1_PROTOTYPE = base_type::MAX_PHASE1_PROTOTYPE;
+
+    //
+    // All phase1 types after rotation.
+    //
+    // Value = 3 * 4 = 12
+    //
+    static const size_type kMaxPhase1Type = base_type::kMaxPhase1Type;
+
+    static const std::uint8_t MaskColor = base_type::MaskColor;
 
 private:
     bitset_type visited_;
