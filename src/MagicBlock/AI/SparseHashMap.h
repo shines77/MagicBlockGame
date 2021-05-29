@@ -81,6 +81,21 @@ public:
         IndexArray() noexcept {}
         ~IndexArray() {}
 
+        std::uint16_t getValue(std::uintptr_t * ptr, std::uint16_t index) const {
+            assert(index != kInvalidIndex);
+            assert(index >= 0 && index < (std::uint16_t)kMaxArraySize);
+            std::uint16_t * pid = (std::uint16_t *)ptr + index;
+            return *pid;
+        }
+
+        void setValue(std::uintptr_t * ptr, std::uint16_t index, std::uint16_t id) {
+            assert(index != kInvalidIndex);
+            assert(index >= 0 && index < (std::uint16_t)kMaxArraySize);
+            std::uint16_t * pid = (std::uint16_t *)ptr + index;
+            assert(pid != nullptr);
+            *pid = id;
+        }
+
         void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t id) {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
@@ -137,13 +152,6 @@ public:
             }
             return kInvalidIndex32;
 #endif
-        }
-
-        std::uint16_t getValue(std::uintptr_t * ptr, std::uint16_t index) const {
-            assert(index != kInvalidIndex);
-            assert(index >= 0 && index < (std::uint16_t)kMaxArraySize);
-            std::uint16_t * pid = (std::uint16_t *)ptr + index;
-            return *pid;
         }
     };
 
@@ -449,13 +457,13 @@ public:
             return this->indexOf(static_cast<std::uint16_t>(index));
         }
 
-        virtual IContainer * valueOf(int id) const {
+        virtual IContainer * valueOf(int index) const {
             // Not implemented!
             return nullptr;
         }
 
-        IContainer * valueOf(size_type id) const {
-            return this->valueOf(static_cast<int>(id));
+        IContainer * valueOf(size_type index) const {
+            return this->valueOf(static_cast<int>(index));
         }
     };
 
@@ -518,7 +526,7 @@ public:
             // Not implemented!
         }
 
-        int indexOf(std::uint16_t id) const override {
+        int indexOf(std::uint16_t index) const override {
             // Not implemented!
             return kInvalidIndex;
         }
@@ -640,7 +648,7 @@ public:
             return this->updateValue(static_cast<std::uint16_t>(id), value);
         }
 
-        int indexOf(std::uint16_t id) const override {
+        int indexOf(std::uint16_t index) const override {
             // Not implemented!
             return kInvalidIndex;
         }
@@ -970,9 +978,9 @@ public:
             this->size_++;
         }
 
-        int indexOf(std::uint16_t id) const final {
-            bool exists = this->bitset_.test(id);
-            return (exists ? id : kInvalidIndex32);
+        int indexOf(std::uint16_t index) const final {
+            bool exists = this->bitset_.test(index);
+            return (exists ? index : kInvalidIndex32);
         }
 
         IContainer * valueOf(int index) const final {
@@ -1050,9 +1058,9 @@ public:
             return nullptr;
         }
 
-        int indexOf(std::uint16_t id) const final {
-            bool exists = this->bitset_.test(id);
-            return (exists ? id : kInvalidIndex32);
+        int indexOf(std::uint16_t index) const final {
+            bool exists = this->bitset_.test(index);
+            return (exists ? index : kInvalidIndex32);
         }
 
         IContainer * valueOf(int index) const final {
@@ -1068,23 +1076,23 @@ public:
 
     struct Factory {
         template <size_type type = NodeType::ArrayContainer>
-        static Container * CreateNewContainer() {
-            Container * container;
+        static IContainer * CreateNewContainer() {
+            IContainer * container;
             if (type == NodeType::ArrayContainer) {
                 ArrayContainer * newContainer = new ArrayContainer;
-                container = static_cast<Container *>(newContainer);
+                container = static_cast<IContainer *>(newContainer);
             }
             else if (type == NodeType::LeafArrayContainer) {
                 LeafArrayContainer * newContainer = new LeafArrayContainer;
-                container = static_cast<Container *>(newContainer);
+                container = static_cast<IContainer *>(newContainer);
             }
             else if (type == NodeType::BitmapContainer) {
                 BitmapContainer * newContainer = new BitmapContainer;
-                container = static_cast<Container *>(newContainer);
+                container = static_cast<IContainer *>(newContainer);
             }
             else if (type == NodeType::LeafBitmapContainer) {
                 LeafBitmapContainer * newContainer = new LeafBitmapContainer;
-                container = static_cast<Container *>(newContainer);
+                container = static_cast<IContainer *>(newContainer);
             }
             else {
                 container = nullptr;
@@ -1222,9 +1230,9 @@ public:
     }
 
     void compose_segment_to_board(key_type & board, const std::uint16_t segment_list[BoardY]) {
-        for (size_type segment = 0; segment < BoardY; segment++) {
-            std::uint32_t value = (std::uint32_t)segment_list[segment];
-            size_type y = this->y_index_[segment];
+        for (size_type index = 0; index < BoardY; index++) {
+            std::uint32_t value = (std::uint32_t)segment_list[index];
+            size_type y = this->y_index_[index];
             size_type base_pos = y * BoardX;
             for (size_type x = 0; x < BoardX; x++) {
                 std::uint32_t color = value & Color::Mask32;

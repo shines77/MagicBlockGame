@@ -77,16 +77,6 @@ public:
         IndexArray() noexcept {}
         ~IndexArray() {}
 
-        size_type size() const {
-            return 0;
-        }
-
-        void reserve(size_type capacity) {
-        }
-
-        void resize(size_type newSize) {
-        }
-
         void append(std::uintptr_t * ptr, std::uint16_t size, std::uint16_t value) {
             assert(size <= kArraySizeThreshold);
             assert(size <= kMaxArraySize);
@@ -157,16 +147,6 @@ public:
     public:
         ValueArray() noexcept {}
         ~ValueArray() {}
-
-        size_type size() const {
-            return 0;
-        }
-
-        void reserve(size_type capacity) {
-        }
-
-        void resize(size_type newSize) {
-        }
 
         void append(std::uintptr_t * ptr, std::uint16_t size, Container * container) {
             assert(container != nullptr);
@@ -1020,9 +1000,9 @@ public:
     }
 
     void compose_segment_to_board(board_type & board, const std::uint16_t segment_list[BoardY]) {
-        for (size_type segment = 0; segment < BoardY; segment++) {
-            std::uint32_t value = (std::uint32_t)segment_list[segment];
-            size_type y = this->y_index_[segment];
+        for (size_type index = 0; index < BoardY; index++) {
+            std::uint32_t value = (std::uint32_t)segment_list[index];
+            size_type y = this->y_index_[index];
             size_type base_pos = y * BoardX;
             for (size_type x = 0; x < BoardX; x++) {
                 std::uint32_t color = value & Color::Mask32;
