@@ -295,8 +295,8 @@ public:
         typedef std::size_t size_type;
 
     protected:
-        std::uint16_t    type_;
         // Cardinality
+        std::uint16_t    type_;
         std::uint16_t    size_;
         std::uint16_t    capacity_;
         std::uint16_t    sorted_;
@@ -750,14 +750,14 @@ public:
             return false;
         }
 
-        void append(std::uint16_t value, IContainer * container) final {
+        void append(std::uint16_t id, IContainer * container) final {
             assert(container != nullptr);
             assert(this->size() <= kArraySizeThreshold);
             assert(this->size() <= kMaxArraySize);
             if (this->size() >= this->capacity()) {
                 this->resize(this->capacity() * 2);
             }
-            this->identArray_.append(this->ptr_, this->size_, value);
+            this->identArray_.append(this->ptr_, this->size_, id);
             this->valueArray_.append(this->ptr_, this->capacity_, this->size_, container);
             this->size_++;
         }
@@ -1005,8 +1005,8 @@ public:
             return this->bitset_.test(id);
         }
 
-        void append(std::uint16_t value, IContainer * container) final {
-            this->bitset_.set(value);
+        void append(std::uint16_t id, IContainer * container) final {
+            this->bitset_.set(id);
             this->size_++;
         }
 
@@ -1198,10 +1198,10 @@ public:
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
-            size_type layer_value = this->get_layer_value(board, layer);
+            size_type layer_id = this->get_layer_value(board, layer);
             assert(!container->isLeaf());
             IContainer * child;
-            bool is_exists = container->hasChild(layer_value, child);
+            bool is_exists = container->hasChild(layer_id, child);
             if (is_exists) {
                 assert(child != nullptr);
                 container = child;
@@ -1214,9 +1214,9 @@ public:
 
         // Leaf container
         {
-            size_type layer_value = this->get_layer_value(board, layer);
+            size_type layer_id = this->get_layer_value(board, layer);
             assert(container->isLeaf());
-            bool is_exists = container->hasLeaf(layer_value);
+            bool is_exists = container->hasLeaf(layer_id);
             return is_exists;
         }
     }
@@ -1355,7 +1355,7 @@ public:
     //
     // When using this function, you must ensure that the key does not exist.
     //
-    void always_insert_new(const board_type & board, size_type last_layer, Container * last_container) {
+    void always_insert_new(const board_type & board, size_type last_layer, IContainer * last_container) {
         IContainer * container = last_container;
         assert(container != nullptr);
 

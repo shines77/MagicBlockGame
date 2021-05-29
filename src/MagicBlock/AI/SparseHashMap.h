@@ -298,8 +298,8 @@ public:
         typedef std::size_t size_type;
 
     protected:
-        std::uint16_t    type_;
         // Cardinality
+        std::uint16_t    type_;
         std::uint16_t    size_;
         std::uint16_t    capacity_;
         std::uint16_t    sorted_;
@@ -1050,7 +1050,7 @@ public:
             // Do nothing !!
         }
 
-        IContainer * getChild(std::uint16_t value) const final {
+        IContainer * getChild(std::uint16_t id) const final {
             // Do nothing !!
             return nullptr;
         }
@@ -1315,8 +1315,7 @@ public:
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
             size_type layer_id = get_layer_value(board, layer);
-            assert(container->type() == NodeType::ArrayContainer ||
-                   container->type() == NodeType::BitmapContainer);
+            assert(!container->isLeaf());
             IContainer * child;
             bool is_exists = container->hasChild(layer_id, child);
             if (is_exists) {
