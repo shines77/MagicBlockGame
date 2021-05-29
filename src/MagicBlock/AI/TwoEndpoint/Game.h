@@ -83,8 +83,8 @@ public:
     typedef ForwardSolver <BoardX, BoardY, TargetX, TargetY, false,       SolverType::Full,         phase2_callback>  TForwardSolver;
     typedef BackwardSolver<BoardX, BoardY, TargetX, TargetY, AllowRotate, SolverType::BackwardFull, phase2_callback>  TBackwardSolver;
 
-    typedef typename TForwardSolver::bitset_type::Container     ForwardContainer;
-    typedef typename TBackwardSolver::bitset_type::Container    BackwardContainer;
+    typedef typename TForwardSolver::bitset_type::IContainer     ForwardContainer;
+    typedef typename TBackwardSolver::bitset_type::IContainer    BackwardContainer;
 
     typedef SegmentPair<BoardX, BoardY> segment_pair_t;
 
@@ -241,10 +241,10 @@ public:
         assert(bw_container != nullptr);
         int total = 0;
         for (size_type i = fw_container->begin(); i < fw_container->end(); fw_container->next(i)) {
-            int fw_value = fw_container->indexOf(i);
+            int fw_value = fw_container->getId(i);
             assert(fw_value != -1);
             for (size_type j = bw_container->begin(); j < bw_container->end(); bw_container->next(j)) {
-                int bw_value = bw_container->indexOf(j);
+                int bw_value = bw_container->getId(j);
                 assert(bw_value != -1);
                 // It's overlapped ?
                 bool overlapped = this->is_coincident(fw_value, bw_value);
@@ -268,12 +268,12 @@ public:
         assert(bw_container != nullptr);
         int total = 0;
         for (size_type i = fw_container->begin(); i < fw_container->end(); fw_container->next(i)) {
-            int fw_value = fw_container->indexOf(i);
+            int fw_value = fw_container->getId(i);
             assert(fw_value != -1);
-            ForwardContainer * fw_child = fw_container->valueOf(i);
+            ForwardContainer * fw_child = fw_container->getValue(i);
             assert (fw_child != nullptr);
             for (size_type j = bw_container->begin(); j < bw_container->end(); bw_container->next(j)) {
-                int bw_value = bw_container->indexOf(j);
+                int bw_value = bw_container->getId(j);
                 assert(bw_value != -1);
                 // It's overlapped ?
                 bool overlapped = this->is_coincident(fw_value, bw_value);
@@ -282,7 +282,7 @@ public:
                     this->segment_pair_.fw_segments[layer] = fw_value;
                     this->segment_pair_.bw_segments[layer] = bw_value;
                     
-                    BackwardContainer * bw_child = bw_container->valueOf(j);
+                    BackwardContainer * bw_child = bw_container->getValue(j);
                     assert (bw_child != nullptr);
 
                     if (!fw_child->isLeaf()) {
@@ -315,12 +315,12 @@ public:
         this->segment_list_.clear();
 
         for (size_type i = fw_container->begin(); i < fw_container->end(); fw_container->next(i)) {
-            int fw_value = fw_container->indexOf(i);
+            int fw_value = fw_container->getId(i);
             if (fw_value != -1) {
-                ForwardContainer * fw_child = fw_container->valueOf(i);
+                ForwardContainer * fw_child = fw_container->getValue(i);
                 assert(fw_child != nullptr);
                 for (size_type j = bw_container->begin(); j < bw_container->end(); bw_container->next(j)) {
-                    int bw_value = bw_container->indexOf(j);
+                    int bw_value = bw_container->getId(j);
                     if (bw_value != -1) {
                         // It's overlapped ?
                         bool overlapped = this->is_coincident(fw_value, bw_value);
@@ -329,7 +329,7 @@ public:
                             this->segment_pair_.fw_segments[0] = fw_value;
                             this->segment_pair_.bw_segments[0] = bw_value;
 
-                            BackwardContainer * bw_child = bw_container->valueOf(j);
+                            BackwardContainer * bw_child = bw_container->getValue(j);
                             assert(bw_child != nullptr);
 
                             // Travel the next layer
