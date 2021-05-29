@@ -324,6 +324,7 @@ public:
 
     int bitset_search(size_type max_depth, size_type time_limit) {
         int result = 0;
+        return result;
     }
 
     int stdset_solve(size_type depth, size_type max_depth) {
