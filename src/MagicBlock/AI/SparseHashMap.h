@@ -1280,6 +1280,7 @@ public:
     bool contains(const key_type & board) const {
         IContainer * container = this->root();
         assert(container != nullptr);
+
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
@@ -1299,8 +1300,10 @@ public:
 
         // Leaf container
         {
-            size_type layer_id = this->get_layer_value(board, layer);
+            assert(container != nullptr);
             assert(container->isLeaf());
+
+            size_type layer_id = this->get_layer_value(board, layer);
             LeafContainer * leafContainer = static_cast<LeafContainer *>(container);
             assert(leafContainer != nullptr);
             bool is_exists = leafContainer->hasValue(layer_id);
@@ -1311,6 +1314,7 @@ public:
     bool contains(const key_type & board, size_type & last_layer, IContainer *& last_container) const {
         IContainer * container = this->root();
         assert(container != nullptr);
+
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
@@ -1332,10 +1336,13 @@ public:
 
         // Leaf container
         {
-            size_type layer_id = this->get_layer_value(board, layer);
+            assert(container != nullptr);
             assert(container->isLeaf());
+
+            size_type layer_id = this->get_layer_value(board, layer);
             LeafContainer * leafContainer = static_cast<LeafContainer *>(container);
-            bool is_exists = leafContainer->hasLeaf(layer_id);
+            assert(leafContainer != nullptr);
+            bool is_exists = leafContainer->hasValue(layer_id);
             if (!is_exists) {
                 last_layer = layer;
                 last_container = container;
@@ -1389,6 +1396,7 @@ protected:
         {
             assert(leafContainer != nullptr);
             assert(leafContainer->isLeaf());
+
             size_type layer_id = this->get_layer_value(key, layer);
             if (!insert_new) {
                 bool is_exists = leafContainer->hasValue(layer_id);
@@ -1457,6 +1465,7 @@ public:
         {
             assert(leafContainer != nullptr);
             assert(leafContainer->isLeaf());
+
             size_type layer_id = this->get_layer_value(board, layer);
             if (!insert_new) {
                 bool is_exists = leafContainer->hasValue(layer_id);
@@ -1493,8 +1502,9 @@ public:
         // Leaf container
         {
             assert(leafContainer != nullptr);
-            size_type layer_id = this->get_layer_value(board, layer);
             assert(leafContainer->isLeaf());
+
+            size_type layer_id = this->get_layer_value(board, layer);
             leafContainer->appendValue(layer_id, value);
         }
 

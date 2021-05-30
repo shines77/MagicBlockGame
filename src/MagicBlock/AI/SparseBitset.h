@@ -1195,6 +1195,7 @@ public:
     bool contains(const board_type & board) const {
         IContainer * container = this->root();
         assert(container != nullptr);
+
         // Normal container
         size_type layer;
         for (layer = 0; layer < BoardY - 1; layer++) {
@@ -1214,14 +1215,16 @@ public:
 
         // Leaf container
         {
-            size_type layer_id = this->get_layer_value(board, layer);
+            assert(container != nullptr);
             assert(container->isLeaf());
+
+            size_type layer_id = this->get_layer_value(board, layer);
             bool is_exists = container->hasLeaf(layer_id);
             return is_exists;
         }
     }
 
-    bool contains(const board_type & board, size_type & last_layer, Container *& last_container) const {
+    bool contains(const board_type & board, size_type & last_layer, IContainer *& last_container) const {
         IContainer * container = this->root();
         assert(container != nullptr);
 
@@ -1246,8 +1249,10 @@ public:
 
         // Leaf container
         {
-            size_type layer_id = this->get_layer_value(board, layer);
+            assert(container != nullptr);
             assert(container->isLeaf());
+
+            size_type layer_id = this->get_layer_value(board, layer);
             bool is_exists = container->hasLeaf(layer_id);
             if (!is_exists) {
                 last_layer = layer;
@@ -1260,7 +1265,7 @@ public:
     //
     // Root -> (ArrayContainer)0 -> (ArrayContainer)1 -> (ArrayContainer)2 -> (LeafArrayContainer)3 -> 4444
     //
-    void insert(const board_type & board) {
+    bool insert(const board_type & board) {
         IContainer * container = this->root();
         assert(container != nullptr);
         bool insert_new = false;
@@ -1290,16 +1295,19 @@ public:
 
         // Leaf container
         {
-            size_type layer_id = this->get_layer_value(board, layer);
+            assert(container != nullptr);
             assert(container->isLeaf());
+
+            size_type layer_id = this->get_layer_value(board, layer);
             if (!insert_new) {
                 bool is_exists = container->hasLeaf(layer_id);
                 if (is_exists) {
-                    return;
+                    return false;
                 }
             }
             container->appendLeaf(layer_id);
             this->size_++;
+            return true;
         }
     }
 
@@ -1316,8 +1324,7 @@ public:
         for (layer = 0; layer < BoardY - 1; layer++) {
             size_type layer_id = this->get_layer_value(board, layer);
             if (!insert_new) {
-                assert(container->type() == NodeType::ArrayContainer ||
-                       container->type() == NodeType::BitmapContainer);
+                assert(!container->isLeaf());
                 IContainer * child;
                 bool is_exists = container->hasChild(layer_id, child);
                 if (is_exists) {
@@ -1337,8 +1344,10 @@ public:
 
         // Leaf container
         {
-            size_type layer_id = this->get_layer_value(board, layer);
+            assert(container != nullptr);
             assert(container->isLeaf());
+
+            size_type layer_id = this->get_layer_value(board, layer);
             if (!insert_new) {
                 bool is_exists = container->hasLeaf(layer_id);
                 if (is_exists) {
@@ -1347,9 +1356,9 @@ public:
             }
             container->appendLeaf(layer_id);
             this->size_++;
-        }
 
-        return true;
+            return true;
+        }
     }
 
     //
@@ -1372,8 +1381,9 @@ public:
         // Leaf container
         {
             assert(container != nullptr);
-            size_type layer_id = this->get_layer_value(board, layer);
             assert(container->isLeaf());
+
+            size_type layer_id = this->get_layer_value(board, layer);
             container->appendLeaf(layer_id);
         }
 
