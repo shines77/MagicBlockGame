@@ -98,6 +98,32 @@ $$\frac{8! \times {3}^{8} \times 12! \times {2}^{12}}{3 \times 2 \times 2} = 43,
     总的来说，IDA * 是在限制搜索深度下，加入估价函数进行剪枝，然后不断迭代加深的一种算法，算法保证找到答案时，搜索深度是最小的，部分情况下可以代替广搜。题目一定要保证有解，否则会无限递归下去。
     ```
 
+* [AI] A * 算法
+
+    [https://blog.csdn.net/potato_uncle/article/details/109125856](https://blog.csdn.net/potato_uncle/article/details/109125856)
+
+    主要介绍了 `A *` 算法，同时还提了一下 `IDA *`，递归最佳优先搜索 `RBFS`，`SMA *` 算法等。
+
+* [ML] 无信息搜索 Uninformed Search
+
+    [https://blog.csdn.net/potato_uncle/article/details/108957342](https://blog.csdn.net/potato_uncle/article/details/108957342)
+
+    ```shell
+    一、广度优先搜索 Breadth-First Search
+
+    二、一致代价搜索 Uniform-Cost Search
+
+    三、深度优先搜索 Depth-First Search
+
+    四、深度受限搜索 Depth-limited search
+
+    五、迭代深度搜索 Iterative Deepening Search
+
+    六、双向搜索 Bi-directional search
+
+    七、无信息搜索算法性能总结
+    ```
+
 ## X. 3D魔方程序
 
 * HTML5交互式3D魔方游戏代码
