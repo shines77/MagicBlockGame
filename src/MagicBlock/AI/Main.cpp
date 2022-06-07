@@ -560,7 +560,7 @@ int main(int argc, char * argv[])
 
     }
 
-    if (1) {
+    if (0) {
 
     ////////////////////////////////////////////////////////////////////////
 
@@ -639,6 +639,20 @@ int main(int argc, char * argv[])
     ////////////////////////////////////////////////////////////////////////
 
     }
+
+    ////////////////////////////////////////////////////////////////////////
+
+    if (1) {
+
+        //solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, true>();
+        //Console::readKeyLine();
+
+        solve_magic_block<Category::TwoEndpoint, SolverId::BitSet, false>();
+        Console::readKeyLine();
+
+    }
+
+    ////////////////////////////////////////////////////////////////////////
 
     return 0;
 }
