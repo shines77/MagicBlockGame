@@ -564,17 +564,17 @@ int main(int argc, char * argv[])
 
     ////////////////////////////////////////////////////////////////////////
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, true>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Queue, true>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, true>();
     Console::readKeyLine();
 #endif
@@ -584,12 +584,12 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_IDA, SolverId::BitSet, true>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::StdSet, true>();
     Console::readKeyLine();
 #endif
@@ -601,17 +601,17 @@ int main(int argc, char * argv[])
 
     ////////////////////////////////////////////////////////////////////////
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Normal, false>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::Queue, false>();
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_v1, SolverId::BitSet, false>();
     Console::readKeyLine();
 #endif
@@ -621,12 +621,12 @@ int main(int argc, char * argv[])
     Console::readKeyLine();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoPhase_IDA, SolverId::BitSet, false>();
     Console::readKeyLast();
 #endif
 
-#if 1
+#if 0
     solve_magic_block<Category::TwoEndpoint, SolverId::StdSet, false>();
     Console::readKeyLine();
 #endif
