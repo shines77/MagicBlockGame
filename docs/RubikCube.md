@@ -29,11 +29,11 @@ $$\frac{8! \times {3}^{8} \times 12! \times {2}^{12}}{3 \times 2 \times 2} = 43,
     [http://kociemba.org/cube.htm](http://kociemba.org/cube.htm)
 
 * 高效的计算机解魔方算法：二阶段算法 -- [知乎]
-  
+
     [https://zhuanlan.zhihu.com/p/73054362](https://zhuanlan.zhihu.com/p/73054362)
 
 * 三阶魔方还原 two phase 算法--学习笔记
-  
+
     [https://blog.csdn.net/harryhare/article/details/36894373](https://blog.csdn.net/harryhare/article/details/36894373)
 
 * 【ACM】魔方 -- 11题

@@ -38,7 +38,7 @@ int getAllMD(Puzzle pz)                             // 代表求出输入拼图�
     {
         if (pz.f[i] == N2)                          // 如果进行遍历的拼图为空位，那么就直接进行返回。因为空位不算拼图，因此没有曼哈顿距离
         {
-            continue;                              
+            continue;
         }
         sum += MDT[i][pz.f[i] - 1];                 // 通过这个式子来算出各个拼图的曼哈顿距离，并进行相加
     }
@@ -65,7 +65,7 @@ bool dfs(int depth, int prev)                       // 代表dfs函数，其中d
     if (depth + state.MD > limit)                   // 如果当前的搜索深度+当前拼图的启发值（曼哈顿距离) 大于限制深度的话，
                                                     // 我们就要对其进行剪枝，禁止dfs再向下搜索。
     {
-        return false;        
+        return false;
     }
     int sx = state.space / N;                       // 根据这个式子来求出当前所在的坐标(sx,sy),老实说我也没明白这个式子是什么意思，
                                                     // 但是我们可以暂时理解为就是当前空位的下标，之后我们要对这个空位来进行移动，从而得到拼图的不同情况。

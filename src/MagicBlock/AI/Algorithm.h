@@ -119,7 +119,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
 
     alignas(64) static const std::uint32_t head_backward_index_mask[16] = {
         0x0000FFFFUL, 0x00000000UL, 0x0000FFF3UL, 0x00000000UL,
-        0x0000FFF0UL, 0x00000000UL, 0x0000FF30UL, 0x00000000UL, 
+        0x0000FFF0UL, 0x00000000UL, 0x0000FF30UL, 0x00000000UL,
         0x0000FF00UL, 0x00000000UL, 0x0000F300UL, 0x00000000UL,
         0x0000F000UL, 0x00000000UL, 0x00003000UL, 0x00000000UL
     };
@@ -190,7 +190,7 @@ static int find_uint16_sse2(std::uint16_t * buf, std::size_t first,
         }
         current += kSingelStepSize;
     }
-    
+
     std::uint16_t * aligned_end = (std::uint16_t *)((std::size_t)buf_end & (~kSSE2AlignMask));
     assert(aligned_end <= buf_end);
 
@@ -384,12 +384,12 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
 
     alignas(64) static const std::uint32_t head_backward_index_mask[32] = {
         0xFFFFFFFFUL, 0x00000000UL, 0xFFFFFFF3UL, 0x00000000UL,
-        0xFFFFFFF0UL, 0x00000000UL, 0xFFFFFF30UL, 0x00000000UL, 
+        0xFFFFFFF0UL, 0x00000000UL, 0xFFFFFF30UL, 0x00000000UL,
         0xFFFFFF00UL, 0x00000000UL, 0xFFFFF300UL, 0x00000000UL,
         0xFFFFF000UL, 0x00000000UL, 0xFFFF3000UL, 0x00000000UL,
 
         0xFFFF0000UL, 0x00000000UL, 0xFFF30000UL, 0x00000000UL,
-        0xFFF00000UL, 0x00000000UL, 0xFF300000UL, 0x00000000UL, 
+        0xFFF00000UL, 0x00000000UL, 0xFF300000UL, 0x00000000UL,
         0xFF000000UL, 0x00000000UL, 0xF3000000UL, 0x00000000UL,
         0xF0000000UL, 0x00000000UL, 0x30000000UL, 0x00000000UL
     };
@@ -455,7 +455,7 @@ static int find_uint16_avx2(std::uint16_t * buf, std::size_t first,
         }
         current += kSingelStepSize;
     }
-    
+
     std::uint16_t * aligned_end = (std::uint16_t *)((std::size_t)buf_end & (~kAVX2AlignMask));
     assert(aligned_end <= buf_end);
 

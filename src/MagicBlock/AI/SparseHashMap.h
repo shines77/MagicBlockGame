@@ -445,7 +445,7 @@ public:
 
         IContainer * append(std::uint16_t id) {
             IContainer * container = new ArrayContainer();
-            this->append(id, container);    
+            this->append(id, container);
             return container;
         }
 
@@ -1380,7 +1380,7 @@ protected:
                     else {
                         leafContainer = static_cast<LeafContainer *>(child);
                         break;
-                    }                    
+                    }
                 }
                 else {
                     insert_new = true;
